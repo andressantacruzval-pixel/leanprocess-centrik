@@ -7,13 +7,6 @@ function showError(msg) {
   alertBox.classList.remove('hidden');
 }
 
-fetch('/api/exam/info')
-  .then((r) => r.json())
-  .then((d) => {
-    if (d.examTitle) document.getElementById('examTitle').textContent = d.examTitle;
-  })
-  .catch(() => {});
-
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   alertBox.classList.add('hidden');

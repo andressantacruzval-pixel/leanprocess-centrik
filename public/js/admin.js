@@ -1,6 +1,10 @@
 let token = sessionStorage.getItem('adminToken');
+let examsCache = [];
+let selectedExamId = parseInt(sessionStorage.getItem('selectedExamId'), 10) || null;
+let questionsCache = [];
+let resultsCache = [];
+
 const el = (id) => document.getElementById(id);
-let bankActive = 0;
 
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
@@ -14,7 +18,7 @@ function flash(msg, type = 'success') {
   a.className = 'alert alert-' + type;
   a.classList.remove('hidden');
   clearTimeout(flash._t);
-  flash._t = setTimeout(() => a.classList.add('hidden'), 4000);
+  flash._t = setTimeout(() => a.classList.add('hidden'), 4500);
 }
 
 async function api(path, opts = {}) {
@@ -33,6 +37,14 @@ async function api(path, opts = {}) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Ocurrio un error.');
   return data;
+}
+
+function btn(text, cls, onClick) {
+  const b = document.createElement('button');
+  b.textContent = text;
+  b.className = cls;
+  b.addEventListener('click', onClick);
+  return b;
 }
 
 // --- Autenticacion -------------------------------------------------------
@@ -68,9 +80,8 @@ function logout() {
 function showDashboard() {
   el('loginView').classList.add('hidden');
   el('dashView').classList.remove('hidden');
-  loadConfig();
-  loadQuestions();
-  loadCodes();
+  loadExams();
+  loadSettings();
   loadResults();
 }
 
@@ -84,33 +95,182 @@ document.querySelectorAll('.tab').forEach((tab) => {
   });
 });
 
-// --- Configuracion -------------------------------------------------------
-async function loadConfig() {
+function switchTab(name) {
+  document.querySelector(`.tab[data-tab="${name}"]`).click();
+}
+
+// --- Certificaciones (examenes) -----------------------------------------
+async function loadExams() {
   try {
-    const { config, stats } = await api('/config');
-    el('cfgTitle').value = config.exam_title;
-    el('cfgQuestions').value = config.questions_per_exam;
-    el('cfgPass').value = config.pass_percentage;
-    el('cfgDuration').value = config.duration_minutes;
-    el('cfgAttempts').value = config.max_attempts;
-    el('cfgReview').value = config.review_mode;
-    el('cfgShuffleQ').checked = config.shuffle_questions;
-    el('cfgShuffleO').checked = config.shuffle_options;
+    const { exams } = await api('/exams');
+    examsCache = exams;
+    if (!exams.find((e) => e.id === selectedExamId)) {
+      selectedExamId = exams.length ? exams[0].id : null;
+    }
+    if (selectedExamId) sessionStorage.setItem('selectedExamId', selectedExamId);
+    renderExamSelector();
+    renderExamsTable();
+    renderResultsFilter();
+    await refreshSelectedExam();
+  } catch (err) {
+    flash(err.message, 'error');
+  }
+}
 
-    el('cfgEmailEnabled').checked = config.email_enabled;
-    el('cfgSmtpHost').value = config.smtp_host || '';
-    el('cfgSmtpPort').value = config.smtp_port || 587;
-    el('cfgSmtpSecure').checked = config.smtp_secure;
-    el('cfgSmtpUser').value = config.smtp_user || '';
-    el('cfgSmtpPass').value = '';
-    el('cfgSmtpPass').placeholder = config.smtp_pass_set ? '(sin cambios)' : 'Contrasena SMTP';
-    el('cfgSmtpFrom').value = config.smtp_from || '';
-    el('cfgSubjPass').value = config.email_subject_pass || '';
-    el('cfgBodyPass').value = config.email_body_pass || '';
-    el('cfgSubjFail').value = config.email_subject_fail || '';
-    el('cfgBodyFail').value = config.email_body_fail || '';
+function renderExamSelector() {
+  const sel = el('examSelector');
+  sel.innerHTML = '';
+  examsCache.forEach((e) => {
+    const opt = document.createElement('option');
+    opt.value = e.id;
+    opt.textContent = e.name + (e.is_active ? '' : ' (inactiva)');
+    sel.appendChild(opt);
+  });
+  if (selectedExamId) sel.value = selectedExamId;
+  sel.classList.toggle('hidden', examsCache.length === 0);
+  el('examContextEmpty').classList.toggle('hidden', examsCache.length > 0);
+}
 
-    bankActive = stats.active_questions;
+el('examSelector').addEventListener('change', () => {
+  selectedExamId = parseInt(el('examSelector').value, 10) || null;
+  if (selectedExamId) sessionStorage.setItem('selectedExamId', selectedExamId);
+  refreshSelectedExam();
+});
+
+function renderExamsTable() {
+  const tbody = el('examsTable');
+  tbody.innerHTML = '';
+  el('examCount').textContent = examsCache.length;
+  el('noExams').classList.toggle('hidden', examsCache.length > 0);
+
+  examsCache.forEach((e) => {
+    const tr = document.createElement('tr');
+    if (e.id === selectedExamId) tr.style.background = 'rgba(20,184,166,0.07)';
+    tr.innerHTML = `
+      <td><strong>${esc(e.name)}</strong></td>
+      <td>${e.active_questions} activas / ${e.total_questions} totales</td>
+      <td>${e.total_codes}</td>
+      <td>${e.completed_attempts}</td>
+      <td><span class="pill ${e.is_active ? 'green' : 'gray'}">${e.is_active ? 'Activa' : 'Inactiva'}</span></td>
+      <td></td>`;
+    const actions = tr.lastElementChild;
+    actions.style.whiteSpace = 'nowrap';
+    const manage = btn('Gestionar', 'btn-primary btn-sm', () => {
+      selectedExamId = e.id;
+      sessionStorage.setItem('selectedExamId', e.id);
+      el('examSelector').value = e.id;
+      refreshSelectedExam();
+      switchTab('config');
+    });
+    const toggle = btn(e.is_active ? 'Desactivar' : 'Activar', 'btn-ghost btn-sm', () =>
+      toggleExamActive(e)
+    );
+    const del = btn('Eliminar', 'btn-danger btn-sm', () => deleteExam(e));
+    actions.append(manage, document.createTextNode(' '), toggle, document.createTextNode(' '), del);
+    tbody.appendChild(tr);
+  });
+}
+
+el('createExamBtn').addEventListener('click', async () => {
+  const name = el('newExamName').value.trim();
+  if (name.length < 3) {
+    flash('Escribe el nombre de la certificacion.', 'error');
+    return;
+  }
+  try {
+    const { exam } = await api('/exams', { method: 'POST', body: JSON.stringify({ name }) });
+    el('newExamName').value = '';
+    selectedExamId = exam.id;
+    sessionStorage.setItem('selectedExamId', exam.id);
+    flash('Certificacion creada. Configurala y agrega su banco de preguntas.');
+    await loadExams();
+  } catch (err) {
+    flash(err.message, 'error');
+  }
+});
+
+async function toggleExamActive(e) {
+  try {
+    const { exam } = await api('/exams/' + e.id);
+    await api('/exams/' + e.id, {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: exam.name,
+        questionsPerExam: exam.questions_per_exam,
+        passPercentage: exam.pass_percentage,
+        durationMinutes: exam.duration_minutes,
+        maxAttempts: exam.max_attempts,
+        shuffleQuestions: exam.shuffle_questions,
+        shuffleOptions: exam.shuffle_options,
+        reviewMode: exam.review_mode,
+        isActive: !exam.is_active,
+        emailSubjectPass: exam.email_subject_pass,
+        emailBodyPass: exam.email_body_pass,
+        emailSubjectFail: exam.email_subject_fail,
+        emailBodyFail: exam.email_body_fail,
+      }),
+    });
+    flash(`Certificacion ${exam.is_active ? 'desactivada' : 'activada'}.`);
+    loadExams();
+  } catch (err) {
+    flash(err.message, 'error');
+  }
+}
+
+async function deleteExam(e) {
+  if (
+    !confirm(
+      `Eliminar la certificacion "${e.name}"?\n\n` +
+        'Se borraran TODAS sus preguntas, codigos de acceso y resultados. ' +
+        'Esta accion no se puede deshacer.'
+    )
+  ) {
+    return;
+  }
+  try {
+    await api('/exams/' + e.id, { method: 'DELETE' });
+    if (selectedExamId === e.id) selectedExamId = null;
+    flash('Certificacion eliminada.');
+    loadExams();
+    loadResults();
+  } catch (err) {
+    flash(err.message, 'error');
+  }
+}
+
+// --- Estado de la certificacion seleccionada ----------------------------
+async function refreshSelectedExam() {
+  const hasExam = !!selectedExamId;
+  document.querySelectorAll('.needs-exam').forEach((n) => n.classList.toggle('hidden', hasExam));
+  document.querySelectorAll('.exam-scoped').forEach((n) => n.classList.toggle('hidden', !hasExam));
+  if (el('examSelector') && selectedExamId) el('examSelector').value = selectedExamId;
+  if (!hasExam) return;
+  await loadExamConfig();
+  await loadQuestions();
+  await loadCodes();
+}
+
+// --- Configuracion de la certificacion ----------------------------------
+function statBox(num, label) {
+  return `<div class="stat-box"><div class="num">${num}</div><div class="lbl">${esc(label)}</div></div>`;
+}
+
+async function loadExamConfig() {
+  try {
+    const { exam, stats } = await api('/exams/' + selectedExamId);
+    el('cfgName').value = exam.name;
+    el('cfgActive').checked = exam.is_active;
+    el('cfgQuestions').value = exam.questions_per_exam;
+    el('cfgPass').value = exam.pass_percentage;
+    el('cfgDuration').value = exam.duration_minutes;
+    el('cfgAttempts').value = exam.max_attempts;
+    el('cfgReview').value = exam.review_mode;
+    el('cfgShuffleQ').checked = exam.shuffle_questions;
+    el('cfgShuffleO').checked = exam.shuffle_options;
+    el('cfgSubjPass').value = exam.email_subject_pass || '';
+    el('cfgBodyPass').value = exam.email_body_pass || '';
+    el('cfgSubjFail').value = exam.email_subject_fail || '';
+    el('cfgBodyFail').value = exam.email_body_fail || '';
 
     el('statsGrid').innerHTML = `
       ${statBox(stats.active_questions, 'Preguntas activas')}
@@ -119,7 +279,7 @@ async function loadConfig() {
       ${statBox(stats.completed_attempts, 'Examenes rendidos')}`;
 
     const hint = el('bankHint');
-    if (stats.active_questions < config.questions_per_exam) {
+    if (stats.active_questions < exam.questions_per_exam) {
       hint.textContent = `Atencion: solo hay ${stats.active_questions} preguntas activas. El examen no podra iniciar.`;
       hint.style.color = 'var(--danger)';
     } else {
@@ -131,17 +291,15 @@ async function loadConfig() {
   }
 }
 
-function statBox(num, label) {
-  return `<div class="stat-box"><div class="num">${num}</div><div class="lbl">${esc(label)}</div></div>`;
-}
-
 el('configForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (!selectedExamId) return;
   try {
-    await api('/config', {
+    await api('/exams/' + selectedExamId, {
       method: 'PUT',
       body: JSON.stringify({
-        examTitle: el('cfgTitle').value,
+        name: el('cfgName').value,
+        isActive: el('cfgActive').checked,
         questionsPerExam: el('cfgQuestions').value,
         passPercentage: el('cfgPass').value,
         durationMinutes: el('cfgDuration').value,
@@ -149,13 +307,6 @@ el('configForm').addEventListener('submit', async (e) => {
         reviewMode: el('cfgReview').value,
         shuffleQuestions: el('cfgShuffleQ').checked,
         shuffleOptions: el('cfgShuffleO').checked,
-        emailEnabled: el('cfgEmailEnabled').checked,
-        smtpHost: el('cfgSmtpHost').value,
-        smtpPort: el('cfgSmtpPort').value,
-        smtpSecure: el('cfgSmtpSecure').checked,
-        smtpUser: el('cfgSmtpUser').value,
-        smtpPass: el('cfgSmtpPass').value,
-        smtpFrom: el('cfgSmtpFrom').value,
         emailSubjectPass: el('cfgSubjPass').value,
         emailBodyPass: el('cfgBodyPass').value,
         emailSubjectFail: el('cfgSubjFail').value,
@@ -163,38 +314,16 @@ el('configForm').addEventListener('submit', async (e) => {
       }),
     });
     flash('Configuracion guardada correctamente.');
-    loadConfig();
+    loadExams();
   } catch (err) {
     flash(err.message, 'error');
   }
 });
 
-el('testEmailBtn').addEventListener('click', async () => {
-  const to = el('testEmailTo').value.trim();
-  if (!to) {
-    flash('Ingresa un correo de destino para la prueba.', 'error');
-    return;
-  }
-  const btn = el('testEmailBtn');
-  btn.disabled = true;
-  btn.textContent = 'Enviando...';
-  try {
-    await api('/config/test-email', { method: 'POST', body: JSON.stringify({ to }) });
-    flash('Correo de prueba enviado correctamente.');
-  } catch (err) {
-    flash(err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Enviar prueba';
-  }
-});
-
-// --- Preguntas -----------------------------------------------------------
-let questionsCache = [];
-
+// --- Banco de preguntas --------------------------------------------------
 async function loadQuestions() {
   try {
-    const { questions } = await api('/questions');
+    const { questions } = await api('/exams/' + selectedExamId + '/questions');
     questionsCache = questions;
     el('questionCount').textContent = questions.length;
     const tbody = el('questionsTable');
@@ -212,23 +341,17 @@ async function loadQuestions() {
         <td><span class="pill ${q.is_active ? 'green' : 'gray'}">${q.is_active ? 'Activa' : 'Inactiva'}</span></td>
         <td></td>`;
       const actions = tr.lastElementChild;
-      const editBtn = btn('Editar', 'btn-ghost btn-sm', () => openQuestionModal(q));
-      const delBtn = btn('Eliminar', 'btn-danger btn-sm', () => deleteQuestion(q));
       actions.style.whiteSpace = 'nowrap';
-      actions.append(editBtn, document.createTextNode(' '), delBtn);
+      actions.append(
+        btn('Editar', 'btn-ghost btn-sm', () => openQuestionModal(q)),
+        document.createTextNode(' '),
+        btn('Eliminar', 'btn-danger btn-sm', () => deleteQuestion(q))
+      );
       tbody.appendChild(tr);
     });
   } catch (err) {
     flash(err.message, 'error');
   }
-}
-
-function btn(text, cls, onClick) {
-  const b = document.createElement('button');
-  b.textContent = text;
-  b.className = cls;
-  b.addEventListener('click', onClick);
-  return b;
 }
 
 async function deleteQuestion(q) {
@@ -237,7 +360,8 @@ async function deleteQuestion(q) {
     await api('/questions/' + q.id, { method: 'DELETE' });
     flash('Pregunta eliminada.');
     loadQuestions();
-    loadConfig();
+    loadExamConfig();
+    loadExams();
   } catch (err) {
     flash(err.message, 'error');
   }
@@ -245,7 +369,6 @@ async function deleteQuestion(q) {
 
 el('newQuestionBtn').addEventListener('click', () => openQuestionModal(null));
 
-// --- Modal generico ------------------------------------------------------
 function openModal(innerHtml) {
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
@@ -257,7 +380,6 @@ function openModal(innerHtml) {
   return overlay;
 }
 
-// --- Modal de pregunta ---------------------------------------------------
 function openQuestionModal(q) {
   const isEdit = !!q;
   const overlay = openModal(`
@@ -284,7 +406,6 @@ function openQuestionModal(q) {
     </div>`);
 
   const optionsBox = overlay.querySelector('#qmOptions');
-
   function addOptionRow(text = '', isCorrect = false) {
     const row = document.createElement('div');
     row.className = 'q-edit-option';
@@ -327,12 +448,16 @@ function openQuestionModal(q) {
       if (isEdit) {
         await api('/questions/' + q.id, { method: 'PUT', body: JSON.stringify(body) });
       } else {
-        await api('/questions', { method: 'POST', body: JSON.stringify(body) });
+        await api('/exams/' + selectedExamId + '/questions', {
+          method: 'POST',
+          body: JSON.stringify(body),
+        });
       }
       overlay.remove();
       flash(isEdit ? 'Pregunta actualizada.' : 'Pregunta creada.');
       loadQuestions();
-      loadConfig();
+      loadExamConfig();
+      loadExams();
     } catch (err) {
       const a = overlay.querySelector('#qmAlert');
       a.textContent = err.message;
@@ -341,19 +466,18 @@ function openQuestionModal(q) {
   });
 }
 
-// --- Modal de importacion ------------------------------------------------
 el('importBtn').addEventListener('click', () => {
   const overlay = openModal(`
     <h3>Importar preguntas desde CSV</h3>
     <p class="muted-text" style="margin-bottom:12px;">
-      Columnas: <strong>pregunta, categoria, dificultad, opcion_a, opcion_b,
-      opcion_c, opcion_d, opcion_e, correctas</strong>.
-      La columna "correctas" admite una o varias letras (ej. "A" o "A,C").
-      Las columnas categoria, dificultad y opcion_c/d/e son opcionales.
+      Las preguntas se agregan a la certificacion activa. Columnas:
+      <strong>pregunta, categoria, dificultad, opcion_a, opcion_b, opcion_c,
+      opcion_d, opcion_e, correctas</strong>. La columna "correctas" admite una
+      o varias letras (ej. "A" o "A,C"). Las columnas categoria, dificultad y
+      opcion_c/d/e son opcionales.
     </p>
     <div class="field">
       <label>Selecciona un archivo .csv</label>
-      <input type="text" id="impFileWrap" class="hidden" />
       <input type="file" id="impFile" accept=".csv,text/csv" />
     </div>
     <div class="field">
@@ -386,14 +510,15 @@ el('importBtn').addEventListener('click', () => {
       return;
     }
     try {
-      const { imported } = await api('/questions/import', {
+      const { imported } = await api('/exams/' + selectedExamId + '/questions/import', {
         method: 'POST',
         body: JSON.stringify({ csv }),
       });
       overlay.remove();
       flash(`${imported} pregunta(s) importada(s) correctamente.`);
       loadQuestions();
-      loadConfig();
+      loadExamConfig();
+      loadExams();
     } catch (err) {
       const a = overlay.querySelector('#impAlert');
       a.textContent = err.message;
@@ -402,10 +527,10 @@ el('importBtn').addEventListener('click', () => {
   });
 });
 
-// --- Codigos -------------------------------------------------------------
+// --- Codigos de acceso ---------------------------------------------------
 async function loadCodes() {
   try {
-    const { codes } = await api('/codes');
+    const { codes } = await api('/exams/' + selectedExamId + '/codes');
     el('codeCountLabel').textContent = codes.length;
     const tbody = el('codesTable');
     tbody.innerHTML = '';
@@ -452,13 +577,14 @@ async function loadCodes() {
 }
 
 el('generateCodesBtn').addEventListener('click', async () => {
+  if (!selectedExamId) return;
   const names = el('codeNames').value
     .split('\n')
     .map((n) => n.trim())
     .filter(Boolean);
   const count = parseInt(el('codeCount').value, 10) || (names.length || 1);
   try {
-    const { codes } = await api('/codes', {
+    const { codes } = await api('/exams/' + selectedExamId + '/codes', {
       method: 'POST',
       body: JSON.stringify({ count, names }),
     });
@@ -466,20 +592,27 @@ el('generateCodesBtn').addEventListener('click', async () => {
     flash(`${codes.length} codigo(s) generado(s).`);
     showGeneratedCodes(codes);
     loadCodes();
-    loadConfig();
+    loadExams();
   } catch (err) {
     flash(err.message, 'error');
   }
 });
 
 function showGeneratedCodes(codes) {
+  const examName = (examsCache.find((e) => e.id === selectedExamId) || {}).name || '';
   const list = codes
-    .map((c) => `<div class="code-chip" style="display:inline-block;margin:4px;">${esc(c.code)}` +
-      (c.student_name ? ` &middot; ${esc(c.student_name)}` : '') + `</div>`)
+    .map(
+      (c) =>
+        `<div class="code-chip" style="display:inline-block;margin:4px;">${esc(c.code)}` +
+        (c.student_name ? ` &middot; ${esc(c.student_name)}` : '') +
+        `</div>`
+    )
     .join('');
   const overlay = openModal(`
     <h3>Codigos generados</h3>
-    <p class="muted-text" style="margin-bottom:10px;">Entrega estos codigos a los estudiantes:</p>
+    <p class="muted-text" style="margin-bottom:10px;">
+      Certificacion: <strong>${esc(examName)}</strong>. Entrega estos codigos a los estudiantes:
+    </p>
     <div>${list}</div>
     <div class="modal-actions">
       <button type="button" class="btn-primary" id="genClose">Listo</button>
@@ -488,7 +621,18 @@ function showGeneratedCodes(codes) {
 }
 
 // --- Resultados ----------------------------------------------------------
-let resultsCache = [];
+function renderResultsFilter() {
+  const sel = el('filterExam');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Todas las certificaciones</option>';
+  examsCache.forEach((e) => {
+    const opt = document.createElement('option');
+    opt.value = e.id;
+    opt.textContent = e.name;
+    sel.appendChild(opt);
+  });
+  sel.value = current;
+}
 
 async function loadResults() {
   try {
@@ -500,12 +644,18 @@ async function loadResults() {
   }
 }
 
-function renderResults() {
+function filteredResults() {
+  const examId = el('filterExam').value;
   const onlyPassed = el('filterPassed').checked;
-  const rows = onlyPassed
-    ? resultsCache.filter((r) => r.status === 'completed' && r.passed)
-    : resultsCache;
+  return resultsCache.filter((r) => {
+    if (examId && String(r.exam_id) !== examId) return false;
+    if (onlyPassed && !(r.status === 'completed' && r.passed)) return false;
+    return true;
+  });
+}
 
+function renderResults() {
+  const rows = filteredResults();
   const tbody = el('resultsTable');
   tbody.innerHTML = '';
   el('noResults').classList.toggle('hidden', rows.length > 0);
@@ -525,6 +675,7 @@ function renderResults() {
     tr.innerHTML = `
       <td>${esc(r.student_name)}</td>
       <td>${esc(r.student_email || '-')}</td>
+      <td>${esc(r.exam_name || '-')}</td>
       <td><span class="code-chip">${esc(r.code)}</span></td>
       <td>${done ? r.score + '%' : '-'}</td>
       <td>${verdict}</td>
@@ -538,19 +689,17 @@ function renderResults() {
   });
 }
 
+el('filterExam').addEventListener('change', renderResults);
 el('filterPassed').addEventListener('change', renderResults);
 
 el('exportBtn').addEventListener('click', () => {
-  const onlyPassed = el('filterPassed').checked;
-  const rows = onlyPassed
-    ? resultsCache.filter((r) => r.status === 'completed' && r.passed)
-    : resultsCache;
+  const rows = filteredResults();
   if (!rows.length) {
     flash('No hay resultados para exportar.', 'error');
     return;
   }
   const headers = [
-    'Estudiante', 'Correo', 'Codigo', 'Estado', 'Puntaje',
+    'Estudiante', 'Correo', 'Certificacion', 'Codigo', 'Estado', 'Puntaje',
     'Resultado', 'Salidas del examen', 'Correo enviado', 'Inicio', 'Finalizado',
   ];
   const csvCell = (v) => {
@@ -560,18 +709,23 @@ el('exportBtn').addEventListener('click', () => {
   const lines = [headers.join(',')];
   rows.forEach((r) => {
     const done = r.status === 'completed';
-    lines.push([
-      r.student_name,
-      r.student_email || '',
-      r.code,
-      done ? 'Completado' : 'En curso',
-      done ? r.score + '%' : '',
-      done ? (r.passed ? 'Aprobado' : 'Reprobado') : '',
-      r.tab_switches || 0,
-      r.email_sent ? 'Si' : 'No',
-      r.started_at ? new Date(r.started_at).toLocaleString('es') : '',
-      r.finished_at ? new Date(r.finished_at).toLocaleString('es') : '',
-    ].map(csvCell).join(','));
+    lines.push(
+      [
+        r.student_name,
+        r.student_email || '',
+        r.exam_name || '',
+        r.code,
+        done ? 'Completado' : 'En curso',
+        done ? r.score + '%' : '',
+        done ? (r.passed ? 'Aprobado' : 'Reprobado') : '',
+        r.tab_switches || 0,
+        r.email_sent ? 'Si' : 'No',
+        r.started_at ? new Date(r.started_at).toLocaleString('es') : '',
+        r.finished_at ? new Date(r.finished_at).toLocaleString('es') : '',
+      ]
+        .map(csvCell)
+        .join(',')
+    );
   });
   const blob = new Blob(['﻿' + lines.join('\r\n')], {
     type: 'text/csv;charset=utf-8;',
@@ -579,7 +733,7 @@ el('exportBtn').addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `resultados-examen-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `resultados-examenes-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 });
@@ -609,9 +763,10 @@ async function openResultModal(id) {
         })
         .join('');
     }
-    const verdict = attempt.status !== 'completed'
-      ? 'En curso'
-      : attempt.passed ? 'APROBADO' : 'REPROBADO';
+    const verdict =
+      attempt.status !== 'completed'
+        ? 'En curso'
+        : attempt.passed ? 'APROBADO' : 'REPROBADO';
     const switchLine =
       attempt.tabSwitches > 0
         ? `<p><strong>Salidas del examen:</strong> <span class="pill red">${attempt.tabSwitches}</span> ` +
@@ -619,6 +774,7 @@ async function openResultModal(id) {
         : '<p><strong>Salidas del examen:</strong> <span class="pill gray">0</span></p>';
     const overlay = openModal(`
       <h3>Detalle del examen</h3>
+      <p><strong>Certificacion:</strong> ${esc(attempt.examName || '-')}</p>
       <p><strong>Estudiante:</strong> ${esc(attempt.studentName)}</p>
       <p><strong>Correo:</strong> ${esc(attempt.studentEmail || '-')}</p>
       <p><strong>Codigo:</strong> ${esc(attempt.code)}</p>
@@ -637,6 +793,65 @@ async function openResultModal(id) {
     flash(err.message, 'error');
   }
 }
+
+// --- Ajustes de correo ---------------------------------------------------
+async function loadSettings() {
+  try {
+    const { settings } = await api('/settings');
+    el('setEmailEnabled').checked = settings.email_enabled;
+    el('setSmtpHost').value = settings.smtp_host || '';
+    el('setSmtpPort').value = settings.smtp_port || 587;
+    el('setSmtpSecure').checked = settings.smtp_secure;
+    el('setSmtpUser').value = settings.smtp_user || '';
+    el('setSmtpPass').value = '';
+    el('setSmtpPass').placeholder = settings.smtp_pass_set ? '(sin cambios)' : 'Contrasena SMTP';
+    el('setSmtpFrom').value = settings.smtp_from || '';
+  } catch (err) {
+    flash(err.message, 'error');
+  }
+}
+
+el('settingsForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await api('/settings', {
+      method: 'PUT',
+      body: JSON.stringify({
+        emailEnabled: el('setEmailEnabled').checked,
+        smtpHost: el('setSmtpHost').value,
+        smtpPort: el('setSmtpPort').value,
+        smtpSecure: el('setSmtpSecure').checked,
+        smtpUser: el('setSmtpUser').value,
+        smtpPass: el('setSmtpPass').value,
+        smtpFrom: el('setSmtpFrom').value,
+      }),
+    });
+    flash('Ajustes de correo guardados.');
+    loadSettings();
+  } catch (err) {
+    flash(err.message, 'error');
+  }
+});
+
+el('testEmailBtn').addEventListener('click', async () => {
+  const to = el('testEmailTo').value.trim();
+  if (!to) {
+    flash('Ingresa un correo de destino para la prueba.', 'error');
+    return;
+  }
+  const b = el('testEmailBtn');
+  b.disabled = true;
+  b.textContent = 'Enviando...';
+  try {
+    await api('/settings/test-email', { method: 'POST', body: JSON.stringify({ to }) });
+    flash('Correo de prueba enviado correctamente.');
+  } catch (err) {
+    flash(err.message, 'error');
+  } finally {
+    b.disabled = false;
+    b.textContent = 'Enviar prueba';
+  }
+});
 
 // --- Arranque ------------------------------------------------------------
 if (token) {

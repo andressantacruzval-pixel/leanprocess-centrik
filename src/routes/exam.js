@@ -1,21 +1,21 @@
 const express = require('express');
 const { pool } = require('../db');
 const { signAttempt, requireAttempt } = require('../auth');
-const { shuffle, generateCode, getAttemptQuestions, gradeAttempt, buildReview } = require('../helpers');
+const { shuffle, getAttemptQuestions, gradeAttempt, buildReview } = require('../helpers');
 
 const router = express.Router();
 
-async function getConfig() {
-  const { rows } = await pool.query('SELECT * FROM exam_config WHERE id = 1');
-  return rows[0];
+async function getExam(id) {
+  const { rows } = await pool.query('SELECT * FROM exams WHERE id = $1', [id]);
+  return rows[0] || null;
 }
 
-// Construye el estado completo del examen para el frontend.
-async function buildState(attempt, config) {
+// Construye el estado del examen para el frontend.
+async function buildState(attempt, exam) {
   const base = {
     attemptId: attempt.id,
     status: attempt.status,
-    examTitle: config.exam_title,
+    examTitle: exam.name,
     serverNow: new Date().toISOString(),
   };
   if (attempt.status === 'completed') {
@@ -35,13 +35,13 @@ async function buildState(attempt, config) {
     questions,
     answers: answerMap,
     expiresAt: attempt.expires_at,
-    durationMinutes: config.duration_minutes,
-    passPercentage: config.pass_percentage,
+    durationMinutes: exam.duration_minutes,
+    passPercentage: exam.pass_percentage,
     totalQuestions: questions.length,
   };
 }
 
-// POST /api/exam/start  { code, studentName }
+// POST /api/exam/start  { code, studentName, studentEmail }
 router.post('/start', async (req, res) => {
   try {
     const code = String(req.body.code || '').trim().toUpperCase();
@@ -64,7 +64,12 @@ router.post('/start', async (req, res) => {
       return res.status(403).json({ error: 'Codigo de acceso invalido o desactivado.' });
     }
 
-    const config = await getConfig();
+    const exam = await getExam(accessCode.exam_id);
+    if (!exam || !exam.is_active) {
+      return res.status(403).json({
+        error: 'El examen asociado a este codigo no esta disponible. Contacta al administrador.',
+      });
+    }
 
     // Finaliza intentos vencidos que sigan abiertos.
     const { rows: openRows } = await pool.query(
@@ -75,9 +80,8 @@ router.post('/start', async (req, res) => {
       if (new Date(open.expires_at).getTime() <= Date.now()) {
         await gradeAttempt(pool, open.id);
       } else {
-        // Hay un intento en curso: se reanuda.
         const token = signAttempt(open.id);
-        const state = await buildState(open, config);
+        const state = await buildState(open, exam);
         return res.json({ token, ...state, resumed: true });
       }
     }
@@ -86,25 +90,25 @@ router.post('/start', async (req, res) => {
       `SELECT COUNT(*)::int AS used FROM attempts WHERE access_code_id = $1 AND status = 'completed'`,
       [accessCode.id]
     );
-    const used = countRows[0].used;
-    if (used >= config.max_attempts) {
+    if (countRows[0].used >= exam.max_attempts) {
       return res.status(403).json({
-        error: `Has agotado tus intentos (${config.max_attempts}). Contacta al administrador.`,
+        error: `Has agotado tus intentos (${exam.max_attempts}). Contacta al administrador.`,
       });
     }
 
     const { rows: bankRows } = await pool.query(
-      'SELECT id FROM questions WHERE is_active = true'
+      'SELECT id FROM questions WHERE exam_id = $1 AND is_active = true',
+      [exam.id]
     );
-    if (bankRows.length < config.questions_per_exam) {
+    if (bankRows.length < exam.questions_per_exam) {
       return res.status(409).json({
         error: 'El examen aun no esta disponible. Contacta al administrador.',
       });
     }
 
     let selected = bankRows.map((r) => r.id);
-    selected = config.shuffle_questions ? shuffle(selected) : selected;
-    selected = selected.slice(0, config.questions_per_exam);
+    selected = exam.shuffle_questions ? shuffle(selected) : selected;
+    selected = selected.slice(0, exam.questions_per_exam);
 
     const { rows: optRows } = await pool.query(
       'SELECT id, question_id, position FROM options WHERE question_id = ANY($1)',
@@ -117,19 +121,21 @@ router.post('/start', async (req, res) => {
     const optionOrder = {};
     for (const qid of selected) {
       let list = (optsByQ[qid] || []).slice();
-      list = config.shuffle_options
+      list = exam.shuffle_options
         ? shuffle(list)
         : list.sort((a, b) => a.position - b.position || a.id - b.id);
       optionOrder[qid] = list.map((o) => o.id);
     }
 
-    const expiresAt = new Date(Date.now() + config.duration_minutes * 60000);
+    const expiresAt = new Date(Date.now() + exam.duration_minutes * 60000);
     const { rows: created } = await pool.query(
       `INSERT INTO attempts
-         (access_code_id, student_name, student_email, question_ids, option_order, expires_at)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+         (access_code_id, exam_id, student_name, student_email,
+          question_ids, option_order, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [
         accessCode.id,
+        exam.id,
         studentName,
         studentEmail,
         JSON.stringify(selected),
@@ -146,7 +152,7 @@ router.post('/start', async (req, res) => {
 
     const attempt = created[0];
     const token = signAttempt(attempt.id);
-    const state = await buildState(attempt, config);
+    const state = await buildState(attempt, exam);
     res.json({ token, ...state, resumed: false });
   } catch (err) {
     console.error('POST /exam/start', err);
@@ -164,8 +170,9 @@ router.get('/state', requireAttempt, async (req, res) => {
     if (attempt.status === 'in_progress' && new Date(attempt.expires_at).getTime() <= Date.now()) {
       attempt = await gradeAttempt(pool, attempt.id);
     }
-    const config = await getConfig();
-    res.json(await buildState(attempt, config));
+    const exam = await getExam(attempt.exam_id);
+    if (!exam) return res.status(404).json({ error: 'Examen no encontrado.' });
+    res.json(await buildState(attempt, exam));
   } catch (err) {
     console.error('GET /exam/state', err);
     res.status(500).json({ error: 'No se pudo cargar el examen.' });
@@ -229,21 +236,23 @@ router.get('/result', requireAttempt, async (req, res) => {
       attempt = await gradeAttempt(pool, attempt.id);
     }
 
-    const config = await getConfig();
+    const exam = await getExam(attempt.exam_id);
+    if (!exam) return res.status(404).json({ error: 'Examen no encontrado.' });
+
     const total = attempt.question_ids.length;
     const score = Number(attempt.score);
     const correctCount = Math.round((score / 100) * total);
 
     const showReview =
-      config.review_mode === 'always' ||
-      (config.review_mode === 'if_passed' && attempt.passed);
+      exam.review_mode === 'always' ||
+      (exam.review_mode === 'if_passed' && attempt.passed);
 
     const payload = {
-      examTitle: config.exam_title,
+      examTitle: exam.name,
       studentName: attempt.student_name,
       score,
       passed: attempt.passed,
-      passPercentage: config.pass_percentage,
+      passPercentage: exam.pass_percentage,
       totalQuestions: total,
       correctCount,
       finishedAt: attempt.finished_at,
@@ -275,17 +284,4 @@ router.post('/flag', requireAttempt, async (req, res) => {
   }
 });
 
-// GET /api/exam/info  (publico: solo el titulo para la pantalla de ingreso)
-router.get('/info', async (_req, res) => {
-  try {
-    const config = await getConfig();
-    res.json({ examTitle: config.exam_title });
-  } catch {
-    res.json({ examTitle: 'Examen de Certificacion Lean Process Implementer' });
-  }
-});
-
 module.exports = router;
-
-// Exportado para pruebas/utilidades
-module.exports.generateCode = generateCode;

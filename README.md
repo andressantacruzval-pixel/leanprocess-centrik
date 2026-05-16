@@ -1,19 +1,25 @@
-# Plataforma de Examen — Lean Process Implementer
+# Plataforma de Exámenes de Certificación
 
-Aplicación web para que los estudiantes rindan el examen de certificación
-**Lean Process Implementer**. El administrador carga un banco de preguntas de
-opción múltiple y, cuando un estudiante ingresa con su código único, el sistema
-le arma un examen aleatorio. La calificación es instantánea (APROBADO /
-REPROBADO).
+Aplicación web para que los estudiantes rindan exámenes de certificación
+(por ejemplo *Lean Process Implementer* o *Business Continuity Implementer*).
+El administrador puede crear **múltiples certificaciones**, cada una con su
+propio banco de preguntas y configuración. Cuando un estudiante ingresa con su
+código único, el sistema identifica a qué certificación pertenece y le arma un
+examen aleatorio. La calificación es instantánea (APROBADO / REPROBADO).
 
 ## Características
 
-- **Panel de administrador** para configurar el examen, gestionar el banco de
-  preguntas, generar códigos de acceso y consultar resultados.
+- **Múltiples certificaciones**: el administrador crea y administra varios
+  exámenes de forma independiente, cada uno con su propio banco de preguntas,
+  configuración, códigos de acceso y resultados.
+- **Códigos de acceso por certificación**: cada código queda asociado a una
+  certificación; el estudiante solo necesita su código para entrar.
+- **Panel de administrador** para crear certificaciones, configurarlas,
+  gestionar el banco de preguntas, generar códigos y consultar resultados.
 - **Carga de preguntas** manual o por importación de archivo CSV.
-- **Parámetros configurables**: número de preguntas por examen, porcentaje para
-  aprobar, duración del temporizador, intentos permitidos, mezcla de preguntas
-  y opciones, y modo de revisión de respuestas.
+- **Parámetros configurables por certificación**: número de preguntas por
+  examen, porcentaje para aprobar, duración del temporizador, intentos
+  permitidos, mezcla de preguntas y opciones, y modo de revisión de respuestas.
 - **Selección aleatoria** de preguntas por intento, fijada al iniciar.
 - **Temporizador** persistente controlado por el servidor (no se puede
   manipular desde el navegador ni recargando la página).
@@ -72,23 +78,34 @@ REPROBADO).
 ### Administrador
 
 1. Ingresar al panel con la contraseña configurada.
-2. **Configuración**: definir título, número de preguntas, porcentaje para
-   aprobar, duración, intentos y opciones de mezcla.
-3. **Banco de preguntas**: crear preguntas manualmente o importar un CSV. En
+2. **Certificaciones**: crear las certificaciones (ej. "Lean Process
+   Implementer", "Business Continuity Implementer"). La barra superior permite
+   elegir la certificación activa; las pestañas Configuración, Banco de
+   preguntas y Códigos operan sobre ella.
+3. **Configuración**: definir nombre, número de preguntas, porcentaje para
+   aprobar, duración, intentos, opciones de mezcla y los textos del correo de
+   resultado de la certificación activa.
+4. **Banco de preguntas**: crear preguntas manualmente o importar un CSV. En
    `sample/preguntas-ejemplo.csv` hay un archivo de ejemplo.
-4. **Códigos de acceso**: generar códigos (uno por estudiante, con nombre
-   opcional) y entregarlos.
-5. **Resultados**: consultar el detalle de cada examen rendido, descargar el
-   CSV con todos los resultados o filtrar solo a los aprobados.
+5. **Códigos de acceso**: generar códigos (uno por estudiante, con nombre
+   opcional) y entregarlos. Los códigos quedan asociados a la certificación
+   activa.
+6. **Resultados**: consultar el detalle de cada examen rendido, filtrar por
+   certificación o por aprobados, y descargar el CSV con los resultados.
+7. **Correo**: configurar el servidor SMTP global usado para enviar los
+   resultados.
 
 #### Notificaciones por correo
 
-En la pestaña **Configuración**, panel *Notificaciones por correo*, se puede
-activar el envío automático del resultado al correo del estudiante. Hay que
-indicar el servidor SMTP (host, puerto, usuario, contraseña y remitente) y
-redactar los mensajes para los casos APROBADO y REPROBADO. En los textos se
-pueden usar las variables `{nombre}`, `{puntaje}`, `{resultado}`, `{examen}` y
-`{minimo}`. El botón *Enviar prueba* permite validar la configuración SMTP.
+En la pestaña **Correo** se configura el servidor SMTP global (host, puerto,
+usuario, contraseña y remitente) y se activa el envío automático del resultado
+al correo del estudiante. El botón *Enviar prueba* permite validar la
+configuración SMTP.
+
+Los textos de los mensajes para los casos APROBADO y REPROBADO se redactan por
+separado en la pestaña **Configuración** de cada certificación. En los textos
+se pueden usar las variables `{nombre}`, `{puntaje}`, `{resultado}`,
+`{examen}` y `{minimo}`.
 
 ### Formato del CSV de importación
 

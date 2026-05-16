@@ -19,40 +19,151 @@ router.post('/login', (req, res) => {
 
 router.use(requireAdmin);
 
-// --- Configuracion del examen -------------------------------------------
-router.get('/config', async (_req, res) => {
+// --- Ajustes globales (correo / SMTP) -----------------------------------
+router.get('/settings', async (_req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM exam_config WHERE id = 1');
-    // No se expone la contrasena SMTP; solo se indica si esta configurada.
-    const config = { ...rows[0] };
-    config.smtp_pass_set = !!config.smtp_pass;
-    delete config.smtp_pass;
-    rows[0] = config;
-    const { rows: stats } = await pool.query(
-      `SELECT
-         (SELECT COUNT(*)::int FROM questions) AS total_questions,
-         (SELECT COUNT(*)::int FROM questions WHERE is_active = true) AS active_questions,
-         (SELECT COUNT(*)::int FROM access_codes) AS total_codes,
-         (SELECT COUNT(*)::int FROM attempts WHERE status = 'completed') AS completed_attempts`
-    );
-    res.json({ config: rows[0], stats: stats[0] });
+    const { rows } = await pool.query('SELECT * FROM app_settings WHERE id = 1');
+    const settings = { ...rows[0] };
+    settings.smtp_pass_set = !!settings.smtp_pass;
+    delete settings.smtp_pass;
+    res.json({ settings });
   } catch (err) {
-    console.error('GET /admin/config', err);
-    res.status(500).json({ error: 'No se pudo cargar la configuracion.' });
+    console.error('GET /admin/settings', err);
+    res.status(500).json({ error: 'No se pudieron cargar los ajustes.' });
   }
 });
 
-router.put('/config', async (req, res) => {
+router.put('/settings', async (req, res) => {
   try {
     const b = req.body || {};
-    const examTitle = String(b.examTitle || '').trim();
+    const emailEnabled = !!b.emailEnabled;
+    const smtpHost = String(b.smtpHost || '').trim();
+    const smtpFrom = String(b.smtpFrom || '').trim();
+    let smtpPort = parseInt(b.smtpPort, 10);
+    if (!(smtpPort >= 1 && smtpPort <= 65535)) smtpPort = 587;
+    const smtpUser = String(b.smtpUser || '').trim();
+    const smtpPass = String(b.smtpPass || '');
+
+    if (emailEnabled && (!smtpHost || !smtpFrom)) {
+      return res.status(400).json({
+        error: 'Para activar el correo debes indicar el servidor SMTP y el remitente.',
+      });
+    }
+
+    const { rows } = await pool.query(
+      `UPDATE app_settings SET
+         email_enabled = $1, smtp_host = $2, smtp_port = $3, smtp_secure = $4,
+         smtp_user = $5, smtp_from = $6,
+         smtp_pass = COALESCE(NULLIF($7, ''), smtp_pass)
+       WHERE id = 1 RETURNING *`,
+      [emailEnabled, smtpHost || null, smtpPort, !!b.smtpSecure, smtpUser || null,
+       smtpFrom || null, smtpPass]
+    );
+    const settings = { ...rows[0] };
+    settings.smtp_pass_set = !!settings.smtp_pass;
+    delete settings.smtp_pass;
+    res.json({ settings });
+  } catch (err) {
+    console.error('PUT /admin/settings', err);
+    res.status(500).json({ error: 'No se pudieron guardar los ajustes.' });
+  }
+});
+
+router.post('/settings/test-email', async (req, res) => {
+  try {
+    const to = String(req.body.to || '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      return res.status(400).json({ error: 'Ingresa un correo de destino valido.' });
+    }
+    const { rows } = await pool.query('SELECT * FROM app_settings WHERE id = 1');
+    const settings = rows[0];
+    if (!settings.smtp_host || !settings.smtp_from) {
+      return res.status(400).json({
+        error: 'Configura y guarda el servidor SMTP y el remitente antes de probar.',
+      });
+    }
+    await sendTestEmail(settings, to);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('POST /admin/settings/test-email', err);
+    res.status(500).json({ error: 'No se pudo enviar el correo de prueba: ' + err.message });
+  }
+});
+
+// --- Examenes (certificaciones) -----------------------------------------
+router.get('/exams', async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT e.*,
+         (SELECT COUNT(*)::int FROM questions q WHERE q.exam_id = e.id) AS total_questions,
+         (SELECT COUNT(*)::int FROM questions q WHERE q.exam_id = e.id AND q.is_active) AS active_questions,
+         (SELECT COUNT(*)::int FROM access_codes c WHERE c.exam_id = e.id) AS total_codes,
+         (SELECT COUNT(*)::int FROM attempts a WHERE a.exam_id = e.id AND a.status = 'completed') AS completed_attempts
+       FROM exams e ORDER BY e.id`
+    );
+    res.json({ exams: rows });
+  } catch (err) {
+    console.error('GET /admin/exams', err);
+    res.status(500).json({ error: 'No se pudieron cargar los examenes.' });
+  }
+});
+
+router.post('/exams', async (req, res) => {
+  try {
+    const name = String(req.body.name || '').trim();
+    if (name.length < 3) {
+      return res.status(400).json({ error: 'El nombre del examen es obligatorio.' });
+    }
+    const { rows } = await pool.query(
+      'INSERT INTO exams (name) VALUES ($1) RETURNING *',
+      [name]
+    );
+    res.json({ ok: true, exam: rows[0] });
+  } catch (err) {
+    console.error('POST /admin/exams', err);
+    res.status(500).json({ error: 'No se pudo crear el examen.' });
+  }
+});
+
+router.get('/exams/:id', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM exams WHERE id = $1', [
+      parseInt(req.params.id, 10),
+    ]);
+    if (!rows.length) return res.status(404).json({ error: 'Examen no encontrado.' });
+    const { rows: stats } = await pool.query(
+      `SELECT
+         (SELECT COUNT(*)::int FROM questions q WHERE q.exam_id = $1) AS total_questions,
+         (SELECT COUNT(*)::int FROM questions q WHERE q.exam_id = $1 AND q.is_active) AS active_questions,
+         (SELECT COUNT(*)::int FROM access_codes c WHERE c.exam_id = $1) AS total_codes,
+         (SELECT COUNT(*)::int FROM attempts a WHERE a.exam_id = $1 AND a.status = 'completed') AS completed_attempts`,
+      [parseInt(req.params.id, 10)]
+    );
+    res.json({ exam: rows[0], stats: stats[0] });
+  } catch (err) {
+    console.error('GET /admin/exams/:id', err);
+    res.status(500).json({ error: 'No se pudo cargar el examen.' });
+  }
+});
+
+router.put('/exams/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const b = req.body || {};
+    const name = String(b.name || '').trim();
     const questionsPerExam = parseInt(b.questionsPerExam, 10);
     const passPercentage = parseInt(b.passPercentage, 10);
     const durationMinutes = parseInt(b.durationMinutes, 10);
     const maxAttempts = parseInt(b.maxAttempts, 10);
     const reviewMode = String(b.reviewMode || '');
+    const subjPass = String(b.emailSubjectPass || '').trim();
+    const bodyPass = String(b.emailBodyPass || '').trim();
+    const subjFail = String(b.emailSubjectFail || '').trim();
+    const bodyFail = String(b.emailBodyFail || '').trim();
 
-    if (!examTitle) return res.status(400).json({ error: 'El titulo es obligatorio.' });
+    if (name.length < 3) {
+      return res.status(400).json({ error: 'El nombre del examen es obligatorio.' });
+    }
     if (!(questionsPerExam >= 1)) {
       return res.status(400).json({ error: 'El numero de preguntas debe ser al menos 1.' });
     }
@@ -68,108 +179,54 @@ router.put('/config', async (req, res) => {
     if (!['never', 'if_passed', 'always'].includes(reviewMode)) {
       return res.status(400).json({ error: 'Modo de revision no valido.' });
     }
-
-    // Configuracion de correo electronico.
-    const emailEnabled = !!b.emailEnabled;
-    const smtpHost = String(b.smtpHost || '').trim();
-    const smtpFrom = String(b.smtpFrom || '').trim();
-    let smtpPort = parseInt(b.smtpPort, 10);
-    if (!(smtpPort >= 1 && smtpPort <= 65535)) smtpPort = 587;
-    const smtpUser = String(b.smtpUser || '').trim();
-    const smtpPass = String(b.smtpPass || '');
-    const emailSubjectPass = String(b.emailSubjectPass || '').trim();
-    const emailBodyPass = String(b.emailBodyPass || '').trim();
-    const emailSubjectFail = String(b.emailSubjectFail || '').trim();
-    const emailBodyFail = String(b.emailBodyFail || '').trim();
-
-    if (emailEnabled) {
-      if (!smtpHost || !smtpFrom) {
-        return res.status(400).json({
-          error: 'Para activar el correo debes indicar el servidor SMTP y el remitente.',
-        });
-      }
-      if (!emailSubjectPass || !emailBodyPass || !emailSubjectFail || !emailBodyFail) {
-        return res.status(400).json({
-          error: 'Los textos de correo (aprobado y reprobado) no pueden estar vacios.',
-        });
-      }
+    if (!subjPass || !bodyPass || !subjFail || !bodyFail) {
+      return res.status(400).json({
+        error: 'Los textos de correo (aprobado y reprobado) no pueden estar vacios.',
+      });
     }
 
     const { rows } = await pool.query(
-      `UPDATE exam_config SET
-         exam_title = $1, questions_per_exam = $2, pass_percentage = $3,
-         duration_minutes = $4, max_attempts = $5,
-         shuffle_questions = $6, shuffle_options = $7, review_mode = $8,
-         email_enabled = $9, smtp_host = $10, smtp_port = $11, smtp_secure = $12,
-         smtp_user = $13, smtp_from = $14,
-         smtp_pass = COALESCE(NULLIF($15, ''), smtp_pass),
-         email_subject_pass = COALESCE(NULLIF($16, ''), email_subject_pass),
-         email_body_pass = COALESCE(NULLIF($17, ''), email_body_pass),
-         email_subject_fail = COALESCE(NULLIF($18, ''), email_subject_fail),
-         email_body_fail = COALESCE(NULLIF($19, ''), email_body_fail)
-       WHERE id = 1 RETURNING *`,
+      `UPDATE exams SET
+         name = $1, questions_per_exam = $2, pass_percentage = $3, duration_minutes = $4,
+         max_attempts = $5, shuffle_questions = $6, shuffle_options = $7, review_mode = $8,
+         is_active = $9, email_subject_pass = $10, email_body_pass = $11,
+         email_subject_fail = $12, email_body_fail = $13
+       WHERE id = $14 RETURNING *`,
       [
-        examTitle,
-        questionsPerExam,
-        passPercentage,
-        durationMinutes,
-        maxAttempts,
-        !!b.shuffleQuestions,
-        !!b.shuffleOptions,
-        reviewMode,
-        emailEnabled,
-        smtpHost || null,
-        smtpPort,
-        !!b.smtpSecure,
-        smtpUser || null,
-        smtpFrom || null,
-        smtpPass,
-        emailSubjectPass,
-        emailBodyPass,
-        emailSubjectFail,
-        emailBodyFail,
+        name, questionsPerExam, passPercentage, durationMinutes, maxAttempts,
+        !!b.shuffleQuestions, !!b.shuffleOptions, reviewMode, b.isActive !== false,
+        subjPass, bodyPass, subjFail, bodyFail, id,
       ]
     );
-    const saved = { ...rows[0] };
-    saved.smtp_pass_set = !!saved.smtp_pass;
-    delete saved.smtp_pass;
-    res.json({ config: saved });
+    if (!rows.length) return res.status(404).json({ error: 'Examen no encontrado.' });
+    res.json({ ok: true, exam: rows[0] });
   } catch (err) {
-    console.error('PUT /admin/config', err);
-    res.status(500).json({ error: 'No se pudo guardar la configuracion.' });
+    console.error('PUT /admin/exams/:id', err);
+    res.status(500).json({ error: 'No se pudo guardar el examen.' });
   }
 });
 
-// POST /api/admin/config/test-email  { to }
-router.post('/config/test-email', async (req, res) => {
+router.delete('/exams/:id', async (req, res) => {
   try {
-    const to = String(req.body.to || '').trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
-      return res.status(400).json({ error: 'Ingresa un correo de destino valido.' });
-    }
-    const { rows } = await pool.query('SELECT * FROM exam_config WHERE id = 1');
-    const config = rows[0];
-    if (!config.smtp_host || !config.smtp_from) {
-      return res.status(400).json({
-        error: 'Configura y guarda el servidor SMTP y el remitente antes de probar.',
-      });
-    }
-    await sendTestEmail(config, to);
+    await pool.query('DELETE FROM exams WHERE id = $1', [parseInt(req.params.id, 10)]);
     res.json({ ok: true });
   } catch (err) {
-    console.error('POST /admin/config/test-email', err);
-    res.status(500).json({ error: 'No se pudo enviar el correo de prueba: ' + err.message });
+    console.error('DELETE /admin/exams/:id', err);
+    res.status(500).json({ error: 'No se pudo eliminar el examen.' });
   }
 });
 
-// --- Banco de preguntas --------------------------------------------------
-async function fetchQuestions() {
+// --- Banco de preguntas (por examen) ------------------------------------
+async function fetchQuestions(examId) {
   const { rows: qs } = await pool.query(
-    'SELECT id, text, category, difficulty, is_active FROM questions ORDER BY id DESC'
+    'SELECT id, text, category, difficulty, is_active FROM questions WHERE exam_id = $1 ORDER BY id DESC',
+    [examId]
   );
   if (!qs.length) return [];
+  const ids = qs.map((q) => q.id);
   const { rows: opts } = await pool.query(
-    'SELECT id, question_id, text, is_correct, position FROM options ORDER BY position, id'
+    'SELECT id, question_id, text, is_correct, position FROM options WHERE question_id = ANY($1) ORDER BY position, id',
+    [ids]
   );
   const byQ = {};
   opts.forEach((o) => {
@@ -203,25 +260,26 @@ function validateQuestionBody(b) {
   };
 }
 
-router.get('/questions', async (_req, res) => {
+router.get('/exams/:examId/questions', async (req, res) => {
   try {
-    res.json({ questions: await fetchQuestions() });
+    res.json({ questions: await fetchQuestions(parseInt(req.params.examId, 10)) });
   } catch (err) {
-    console.error('GET /admin/questions', err);
+    console.error('GET /admin/exams/:examId/questions', err);
     res.status(500).json({ error: 'No se pudieron cargar las preguntas.' });
   }
 });
 
-router.post('/questions', async (req, res) => {
+router.post('/exams/:examId/questions', async (req, res) => {
+  const examId = parseInt(req.params.examId, 10);
   const { error, value } = validateQuestionBody(req.body);
   if (error) return res.status(400).json({ error });
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     const { rows } = await client.query(
-      `INSERT INTO questions (text, category, difficulty, is_active)
-       VALUES ($1, $2, $3, $4) RETURNING id`,
-      [value.text, value.category, value.difficulty, req.body.is_active !== false]
+      `INSERT INTO questions (exam_id, text, category, difficulty, is_active)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+      [examId, value.text, value.category, value.difficulty, req.body.is_active !== false]
     );
     const qid = rows[0].id;
     for (let i = 0; i < value.options.length; i++) {
@@ -235,8 +293,46 @@ router.post('/questions', async (req, res) => {
     res.json({ ok: true, id: qid });
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('POST /admin/questions', err);
+    console.error('POST /admin/exams/:examId/questions', err);
     res.status(500).json({ error: 'No se pudo crear la pregunta.' });
+  } finally {
+    client.release();
+  }
+});
+
+router.post('/exams/:examId/questions/import', async (req, res) => {
+  const examId = parseInt(req.params.examId, 10);
+  let questions;
+  try {
+    const rows = parseCSV(req.body.csv || '');
+    questions = rowsToQuestions(rows);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const q of questions) {
+      const { rows } = await client.query(
+        `INSERT INTO questions (exam_id, text, category, difficulty)
+         VALUES ($1, $2, $3, $4) RETURNING id`,
+        [examId, q.text, q.category, q.difficulty]
+      );
+      const qid = rows[0].id;
+      for (let i = 0; i < q.options.length; i++) {
+        const o = q.options[i];
+        await client.query(
+          'INSERT INTO options (question_id, text, is_correct, position) VALUES ($1, $2, $3, $4)',
+          [qid, o.text, o.is_correct, i]
+        );
+      }
+    }
+    await client.query('COMMIT');
+    res.json({ ok: true, imported: questions.length });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('POST /admin/exams/:examId/questions/import', err);
+    res.status(500).json({ error: 'No se pudieron importar las preguntas.' });
   } finally {
     client.release();
   }
@@ -279,8 +375,7 @@ router.put('/questions/:id', async (req, res) => {
 
 router.delete('/questions/:id', async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    await pool.query('DELETE FROM questions WHERE id = $1', [id]);
+    await pool.query('DELETE FROM questions WHERE id = $1', [parseInt(req.params.id, 10)]);
     res.json({ ok: true });
   } catch (err) {
     console.error('DELETE /admin/questions/:id', err);
@@ -288,61 +383,28 @@ router.delete('/questions/:id', async (req, res) => {
   }
 });
 
-router.post('/questions/import', async (req, res) => {
-  let questions;
-  try {
-    const rows = parseCSV(req.body.csv || '');
-    questions = rowsToQuestions(rows);
-  } catch (err) {
-    return res.status(400).json({ error: err.message });
-  }
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    for (const q of questions) {
-      const { rows } = await client.query(
-        `INSERT INTO questions (text, category, difficulty) VALUES ($1, $2, $3) RETURNING id`,
-        [q.text, q.category, q.difficulty]
-      );
-      const qid = rows[0].id;
-      for (let i = 0; i < q.options.length; i++) {
-        const o = q.options[i];
-        await client.query(
-          'INSERT INTO options (question_id, text, is_correct, position) VALUES ($1, $2, $3, $4)',
-          [qid, o.text, o.is_correct, i]
-        );
-      }
-    }
-    await client.query('COMMIT');
-    res.json({ ok: true, imported: questions.length });
-  } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('POST /admin/questions/import', err);
-    res.status(500).json({ error: 'No se pudieron importar las preguntas.' });
-  } finally {
-    client.release();
-  }
-});
-
-// --- Codigos de acceso ---------------------------------------------------
-router.get('/codes', async (_req, res) => {
+// --- Codigos de acceso (por examen) -------------------------------------
+router.get('/exams/:examId/codes', async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT c.id, c.code, c.student_name, c.is_active, c.created_at,
               (SELECT COUNT(*)::int FROM attempts a
                  WHERE a.access_code_id = c.id AND a.status = 'completed') AS used_attempts
          FROM access_codes c
-        ORDER BY c.id DESC`
+        WHERE c.exam_id = $1
+        ORDER BY c.id DESC`,
+      [parseInt(req.params.examId, 10)]
     );
     res.json({ codes: rows });
   } catch (err) {
-    console.error('GET /admin/codes', err);
+    console.error('GET /admin/exams/:examId/codes', err);
     res.status(500).json({ error: 'No se pudieron cargar los codigos.' });
   }
 });
 
-router.post('/codes', async (req, res) => {
+router.post('/exams/:examId/codes', async (req, res) => {
   try {
+    const examId = parseInt(req.params.examId, 10);
     const names = Array.isArray(req.body.names)
       ? req.body.names.map((n) => String(n || '').trim()).filter(Boolean)
       : [];
@@ -354,7 +416,6 @@ router.post('/codes', async (req, res) => {
     for (let i = 0; i < count; i++) {
       let code;
       let attempts = 0;
-      // Reintenta ante una colision improbable de codigo.
       while (attempts < 10) {
         code = generateCode();
         const { rowCount } = await pool.query('SELECT 1 FROM access_codes WHERE code = $1', [code]);
@@ -362,24 +423,23 @@ router.post('/codes', async (req, res) => {
         attempts++;
       }
       const { rows } = await pool.query(
-        'INSERT INTO access_codes (code, student_name) VALUES ($1, $2) RETURNING *',
-        [code, names[i] || null]
+        'INSERT INTO access_codes (exam_id, code, student_name) VALUES ($1, $2, $3) RETURNING *',
+        [examId, code, names[i] || null]
       );
       created.push(rows[0]);
     }
     res.json({ ok: true, codes: created });
   } catch (err) {
-    console.error('POST /admin/codes', err);
+    console.error('POST /admin/exams/:examId/codes', err);
     res.status(500).json({ error: 'No se pudieron generar los codigos.' });
   }
 });
 
 router.patch('/codes/:id', async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
     const { rows } = await pool.query(
       'UPDATE access_codes SET is_active = $1 WHERE id = $2 RETURNING *',
-      [!!req.body.is_active, id]
+      [!!req.body.is_active, parseInt(req.params.id, 10)]
     );
     if (!rows.length) return res.status(404).json({ error: 'Codigo no encontrado.' });
     res.json({ ok: true, code: rows[0] });
@@ -391,8 +451,7 @@ router.patch('/codes/:id', async (req, res) => {
 
 router.delete('/codes/:id', async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    await pool.query('DELETE FROM access_codes WHERE id = $1', [id]);
+    await pool.query('DELETE FROM access_codes WHERE id = $1', [parseInt(req.params.id, 10)]);
     res.json({ ok: true });
   } catch (err) {
     console.error('DELETE /admin/codes/:id', err);
@@ -405,10 +464,12 @@ router.get('/results', async (_req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT a.id, a.student_name, a.student_email, a.score, a.passed, a.status,
-              a.started_at, a.finished_at, a.tab_switches, a.email_sent, c.code,
+              a.started_at, a.finished_at, a.tab_switches, a.email_sent, a.exam_id,
+              c.code, e.name AS exam_name,
               jsonb_array_length(a.question_ids) AS total_questions
          FROM attempts a
          JOIN access_codes c ON c.id = a.access_code_id
+         LEFT JOIN exams e ON e.id = a.exam_id
         ORDER BY a.id DESC`
     );
     res.json({ results: rows });
@@ -420,12 +481,12 @@ router.get('/results', async (_req, res) => {
 
 router.get('/results/:id', async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
     const { rows } = await pool.query(
-      `SELECT a.*, c.code FROM attempts a
+      `SELECT a.*, c.code, e.name AS exam_name FROM attempts a
          JOIN access_codes c ON c.id = a.access_code_id
+         LEFT JOIN exams e ON e.id = a.exam_id
         WHERE a.id = $1`,
-      [id]
+      [parseInt(req.params.id, 10)]
     );
     const attempt = rows[0];
     if (!attempt) return res.status(404).json({ error: 'Resultado no encontrado.' });
@@ -434,6 +495,7 @@ router.get('/results/:id', async (req, res) => {
       attempt: {
         id: attempt.id,
         code: attempt.code,
+        examName: attempt.exam_name,
         studentName: attempt.student_name,
         studentEmail: attempt.student_email,
         score: attempt.score,

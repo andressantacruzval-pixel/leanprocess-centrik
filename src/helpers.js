@@ -108,9 +108,10 @@ async function gradeAttempt(pool, attemptId) {
   const total = qids.length;
   const score = total ? Math.round((correctCount / total) * 10000) / 100 : 0;
 
-  const { rows: cfgRows } = await pool.query('SELECT * FROM exam_config WHERE id = 1');
-  const config = cfgRows[0];
-  const passed = score >= config.pass_percentage;
+  const { rows: examRows } = await pool.query('SELECT * FROM exams WHERE id = $1', [attempt.exam_id]);
+  const exam = examRows[0];
+  const passPct = exam ? exam.pass_percentage : 100;
+  const passed = score >= passPct;
 
   const { rows: updated } = await pool.query(
     `UPDATE attempts
@@ -122,8 +123,16 @@ async function gradeAttempt(pool, attemptId) {
   const result = updated[0];
 
   // Notificacion por correo al estudiante (sin bloquear la respuesta HTTP).
-  if (config.email_enabled && result.student_email && !result.email_sent) {
-    sendResultEmail(config, result)
+  if (exam && result.student_email && !result.email_sent) {
+    pool
+      .query('SELECT * FROM app_settings WHERE id = 1')
+      .then(({ rows }) => {
+        const settings = rows[0];
+        if (settings && settings.email_enabled) {
+          return sendResultEmail(settings, exam, result);
+        }
+        return false;
+      })
       .then((sent) => {
         if (sent) {
           return pool.query('UPDATE attempts SET email_sent = true WHERE id = $1', [attemptId]);
