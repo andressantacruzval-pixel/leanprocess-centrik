@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examen de Certificacion Lean Process Implementer</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="center-wrap">
+    <div class="card">
+      <div class="brand">
+        <div class="logo">LPI</div>
+        <h1 id="examTitle">Examen de Certificacion</h1>
+        <p>Ingresa tus datos para comenzar tu evaluacion</p>
+      </div>
+
+      <div id="alert" class="alert alert-error hidden"></div>
+
+      <form id="startForm">
+        <div class="field">
+          <label for="studentName">Nombre completo</label>
+          <input type="text" id="studentName" autocomplete="name" required
+                 placeholder="Ej. Maria Fernanda Lopez" />
+        </div>
+        <div class="field">
+          <label for="code">Codigo de acceso</label>
+          <input type="text" id="code" required placeholder="Ej. LPI-A1B2C3D4"
+                 autocapitalize="characters" style="text-transform: uppercase;" />
+          <p class="hint">El codigo te lo entrega el administrador de la certificacion.</p>
+        </div>
+        <button type="submit" class="btn-primary btn-block" id="startBtn">
+          Comenzar examen
+        </button>
+      </form>
+
+      <p style="text-align:center; margin-top:18px;">
+        <a href="/admin.html" class="muted-text">Acceso de administrador</a>
+      </p>
+    </div>
+  </div>
+  <script src="/js/student.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resultado del examen</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="center-wrap">
+    <div class="card wide">
+      <div class="brand">
+        <div class="logo">LPI</div>
+        <h1 id="examTitle">Resultado del examen</h1>
+        <p id="studentLine"></p>
+      </div>
+
+      <div id="loadAlert" class="alert alert-error hidden"></div>
+
+      <div id="resultContent" class="hidden">
+        <div class="result-banner" id="banner">
+          <div class="verdict" id="verdict"></div>
+          <div class="score" id="scoreLine"></div>
+        </div>
+
+        <div class="result-stats">
+          <div class="stat-box">
+            <div class="num" id="statCorrect">0</div>
+            <div class="lbl">Respuestas correctas</div>
+          </div>
+          <div class="stat-box">
+            <div class="num" id="statTotal">0</div>
+            <div class="lbl">Total de preguntas</div>
+          </div>
+          <div class="stat-box">
+            <div class="num" id="statPass">0%</div>
+            <div class="lbl">Minimo para aprobar</div>
+          </div>
+        </div>
+
+        <div id="reviewSection" class="hidden">
+          <h2 style="margin-bottom:14px;">Revision de respuestas</h2>
+          <div id="reviewList"></div>
+        </div>
+        <p id="noReview" class="muted-text hidden" style="text-align:center;">
+          La revision de respuestas no esta habilitada para este examen.
+        </p>
+
+        <a href="/" class="btn-ghost btn-block" style="text-align:center; margin-top:20px;">
+          Volver al inicio
+        </a>
+      </div>
+    </div>
+  </div>
+  <script src="/js/result.js"></script>
+</body>
+</html>

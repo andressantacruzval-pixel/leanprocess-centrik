@@ -1,0 +1,13 @@
+pregunta,categoria,dificultad,opcion_a,opcion_b,opcion_c,opcion_d,correctas
+"Que significa la sigla DMAIC en metodologias de mejora?",Fundamentos,Facil,"Definir, Medir, Analizar, Mejorar, Controlar","Disenar, Modelar, Auditar, Iniciar, Cerrar","Detectar, Mapear, Asignar, Implementar, Comparar","Documentar, Monitorear, Ajustar, Innovar, Certificar",A
+"Cual es el objetivo principal de la filosofia Lean?",Fundamentos,Facil,"Aumentar el numero de empleados","Eliminar el desperdicio y maximizar el valor para el cliente","Reducir la calidad para abaratar costos","Incrementar el inventario en proceso",B
+"Cuales de los siguientes son considerados desperdicios (mudas) en Lean?",Desperdicios,Media,"Sobreproduccion","Esperas","Defectos","Capacitacion del personal","A,B,C"
+"Que es un sistema Pull (jalar) en la produccion Lean?",Procesos,Media,"Producir segun la demanda real del cliente","Producir el maximo posible sin importar la demanda","Almacenar grandes lotes por anticipado","Eliminar el control de calidad",A
+"Que herramienta Lean se utiliza para organizar el lugar de trabajo?",Herramientas,Facil,"Las 5S","El diagrama de Gantt","El analisis FODA","La matriz BCG",A
+"Que representa el termino Kaizen?",Fundamentos,Media,"Un cambio radical y unico","La mejora continua e incremental","Un tipo de inventario de seguridad","Una auditoria financiera",B
+"El Value Stream Mapping (VSM) sirve principalmente para:",Herramientas,Media,"Visualizar el flujo de valor e identificar desperdicios","Calcular la nomina de la empresa","Disenar la campana de marketing","Seleccionar proveedores de TI",A
+"Que es el Takt Time?",Procesos,Dificil,"El tiempo total de la jornada laboral","El ritmo de produccion necesario para satisfacer la demanda del cliente","El tiempo de descanso de los operarios","El tiempo de envio al cliente final",B
+"Cuales son principios clave del pensamiento Lean?",Fundamentos,Media,"Identificar el valor","Mapear el flujo de valor","Buscar la perfeccion","Maximizar el desperdicio","A,B,C"
+"Que herramienta ayuda a encontrar la causa raiz de un problema?",Herramientas,Media,"Los 5 Por que","El organigrama","El balance general","El catalogo de productos",A
+"Que es un tablero Kanban?",Herramientas,Facil,"Una herramienta visual para gestionar el flujo de trabajo","Un informe contable mensual","Un contrato con el cliente","Un manual de recursos humanos",A
+"En Lean, el concepto de Jidoka se refiere a:",Procesos,Dificil,"Automatizacion con un toque humano que detiene el proceso ante defectos","Trabajar siempre horas extra","Producir sin controles de calidad","Eliminar a los supervisores",A
