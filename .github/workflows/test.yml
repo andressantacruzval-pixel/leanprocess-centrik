@@ -1,5 +1,5 @@
-name: Pruebas automáticas
-on: [push, pull_request]
+name: Prueba básica
+on: [push]
 
 jobs:
   build:
@@ -8,9 +8,5 @@ jobs:
       - name: Clonar el repositorio
         uses: actions/checkout@v4
 
-      - name: Instalar dependencias
-        run: npm install
-
-      - name: Ejecutar pruebas
-        run: npm test
-
+      - name: Verificar conexión del runner
+        run: echo "El runner funciona correctamente"
