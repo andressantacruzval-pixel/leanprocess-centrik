@@ -24,7 +24,7 @@ app.use((err, _req, res, _next) => {
 async function start() {
   try {
     await initSchema();
-    app.listen(config.port, () => {
+    app.listen(config.port, '0.0.0.0', () => {
       console.log(`Plataforma de examen activa en http://localhost:${config.port}`);
       console.log(`Panel de administrador: http://localhost:${config.port}/admin.html`);
     });
