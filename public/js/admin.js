@@ -96,6 +96,20 @@ async function loadConfig() {
     el('cfgReview').value = config.review_mode;
     el('cfgShuffleQ').checked = config.shuffle_questions;
     el('cfgShuffleO').checked = config.shuffle_options;
+
+    el('cfgEmailEnabled').checked = config.email_enabled;
+    el('cfgSmtpHost').value = config.smtp_host || '';
+    el('cfgSmtpPort').value = config.smtp_port || 587;
+    el('cfgSmtpSecure').checked = config.smtp_secure;
+    el('cfgSmtpUser').value = config.smtp_user || '';
+    el('cfgSmtpPass').value = '';
+    el('cfgSmtpPass').placeholder = config.smtp_pass_set ? '(sin cambios)' : 'Contrasena SMTP';
+    el('cfgSmtpFrom').value = config.smtp_from || '';
+    el('cfgSubjPass').value = config.email_subject_pass || '';
+    el('cfgBodyPass').value = config.email_body_pass || '';
+    el('cfgSubjFail').value = config.email_subject_fail || '';
+    el('cfgBodyFail').value = config.email_body_fail || '';
+
     bankActive = stats.active_questions;
 
     el('statsGrid').innerHTML = `
@@ -135,12 +149,43 @@ el('configForm').addEventListener('submit', async (e) => {
         reviewMode: el('cfgReview').value,
         shuffleQuestions: el('cfgShuffleQ').checked,
         shuffleOptions: el('cfgShuffleO').checked,
+        emailEnabled: el('cfgEmailEnabled').checked,
+        smtpHost: el('cfgSmtpHost').value,
+        smtpPort: el('cfgSmtpPort').value,
+        smtpSecure: el('cfgSmtpSecure').checked,
+        smtpUser: el('cfgSmtpUser').value,
+        smtpPass: el('cfgSmtpPass').value,
+        smtpFrom: el('cfgSmtpFrom').value,
+        emailSubjectPass: el('cfgSubjPass').value,
+        emailBodyPass: el('cfgBodyPass').value,
+        emailSubjectFail: el('cfgSubjFail').value,
+        emailBodyFail: el('cfgBodyFail').value,
       }),
     });
     flash('Configuracion guardada correctamente.');
     loadConfig();
   } catch (err) {
     flash(err.message, 'error');
+  }
+});
+
+el('testEmailBtn').addEventListener('click', async () => {
+  const to = el('testEmailTo').value.trim();
+  if (!to) {
+    flash('Ingresa un correo de destino para la prueba.', 'error');
+    return;
+  }
+  const btn = el('testEmailBtn');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try {
+    await api('/config/test-email', { method: 'POST', body: JSON.stringify({ to }) });
+    flash('Correo de prueba enviado correctamente.');
+  } catch (err) {
+    flash(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enviar prueba';
   }
 });
 
@@ -443,37 +488,101 @@ function showGeneratedCodes(codes) {
 }
 
 // --- Resultados ----------------------------------------------------------
+let resultsCache = [];
+
 async function loadResults() {
   try {
     const { results } = await api('/results');
-    const tbody = el('resultsTable');
-    tbody.innerHTML = '';
-    el('noResults').classList.toggle('hidden', results.length > 0);
-
-    results.forEach((r) => {
-      const tr = document.createElement('tr');
-      const done = r.status === 'completed';
-      const verdict = !done
-        ? '<span class="pill gray">En curso</span>'
-        : r.passed
-          ? '<span class="pill green">Aprobado</span>'
-          : '<span class="pill red">Reprobado</span>';
-      tr.innerHTML = `
-        <td>${esc(r.student_name)}</td>
-        <td><span class="code-chip">${esc(r.code)}</span></td>
-        <td>${done ? r.score + '%' : '-'}</td>
-        <td>${verdict}</td>
-        <td>${r.finished_at ? new Date(r.finished_at).toLocaleString('es') : '-'}</td>
-        <td></td>`;
-      tr.lastElementChild.appendChild(
-        btn('Ver detalle', 'btn-ghost btn-sm', () => openResultModal(r.id))
-      );
-      tbody.appendChild(tr);
-    });
+    resultsCache = results;
+    renderResults();
   } catch (err) {
     flash(err.message, 'error');
   }
 }
+
+function renderResults() {
+  const onlyPassed = el('filterPassed').checked;
+  const rows = onlyPassed
+    ? resultsCache.filter((r) => r.status === 'completed' && r.passed)
+    : resultsCache;
+
+  const tbody = el('resultsTable');
+  tbody.innerHTML = '';
+  el('noResults').classList.toggle('hidden', rows.length > 0);
+
+  rows.forEach((r) => {
+    const tr = document.createElement('tr');
+    const done = r.status === 'completed';
+    const verdict = !done
+      ? '<span class="pill gray">En curso</span>'
+      : r.passed
+        ? '<span class="pill green">Aprobado</span>'
+        : '<span class="pill red">Reprobado</span>';
+    const switches =
+      r.tab_switches > 0
+        ? `<span class="pill red">${r.tab_switches}</span>`
+        : '<span class="pill gray">0</span>';
+    tr.innerHTML = `
+      <td>${esc(r.student_name)}</td>
+      <td>${esc(r.student_email || '-')}</td>
+      <td><span class="code-chip">${esc(r.code)}</span></td>
+      <td>${done ? r.score + '%' : '-'}</td>
+      <td>${verdict}</td>
+      <td>${switches}</td>
+      <td>${r.finished_at ? new Date(r.finished_at).toLocaleString('es') : '-'}</td>
+      <td></td>`;
+    tr.lastElementChild.appendChild(
+      btn('Ver detalle', 'btn-ghost btn-sm', () => openResultModal(r.id))
+    );
+    tbody.appendChild(tr);
+  });
+}
+
+el('filterPassed').addEventListener('change', renderResults);
+
+el('exportBtn').addEventListener('click', () => {
+  const onlyPassed = el('filterPassed').checked;
+  const rows = onlyPassed
+    ? resultsCache.filter((r) => r.status === 'completed' && r.passed)
+    : resultsCache;
+  if (!rows.length) {
+    flash('No hay resultados para exportar.', 'error');
+    return;
+  }
+  const headers = [
+    'Estudiante', 'Correo', 'Codigo', 'Estado', 'Puntaje',
+    'Resultado', 'Salidas del examen', 'Correo enviado', 'Inicio', 'Finalizado',
+  ];
+  const csvCell = (v) => {
+    const s = String(v == null ? '' : v);
+    return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const lines = [headers.join(',')];
+  rows.forEach((r) => {
+    const done = r.status === 'completed';
+    lines.push([
+      r.student_name,
+      r.student_email || '',
+      r.code,
+      done ? 'Completado' : 'En curso',
+      done ? r.score + '%' : '',
+      done ? (r.passed ? 'Aprobado' : 'Reprobado') : '',
+      r.tab_switches || 0,
+      r.email_sent ? 'Si' : 'No',
+      r.started_at ? new Date(r.started_at).toLocaleString('es') : '',
+      r.finished_at ? new Date(r.finished_at).toLocaleString('es') : '',
+    ].map(csvCell).join(','));
+  });
+  const blob = new Blob(['﻿' + lines.join('\r\n')], {
+    type: 'text/csv;charset=utf-8;',
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `resultados-examen-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
 async function openResultModal(id) {
   try {
@@ -503,13 +612,21 @@ async function openResultModal(id) {
     const verdict = attempt.status !== 'completed'
       ? 'En curso'
       : attempt.passed ? 'APROBADO' : 'REPROBADO';
+    const switchLine =
+      attempt.tabSwitches > 0
+        ? `<p><strong>Salidas del examen:</strong> <span class="pill red">${attempt.tabSwitches}</span> ` +
+          `(el estudiante abandono la pantalla durante la prueba)</p>`
+        : '<p><strong>Salidas del examen:</strong> <span class="pill gray">0</span></p>';
     const overlay = openModal(`
       <h3>Detalle del examen</h3>
       <p><strong>Estudiante:</strong> ${esc(attempt.studentName)}</p>
+      <p><strong>Correo:</strong> ${esc(attempt.studentEmail || '-')}</p>
       <p><strong>Codigo:</strong> ${esc(attempt.code)}</p>
       <p><strong>Resultado:</strong> ${verdict}${
         attempt.status === 'completed' ? ' &middot; ' + attempt.score + '%' : ''
       }</p>
+      ${switchLine}
+      <p><strong>Correo de resultado enviado:</strong> ${attempt.emailSent ? 'Si' : 'No'}</p>
       <hr style="margin:14px 0; border:none; border-top:1px solid var(--border);" />
       ${reviewHtml}
       <div class="modal-actions">

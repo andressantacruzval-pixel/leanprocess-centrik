@@ -251,4 +251,31 @@ async function autoSubmit() {
   await submitExam();
 }
 
+// --- Anti-trampa: deteccion de salida de la pantalla del examen ----------
+let tabSwitchCount = 0;
+let isAway = false;
+
+function onExamExit() {
+  if (isAway || state.finished || !state.questions.length) return;
+  isAway = true;
+  tabSwitchCount++;
+  fetch('/api/exam/flag', { method: 'POST', headers: authHeaders }).catch(() => {});
+  const w = el('cheatWarning');
+  w.textContent =
+    `Advertencia: saliste de la pantalla del examen. Para garantizar la ` +
+    `integridad de la evaluacion, este evento queda registrado ` +
+    `(${tabSwitchCount} ${tabSwitchCount === 1 ? 'vez' : 'veces'}).`;
+  w.classList.remove('hidden');
+}
+function onExamReturn() {
+  isAway = false;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) onExamExit();
+  else onExamReturn();
+});
+window.addEventListener('blur', onExamExit);
+window.addEventListener('focus', onExamReturn);
+
 init();

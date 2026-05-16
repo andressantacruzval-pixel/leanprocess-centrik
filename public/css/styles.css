@@ -79,7 +79,7 @@ a { color: var(--primary); }
   margin-bottom: 6px;
 }
 input[type="text"], input[type="password"], input[type="number"],
-select, textarea {
+input[type="email"], select, textarea {
   width: 100%;
   padding: 11px 13px;
   border: 1px solid var(--border);

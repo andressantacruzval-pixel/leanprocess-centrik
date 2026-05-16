@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS attempts (
   id SERIAL PRIMARY KEY,
   access_code_id INTEGER NOT NULL REFERENCES access_codes(id) ON DELETE CASCADE,
   student_name TEXT NOT NULL,
+  student_email TEXT,
   question_ids JSONB NOT NULL,
   option_order JSONB NOT NULL DEFAULT '{}',
   started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -61,7 +62,9 @@ CREATE TABLE IF NOT EXISTS attempts (
   finished_at TIMESTAMPTZ,
   status TEXT NOT NULL DEFAULT 'in_progress',
   score NUMERIC(5,2),
-  passed BOOLEAN
+  passed BOOLEAN,
+  tab_switches INTEGER NOT NULL DEFAULT 0,
+  email_sent BOOLEAN NOT NULL DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS attempt_answers (
@@ -72,6 +75,39 @@ CREATE TABLE IF NOT EXISTS attempt_answers (
 );
 
 INSERT INTO exam_config (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+-- Migraciones para bases de datos ya existentes.
+ALTER TABLE attempts ADD COLUMN IF NOT EXISTS student_email TEXT;
+ALTER TABLE attempts ADD COLUMN IF NOT EXISTS tab_switches INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE attempts ADD COLUMN IF NOT EXISTS email_sent BOOLEAN NOT NULL DEFAULT false;
+
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS email_enabled BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS smtp_host TEXT;
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS smtp_port INTEGER NOT NULL DEFAULT 587;
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS smtp_secure BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS smtp_user TEXT;
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS smtp_pass TEXT;
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS smtp_from TEXT;
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS email_subject_pass TEXT
+  NOT NULL DEFAULT 'Resultado de tu examen - {examen}';
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS email_body_pass TEXT
+  NOT NULL DEFAULT 'Hola {nombre},
+
+Felicitaciones. Has APROBADO el examen "{examen}" con una calificacion de {puntaje}.
+
+El equipo de certificacion se pondra en contacto contigo para los siguientes pasos.
+
+Saludos cordiales.';
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS email_subject_fail TEXT
+  NOT NULL DEFAULT 'Resultado de tu examen - {examen}';
+ALTER TABLE exam_config ADD COLUMN IF NOT EXISTS email_body_fail TEXT
+  NOT NULL DEFAULT 'Hola {nombre},
+
+Has finalizado el examen "{examen}" con una calificacion de {puntaje}. El resultado es REPROBADO (el minimo para aprobar es {minimo}).
+
+Puedes consultar con el administrador sobre la disponibilidad de nuevos intentos.
+
+Saludos cordiales.';
 `;
 
 async function initSchema() {

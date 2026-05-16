@@ -48,9 +48,9 @@
       <!-- Tab: Configuracion -->
       <section id="tab-config" class="tab-content">
         <div class="stats-grid" id="statsGrid"></div>
-        <div class="panel">
-          <h2>Parametros del examen</h2>
-          <form id="configForm">
+        <form id="configForm">
+          <div class="panel">
+            <h2>Parametros del examen</h2>
             <div class="field">
               <label for="cfgTitle">Titulo del examen</label>
               <input type="text" id="cfgTitle" required />
@@ -92,9 +92,85 @@
               <input type="checkbox" id="cfgShuffleO" />
               <label for="cfgShuffleO">Mezclar el orden de las opciones</label>
             </div>
-            <button type="submit" class="btn-primary">Guardar configuracion</button>
-          </form>
-        </div>
+          </div>
+
+          <div class="panel">
+            <h2>Notificaciones por correo electronico</h2>
+            <div class="checkbox-row">
+              <input type="checkbox" id="cfgEmailEnabled" />
+              <label for="cfgEmailEnabled">
+                Enviar automaticamente el resultado al correo del estudiante
+              </label>
+            </div>
+            <div class="panel-row">
+              <div class="field">
+                <label for="cfgSmtpHost">Servidor SMTP</label>
+                <input type="text" id="cfgSmtpHost" placeholder="Ej. smtp.gmail.com" />
+              </div>
+              <div class="field" style="max-width:140px;">
+                <label for="cfgSmtpPort">Puerto</label>
+                <input type="number" id="cfgSmtpPort" min="1" max="65535" />
+              </div>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="cfgSmtpSecure" />
+              <label for="cfgSmtpSecure">Conexion segura SSL/TLS (normalmente puerto 465)</label>
+            </div>
+            <div class="panel-row">
+              <div class="field">
+                <label for="cfgSmtpUser">Usuario SMTP</label>
+                <input type="text" id="cfgSmtpUser" placeholder="usuario o correo" />
+              </div>
+              <div class="field">
+                <label for="cfgSmtpPass">Contrasena SMTP</label>
+                <input type="password" id="cfgSmtpPass" placeholder="(sin cambios)" />
+                <p class="hint">Dejala vacia para mantener la contrasena actual.</p>
+              </div>
+            </div>
+            <div class="field">
+              <label for="cfgSmtpFrom">Correo remitente</label>
+              <input type="text" id="cfgSmtpFrom" placeholder="certificacion@tuempresa.com" />
+            </div>
+
+            <p class="hint" style="margin:14px 0 8px;">
+              En los textos puedes usar: <strong>{nombre}</strong>, <strong>{puntaje}</strong>,
+              <strong>{resultado}</strong>, <strong>{examen}</strong>, <strong>{minimo}</strong>.
+            </p>
+
+            <h3 style="font-size:0.92rem; margin:14px 0 8px;">Mensaje para APROBADOS</h3>
+            <div class="field">
+              <label for="cfgSubjPass">Asunto</label>
+              <input type="text" id="cfgSubjPass" />
+            </div>
+            <div class="field">
+              <label for="cfgBodyPass">Cuerpo del mensaje</label>
+              <textarea id="cfgBodyPass" style="min-height:120px;"></textarea>
+            </div>
+
+            <h3 style="font-size:0.92rem; margin:14px 0 8px;">Mensaje para REPROBADOS</h3>
+            <div class="field">
+              <label for="cfgSubjFail">Asunto</label>
+              <input type="text" id="cfgSubjFail" />
+            </div>
+            <div class="field">
+              <label for="cfgBodyFail">Cuerpo del mensaje</label>
+              <textarea id="cfgBodyFail" style="min-height:120px;"></textarea>
+            </div>
+
+            <div class="panel-row" style="align-items:flex-end;">
+              <div class="field">
+                <label for="testEmailTo">Enviar correo de prueba a</label>
+                <input type="email" id="testEmailTo" placeholder="tu-correo@ejemplo.com" />
+              </div>
+              <div class="field" style="flex:0;">
+                <button type="button" class="btn-ghost" id="testEmailBtn">Enviar prueba</button>
+              </div>
+            </div>
+            <p class="hint">Guarda la configuracion antes de enviar el correo de prueba.</p>
+          </div>
+
+          <button type="submit" class="btn-primary">Guardar configuracion</button>
+        </form>
       </section>
 
       <!-- Tab: Preguntas -->
@@ -160,12 +236,19 @@
       <section id="tab-results" class="tab-content hidden">
         <div class="panel">
           <h2>Resultados de los examenes</h2>
+          <div class="toolbar" style="align-items:center;">
+            <button class="btn-primary" id="exportBtn">Descargar resultados (CSV)</button>
+            <label class="checkbox-row" style="margin:0;">
+              <input type="checkbox" id="filterPassed" />
+              <span>Mostrar solo aprobados</span>
+            </label>
+          </div>
           <div class="table-scroll">
             <table>
               <thead>
                 <tr>
-                  <th>Estudiante</th><th>Codigo</th><th>Puntaje</th>
-                  <th>Resultado</th><th>Finalizado</th><th></th>
+                  <th>Estudiante</th><th>Correo</th><th>Codigo</th><th>Puntaje</th>
+                  <th>Resultado</th><th>Salidas</th><th>Finalizado</th><th></th>
                 </tr>
               </thead>
               <tbody id="resultsTable"></tbody>

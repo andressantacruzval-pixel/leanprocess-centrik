@@ -1,3 +1,5 @@
+const { sendResultEmail } = require('./mailer');
+
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -106,9 +108,9 @@ async function gradeAttempt(pool, attemptId) {
   const total = qids.length;
   const score = total ? Math.round((correctCount / total) * 10000) / 100 : 0;
 
-  const { rows: cfgRows } = await pool.query('SELECT pass_percentage FROM exam_config WHERE id = 1');
-  const passPct = cfgRows[0].pass_percentage;
-  const passed = score >= passPct;
+  const { rows: cfgRows } = await pool.query('SELECT * FROM exam_config WHERE id = 1');
+  const config = cfgRows[0];
+  const passed = score >= config.pass_percentage;
 
   const { rows: updated } = await pool.query(
     `UPDATE attempts
@@ -117,7 +119,20 @@ async function gradeAttempt(pool, attemptId) {
       RETURNING *`,
     [attemptId, score, passed]
   );
-  return updated[0];
+  const result = updated[0];
+
+  // Notificacion por correo al estudiante (sin bloquear la respuesta HTTP).
+  if (config.email_enabled && result.student_email && !result.email_sent) {
+    sendResultEmail(config, result)
+      .then((sent) => {
+        if (sent) {
+          return pool.query('UPDATE attempts SET email_sent = true WHERE id = $1', [attemptId]);
+        }
+      })
+      .catch((err) => console.error('Error al enviar correo de resultado:', err.message));
+  }
+
+  return result;
 }
 
 // Construye el detalle de revision (con respuestas correctas) de un intento ya calificado.

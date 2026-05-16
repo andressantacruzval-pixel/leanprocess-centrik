@@ -18,6 +18,7 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   alertBox.classList.add('hidden');
   const studentName = document.getElementById('studentName').value.trim();
+  const studentEmail = document.getElementById('studentEmail').value.trim();
   const code = document.getElementById('code').value.trim().toUpperCase();
 
   startBtn.disabled = true;
@@ -26,7 +27,7 @@ form.addEventListener('submit', async (e) => {
     const res = await fetch('/api/exam/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentName, code }),
+      body: JSON.stringify({ studentName, studentEmail, code }),
     });
     const data = await res.json();
     if (!res.ok) {

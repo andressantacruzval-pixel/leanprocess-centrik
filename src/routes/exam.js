@@ -46,9 +46,13 @@ router.post('/start', async (req, res) => {
   try {
     const code = String(req.body.code || '').trim().toUpperCase();
     const studentName = String(req.body.studentName || '').trim();
+    const studentEmail = String(req.body.studentEmail || '').trim().toLowerCase();
     if (!code) return res.status(400).json({ error: 'Ingresa tu codigo de acceso.' });
     if (studentName.length < 3) {
       return res.status(400).json({ error: 'Ingresa tu nombre completo.' });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(studentEmail)) {
+      return res.status(400).json({ error: 'Ingresa un correo electronico valido.' });
     }
 
     const { rows: codeRows } = await pool.query(
@@ -121,9 +125,17 @@ router.post('/start', async (req, res) => {
 
     const expiresAt = new Date(Date.now() + config.duration_minutes * 60000);
     const { rows: created } = await pool.query(
-      `INSERT INTO attempts (access_code_id, student_name, question_ids, option_order, expires_at)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [accessCode.id, studentName, JSON.stringify(selected), JSON.stringify(optionOrder), expiresAt]
+      `INSERT INTO attempts
+         (access_code_id, student_name, student_email, question_ids, option_order, expires_at)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [
+        accessCode.id,
+        studentName,
+        studentEmail,
+        JSON.stringify(selected),
+        JSON.stringify(optionOrder),
+        expiresAt,
+      ]
     );
     if (!accessCode.student_name) {
       await pool.query('UPDATE access_codes SET student_name = $1 WHERE id = $2', [
@@ -244,6 +256,22 @@ router.get('/result', requireAttempt, async (req, res) => {
   } catch (err) {
     console.error('GET /exam/result', err);
     res.status(500).json({ error: 'No se pudo cargar el resultado.' });
+  }
+});
+
+// POST /api/exam/flag  (anti-trampa: registra que el estudiante salio del examen)
+router.post('/flag', requireAttempt, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `UPDATE attempts SET tab_switches = tab_switches + 1
+         WHERE id = $1 AND status = 'in_progress'
+         RETURNING tab_switches`,
+      [req.attemptId]
+    );
+    res.json({ ok: true, tabSwitches: rows.length ? rows[0].tab_switches : 0 });
+  } catch (err) {
+    console.error('POST /exam/flag', err);
+    res.status(500).json({ error: 'No se pudo registrar el evento.' });
   }
 });
 

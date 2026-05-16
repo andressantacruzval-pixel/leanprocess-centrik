@@ -3,6 +3,7 @@ const { pool } = require('../db');
 const config = require('../config');
 const { signAdmin, requireAdmin } = require('../auth');
 const { generateCode, buildReview } = require('../helpers');
+const { sendTestEmail } = require('../mailer');
 const { parseCSV, rowsToQuestions } = require('../csv');
 
 const router = express.Router();
@@ -22,6 +23,11 @@ router.use(requireAdmin);
 router.get('/config', async (_req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM exam_config WHERE id = 1');
+    // No se expone la contrasena SMTP; solo se indica si esta configurada.
+    const config = { ...rows[0] };
+    config.smtp_pass_set = !!config.smtp_pass;
+    delete config.smtp_pass;
+    rows[0] = config;
     const { rows: stats } = await pool.query(
       `SELECT
          (SELECT COUNT(*)::int FROM questions) AS total_questions,
@@ -63,11 +69,44 @@ router.put('/config', async (req, res) => {
       return res.status(400).json({ error: 'Modo de revision no valido.' });
     }
 
+    // Configuracion de correo electronico.
+    const emailEnabled = !!b.emailEnabled;
+    const smtpHost = String(b.smtpHost || '').trim();
+    const smtpFrom = String(b.smtpFrom || '').trim();
+    let smtpPort = parseInt(b.smtpPort, 10);
+    if (!(smtpPort >= 1 && smtpPort <= 65535)) smtpPort = 587;
+    const smtpUser = String(b.smtpUser || '').trim();
+    const smtpPass = String(b.smtpPass || '');
+    const emailSubjectPass = String(b.emailSubjectPass || '').trim();
+    const emailBodyPass = String(b.emailBodyPass || '').trim();
+    const emailSubjectFail = String(b.emailSubjectFail || '').trim();
+    const emailBodyFail = String(b.emailBodyFail || '').trim();
+
+    if (emailEnabled) {
+      if (!smtpHost || !smtpFrom) {
+        return res.status(400).json({
+          error: 'Para activar el correo debes indicar el servidor SMTP y el remitente.',
+        });
+      }
+      if (!emailSubjectPass || !emailBodyPass || !emailSubjectFail || !emailBodyFail) {
+        return res.status(400).json({
+          error: 'Los textos de correo (aprobado y reprobado) no pueden estar vacios.',
+        });
+      }
+    }
+
     const { rows } = await pool.query(
       `UPDATE exam_config SET
          exam_title = $1, questions_per_exam = $2, pass_percentage = $3,
          duration_minutes = $4, max_attempts = $5,
-         shuffle_questions = $6, shuffle_options = $7, review_mode = $8
+         shuffle_questions = $6, shuffle_options = $7, review_mode = $8,
+         email_enabled = $9, smtp_host = $10, smtp_port = $11, smtp_secure = $12,
+         smtp_user = $13, smtp_from = $14,
+         smtp_pass = COALESCE(NULLIF($15, ''), smtp_pass),
+         email_subject_pass = COALESCE(NULLIF($16, ''), email_subject_pass),
+         email_body_pass = COALESCE(NULLIF($17, ''), email_body_pass),
+         email_subject_fail = COALESCE(NULLIF($18, ''), email_subject_fail),
+         email_body_fail = COALESCE(NULLIF($19, ''), email_body_fail)
        WHERE id = 1 RETURNING *`,
       [
         examTitle,
@@ -78,12 +117,48 @@ router.put('/config', async (req, res) => {
         !!b.shuffleQuestions,
         !!b.shuffleOptions,
         reviewMode,
+        emailEnabled,
+        smtpHost || null,
+        smtpPort,
+        !!b.smtpSecure,
+        smtpUser || null,
+        smtpFrom || null,
+        smtpPass,
+        emailSubjectPass,
+        emailBodyPass,
+        emailSubjectFail,
+        emailBodyFail,
       ]
     );
-    res.json({ config: rows[0] });
+    const saved = { ...rows[0] };
+    saved.smtp_pass_set = !!saved.smtp_pass;
+    delete saved.smtp_pass;
+    res.json({ config: saved });
   } catch (err) {
     console.error('PUT /admin/config', err);
     res.status(500).json({ error: 'No se pudo guardar la configuracion.' });
+  }
+});
+
+// POST /api/admin/config/test-email  { to }
+router.post('/config/test-email', async (req, res) => {
+  try {
+    const to = String(req.body.to || '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      return res.status(400).json({ error: 'Ingresa un correo de destino valido.' });
+    }
+    const { rows } = await pool.query('SELECT * FROM exam_config WHERE id = 1');
+    const config = rows[0];
+    if (!config.smtp_host || !config.smtp_from) {
+      return res.status(400).json({
+        error: 'Configura y guarda el servidor SMTP y el remitente antes de probar.',
+      });
+    }
+    await sendTestEmail(config, to);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('POST /admin/config/test-email', err);
+    res.status(500).json({ error: 'No se pudo enviar el correo de prueba: ' + err.message });
   }
 });
 
@@ -329,8 +404,8 @@ router.delete('/codes/:id', async (req, res) => {
 router.get('/results', async (_req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT a.id, a.student_name, a.score, a.passed, a.status,
-              a.started_at, a.finished_at, c.code,
+      `SELECT a.id, a.student_name, a.student_email, a.score, a.passed, a.status,
+              a.started_at, a.finished_at, a.tab_switches, a.email_sent, c.code,
               jsonb_array_length(a.question_ids) AS total_questions
          FROM attempts a
          JOIN access_codes c ON c.id = a.access_code_id
@@ -360,11 +435,14 @@ router.get('/results/:id', async (req, res) => {
         id: attempt.id,
         code: attempt.code,
         studentName: attempt.student_name,
+        studentEmail: attempt.student_email,
         score: attempt.score,
         passed: attempt.passed,
         status: attempt.status,
         startedAt: attempt.started_at,
         finishedAt: attempt.finished_at,
+        tabSwitches: attempt.tab_switches,
+        emailSent: attempt.email_sent,
       },
       review,
     });
