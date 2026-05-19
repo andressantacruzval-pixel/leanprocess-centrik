@@ -73,6 +73,26 @@ examen aleatorio. La calificación es instantánea (APROBADO / REPROBADO).
    - Estudiantes: `http://localhost:3000`
    - Administrador: `http://localhost:3000/admin.html`
 
+## Despliegue en Render (enlace público gratuito)
+
+El repositorio incluye un blueprint (`render.yaml`) que crea el servidor web y
+la base de datos PostgreSQL automáticamente.
+
+1. Crear una cuenta en [render.com](https://render.com) (se puede entrar con
+   la cuenta de GitHub).
+2. En el panel: **New +** → **Blueprint**.
+3. Conectar el repositorio de GitHub y elegir la rama
+   `claude/lean-exam-platform-yictq`.
+4. Render detecta `render.yaml` y muestra los servicios a crear. Pedirá un
+   valor para `ADMIN_PASSWORD`: escribe la contraseña que quieras para el
+   panel de administrador.
+5. Pulsar **Apply**. Render instala dependencias, crea la base de datos y
+   publica la aplicación en un enlace público (las tablas se crean solas).
+
+El plan gratuito de Render suspende el servicio tras un periodo de
+inactividad; la primera visita después de eso puede tardar unos segundos en
+responder.
+
 ## Uso
 
 ### Administrador
