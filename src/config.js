@@ -1,6 +1,12 @@
 require('dotenv').config();
 
-const databaseUrl = process.env.DATABASE_URL || '';
+// Acepta la variable estandar o las que crea la integracion de Postgres de Vercel.
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.POSTGRES_URL_NON_POOLING ||
+  '';
+
 const needsSsl =
   process.env.PGSSL === 'true' || /sslmode=require/i.test(databaseUrl);
 

@@ -93,6 +93,30 @@ El plan gratuito de Render suspende el servicio tras un periodo de
 inactividad; la primera visita después de eso puede tardar unos segundos en
 responder.
 
+## Despliegue en Vercel (enlace público gratuito)
+
+El repositorio incluye `vercel.json`: la aplicación Express se ejecuta como
+función serverless (`api/index.js`) y los archivos estáticos se sirven desde
+la CDN. Pasos:
+
+1. **Base de datos**: Vercel no aloja PostgreSQL, así que primero se necesita
+   una. La opción más simple es la integración de Vercel:
+   - En tu proyecto de Vercel: pestaña **Storage** → **Create Database** →
+     **Postgres**. Vercel inyecta automáticamente las variables de conexión
+     (`POSTGRES_URL`, etc.), que la aplicación ya reconoce.
+   - Alternativa: una base externa (Neon, Supabase) y configurar
+     `DATABASE_URL` manualmente.
+2. **Importar el proyecto**: en [vercel.com](https://vercel.com), **Add New…**
+   → **Project** → importar el repositorio de GitHub.
+3. **Rama de producción**: en **Settings → Git**, fijar la rama de producción
+   como `claude/lean-exam-platform-yictq` (o fusionar esa rama a `main`).
+4. **Variables de entorno** (**Settings → Environment Variables**):
+   - `JWT_SECRET`: una cadena larga y aleatoria.
+   - `ADMIN_PASSWORD`: la contraseña del panel de administrador.
+   - `PGSSL`: `true`.
+5. **Deploy**. Vercel publica la aplicación en un enlace público. Las tablas
+   de la base de datos se crean automáticamente en la primera visita.
+
 ## Uso
 
 ### Administrador

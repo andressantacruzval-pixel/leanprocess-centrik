@@ -9,6 +9,8 @@ if (!config.databaseUrl) {
 const pool = new Pool({
   connectionString: config.databaseUrl,
   ssl: config.ssl,
+  max: 5,
+  idleTimeoutMillis: 20000,
 });
 
 const SCHEMA = `
@@ -125,6 +127,8 @@ async function migrateAndSeed() {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    // Evita que dos arranques concurrentes (serverless) siembren a la vez.
+    await client.query('SELECT pg_advisory_xact_lock($1)', [727274]);
     const { rows: examCount } = await client.query('SELECT COUNT(*)::int AS n FROM exams');
     if (examCount[0].n === 0) {
       const { rows: reg } = await client.query(
@@ -202,10 +206,21 @@ async function migrateAndSeed() {
   }
 }
 
-async function initSchema() {
-  await pool.query(SCHEMA);
-  await migrateAndSeed();
-  console.log('Esquema de base de datos verificado.');
+// Verifica el esquema una sola vez por instancia (apto para entornos serverless).
+let schemaPromise;
+function ensureSchema() {
+  if (!schemaPromise) {
+    schemaPromise = (async () => {
+      await pool.query(SCHEMA);
+      await migrateAndSeed();
+      console.log('Esquema de base de datos verificado.');
+    })();
+    // Si falla, permite reintentar en la siguiente solicitud.
+    schemaPromise.catch(() => {
+      schemaPromise = undefined;
+    });
+  }
+  return schemaPromise;
 }
 
-module.exports = { pool, initSchema };
+module.exports = { pool, ensureSchema };
