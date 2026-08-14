@@ -1,0 +1,1830 @@
+{
+  "timestamp": "2026-04-17 16:24:38.098696+00",
+  "project": "bpqqtcpbjjlfcaiuselu",
+  "plans": [
+    {
+      "id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "name": "free",
+      "display_name": "Free",
+      "description": "Plan gratuito con funciones básicas",
+      "price_monthly": 0,
+      "price_yearly": 0,
+      "stripe_price_id_monthly": null,
+      "stripe_price_id_yearly": null,
+      "is_active": true,
+      "sort_order": 1,
+      "created_at": "2026-04-13T21:52:42.278668+00:00",
+      "updated_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "name": "pro",
+      "display_name": "Pro",
+      "description": "Plan profesional con IA y exports avanzados",
+      "price_monthly": 29,
+      "price_yearly": 290,
+      "stripe_price_id_monthly": null,
+      "stripe_price_id_yearly": null,
+      "is_active": true,
+      "sort_order": 2,
+      "created_at": "2026-04-13T21:52:42.278668+00:00",
+      "updated_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "a9f6160f-4e0f-46bd-9ef4-536c5c75894f",
+      "name": "enterprise",
+      "display_name": "Enterprise",
+      "description": "Plan empresarial con soporte prioritario",
+      "price_monthly": 99,
+      "price_yearly": 990,
+      "stripe_price_id_monthly": null,
+      "stripe_price_id_yearly": null,
+      "is_active": true,
+      "sort_order": 3,
+      "created_at": "2026-04-13T21:52:42.278668+00:00",
+      "updated_at": "2026-04-13T21:52:42.278668+00:00"
+    }
+  ],
+  "plan_limits": [
+    {
+      "id": "14aeff3b-96a0-48e2-ac17-dc65e7339adf",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "max_companies",
+      "limit_value": "1",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "fee79c08-9634-4cd0-904c-dc918c4d7c2e",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "max_processes",
+      "limit_value": "10",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "ca3094a6-81c1-4106-af3a-84b0c2a5a1eb",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "ai_tokens_month",
+      "limit_value": "5000",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "a62c3a8a-e2d4-4eaf-b76c-b574e96f5e6b",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "exports",
+      "limit_value": "false",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "6fa005df-9b6e-4b19-974b-4b70c625ce18",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "max_companies",
+      "limit_value": "5",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "fbb867dc-af10-4d1a-80d1-064b3b8eecc9",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "max_processes",
+      "limit_value": "100",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "c9cce5e1-d86d-4981-b24f-a7c4130fc039",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "ai_tokens_month",
+      "limit_value": "50000",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "33649837-3a7f-4a6a-bc7a-4717742472a1",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "exports",
+      "limit_value": "true",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "dff395db-628a-4a3c-b977-eb0eecd00981",
+      "plan_id": "a9f6160f-4e0f-46bd-9ef4-536c5c75894f",
+      "feature_key": "max_companies",
+      "limit_value": "unlimited",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "c01560d4-178f-407a-8df9-4c30f56cfc5a",
+      "plan_id": "a9f6160f-4e0f-46bd-9ef4-536c5c75894f",
+      "feature_key": "max_processes",
+      "limit_value": "unlimited",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "d35910e7-d6f2-4fbd-b18a-92f8b73b7217",
+      "plan_id": "a9f6160f-4e0f-46bd-9ef4-536c5c75894f",
+      "feature_key": "ai_tokens_month",
+      "limit_value": "unlimited",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "135e3940-99c3-42a7-9a9b-76ddd9814387",
+      "plan_id": "a9f6160f-4e0f-46bd-9ef4-536c5c75894f",
+      "feature_key": "exports",
+      "limit_value": "true",
+      "created_at": "2026-04-13T21:52:42.278668+00:00"
+    },
+    {
+      "id": "a14d4d94-bfd0-43c8-8611-b909cbc05e3f",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "export_bpmn",
+      "limit_value": "false",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "757d95ac-d3fb-40f1-a660-3073546fb2c0",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "ai_tokens_monthly",
+      "limit_value": "10000",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "829665d3-c518-4edd-ba63-f46d99d285a8",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "export_pdf",
+      "limit_value": "false",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "a03d9ec1-6519-4cf3-9f32-7ff504622063",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "process_characterization",
+      "limit_value": "false",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "675ac324-e3ea-4ee4-a99b-9f6b35334b85",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "process_map",
+      "limit_value": "true",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "acef760f-2228-4e0f-836c-f811536e3d54",
+      "plan_id": "c7206b1f-071a-42d0-b38f-a9c76d95cde3",
+      "feature_key": "max_sipoc_per_process",
+      "limit_value": "1",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "6a4d7b6f-82a4-4ab6-b23a-56fbe14d23e7",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "export_bpmn",
+      "limit_value": "true",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "41771145-ce18-418f-87cc-ffacd81086e8",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "ai_tokens_monthly",
+      "limit_value": "200000",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "de1afb0b-4eee-471d-88ae-c24a8e751f08",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "export_pdf",
+      "limit_value": "true",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "304c1b7d-ef0d-4f7d-8410-6b8f9fbc39f6",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "process_characterization",
+      "limit_value": "true",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "c8ef33d5-a965-4dc9-8911-c1270104b92c",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "process_map",
+      "limit_value": "true",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    },
+    {
+      "id": "a5c40a14-ea8b-484e-adff-1fd1396db572",
+      "plan_id": "db79914c-c13d-4baf-92ee-9caa55f48f3f",
+      "feature_key": "max_sipoc_per_process",
+      "limit_value": "unlimited",
+      "created_at": "2026-04-14T18:58:43.453279+00:00"
+    }
+  ],
+  "plan_token_allocations": [
+    {
+      "plan_id": "free",
+      "tokens_monthly": 100,
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "plan_id": "community",
+      "tokens_monthly": 1000,
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "plan_id": "pro",
+      "tokens_monthly": 5000,
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "plan_id": "max",
+      "tokens_monthly": 20000,
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    }
+  ],
+  "token_packages": [
+    {
+      "id": "pkg_200",
+      "name": "200 Tokens",
+      "tokens": 200,
+      "price_usd": 4.99,
+      "stripe_price_id": null,
+      "active": true,
+      "created_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "id": "pkg_500",
+      "name": "500 Tokens",
+      "tokens": 500,
+      "price_usd": 9.99,
+      "stripe_price_id": null,
+      "active": true,
+      "created_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "id": "pkg_1000",
+      "name": "1,000 Tokens",
+      "tokens": 1000,
+      "price_usd": 17.99,
+      "stripe_price_id": null,
+      "active": true,
+      "created_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "id": "pkg_5000",
+      "name": "5,000 Tokens",
+      "tokens": 5000,
+      "price_usd": 69.99,
+      "stripe_price_id": null,
+      "active": true,
+      "created_at": "2026-04-15T22:24:55.041662+00:00"
+    }
+  ],
+  "addon_prices": [
+    {
+      "key": "extra_company",
+      "price_usd": 29.99,
+      "description": "Empresa adicional por mes",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "extra_member",
+      "price_usd": 9.99,
+      "description": "Miembro adicional por mes",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "priority_support",
+      "price_usd": 19.99,
+      "description": "Soporte prioritario por mes",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    }
+  ],
+  "operation_costs": [
+    {
+      "key": "process_objective",
+      "tokens": 5,
+      "tier": "simple",
+      "description": "Generar objetivo del proceso",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "sipoc",
+      "tokens": 10,
+      "tier": "media",
+      "description": "Generar SIPOC",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "indicators",
+      "tokens": 10,
+      "tier": "media",
+      "description": "Generar indicadores KPI",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "procedure_from_context",
+      "tokens": 10,
+      "tier": "media",
+      "description": "Generar procedimiento desde contexto",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "procedure_from_bpmn",
+      "tokens": 10,
+      "tier": "media",
+      "description": "Generar procedimiento desde BPMN",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "risks_from_bpmn",
+      "tokens": 10,
+      "tier": "media",
+      "description": "Identificar riesgos desde BPMN",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "audit_recommendations",
+      "tokens": 10,
+      "tier": "media",
+      "description": "Generar programa de auditoría",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "advisor_chat_turn",
+      "tokens": 10,
+      "tier": "media",
+      "description": "Turno de chat con consultor",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "process_map_onboarding_turn",
+      "tokens": 10,
+      "tier": "media",
+      "description": "Turno de onboarding conversacional",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "bpmn_from_interview",
+      "tokens": 15,
+      "tier": "alta",
+      "description": "Generar BPMN desde entrevista",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "bpmn_refine",
+      "tokens": 15,
+      "tier": "alta",
+      "description": "Refinar diagrama BPMN",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "flowchart_interview_turn",
+      "tokens": 15,
+      "tier": "alta",
+      "description": "Turno de entrevista flowchart",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "value_classification",
+      "tokens": 10,
+      "tier": "media",
+      "description": "Clasificar actividades VA/NVA/NVABN",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    },
+    {
+      "key": "improve_text",
+      "tokens": 5,
+      "tier": "simple",
+      "description": "Mejorar texto de sección",
+      "updated_at": "2026-04-15T22:24:55.041662+00:00"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "email": "fernangal2004@gmail.com",
+      "full_name": "Fernando Galindop",
+      "avatar_url": null,
+      "plan_id": null,
+      "stripe_customer_id": null,
+      "stripe_subscription_id": null,
+      "ai_tokens_used": 0,
+      "ai_tokens_reset_at": "2026-04-14T15:18:28.960209+00:00",
+      "circle_member": false,
+      "is_admin": true,
+      "created_at": "2026-04-14T15:18:28.960209+00:00",
+      "updated_at": "2026-04-14T15:18:28.960209+00:00"
+    }
+  ],
+  "companies": [
+    {
+      "id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "name": "EMCY",
+      "industry": "Ventas",
+      "company_size": null,
+      "country": "Ecuador",
+      "description": "Ventas por internet",
+      "logo_url": null,
+      "onboarding_completed": true,
+      "process_level_count": 3,
+      "created_at": "2026-04-16T16:13:34.826+00:00",
+      "updated_at": "2026-04-16T16:13:41.097508+00:00"
+    }
+  ],
+  "memberships": [
+    {
+      "id": "2e7bc5b3-14a3-4883-bec3-f26c8e042a49",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "email": "",
+      "full_name": null,
+      "role": "owner",
+      "status": "active",
+      "invited_by": null,
+      "created_at": "2026-04-16T16:13:36.487478+00:00",
+      "updated_at": "2026-04-16T16:13:36.487478+00:00"
+    }
+  ],
+  "macroprocesses": [
+    {
+      "id": "fb5639e0-f278-4bf2-acbe-d9e7f579b00a",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": "Marketing",
+      "category": "productivo",
+      "sort_order": 0,
+      "color": null,
+      "icon": null,
+      "created_at": "2026-04-16T18:09:54.173+00:00",
+      "updated_at": "2026-04-16T18:09:54.173+00:00"
+    }
+  ],
+  "processes": [
+    {
+      "id": "79d7505c-30fe-4a93-9224-0534b3aef7ac",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "macroprocess_id": "fb5639e0-f278-4bf2-acbe-d9e7f579b00a",
+      "parent_process_id": null,
+      "level_definition_id": null,
+      "name": "Pautar",
+      "code": null,
+      "description": null,
+      "entity": null,
+      "process_type": null,
+      "execution_frequency": null,
+      "version": null,
+      "execution_level": null,
+      "management": null,
+      "coordination": null,
+      "operative": null,
+      "business_line": null,
+      "supervision_level": null,
+      "responsible": null,
+      "delivery_method": null,
+      "execution_type": null,
+      "is_critical": false,
+      "has_contingency_plan": false,
+      "involves_cash_movement": false,
+      "has_tax_operations": false,
+      "affects_accounting": false,
+      "handles_personal_data": false,
+      "provided_by_third_party": false,
+      "approval_date": null,
+      "update_date": null,
+      "sort_order": 0,
+      "created_at": "2026-04-16T18:32:24.765+00:00",
+      "updated_at": "2026-04-16T18:32:24.765+00:00",
+      "bpmn_xml": null
+    },
+    {
+      "id": "4a4caa8d-35fd-457f-8a13-7d934410020a",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "macroprocess_id": "fb5639e0-f278-4bf2-acbe-d9e7f579b00a",
+      "parent_process_id": null,
+      "level_definition_id": null,
+      "name": "Creacion de Crativos",
+      "code": null,
+      "description": null,
+      "entity": null,
+      "process_type": null,
+      "execution_frequency": null,
+      "version": null,
+      "execution_level": null,
+      "management": null,
+      "coordination": null,
+      "operative": null,
+      "business_line": null,
+      "supervision_level": null,
+      "responsible": null,
+      "delivery_method": null,
+      "execution_type": null,
+      "is_critical": false,
+      "has_contingency_plan": false,
+      "involves_cash_movement": false,
+      "has_tax_operations": false,
+      "affects_accounting": false,
+      "handles_personal_data": false,
+      "provided_by_third_party": false,
+      "approval_date": null,
+      "update_date": null,
+      "sort_order": 1,
+      "created_at": "2026-04-16T18:32:33.715+00:00",
+      "updated_at": "2026-04-16T18:32:33.715+00:00",
+      "bpmn_xml": null
+    },
+    {
+      "id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "macroprocess_id": "fb5639e0-f278-4bf2-acbe-d9e7f579b00a",
+      "parent_process_id": "4a4caa8d-35fd-457f-8a13-7d934410020a",
+      "level_definition_id": null,
+      "name": "Generar creativo",
+      "code": null,
+      "description": "",
+      "entity": "EMCY",
+      "process_type": "productivo",
+      "execution_frequency": "",
+      "version": "1.3",
+      "execution_level": "",
+      "management": "",
+      "coordination": "",
+      "operative": null,
+      "business_line": "",
+      "supervision_level": "",
+      "responsible": "",
+      "delivery_method": "",
+      "execution_type": "",
+      "is_critical": false,
+      "has_contingency_plan": false,
+      "involves_cash_movement": false,
+      "has_tax_operations": false,
+      "affects_accounting": false,
+      "handles_personal_data": false,
+      "provided_by_third_party": false,
+      "approval_date": null,
+      "update_date": "2026-04-16",
+      "sort_order": 0,
+      "created_at": "2026-04-16T20:54:26.249+00:00",
+      "updated_at": "2026-04-16T21:42:16.559366+00:00",
+      "bpmn_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn2:definitions xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:bpmn2=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\" xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\" id=\"Definitions_1\" targetNamespace=\"http://bpmn.io/schema/bpmn\" exporter=\"Lean Process\" exporterVersion=\"1.0\">\n  <bpmn2:collaboration id=\"Collaboration_1\">\n    <bpmn2:participant id=\"Participant_1\" name=\"Proceso\" processRef=\"Process_1\" />\n  </bpmn2:collaboration>\n  <bpmn2:process id=\"Process_1\" isExecutable=\"false\">\n    <bpmn2:laneSet id=\"LaneSet_1\">\n      <bpmn2:lane id=\"Lane_1\" name=\"Marketing\">\n        <bpmn2:flowNodeRef>StartEvent_1</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Gateway_1</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Task_1</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Task_3</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Task_4</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Task_2</bpmn2:flowNodeRef>\n      </bpmn2:lane>\n    </bpmn2:laneSet>\n    <bpmn2:sequenceFlow id=\"Flow_1\" sourceRef=\"StartEvent_1\" targetRef=\"Task_1\" />\n    <bpmn2:sequenceFlow id=\"Flow_2\" sourceRef=\"Task_1\" targetRef=\"Gateway_1\" />\n    <bpmn2:sequenceFlow id=\"Flow_3\" name=\"no\" sourceRef=\"Gateway_1\" targetRef=\"Task_2\" />\n    <bpmn2:sequenceFlow id=\"Flow_4\" name=\"Si\" sourceRef=\"Gateway_1\" targetRef=\"Task_3\" />\n    <bpmn2:sequenceFlow id=\"Flow_5\" sourceRef=\"Task_3\" targetRef=\"Task_4\" />\n    <bpmn2:startEvent id=\"StartEvent_1\" name=\"Inicio\">\n      <bpmn2:outgoing>Flow_1</bpmn2:outgoing>\n    </bpmn2:startEvent>\n    <bpmn2:exclusiveGateway id=\"Gateway_1\" name=\"Hay creativos existentes?\">\n      <bpmn2:incoming>Flow_2</bpmn2:incoming>\n      <bpmn2:outgoing>Flow_3</bpmn2:outgoing>\n      <bpmn2:outgoing>Flow_4</bpmn2:outgoing>\n    </bpmn2:exclusiveGateway>\n    <bpmn2:task id=\"Task_1\" name=\"Crear videos\">\n      <bpmn2:incoming>Flow_1</bpmn2:incoming>\n      <bpmn2:outgoing>Flow_2</bpmn2:outgoing>\n    </bpmn2:task>\n    <bpmn2:task id=\"Task_3\" name=\"Observar rendimiento de creativos existentes\">\n      <bpmn2:incoming>Flow_4</bpmn2:incoming>\n      <bpmn2:outgoing>Flow_5</bpmn2:outgoing>\n    </bpmn2:task>\n    <bpmn2:task id=\"Task_4\" name=\"Sacar variaciones de creativos\">\n      <bpmn2:incoming>Flow_5</bpmn2:incoming>\n    </bpmn2:task>\n    <bpmn2:task id=\"Task_2\" name=\"Crear creativos\">\n      <bpmn2:incoming>Flow_3</bpmn2:incoming>\n    </bpmn2:task>\n  </bpmn2:process>\n  <bpmndi:BPMNDiagram id=\"BPMNDiagram_1\">\n    <bpmndi:BPMNPlane id=\"BPMNPlane_1\" bpmnElement=\"Collaboration_1\">\n      <bpmndi:BPMNShape id=\"Participant_1_di\" bpmnElement=\"Participant_1\" isHorizontal=\"true\">\n        <dc:Bounds x=\"-140\" y=\"0\" width=\"1348\" height=\"380\" />\n        <bpmndi:BPMNLabel />\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Lane_1_di\" bpmnElement=\"Lane_1\" isHorizontal=\"true\">\n        <dc:Bounds x=\"-110\" y=\"0\" width=\"1318\" height=\"380\" />\n        <bpmndi:BPMNLabel />\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"StartEvent_1_di\" bpmnElement=\"StartEvent_1\">\n        <dc:Bounds x=\"-40\" y=\"62\" width=\"36\" height=\"36\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"-33\" y=\"73\" width=\"26\" height=\"14\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Gateway_1_di\" bpmnElement=\"Gateway_1\" isMarkerVisible=\"true\">\n        <dc:Bounds x=\"286\" y=\"55\" width=\"50\" height=\"50\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"277\" y=\"26\" width=\"67\" height=\"27\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Task_1_di\" bpmnElement=\"Task_1\">\n        <dc:Bounds x=\"-14\" y=\"180\" width=\"110\" height=\"80\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"11\" y=\"264\" width=\"90\" height=\"20\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Task_3_di\" bpmnElement=\"Task_3\">\n        <dc:Bounds x=\"485\" y=\"280\" width=\"110\" height=\"80\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"510\" y=\"364\" width=\"90\" height=\"20\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Task_4_di\" bpmnElement=\"Task_4\">\n        <dc:Bounds x=\"795\" y=\"130\" width=\"110\" height=\"80\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"820\" y=\"214\" width=\"90\" height=\"20\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Task_2_di\" bpmnElement=\"Task_2\">\n        <dc:Bounds x=\"575\" y=\"70\" width=\"110\" height=\"80\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"600\" y=\"154\" width=\"90\" height=\"20\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge id=\"Flow_1_di\" bpmnElement=\"Flow_1\">\n        <di:waypoint x=\"-4\" y=\"80\" />\n        <di:waypoint x=\"41\" y=\"80\" />\n        <di:waypoint x=\"41\" y=\"180\" />\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_2_di\" bpmnElement=\"Flow_2\">\n        <di:waypoint x=\"96\" y=\"220\" />\n        <di:waypoint x=\"311\" y=\"220\" />\n        <di:waypoint x=\"311\" y=\"105\" />\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_3_di\" bpmnElement=\"Flow_3\">\n        <di:waypoint x=\"336\" y=\"80\" />\n        <di:waypoint x=\"381\" y=\"80\" />\n        <di:waypoint x=\"400\" y=\"110\" />\n        <di:waypoint x=\"575\" y=\"110\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"463\" y=\"93\" width=\"13\" height=\"14\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_4_di\" bpmnElement=\"Flow_4\">\n        <di:waypoint x=\"311\" y=\"105\" />\n        <di:waypoint x=\"311\" y=\"320\" />\n        <di:waypoint x=\"485\" y=\"320\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"375\" y=\"303\" width=\"10\" height=\"14\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_5_di\" bpmnElement=\"Flow_5\">\n        <di:waypoint x=\"540\" y=\"280\" />\n        <di:waypoint x=\"540\" y=\"170\" />\n        <di:waypoint x=\"795\" y=\"170\" />\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</bpmn2:definitions>\n"
+    }
+  ],
+  "bpmn_diagrams": [
+    {
+      "id": "54179c20-249f-4d63-ac17-87ea8d2d2823",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "name": "Diagrama principal",
+      "diagram_json": null,
+      "diagram_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn2:definitions xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:bpmn2=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\" xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\" id=\"Definitions_1\" targetNamespace=\"http://bpmn.io/schema/bpmn\" exporter=\"Lean Process\" exporterVersion=\"1.0\">\n  <bpmn2:collaboration id=\"Collaboration_1\">\n    <bpmn2:participant id=\"Participant_1\" name=\"Proceso\" processRef=\"Process_1\" />\n  </bpmn2:collaboration>\n  <bpmn2:process id=\"Process_1\" isExecutable=\"false\">\n    <bpmn2:laneSet id=\"LaneSet_1\">\n      <bpmn2:lane id=\"Lane_1\" name=\"Marketing\">\n        <bpmn2:flowNodeRef>StartEvent_1</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Gateway_1</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Task_1</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Task_3</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Task_4</bpmn2:flowNodeRef>\n        <bpmn2:flowNodeRef>Task_2</bpmn2:flowNodeRef>\n      </bpmn2:lane>\n    </bpmn2:laneSet>\n    <bpmn2:sequenceFlow id=\"Flow_1\" sourceRef=\"StartEvent_1\" targetRef=\"Task_1\" />\n    <bpmn2:sequenceFlow id=\"Flow_2\" sourceRef=\"Task_1\" targetRef=\"Gateway_1\" />\n    <bpmn2:sequenceFlow id=\"Flow_3\" name=\"no\" sourceRef=\"Gateway_1\" targetRef=\"Task_2\" />\n    <bpmn2:sequenceFlow id=\"Flow_4\" name=\"Si\" sourceRef=\"Gateway_1\" targetRef=\"Task_3\" />\n    <bpmn2:sequenceFlow id=\"Flow_5\" sourceRef=\"Task_3\" targetRef=\"Task_4\" />\n    <bpmn2:startEvent id=\"StartEvent_1\" name=\"Inicio\">\n      <bpmn2:outgoing>Flow_1</bpmn2:outgoing>\n    </bpmn2:startEvent>\n    <bpmn2:exclusiveGateway id=\"Gateway_1\" name=\"Hay creativos existentes?\">\n      <bpmn2:incoming>Flow_2</bpmn2:incoming>\n      <bpmn2:outgoing>Flow_3</bpmn2:outgoing>\n      <bpmn2:outgoing>Flow_4</bpmn2:outgoing>\n    </bpmn2:exclusiveGateway>\n    <bpmn2:task id=\"Task_1\" name=\"Crear videos\">\n      <bpmn2:incoming>Flow_1</bpmn2:incoming>\n      <bpmn2:outgoing>Flow_2</bpmn2:outgoing>\n    </bpmn2:task>\n    <bpmn2:task id=\"Task_3\" name=\"Observar rendimiento de creativos existentes\">\n      <bpmn2:incoming>Flow_4</bpmn2:incoming>\n      <bpmn2:outgoing>Flow_5</bpmn2:outgoing>\n    </bpmn2:task>\n    <bpmn2:task id=\"Task_4\" name=\"Sacar variaciones de creativos\">\n      <bpmn2:incoming>Flow_5</bpmn2:incoming>\n    </bpmn2:task>\n    <bpmn2:task id=\"Task_2\" name=\"Crear creativos\">\n      <bpmn2:incoming>Flow_3</bpmn2:incoming>\n    </bpmn2:task>\n  </bpmn2:process>\n  <bpmndi:BPMNDiagram id=\"BPMNDiagram_1\">\n    <bpmndi:BPMNPlane id=\"BPMNPlane_1\" bpmnElement=\"Collaboration_1\">\n      <bpmndi:BPMNShape id=\"Participant_1_di\" bpmnElement=\"Participant_1\" isHorizontal=\"true\">\n        <dc:Bounds x=\"-140\" y=\"0\" width=\"1348\" height=\"380\" />\n        <bpmndi:BPMNLabel />\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Lane_1_di\" bpmnElement=\"Lane_1\" isHorizontal=\"true\">\n        <dc:Bounds x=\"-110\" y=\"0\" width=\"1318\" height=\"380\" />\n        <bpmndi:BPMNLabel />\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"StartEvent_1_di\" bpmnElement=\"StartEvent_1\">\n        <dc:Bounds x=\"-40\" y=\"62\" width=\"36\" height=\"36\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"-33\" y=\"73\" width=\"26\" height=\"14\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Gateway_1_di\" bpmnElement=\"Gateway_1\" isMarkerVisible=\"true\">\n        <dc:Bounds x=\"286\" y=\"55\" width=\"50\" height=\"50\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"277\" y=\"26\" width=\"67\" height=\"27\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Task_1_di\" bpmnElement=\"Task_1\">\n        <dc:Bounds x=\"-14\" y=\"180\" width=\"110\" height=\"80\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"11\" y=\"264\" width=\"90\" height=\"20\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Task_3_di\" bpmnElement=\"Task_3\">\n        <dc:Bounds x=\"485\" y=\"280\" width=\"110\" height=\"80\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"510\" y=\"364\" width=\"90\" height=\"20\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Task_4_di\" bpmnElement=\"Task_4\">\n        <dc:Bounds x=\"795\" y=\"130\" width=\"110\" height=\"80\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"820\" y=\"214\" width=\"90\" height=\"20\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNShape id=\"Task_2_di\" bpmnElement=\"Task_2\">\n        <dc:Bounds x=\"575\" y=\"70\" width=\"110\" height=\"80\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"600\" y=\"154\" width=\"90\" height=\"20\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNShape>\n      <bpmndi:BPMNEdge id=\"Flow_1_di\" bpmnElement=\"Flow_1\">\n        <di:waypoint x=\"-4\" y=\"80\" />\n        <di:waypoint x=\"41\" y=\"80\" />\n        <di:waypoint x=\"41\" y=\"180\" />\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_2_di\" bpmnElement=\"Flow_2\">\n        <di:waypoint x=\"96\" y=\"220\" />\n        <di:waypoint x=\"311\" y=\"220\" />\n        <di:waypoint x=\"311\" y=\"105\" />\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_3_di\" bpmnElement=\"Flow_3\">\n        <di:waypoint x=\"336\" y=\"80\" />\n        <di:waypoint x=\"381\" y=\"80\" />\n        <di:waypoint x=\"400\" y=\"110\" />\n        <di:waypoint x=\"575\" y=\"110\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"463\" y=\"93\" width=\"13\" height=\"14\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_4_di\" bpmnElement=\"Flow_4\">\n        <di:waypoint x=\"311\" y=\"105\" />\n        <di:waypoint x=\"311\" y=\"320\" />\n        <di:waypoint x=\"485\" y=\"320\" />\n        <bpmndi:BPMNLabel>\n          <dc:Bounds x=\"375\" y=\"303\" width=\"10\" height=\"14\" />\n        </bpmndi:BPMNLabel>\n      </bpmndi:BPMNEdge>\n      <bpmndi:BPMNEdge id=\"Flow_5_di\" bpmnElement=\"Flow_5\">\n        <di:waypoint x=\"540\" y=\"280\" />\n        <di:waypoint x=\"540\" y=\"170\" />\n        <di:waypoint x=\"795\" y=\"170\" />\n      </bpmndi:BPMNEdge>\n    </bpmndi:BPMNPlane>\n  </bpmndi:BPMNDiagram>\n</bpmn2:definitions>\n",
+      "generated_by_ai": false,
+      "ai_prompt": null,
+      "version": 1,
+      "created_at": "2026-04-16T20:59:31.928789+00:00",
+      "updated_at": "2026-04-16T21:42:16.427+00:00"
+    }
+  ],
+  "indicators": [
+    {
+      "id": "8d163a94-3551-4825-8b92-c43d2baf2b54",
+      "process_id": null,
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "(Número de Videos Aprobados sin Revisiones / Número Total de Videos Creados) * 100",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T17:42:53.998+00:00",
+      "updated_at": "2026-04-16T18:09:34.788549+00:00",
+      "nombre": "Porcentaje de Videos Aprobados en Primera Instancia",
+      "objetivo": "Medir la calidad del contenido creado, minimizando las revisiones y retrabajos. Es importante para reducir demoras y optimizar el uso de recursos.",
+      "fuente_datos": "Sistema de Aprobación de Contenido, Registros Internos",
+      "unidad_medida": "porcentaje",
+      "frecuencia": "Mensual",
+      "meta": "90",
+      "umbral_verde": ">=90",
+      "umbral_amarillo": "75-89",
+      "umbral_rojo": "<75",
+      "responsable_reporte": "Analista de Marketing Digital",
+      "responsable_monitoreo": "Gerente de Marketing Digital"
+    },
+    {
+      "id": "52921af8-19d7-4126-860a-2fdee47f497f",
+      "process_id": null,
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "(Número de Pautas Publicadas en la Fecha Prevista / Número Total de Pautas Programadas) * 100",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T17:42:53.998+00:00",
+      "updated_at": "2026-04-16T18:09:34.788549+00:00",
+      "nombre": "Tasa de Cumplimiento de Plazo de Pauta",
+      "objetivo": "Evaluar la capacidad del equipo para lanzar las campañas en las fechas acordadas. Es importante para la planificación estratégica y el cumplimiento de los objetivos de marketing.",
+      "fuente_datos": "Sistema de Gestión de Proyectos, Calendarios de Campañas",
+      "unidad_medida": "porcentaje",
+      "frecuencia": "Mensual",
+      "meta": "95",
+      "umbral_verde": ">=95",
+      "umbral_amarillo": "85-94",
+      "umbral_rojo": "<85",
+      "responsable_reporte": "Analista de Marketing Digital",
+      "responsable_monitoreo": "Gerente de Marketing Digital"
+    },
+    {
+      "id": "103021a5-905a-4640-8da4-880fb7051889",
+      "process_id": null,
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "(Número de Pautas Publicadas Exitosamente / Número Total de Pautas Programadas) * 100",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T17:42:53.998+00:00",
+      "updated_at": "2026-04-16T18:09:34.788549+00:00",
+      "nombre": "Tasa de Publicación Exitosa de Pautas",
+      "objetivo": "Medir la eficacia del paso de 'Pautar', asegurando que los anuncios se lancen sin errores técnicos o de configuración. Es importante para garantizar la continuidad de las campañas.",
+      "fuente_datos": "Plataformas de Anuncios, Registros de Errores Internos",
+      "unidad_medida": "porcentaje",
+      "frecuencia": "Semanal",
+      "meta": "99",
+      "umbral_verde": ">=99",
+      "umbral_amarillo": "95-98",
+      "umbral_rojo": "<95",
+      "responsable_reporte": "Especialista de Pauta Digital",
+      "responsable_monitoreo": "Gerente de Marketing Digital"
+    },
+    {
+      "id": "47de236d-1752-458e-8f0f-946a78b0ba37",
+      "process_id": null,
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "Costo Total de la Campaña / Número de Adquisiciones (o Conversiones)",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T17:42:53.998+00:00",
+      "updated_at": "2026-04-16T18:09:34.788549+00:00",
+      "nombre": "Costo por Adquisición (CPA) Promedio de Campañas",
+      "objetivo": "Medir la efectividad de las campañas publicitarias en términos de costo para adquirir un cliente o una conversión. Es un indicador clave de rendimiento de la inversión (ROI).",
+      "fuente_datos": "Plataformas de Anuncios (Google Ads, Facebook Ads), CRM, Herramientas de Analítica Web",
+      "unidad_medida": "pesos/adquisición",
+      "frecuencia": "Mensual",
+      "meta": "20",
+      "umbral_verde": "<=20",
+      "umbral_amarillo": "21-30",
+      "umbral_rojo": ">30",
+      "responsable_reporte": "Analista de Marketing Digital",
+      "responsable_monitoreo": "Gerente de Marketing Digital"
+    },
+    {
+      "id": "d1172f5e-316c-48c0-a215-071759a8390e",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "(Número de creativos rechazados / Número total de creativos iniciados) * 100",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T20:57:18.98+00:00",
+      "updated_at": "2026-04-16T20:57:18.98+00:00",
+      "nombre": "Tasa de Rechazo de Creativos",
+      "objetivo": "Medir la proporción de creativos que no cumplen los estándares de calidad o el brief y son completamente descartados, para identificar fallas críticas en el proceso.",
+      "fuente_datos": "Sistema de gestión de proyectos, registros de rechazo formal por parte del cliente o equipo interno de calidad.",
+      "unidad_medida": "Porcentaje",
+      "frecuencia": "Mensual",
+      "meta": "5",
+      "umbral_verde": "<= 5%",
+      "umbral_amarillo": "6% - 10%",
+      "umbral_rojo": "> 10%",
+      "responsable_reporte": "Analista de Procesos",
+      "responsable_monitoreo": "Gerente de Calidad"
+    },
+    {
+      "id": "86b14063-2717-43fc-94f1-47c076eca8bb",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "Suma (Número de iteraciones por cada creativo aprobado) / Número total de creativos aprobados",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T20:57:18.98+00:00",
+      "updated_at": "2026-04-16T20:57:18.98+00:00",
+      "nombre": "Número Promedio de Iteraciones por Creativo Aprobado",
+      "objetivo": "Cuantificar la cantidad de retrabajo y ajustes necesarios para llegar a un creativo final aprobado, indicando la eficiencia del proceso de creación y retroalimentación.",
+      "fuente_datos": "Sistema de gestión de proyectos, historial de versiones de archivos, registros de comunicación.",
+      "unidad_medida": "Cantidad",
+      "frecuencia": "Mensual",
+      "meta": "2",
+      "umbral_verde": "<= 2 iteraciones",
+      "umbral_amarillo": "3 iteraciones",
+      "umbral_rojo": "> 3 iteraciones",
+      "responsable_reporte": "Coordinador de Diseño",
+      "responsable_monitoreo": "Gerente de Diseño"
+    },
+    {
+      "id": "687a88b0-d07f-445b-8eaf-2cf2670ab5b8",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "Fecha de Aprobación Final del Creativo - Fecha de Inicio de Solicitud del Creativo",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T20:57:18.98+00:00",
+      "updated_at": "2026-04-16T20:57:18.98+00:00",
+      "nombre": "Tiempo de Ciclo Total del Creativo",
+      "objetivo": "Medir la eficiencia global del proceso, desde el inicio de la solicitud hasta la aprobación final del creativo, para identificar cuellos de botella y reducir el tiempo de entrega.",
+      "fuente_datos": "Sistema de gestión de proyectos, CRM, registros manuales del equipo de diseño.",
+      "unidad_medida": "Días",
+      "frecuencia": "Mensual",
+      "meta": "5",
+      "umbral_verde": "<= 5 días",
+      "umbral_amarillo": "6 - 7 días",
+      "umbral_rojo": "> 7 días",
+      "responsable_reporte": "Analista de Procesos",
+      "responsable_monitoreo": "Gerente de Operaciones"
+    },
+    {
+      "id": "92d6a093-60cc-4e16-a224-f77018835bde",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "Suma (Duración de cada revisión completada) / Número total de revisiones completadas",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T20:57:18.98+00:00",
+      "updated_at": "2026-04-16T20:57:18.98+00:00",
+      "nombre": "Tiempo Promedio de Revisión de Creativos",
+      "objetivo": "Evaluar la agilidad y eficiencia de la fase de revisión, que es crucial para el flujo del proceso, buscando minimizar demoras en la retroalimentación.",
+      "fuente_datos": "Sistema de gestión de proyectos, herramientas de flujo de trabajo de diseño (ej. Asana, Trello, Jira, Monday.com).",
+      "unidad_medida": "Horas",
+      "frecuencia": "Semanal",
+      "meta": "24",
+      "umbral_verde": "<= 24 horas",
+      "umbral_amarillo": "25 - 36 horas",
+      "umbral_rojo": "> 36 horas",
+      "responsable_reporte": "Coordinador de Diseño",
+      "responsable_monitoreo": "Gerente de Diseño"
+    },
+    {
+      "id": "95db7f8b-0ab5-4cb5-bc1b-9cffe74ff443",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "(Número de creativos aprobados en la primera revisión / Número total de creativos enviados a revisión) * 100",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T20:57:18.98+00:00",
+      "updated_at": "2026-04-16T20:57:18.98+00:00",
+      "nombre": "Tasa de Aprobación en Primera Revisión",
+      "objetivo": "Medir la calidad del trabajo inicial y la claridad del brief, buscando reducir el retrabajo y las iteraciones innecesarias.",
+      "fuente_datos": "Sistema de gestión de proyectos, registros de aprobación y feedback del cliente.",
+      "unidad_medida": "Porcentaje",
+      "frecuencia": "Mensual",
+      "meta": "80",
+      "umbral_verde": ">= 80%",
+      "umbral_amarillo": "60% - 79%",
+      "umbral_rojo": "< 60%",
+      "responsable_reporte": "Analista de Calidad",
+      "responsable_monitoreo": "Gerente de Diseño"
+    },
+    {
+      "id": "616e2f14-6c32-4666-8218-2b169fdfa8cf",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "(Costo total de personal involucrado + Costo de herramientas y software + Otros costos directos) / Número de creativos aprobados",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T20:57:18.98+00:00",
+      "updated_at": "2026-04-16T20:57:18.98+00:00",
+      "nombre": "Costo Promedio por Creativo Aprobado",
+      "objetivo": "Evaluar la eficiencia económica del proceso de generación de creativos, incluyendo costos directos de personal y herramientas.",
+      "fuente_datos": "Registros contables, hojas de tiempo del personal, facturas de software y servicios.",
+      "unidad_medida": "Pesos",
+      "frecuencia": "Trimestral",
+      "meta": "200",
+      "umbral_verde": "<= 200 Pesos",
+      "umbral_amarillo": "201 - 250 Pesos",
+      "umbral_rojo": "> 250 Pesos",
+      "responsable_reporte": "Gerente Financiero",
+      "responsable_monitoreo": "Gerente de Operaciones"
+    },
+    {
+      "id": "4a4ba277-bc70-4b12-852c-d85f187d921e",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "name": null,
+      "code": null,
+      "description": null,
+      "formula": "(Suma de puntuaciones de satisfacción del cliente / Número de encuestas completadas) * 100",
+      "unit": null,
+      "frequency": null,
+      "target_value": null,
+      "min_acceptable": null,
+      "max_acceptable": null,
+      "owner": null,
+      "data_source": null,
+      "category": null,
+      "is_active": true,
+      "created_at": "2026-04-16T20:57:18.98+00:00",
+      "updated_at": "2026-04-16T20:57:18.98+00:00",
+      "nombre": "Índice de Satisfacción del Cliente con el Creativo Final",
+      "objetivo": "Medir la percepción del cliente sobre la calidad, relevancia y adecuación del creativo entregado, asegurando que el resultado final cumpla con sus expectativas.",
+      "fuente_datos": "Encuestas de satisfacción del cliente post-entrega, feedback directo del cliente registrado.",
+      "unidad_medida": "Porcentaje (basado en escala de 1-5)",
+      "frecuencia": "Mensual",
+      "meta": "90",
+      "umbral_verde": ">= 90%",
+      "umbral_amarillo": "80% - 89%",
+      "umbral_rojo": "< 80%",
+      "responsable_reporte": "Gerente de Cuentas",
+      "responsable_monitoreo": "Dirección de Marketing/Operaciones"
+    }
+  ],
+  "org_units": [
+    {
+      "id": "bd92d07a-6497-4235-b1e5-ba5360f60f2c",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "org_level_definition_id": null,
+      "parent_id": null,
+      "name": "EMCY",
+      "sort_order": 0,
+      "created_at": "2026-04-16T18:24:57.719+00:00",
+      "updated_at": "2026-04-16T18:24:57.719+00:00"
+    },
+    {
+      "id": "b8c6ef63-f5e0-41b2-8608-0204e95fe3c1",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "org_level_definition_id": null,
+      "parent_id": "bd92d07a-6497-4235-b1e5-ba5360f60f2c",
+      "name": "Marketing",
+      "sort_order": 0,
+      "created_at": "2026-04-16T18:25:07.485+00:00",
+      "updated_at": "2026-04-16T18:25:07.485+00:00"
+    }
+  ],
+  "change_log": [
+    {
+      "id": "6aa46bff-d8d8-47e7-8e35-94312a0224fb",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "created",
+      "description": "Proceso \"Generar creativo\" creado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T20:54:26.639974+00:00"
+    },
+    {
+      "id": "29c49c0c-e8dc-4ad7-8bcb-61ce90f280b3",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T20:55:22.059077+00:00"
+    },
+    {
+      "id": "219f3c37-e3a5-43dd-9992-e82314d676fc",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T20:56:39.447585+00:00"
+    },
+    {
+      "id": "180dc50c-c128-4bcc-b5c1-5ea36aaa9a64",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "kpis_defined",
+      "description": "7 indicador(es) KPI definidos",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T20:57:19.260333+00:00"
+    },
+    {
+      "id": "718a3dc1-9cf6-4f44-81f1-c36b56f7f601",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T20:59:31.917494+00:00"
+    },
+    {
+      "id": "2b429f71-e905-4925-9444-491dbc28d50e",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T20:59:38.1692+00:00"
+    },
+    {
+      "id": "618feebf-4c62-4081-8c88-9bc8df9146dd",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:08:05.999575+00:00"
+    },
+    {
+      "id": "15b9b1ff-1120-4246-a17a-a1f2208aef3a",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:09:17.020118+00:00"
+    },
+    {
+      "id": "1d8dcc5b-2989-40f4-b430-3dba205c7c6e",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:09:59.903187+00:00"
+    },
+    {
+      "id": "8da4c11a-27af-499a-a4e4-416ee7cab767",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:10:59.072288+00:00"
+    },
+    {
+      "id": "5f81f7e2-517d-4976-a924-d18b8900f1a7",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:11:54.78542+00:00"
+    },
+    {
+      "id": "53dcbf8d-109c-41d1-983d-450eaf731c1a",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:12:15.227894+00:00"
+    },
+    {
+      "id": "482b2a88-f92e-4f0b-bb01-6491dca26d2b",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:14:10.026455+00:00"
+    },
+    {
+      "id": "c2bfad77-a3c2-4e3a-83f0-a7ec6bbc1adc",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:14:12.848398+00:00"
+    },
+    {
+      "id": "fcec6246-5647-411e-a105-e31e2e450f26",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:14:20.329133+00:00"
+    },
+    {
+      "id": "252e3754-cae1-4fee-8915-0cdc08616d9e",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:28:21.719831+00:00"
+    },
+    {
+      "id": "a03a70d4-2fdb-4df7-9aff-cd65256248ed",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:29:07.870792+00:00"
+    },
+    {
+      "id": "e3ded3bd-5618-4909-b4b1-d4b86d4367d0",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:32:42.818701+00:00"
+    },
+    {
+      "id": "189907c1-ff25-4790-a76b-6bfbedf00aaf",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:32:53.98224+00:00"
+    },
+    {
+      "id": "ab3b2535-d82c-4d6f-ac04-0f5f03b6187f",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:33:04.345648+00:00"
+    },
+    {
+      "id": "25423bb1-92c8-473a-95f9-fd3b4326dc2d",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:33:11.939434+00:00"
+    },
+    {
+      "id": "59e13fbe-a162-48c9-b568-c84c2975ee80",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:33:16.278437+00:00"
+    },
+    {
+      "id": "1941e476-740b-4544-8ca9-7589e33b0517",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:33:21.664258+00:00"
+    },
+    {
+      "id": "4667e3d3-c69b-445f-a63d-25fa0035ae2e",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:33:23.921858+00:00"
+    },
+    {
+      "id": "55ca12a4-e9bc-459d-930e-09c9b1f70e4f",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:33:27.95781+00:00"
+    },
+    {
+      "id": "dbfde87f-3544-4afb-9203-5972c2f681c6",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:33:30.614986+00:00"
+    },
+    {
+      "id": "bee07515-d9cc-4e88-b142-436c17df12ed",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:33:38.654762+00:00"
+    },
+    {
+      "id": "25796854-7f6b-4a4e-8061-2f9b4d8f25d4",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:33:44.759246+00:00"
+    },
+    {
+      "id": "9a39c32c-4abe-4824-9145-ccfea1a3e4ba",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:34:09.008056+00:00"
+    },
+    {
+      "id": "e4d15936-3902-4130-9439-5a08071eb8cc",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:34:11.015152+00:00"
+    },
+    {
+      "id": "0f1fffba-cd46-4239-ab27-0ee9069ac9c3",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:34:16.151635+00:00"
+    },
+    {
+      "id": "adb978c3-ad6b-43ab-b09b-f9cf6352c298",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:34:43.850725+00:00"
+    },
+    {
+      "id": "37fc1ab6-ff89-41d4-9fd4-e9072e2e117f",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:34:45.937541+00:00"
+    },
+    {
+      "id": "1b3aeeba-8cc7-4cd8-8709-fdaf80557732",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:34:50.640047+00:00"
+    },
+    {
+      "id": "7f589917-c043-4a25-9900-9893113a0a92",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:40:24.939904+00:00"
+    },
+    {
+      "id": "fdacb3a6-bf0b-4070-902e-bf53dd41ee7b",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:40:27.08368+00:00"
+    },
+    {
+      "id": "20cd2719-cb1f-4ddc-a05e-5c3a3e451197",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:40:42.384732+00:00"
+    },
+    {
+      "id": "6391d458-ebb6-4b5b-af90-9f4a23c14cec",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:40:44.951341+00:00"
+    },
+    {
+      "id": "cccc8fa1-4bb4-4aa4-a682-c8d519567000",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:40:54.57478+00:00"
+    },
+    {
+      "id": "340ec40f-9223-4fda-b964-efc7edc827a4",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:40:57.278573+00:00"
+    },
+    {
+      "id": "50a24394-950e-45c4-9e57-0cbe923b6905",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:41:05.74256+00:00"
+    },
+    {
+      "id": "a6490d5b-c6d9-40b5-9234-d177b5731b62",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:41:12.599631+00:00"
+    },
+    {
+      "id": "9ba41540-0aff-470e-a67c-cefa0a9f03db",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:41:49.614925+00:00"
+    },
+    {
+      "id": "27de9e44-f3b3-49e0-9749-81242cb9a32b",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:41:54.16345+00:00"
+    },
+    {
+      "id": "020f57a9-b00c-41c9-9c5e-1e2316d2448b",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:42:02.14108+00:00"
+    },
+    {
+      "id": "2422fae5-c7d4-4ee1-b076-93db233fe686",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:42:04.486727+00:00"
+    },
+    {
+      "id": "3bbe84b1-419a-4a79-bcde-2eb26f294820",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:42:07.527513+00:00"
+    },
+    {
+      "id": "e0adcd4b-6356-456d-ac6b-8f5cdecf8042",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "bpmn_updated",
+      "description": "Flujograma BPMN actualizado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T21:42:16.557096+00:00"
+    },
+    {
+      "id": "738e9f77-702a-4f21-9298-2a2b2841ebe9",
+      "process_id": "bf1df555-4bfc-4cbc-b764-cd0701899ad8",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "action": "procedure_generated",
+      "description": "Procedimiento generado",
+      "author_name": "Fernando Galindop",
+      "metadata": null,
+      "created_at": "2026-04-16T22:08:36.122576+00:00"
+    }
+  ],
+  "ai_usage_log": [
+    {
+      "id": "ded55b18-c6af-46b5-b50d-a35d83faa141",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Hola, soy tu consultor de procesos. Vamos con \"Ciclo de ads\". ¿Como prefieres arrancar: definiendo los roles que participan, contandome los pasos del proceso, o directamente dictandomelo como se te oc",
+      "created_at": "2026-04-16T17:01:29.701791+00:00"
+    },
+    {
+      "id": "9dc9f303-3958-4aa1-88d7-eabdb6ef7219",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Analiza el siguiente proceso y genera indicadores KPI:\n\nNombre del proceso: Ciclo de ads\n\nDiagrama BPMN del proceso:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn2:definitions xmlns:xsi=\"http://www.w3.",
+      "created_at": "2026-04-16T17:02:41.399525+00:00"
+    },
+    {
+      "id": "673c481d-97ab-4dea-8400-3b7fbf73219e",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "risk",
+      "tokens_used": 0,
+      "prompt_summary": "Eres un Oficial Senior de Riesgos con experiencia en Lean Six Sigma y gestion de procesos.\n\nCONTEXTO:\n- Empresa: EMCY\n- Proceso: Ciclo de ads\n- Diagrama BPMN (XML) del proceso a analizar\n\nTAREA:\n1. An",
+      "created_at": "2026-04-16T17:03:56.148997+00:00"
+    },
+    {
+      "id": "211cd490-9db1-49b6-9438-8d398663e91f",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "risk",
+      "tokens_used": 0,
+      "prompt_summary": "Eres un Oficial Senior de Riesgos con experiencia en Lean Six Sigma y gestion de procesos.\n\nCONTEXTO:\n- Empresa: EMCY\n- Proceso: Ciclo de ads\n- Diagrama BPMN (XML) del proceso a analizar\n\nRIESGOS YA I",
+      "created_at": "2026-04-16T17:20:24.088018+00:00"
+    },
+    {
+      "id": "5a6f5247-3a42-435f-8c3b-679daf97c6a9",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "risk",
+      "tokens_used": 0,
+      "prompt_summary": "Eres un Oficial Senior de Riesgos con experiencia en Lean Six Sigma y gestion de procesos.\n\nCONTEXTO:\n- Empresa: EMCY\n- Proceso: Ciclo de ads\n- Diagrama BPMN (XML) del proceso a analizar\n\nRIESGOS YA I",
+      "created_at": "2026-04-16T17:40:55.997677+00:00"
+    },
+    {
+      "id": "9b47d6af-7999-4ac0-9924-d86d4b341a89",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Analiza el siguiente proceso y genera indicadores KPI:\n\nNombre del proceso: Ciclo de ads\n\nDiagrama BPMN del proceso:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn2:definitions xmlns:xsi=\"http://www.w3.",
+      "created_at": "2026-04-16T17:42:38.517023+00:00"
+    },
+    {
+      "id": "7dd9bb32-1516-4289-91ef-18e7a55b3783",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Hola, soy tu consultor de procesos. Vamos con \"Generar creativo\". ¿Como prefieres arrancar: definiendo los roles que participan, contandome los pasos del proceso, o directamente dictandomelo como se t",
+      "created_at": "2026-04-16T20:55:40.782327+00:00"
+    },
+    {
+      "id": "6c3a7382-96db-4867-921b-8d4e5d154d4e",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Hola, soy tu consultor de procesos. Vamos con \"Generar creativo\". ¿Como prefieres arrancar: definiendo los roles que participan, contandome los pasos del proceso, o directamente dictandomelo como se t",
+      "created_at": "2026-04-16T20:56:00.698258+00:00"
+    },
+    {
+      "id": "4d6224b1-d3c7-4b3b-a0bd-1f0e3d1b50be",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Hola, soy tu consultor de procesos. Vamos con \"Generar creativo\". ¿Como prefieres arrancar: definiendo los roles que participan, contandome los pasos del proceso, o directamente dictandomelo como se t",
+      "created_at": "2026-04-16T20:56:34.893514+00:00"
+    },
+    {
+      "id": "4075fd0a-edc1-4fd3-ac1b-b33c9d4dfdff",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Analiza el siguiente proceso y genera indicadores KPI:\n\nNombre del proceso: Generar creativo\n\nDiagrama BPMN del proceso:\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn2:definitions xmlns:xsi=\"http://www",
+      "created_at": "2026-04-16T20:56:59.307347+00:00"
+    },
+    {
+      "id": "8d3fa860-b6e8-4267-814a-40bd5d19ae74",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Hola, soy tu consultor de procesos. Vamos con \"Generar creativo\". ¿Como prefieres arrancar: definiendo los roles que participan, contandome los pasos del proceso, o directamente dictandomelo como se t",
+      "created_at": "2026-04-16T21:08:01.912211+00:00"
+    },
+    {
+      "id": "f7e67223-1ad0-404d-94b9-7aafde51880b",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Hola, soy tu consultor de procesos. Vamos con \"Generar creativo\". ¿Como prefieres arrancar: definiendo los roles que participan, contandome los pasos del proceso, o directamente dictandomelo como se t",
+      "created_at": "2026-04-16T21:09:05.536985+00:00"
+    },
+    {
+      "id": "ba18bf3d-5c70-4444-b9c4-00f9ec030775",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Hola, soy tu consultor de procesos. Vamos con \"Generar creativo\". ¿Como prefieres arrancar: definiendo los roles que participan, contandome los pasos del proceso, o directamente dictandomelo como se t",
+      "created_at": "2026-04-16T21:09:45.711996+00:00"
+    },
+    {
+      "id": "1a9ab22a-82c6-42e7-969f-677d95ff69cc",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "feature": "unknown",
+      "tokens_used": 0,
+      "prompt_summary": "Genera un procedimiento operativo estandar (SOP) COMPLETO basado en el siguiente diagrama de flujo BPMN:\n\nEmpresa: EMCY\nIndustria: Ventas\nMacroproceso: Marketing\nProceso: Creacion de Crativos\nSubproce",
+      "created_at": "2026-04-16T22:08:20.140761+00:00"
+    }
+  ],
+  "ai_rate_limit_log": [
+    {
+      "id": "f0a92660-33ec-4b29-aeeb-7519cdc869c6",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T14:43:22.586527+00:00"
+    },
+    {
+      "id": "868a5a16-5c89-440f-a82d-bbce5309555c",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T17:01:29.709403+00:00"
+    },
+    {
+      "id": "cbcc9a1c-7dd9-41e4-8727-892b024ffd23",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T17:02:41.396708+00:00"
+    },
+    {
+      "id": "3dc919a4-51b1-42d1-b5b5-1ae16ddc7414",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T17:03:56.132721+00:00"
+    },
+    {
+      "id": "1d795fad-9a8c-4c3d-a87f-6347c3536de5",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T17:20:24.083476+00:00"
+    },
+    {
+      "id": "7f2d214d-e50f-491b-bca3-0747401a1da7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T17:40:55.986009+00:00"
+    },
+    {
+      "id": "8bca7ed6-a2a5-46bf-87bb-e96ce6361ebe",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T17:42:38.504132+00:00"
+    },
+    {
+      "id": "2d4b7d75-95fd-4b1a-972e-06fd8c7cb075",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T20:55:40.779429+00:00"
+    },
+    {
+      "id": "47189c41-d0ee-45e7-b56d-85568f4cb2cf",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T20:56:00.693267+00:00"
+    },
+    {
+      "id": "bd9c9d56-f22b-47ee-9658-024f124b2600",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T20:56:34.88505+00:00"
+    },
+    {
+      "id": "4f3514f7-7c4d-4421-85e9-6e5ec3d179bb",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T20:56:59.319021+00:00"
+    },
+    {
+      "id": "63caf4a5-6d9f-448a-8277-37250bc35a8f",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T21:08:01.897511+00:00"
+    },
+    {
+      "id": "db35b9ad-21e1-4eb9-879d-943cdec5d64e",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T21:09:05.530347+00:00"
+    },
+    {
+      "id": "cacfac3e-fc2d-4dc7-9f4d-f5a6b1ceec41",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T21:09:45.696025+00:00"
+    },
+    {
+      "id": "f74d040a-3a37-45c4-9e51-dd4f03ff5b08",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "created_at": "2026-04-16T22:08:20.140614+00:00"
+    }
+  ],
+  "token_wallets": [
+    {
+      "id": "3b46ec29-72e4-483d-a4a2-7bc580036ca0",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "monthly_allocation": 1000,
+      "used": 70,
+      "bonus_balance": 0,
+      "renewal_date": "2026-05-16T16:13:41.281+00:00",
+      "plan_id": "community",
+      "created_at": "2026-04-16T14:22:46.883571+00:00",
+      "updated_at": "2026-04-16T22:08:19.195085+00:00"
+    }
+  ],
+  "token_transactions": [
+    {
+      "id": "624931f3-37af-4cfe-ba09-e6967e02971d",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": null,
+      "type": "grant",
+      "tokens": 1000,
+      "operation_key": null,
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": "Wallet inicializado con plan community",
+      "created_at": "2026-04-16T14:22:47.030554+00:00"
+    },
+    {
+      "id": "4bc0d5a3-1c7c-43a1-8b15-19fc2a5ed4a5",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": null,
+      "type": "consume",
+      "tokens": 5,
+      "operation_key": "process_objective",
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": null,
+      "created_at": "2026-04-16T14:43:21.324037+00:00"
+    },
+    {
+      "id": "f578b6f3-3003-4549-97e3-bc664afbfca0",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": null,
+      "type": "grant",
+      "tokens": 1000,
+      "operation_key": null,
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": "Wallet inicializado con plan community",
+      "created_at": "2026-04-16T15:11:14.753271+00:00"
+    },
+    {
+      "id": "d676b598-7a44-4631-b1a8-4ad4d0b5dfb7",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": null,
+      "type": "grant",
+      "tokens": 1000,
+      "operation_key": null,
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": "Wallet inicializado con plan community",
+      "created_at": "2026-04-16T16:13:41.534883+00:00"
+    },
+    {
+      "id": "1051b848-8e3c-45e2-a500-12dd14474698",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "type": "consume",
+      "tokens": 10,
+      "operation_key": "indicators",
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": null,
+      "created_at": "2026-04-16T17:02:40.380064+00:00"
+    },
+    {
+      "id": "9f4afbb0-7a48-459a-9d98-bdc04679a944",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "type": "consume",
+      "tokens": 10,
+      "operation_key": "risks_from_bpmn",
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": null,
+      "created_at": "2026-04-16T17:03:55.406468+00:00"
+    },
+    {
+      "id": "9159b5fe-000d-4386-9c30-576750822d81",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "type": "consume",
+      "tokens": 10,
+      "operation_key": "risks_from_bpmn",
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": null,
+      "created_at": "2026-04-16T17:20:23.060733+00:00"
+    },
+    {
+      "id": "997c2d33-70e4-4969-a163-dc2eefc0a965",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "type": "consume",
+      "tokens": 10,
+      "operation_key": "risks_from_bpmn",
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": null,
+      "created_at": "2026-04-16T17:40:54.796408+00:00"
+    },
+    {
+      "id": "498634fa-f390-49b1-b52f-5ebb77a60d40",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "type": "consume",
+      "tokens": 10,
+      "operation_key": "indicators",
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": null,
+      "created_at": "2026-04-16T17:42:37.737188+00:00"
+    },
+    {
+      "id": "827112ed-3a6a-4e61-85c8-ab3a2129a92e",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "type": "consume",
+      "tokens": 10,
+      "operation_key": "indicators",
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": null,
+      "created_at": "2026-04-16T20:56:58.491914+00:00"
+    },
+    {
+      "id": "e8c393cd-f1e2-4295-a6f8-2a0d93fb5576",
+      "user_id": "17626d6a-7056-4823-94e4-ead711bc8a72",
+      "company_id": "c104c8db-3c9c-49ab-b747-774709ec4fd7",
+      "type": "consume",
+      "tokens": 10,
+      "operation_key": "procedure_from_bpmn",
+      "price_usd": null,
+      "stripe_payment_intent_id": null,
+      "note": null,
+      "created_at": "2026-04-16T22:08:19.195085+00:00"
+    }
+  ]
+}

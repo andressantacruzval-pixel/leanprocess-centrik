@@ -1,0 +1,104 @@
+import { Plus, Trash2, AlertTriangle } from 'lucide-react'
+import type { ProcedureActivity } from '@/lib/claude'
+import { ACCIONES_AL_PASAR } from '@/lib/constants'
+import { EditableText } from './EditableText'
+
+interface ActivitiesSectionProps {
+  actividades: ProcedureActivity[]
+  updateActivity: (index: number, updates: Partial<ProcedureActivity>) => void
+  addActivity: () => void
+  removeActivity: (index: number) => void
+}
+
+export function ActivitiesSection({
+  actividades,
+  updateActivity,
+  addActivity,
+  removeActivity,
+}: ActivitiesSectionProps) {
+  return (
+    <div className="space-y-0">
+      {actividades.map((activity, i) => (
+        <div
+          key={i}
+          className={`group border-l-4 ${activity.esDecision ? 'border-l-amber-500 bg-amber-50/50' : 'border-l-blue-500 bg-transparent'} py-4 pl-5 pr-3 ${i > 0 ? 'border-t border-gray-100' : ''}`}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1">
+              {/* Activity number + name */}
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${activity.esDecision ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                  {i + 1}
+                </span>
+                <EditableText
+                  value={activity.nombre}
+                  onChange={v => updateActivity(i, { nombre: v })}
+                  className="text-gray-900 text-[13px] font-semibold"
+                  placeholder="Nombre de la actividad..."
+                />
+                {activity.esDecision && (
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                )}
+              </div>
+
+              {/* Executor */}
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider">Responsable:</span>
+                <EditableText
+                  value={activity.ejecutor}
+                  onChange={v => updateActivity(i, { ejecutor: v })}
+                  className="text-gray-600 text-[12px] font-medium"
+                  placeholder="Rol / cargo..."
+                />
+              </div>
+
+              {/* Description */}
+              <EditableText
+                value={activity.descripcion}
+                onChange={v => updateActivity(i, { descripcion: v })}
+                className="text-gray-600 text-[12px] leading-relaxed"
+                multiline
+                placeholder="Descripcion detallada de la actividad..."
+              />
+
+              {/* Decision logic */}
+              {activity.esDecision && (
+                <div className="mt-2 p-2.5 bg-amber-100/60 border border-amber-200 rounded">
+                  <p className="text-[9px] uppercase tracking-wider font-bold text-amber-600 mb-1">Logica de Decision</p>
+                  <EditableText
+                    value={activity.decisiones}
+                    onChange={v => updateActivity(i, { decisiones: v })}
+                    className="text-amber-800 text-[12px]"
+                    placeholder="SI: ... / NO: ..."
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Acciones — siempre en el DOM: ver ACCIONES_AL_PASAR */}
+            <div className={`flex flex-col gap-1 shrink-0 ${ACCIONES_AL_PASAR}`}>
+              <button
+                onClick={() => updateActivity(i, { esDecision: !activity.esDecision })}
+                title={activity.esDecision ? 'Quitar decision' : 'Marcar como decision'}
+                className={`p-2 rounded ${activity.esDecision ? 'text-amber-500 bg-amber-100' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50'}`}
+              >
+                <AlertTriangle className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => removeActivity(i)} title="Eliminar actividad" className="p-2 rounded text-gray-400 hover:text-red-500 hover:bg-red-50">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {actividades.length === 0 && (
+        <p className="py-6 text-center text-gray-400 text-xs italic">Sin actividades registradas</p>
+      )}
+
+      <button onClick={addActivity} className="mt-3 flex items-center gap-1 text-[11px] text-blue-500 hover:text-blue-700 font-medium">
+        <Plus className="w-3 h-3" /> Agregar actividad
+      </button>
+    </div>
+  )
+}

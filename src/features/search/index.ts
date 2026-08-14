@@ -1,0 +1,1 @@
+export { SearchTrigger } from './GlobalSearch'

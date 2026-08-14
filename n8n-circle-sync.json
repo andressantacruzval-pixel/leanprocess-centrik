@@ -1,0 +1,228 @@
+{
+  "name": "LeanProcess Circle Weekly Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 59 23 * * 0" }
+          ]
+        }
+      },
+      "id": "trigger-cron",
+      "name": "Cron: Domingo 23:59",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH new_run AS (\n  INSERT INTO circle_sync_runs (status)\n  VALUES ('running')\n  RETURNING id AS run_id\n)\nSELECT\n  nr.run_id,\n  gs.user_id,\n  gs.email,\n  gs.full_name,\n  gs.circle_member_id,\n  gs.total_points,\n  gs.circle_last_synced_pts,\n  gs.delta_points\nFROM new_run nr\nLEFT JOIN gamification_sync gs\n  ON gs.delta_points >= 10\n  AND gs.circle_member_id IS NOT NULL;",
+        "options": {}
+      },
+      "id": "sql-init",
+      "name": "1. SQL: crear run + obtener usuarios",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [420, 400],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-db",
+          "name": "Supabase Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.user_id }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-has-users",
+      "name": "2. ¿Hay usuarios pendientes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [640, 400]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "outer-loop",
+      "name": "3. Loop por usuario",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [860, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calcula las tags binarias necesarias para acreditar el delta del usuario.\n//\n// Denominaciones: [10, 20, 40, 80] — potencias de 2 × 10.\n// Subsets sin repetición cubren cualquier múltiplo de 10 entre 10 y 150.\n//\n// Cada tag aplicada al miembro dispara una automatización en Circle que:\n//   1. Suma X puntos al miembro\n//   2. Remueve la tag (para que pueda re-aplicarse la próxima semana)\n//\n// Algoritmo greedy: de mayor a menor, agrega la denominación si cabe.\n// Ejemplos:\n//   delta=15  → tags:['pts-10']                              credited=10  (carry 5)\n//   delta=30  → tags:['pts-20','pts-10']                     credited=30\n//   delta=75  → tags:['pts-40','pts-20','pts-10']            credited=70  (carry 5)\n//   delta=150 → tags:['pts-80','pts-40','pts-20','pts-10']   credited=150\n//   delta=545 → tags:['pts-80','pts-40','pts-20','pts-10']   credited=150 (carry 395 → varias semanas)\n\nconst user = $input.item.json;\nconst delta = user.delta_points;\nconst denominations = [80, 40, 20, 10];\n\nconst tagsToApply = [];\nlet credited = 0;\nlet remaining = delta;\n\nfor (const value of denominations) {\n  if (value <= remaining) {\n    tagsToApply.push(`pts-${value}`);\n    credited += value;\n    remaining -= value;\n  }\n}\n\n// Emite UN SOLO ITEM con el array completo de tags.\n// El siguiente nodo hace UNA llamada API con todas las tags al miembro.\nreturn [{\n  json: {\n    run_id: user.run_id,\n    user_id: user.user_id,\n    email: user.email,\n    circle_member_id: user.circle_member_id,\n    total_points: user.total_points,\n    delta_points: delta,\n    circle_last_synced_pts: user.circle_last_synced_pts,\n    tags_to_apply: tagsToApply,\n    credited,\n    new_circle_last_synced_pts: user.circle_last_synced_pts + credited\n  }\n}];"
+      },
+      "id": "calculate-tags",
+      "name": "4. Calcular tags binarias",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1080, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.credited }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-credited",
+      "name": "5. ¿credited > 0?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1300, 400]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://app.circle.so/api/v1/community_members/' + $json.circle_member_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Token {{ $env.CIRCLE_API_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"community_id\": \"{{ $env.CIRCLE_COMMUNITY_ID }}\",\n  \"tag_names\": {{ JSON.stringify($json.tags_to_apply) }}\n}",
+        "options": {
+          "retry": {
+            "maxTries": 3,
+            "waitBetweenTries": 2000
+          }
+        }
+      },
+      "id": "apply-tags",
+      "name": "6. PATCH miembro con todas las tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1520, 340],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "amount": 1100,
+        "unit": "ms"
+      },
+      "id": "wait-rate-limit",
+      "name": "7. Wait 1.1s (rate limit Circle)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1740, 340],
+      "webhookId": "wait-rate-limit"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE profiles\nSET circle_last_synced_pts = $1\nWHERE id = $2;",
+        "options": {
+          "queryReplacement": "={{ $json.new_circle_last_synced_pts }},{{ $json.user_id }}"
+        }
+      },
+      "id": "update-pts",
+      "name": "8. SQL: actualizar circle_last_synced_pts",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1960, 340],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-db",
+          "name": "Supabase Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE circle_sync_runs\nSET\n  status = 'completed',\n  completed_at = NOW(),\n  users_processed = (\n    SELECT COUNT(*)::INT\n    FROM profiles\n    WHERE circle_member = true\n      AND circle_member_id IS NOT NULL\n      AND total_points - circle_last_synced_pts >= 10\n  )\nWHERE id = $1;",
+        "options": {
+          "queryReplacement": "={{ $('1. SQL: crear run + obtener usuarios').first().json.run_id }}"
+        }
+      },
+      "id": "finish-run",
+      "name": "9. SQL: cerrar run como completed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1080, 660],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-db",
+          "name": "Supabase Postgres"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron: Domingo 23:59": {
+      "main": [[{ "node": "1. SQL: crear run + obtener usuarios", "type": "main", "index": 0 }]]
+    },
+    "1. SQL: crear run + obtener usuarios": {
+      "main": [[{ "node": "2. ¿Hay usuarios pendientes?", "type": "main", "index": 0 }]]
+    },
+    "2. ¿Hay usuarios pendientes?": {
+      "main": [
+        [{ "node": "3. Loop por usuario", "type": "main", "index": 0 }],
+        [{ "node": "9. SQL: cerrar run como completed", "type": "main", "index": 0 }]
+      ]
+    },
+    "3. Loop por usuario": {
+      "main": [
+        [{ "node": "9. SQL: cerrar run como completed", "type": "main", "index": 0 }],
+        [{ "node": "4. Calcular tags binarias", "type": "main", "index": 0 }]
+      ]
+    },
+    "4. Calcular tags binarias": {
+      "main": [[{ "node": "5. ¿credited > 0?", "type": "main", "index": 0 }]]
+    },
+    "5. ¿credited > 0?": {
+      "main": [
+        [{ "node": "6. PATCH miembro con todas las tags", "type": "main", "index": 0 }],
+        [{ "node": "3. Loop por usuario", "type": "main", "index": 0 }]
+      ]
+    },
+    "6. PATCH miembro con todas las tags": {
+      "main": [[{ "node": "7. Wait 1.1s (rate limit Circle)", "type": "main", "index": 0 }]]
+    },
+    "7. Wait 1.1s (rate limit Circle)": {
+      "main": [[{ "node": "8. SQL: actualizar circle_last_synced_pts", "type": "main", "index": 0 }]]
+    },
+    "8. SQL: actualizar circle_last_synced_pts": {
+      "main": [[{ "node": "3. Loop por usuario", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true,
+    "timezone": "America/Guayaquil"
+  },
+  "pinData": {},
+  "meta": {
+    "description": "LeanProcess → Circle.so points sync (batch semanal único, queries SQL directos).\n\nFlujo simplificado a 9 nodos:\n  1. CRON dispara domingo 23:59\n  2. SQL: INSERT en circle_sync_runs + LEFT JOIN gamification_sync (1 sola query)\n  3. IF: ¿user_id no es null? → hay usuarios; null → ir directo a 9\n  4. Loop por usuario\n  5. Code: calcula tags binarias del delta\n  6. IF credited > 0 → 7; sino → siguiente iteración\n  7. PATCH /community_members/:id con tag_names: [...] (1 sola llamada con todas las tags)\n  8. Wait 1.1s (rate limit Circle = 60 req/min)\n  9. SQL UPDATE: circle_last_synced_pts += credited\n     (loop back)\n  10. SQL UPDATE: cierra run con status='completed' y users_processed\n\nVariables de entorno requeridas (N8N → Settings → Variables):\n  CIRCLE_API_TOKEN          → token de admin de Circle\n  CIRCLE_COMMUNITY_ID       → ID numérico de la comunidad\n\nCredenciales N8N requeridas:\n  postgres → 'Supabase Postgres'\n    Connection string desde Supabase Dashboard:\n    Settings → Database → Connection string (Direct connection o Session pooler)\n\nSetup en Circle (una sola vez):\n  1. Crear 4 member tags: pts-10, pts-20, pts-40, pts-80\n  2. Crear 4 automatizaciones, una por tag:\n     Trigger: 'Member tag added: pts-X'\n     Actions:\n       a) Award X points to the member\n       b) Remove tag pts-X from the member  ← clave para re-aplicabilidad\n\nFallback si Circle rechaza el endpoint PATCH:\n  - Probar 'POST /community_members/:id/community_member_tags' con body { tag_names: [...] }\n  - Si Circle solo acepta UN tag por llamada, hay que reintroducir un loop interno por tag."
+  }
+}

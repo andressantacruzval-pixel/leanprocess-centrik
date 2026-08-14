@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+/* El fondo oscuro se pintaba en un div dentro de #root, asi que al rebotar el scroll
+   (el overscroll de macOS, arriba o de lado) asomaba el lienzo del navegador en blanco.
+   El fondo de `html` es el que el navegador propaga al lienzo: aqui se ve una sola vez. */
+html {
+  background-color: #070b14;
+}
+
+/* Floating word cloud animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-8px) translateX(4px);
+  }
+  50% {
+    transform: translateY(4px) translateX(-6px);
+  }
+  75% {
+    transform: translateY(-4px) translateX(3px);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+/* Orbital ring animation */
+@keyframes orbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-orbit {
+  animation: orbit 20s linear infinite;
+}
+
+.animate-orbit-reverse {
+  animation: orbit 15s linear infinite reverse;
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.25);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Toast slide-in animation */
+@keyframes toast-slide-in {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-toast-slide-in {
+  animation: toast-slide-in 0.3s ease-out;
+}
+
+/* Entrada de un modal: el fondo se funde y la lámina sube un poco al aparecer.
+   Van SEPARADAS porque tienen ritmos distintos — el fondo se limita a apagar lo
+   de detrás y la lámina es lo que hay que mirar, así que llega con una curva de
+   salida marcada y un desplazamiento corto. Solo `opacity` y `transform`: nada
+   que obligue al navegador a recalcular el diseño. */
+@keyframes modal-fondo {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-lamina {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.animate-modal-fondo {
+  animation: modal-fondo 180ms ease-out both;
+}
+
+.animate-modal-lamina {
+  animation: modal-lamina 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Quien pide menos movimiento no lo pide por gusto: para algunas personas una
+   animación de entrada provoca mareo. Se conserva el fundido, que no desplaza
+   nada, y desaparece el movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-modal-lamina {
+    animation: modal-fondo 120ms ease-out both;
+  }
+  .animate-toast-slide-in {
+    animation: modal-fondo 120ms ease-out both;
+  }
+}
+
+/* Safari en iOS hace zoom sobre la página al enfocar un control con fuente < 16px, y
+   deja al usuario dentro de un formulario ampliado del que tiene que salir a mano. La
+   app usa tamaños pequeños en los filtros y en casi todos sus formularios, así que se
+   arregla una vez aquí y no pantalla por pantalla. Solo bajo puntero grueso: en
+   escritorio los tamaños compactos se quedan como están. */
+@media (pointer: coarse) {
+  select,
+  input,
+  textarea {
+    font-size: 16px;
+  }
+
+  /* Los botones de zoom de ReactFlow miden 26px por CSS de la librería, y en el
+     organigrama son el único modo de acercar o encuadrar con el dedo. */
+  .react-flow__controls-button {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Custom scrollbar for dark panels */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Scrollbar oscuro global — aplica a todos los elementos scrollables del sistema */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Dark theme for native select options */
+select option {
+  background-color: #0b1020;
+  color: white;
+}

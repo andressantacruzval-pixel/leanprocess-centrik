@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - 'Downloads/LeanProcess-v0.1.0-produccion (1)/**'
+  pull_request:
+    paths:
+      - 'Downloads/LeanProcess-v0.1.0-produccion (1)/**'
+
+defaults:
+  run:
+    working-directory: 'Downloads/LeanProcess-v0.1.0-produccion (1)'
+
+jobs:
+  ci:
+    name: Build, Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'Downloads/LeanProcess-v0.1.0-produccion (1)/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc -b
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
