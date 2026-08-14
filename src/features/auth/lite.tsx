@@ -15,21 +15,25 @@ import { PageSpinner } from '@/components/ui/PageSpinner'
  * allí. `VITE_LITE_URL` sigue mandando por encima de las dos, para apuntar a un
  * preview concreto.
  *
- * DESARROLLO LOCAL: si corres en localhost y NO fijas `VITE_LITE_URL`, no hay
- * Hub externo que valga, así que la propia App hace de puerta: login/registro
- * van a las rutas locales `/login` y `/register` (ver `LocalLoginPage`). En
- * cuanto defines `VITE_LITE_URL` (p. ej. para un preview real de Lite), esa
- * URL manda y este atajo local se desactiva.
+ * DESARROLLO LOCAL / DESPLIEGUE AISLADO: si corres en localhost —o fijas el flag
+ * `VITE_STANDALONE_AUTH=1` en un despliegue de prueba— y NO fijas `VITE_LITE_URL`,
+ * no hay Hub externo que valga, así que la propia App hace de puerta:
+ * login/registro van a las rutas `/login` y `/register` (ver `LocalLoginPage`).
+ * En cuanto defines `VITE_LITE_URL` (p. ej. para un preview real de Lite), esa
+ * URL manda y este atajo se desactiva.
  */
 export const EN_LOCAL =
   typeof window !== 'undefined' &&
   ['localhost', '127.0.0.1'].includes(window.location.hostname)
 
+/** Flag para activar el login propio de la App en un despliegue aislado (no-localhost). */
+const STANDALONE_AUTH = import.meta.env.VITE_STANDALONE_AUTH === '1'
+
 /** Hay un Lite externo declarado explícitamente. */
 const LITE_OVERRIDE = import.meta.env.VITE_LITE_URL as string | undefined
 
-/** En local sin override, la autenticación la resuelve la propia App. */
-export const LOCAL_AUTH = EN_LOCAL && !LITE_OVERRIDE
+/** La autenticación la resuelve la propia App (local o despliegue standalone), sin Hub. */
+export const LOCAL_AUTH = (EN_LOCAL || STANDALONE_AUTH) && !LITE_OVERRIDE
 
 const LITE_URL =
   LITE_OVERRIDE ?? (EN_LOCAL ? 'http://localhost:3000' : 'https://www.leanprocess.app')

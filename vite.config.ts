@@ -20,6 +20,9 @@ const VENDOR_CHUNKS: Record<string, string[]> = {
 }
 
 export default defineConfig({
+  // Base pública. En GitHub Pages (proyecto) la app vive bajo /<repo>/, así que
+  // el workflow de deploy fija VITE_BASE. En local/otros hosts queda en '/'.
+  base: process.env.VITE_BASE || '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

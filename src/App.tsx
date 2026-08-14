@@ -182,7 +182,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
-        <BrowserRouter>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Suspense fallback={<PageSpinner />}>
           <Routes>
             <Route path="/" element={<Landing />} />
