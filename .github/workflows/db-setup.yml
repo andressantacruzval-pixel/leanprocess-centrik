@@ -1,0 +1,74 @@
+name: DB setup (one-shot)
+
+# Aplica las migraciones a un proyecto Supabase, habilita un correo de acceso en
+# la whitelist y crea un usuario de prueba ya confirmado. Se corre a mano y una
+# sola vez. La URI de la BD se pasa como input (enmascarado) — NO se versiona.
+on:
+  workflow_dispatch:
+    inputs:
+      db_url:
+        description: 'Supabase Postgres URI (session pooler, con contraseña)'
+        required: true
+      dev_email:
+        description: 'Correo de acceso de prueba'
+        required: true
+        default: 'dev@local.test'
+      dev_password:
+        description: 'Contraseña de acceso de prueba (mín. 6)'
+        required: true
+        default: 'password123'
+
+concurrency:
+  group: db-setup
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://swwthzbnmpylxjqnlzdt.supabase.co
+      SUPABASE_ANON: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3d3RoemJubXB5bHhqcW5semR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2NzE3ODAsImV4cCI6MjEwMjI0Nzc4MH0.zWNJYz3EEmNyBYgrJFNHlOERw02qo30-LqD1PEzwcEE
+      DB_URL: ${{ inputs.db_url }}
+      DEV_EMAIL: ${{ inputs.dev_email }}
+      DEV_PW: ${{ inputs.dev_password }}
+    steps:
+      - name: Mask DB URL in logs
+        run: echo "::add-mask::${{ inputs.db_url }}"
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply migrations (supabase db push)
+        run: npx --yes supabase@latest db push --db-url "$DB_URL" --include-all
+
+      - name: Whitelist dev email
+        run: |
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO public.community_whitelist (email,status,nombre,plan_final)
+             VALUES ('${DEV_EMAIL}','activo','Dev Local','community')
+             ON CONFLICT (email) DO NOTHING;"
+
+      - name: Create test user (signup) and confirm email
+        run: |
+          echo "Signing up ${DEV_EMAIL}..."
+          code=$(curl -sS -X POST "$SUPABASE_URL/auth/v1/signup" \
+            -H "apikey: $SUPABASE_ANON" -H "Content-Type: application/json" \
+            -d "{\"email\":\"${DEV_EMAIL}\",\"password\":\"${DEV_PW}\",\"data\":{\"full_name\":\"Dev Local\"}}" \
+            -o /tmp/signup.json -w "%{http_code}") || true
+          echo "signup HTTP ${code}"
+          head -c 400 /tmp/signup.json; echo
+          # Marcar el correo como confirmado para poder iniciar sesión sin email.
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -c \
+            "UPDATE auth.users SET email_confirmed_at = COALESCE(email_confirmed_at, now())
+             WHERE email = '${DEV_EMAIL}';"
+          echo "Usuario listo."
+
+      - name: Sanity check (tables + user)
+        run: |
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -c \
+            "select 'companies' as t, count(*) from public.companies
+             union all select 'profiles', count(*) from public.profiles
+             union all select 'whitelisted', count(*) from public.community_whitelist;"
