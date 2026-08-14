@@ -28,12 +28,19 @@ jobs:
     env:
       SUPABASE_URL: https://swwthzbnmpylxjqnlzdt.supabase.co
       SUPABASE_ANON: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3d3RoemJubXB5bHhqcW5semR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2NzE3ODAsImV4cCI6MjEwMjI0Nzc4MH0.zWNJYz3EEmNyBYgrJFNHlOERw02qo30-LqD1PEzwcEE
-      DB_URL: ${{ inputs.db_url }}
-      DEV_EMAIL: ${{ inputs.dev_email }}
-      DEV_PW: ${{ inputs.dev_password }}
+      DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      DEV_EMAIL: ${{ inputs.dev_email || 'dev@local.test' }}
+      DEV_PW: ${{ inputs.dev_password || 'password123' }}
     steps:
       - name: Mask DB URL in logs
-        run: echo "::add-mask::${{ inputs.db_url }}"
+        run: echo "::add-mask::${{ secrets.SUPABASE_DB_URL }}"
+
+      - name: Check secret present
+        run: |
+          if [ -z "$DB_URL" ]; then
+            echo "Falta el secreto SUPABASE_DB_URL (Settings → Secrets and variables → Actions)." >&2
+            exit 1
+          fi
 
       - uses: actions/checkout@v4
 
