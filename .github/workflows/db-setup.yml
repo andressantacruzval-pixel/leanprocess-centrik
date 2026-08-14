@@ -4,6 +4,9 @@ name: DB setup (one-shot)
 # la whitelist y crea un usuario de prueba ya confirmado. Se corre a mano y una
 # sola vez. La URI de la BD se pasa como input (enmascarado) — NO se versiona.
 on:
+  push:
+    branches: [claude/desplegar-app-local-j8wbqf]
+    paths: ['.github/workflows/db-setup.yml']
   workflow_dispatch:
     inputs:
       db_url:
