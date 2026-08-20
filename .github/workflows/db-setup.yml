@@ -15,7 +15,7 @@ on:
       dev_email:
         description: 'Correo de acceso de prueba'
         required: true
-        default: 'dev@local.test'
+        default: 'demo@leanprocess.app'
       dev_password:
         description: 'Contraseña de acceso de prueba (mín. 6)'
         required: true
@@ -32,7 +32,7 @@ jobs:
       SUPABASE_URL: https://swwthzbnmpylxjqnlzdt.supabase.co
       SUPABASE_ANON: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3d3RoemJubXB5bHhqcW5semR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2NzE3ODAsImV4cCI6MjEwMjI0Nzc4MH0.zWNJYz3EEmNyBYgrJFNHlOERw02qo30-LqD1PEzwcEE
       DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-      DEV_EMAIL: ${{ inputs.dev_email || 'dev@local.test' }}
+      DEV_EMAIL: ${{ inputs.dev_email || 'demo@leanprocess.app' }}
       DEV_PW: ${{ inputs.dev_password || 'password123' }}
     steps:
       - name: Mask DB URL in logs
