@@ -82,3 +82,5 @@ jobs:
             "select 'companies' as t, count(*) from public.companies
              union all select 'profiles', count(*) from public.profiles
              union all select 'whitelisted', count(*) from public.community_whitelist;"
+
+# retrigger a7bd3eb
