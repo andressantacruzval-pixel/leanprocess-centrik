@@ -84,3 +84,5 @@ jobs:
              union all select 'whitelisted', count(*) from public.community_whitelist;"
 
 # retrigger a7bd3eb
+
+# retrigger con secreto 1787269386
