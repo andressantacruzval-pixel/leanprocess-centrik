@@ -4,6 +4,8 @@ name: Deploy to GitHub Pages
 # GitHub Pages. La base pública es /<repo>/ y el login lo resuelve la propia app
 # (VITE_STANDALONE_AUTH=1), sin depender del Hub Lite externo.
 on:
+  push:
+    branches: [claude/desplegar-app-local-j8wbqf]
   workflow_dispatch:
 
 permissions:
