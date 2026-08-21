@@ -27,6 +27,7 @@ import { ChangeTimelinePanel } from '@/components/timeline/ChangeTimeline'
 import { generateProcessObjective } from '@/lib/claude'
 import { formatDate } from '@/utils/helpers'
 import { BpmnModeler } from '@/features/bpmn/components/BpmnModeler'
+import { CargoLanesPanel } from '@/features/cargos/components/CargoLanesPanel'
 import BpmnPalette from '@/components/workspace/BpmnPalette'
 import type { BpmnModelerInstance, BpmnCommandStack } from '@/types/bpmn'
 import { ProcedureTab } from '@/features/procedure/components/ProcedureTab'
@@ -666,6 +667,7 @@ export default function ProcessCharacterizationPage() {
             hidePalette
             className="h-full"
           />
+          <CargoLanesPanel modeler={modelerInstance} readOnly={readOnly} />
           <ChangeTimelinePanel
             processId={process.id}
             open={timelineOpen}

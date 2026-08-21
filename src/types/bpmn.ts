@@ -60,6 +60,7 @@ export interface BpmnModeling {
   moveShape(shape: BpmnElement, delta: { x: number; y: number }): void
   updateWaypoints(connection: BpmnElement, waypoints: Array<{ x: number; y: number }>): void
   addLane(participant: BpmnElement, location: 'top' | 'bottom'): BpmnElement
+  updateProperties(element: BpmnElement, properties: Record<string, unknown>): void
 }
 
 export interface BpmnElementFactory {
