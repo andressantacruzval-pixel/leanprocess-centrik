@@ -16,6 +16,7 @@ import { useIndicatorStore } from '@/stores/indicatorStore'
 import { useProcedureStore } from '@/stores/procedureStore'
 import { useAuditStore } from '@/stores/auditStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
+import { useImprovementStore } from '@/stores/improvementStore'
 
 export function useCompanyScopedData() {
   const activeCompanyId = useWorkspaceStore((s) => s.activeCompanyId)
@@ -28,6 +29,7 @@ export function useCompanyScopedData() {
   const allProcedures = useProcedureStore((s) => s.procedures)
   const allAudits = useAuditStore((s) => s.audits)
   const allAnalyses = useValueAnalysisStore((s) => s.analyses)
+  const allImprovements = useImprovementStore((s) => s.opportunities)
 
   // Company-scoped processes and macroprocesses
   const macroprocesses = useMemo(
@@ -84,6 +86,12 @@ export function useCompanyScopedData() {
     return scoped
   }, [allAnalyses, processIds])
 
+  // Improvement opportunities scoped by process ownership
+  const improvements = useMemo(
+    () => allImprovements.filter((o) => processIds.has(o.processId)),
+    [allImprovements, processIds]
+  )
+
   return {
     activeCompanyId,
     macroprocesses,
@@ -94,5 +102,6 @@ export function useCompanyScopedData() {
     procedures,
     audits,
     analyses,
+    improvements,
   }
 }

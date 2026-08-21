@@ -415,6 +415,86 @@ Solo JSON, sin markdown.` }],
   }
 }
 
+// ── Improvement opportunities ─────────────────────────────────────────────
+
+export interface AiImprovementOpportunity {
+  name: string
+  description: string
+  /** 1/3/5 — 5 = muy bueno (bajo costo). */
+  costScore: number
+  /** 1/3/5 — 5 = muy bueno (baja complejidad). */
+  complexityScore: number
+  /** 1/3/5 — 5 = muy bueno (corto tiempo). */
+  timeScore: number
+}
+
+/**
+ * Identifica oportunidades de mejora del proceso a partir del análisis de
+ * riesgos y del mapeo de flujo de valor. Cada oportunidad trae tres variables
+ * cualitativas puntuadas 1/3/5 (5 = muy bueno / conveniente).
+ */
+export async function generateImprovementOpportunities(input: {
+  processName: string
+  companyName?: string
+  bpmnSummary?: string
+  risks: { title: string; level: string; processStep?: string }[]
+  valueActivities: { name: string; classification: string | null }[]
+}): Promise<AiImprovementOpportunity[]> {
+  const risksBlock = input.risks.length > 0
+    ? input.risks.map((r) => `- [${r.level}] ${r.title}${r.processStep ? ` (paso: ${r.processStep})` : ''}`).join('\n')
+    : '(Sin riesgos identificados)'
+
+  const valueBlock = input.valueActivities.length > 0
+    ? input.valueActivities.map((a) => `- ${a.name} → ${a.classification ?? 'sin clasificar'}`).join('\n')
+    : '(Sin análisis de valor)'
+
+  const { text } = await callGemini(
+    [{ role: 'user', content: `Analiza el proceso "${sanitizePromptInput(input.processName)}"${input.companyName ? ` de la empresa "${sanitizePromptInput(input.companyName)}"` : ''} e identifica oportunidades de mejora concretas y accionables.
+
+${input.bpmnSummary ? `RESUMEN DEL FLUJOGRAMA:\n${input.bpmnSummary}\n` : ''}
+RIESGOS IDENTIFICADOS:
+${risksBlock}
+
+MAPEO DE FLUJO DE VALOR (VA = valor agregado, NVA = desperdicio, NVABN = necesario sin valor):
+${valueBlock}
+
+TAREA:
+1. Prioriza eliminar/reducir las actividades NVA (desperdicio) y mitigar los riesgos de nivel alto/extremo.
+2. Propón entre 4 y 8 oportunidades de mejora ESPECÍFICAS para este proceso (no genéricas).
+3. Para cada una, evalúa TRES variables con una escala 1/3/5 donde 5 es LO MEJOR (más conveniente) y 1 lo peor:
+   - costScore: 5 = costo de implementación BAJO, 3 = medio, 1 = alto.
+   - complexityScore: 5 = complejidad de implementación BAJA, 3 = media, 1 = alta.
+   - timeScore: 5 = tiempo de implementación CORTO, 3 = medio, 1 = largo.
+
+Responde ÚNICAMENTE un JSON array:
+[
+  {
+    "name": "Título breve de la oportunidad",
+    "description": "Descripción desarrollada (2-4 frases): qué hacer, cómo y qué problema/riesgo/desperdicio ataca.",
+    "costScore": 1|3|5,
+    "complexityScore": 1|3|5,
+    "timeScore": 1|3|5
+  }
+]
+
+REGLAS:
+- Responde EXCLUSIVAMENTE en español.
+- Usa SOLO los valores 1, 3 o 5 en los tres puntajes.
+- Basa cada oportunidad en los riesgos y/o el mapeo de valor reales de arriba.
+- La descripción debe estar bien redactada y ser útil para un plan de acción.` }],
+    'Eres un consultor senior de mejora continua (Lean Six Sigma Black Belt) especializado en optimización de procesos y planes de acción.',
+    'improvement_opportunities'
+  )
+
+  try {
+    const parsed = JSON.parse(cleanJson(text)) as AiImprovementOpportunity[]
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    console.error('[improvement] Failed to parse AI response:', text.slice(0, 200))
+    return []
+  }
+}
+
 // ── Text improvement ──────────────────────────────────────────────────────
 
 export async function improveText(sectionContext: string, currentText: string): Promise<string> {

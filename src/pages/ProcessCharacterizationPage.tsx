@@ -34,6 +34,7 @@ import { IndicatorsTab } from '@/features/kpi/components/IndicatorsTab'
 import { RiskPanel } from '@/features/risk/components/RiskPanel'
 import { AuditTab } from '@/features/audit/components/AuditTab'
 import { ValueAnalysisTab } from '@/features/value-analysis/components/ValueAnalysisTab'
+import { ImprovementTab } from '@/features/improvement/components/ImprovementTab'
 import type { Process } from '@/types'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { CharacterizationPanel } from '@/features/process/components/CharacterizationPanel'
@@ -88,7 +89,7 @@ export default function ProcessCharacterizationPage() {
   const [exportCoords, setExportCoords] = useState<{ top: number; left: number } | null>(null)
   const [rightPanel, setRightPanel] = useState<RightPanelTab>(() => {
     const tab = searchParams.get('tab')
-    const valid: RightPanelTab[] = ['info', 'procedimiento', 'indicadores', 'riesgos', 'auditoria', 'analisis']
+    const valid: RightPanelTab[] = ['info', 'procedimiento', 'indicadores', 'riesgos', 'auditoria', 'analisis', 'mejoras']
     return valid.includes(tab as RightPanelTab) ? (tab as RightPanelTab) : null
   })
   const [panelExpanded, setPanelExpanded] = useState(false)
@@ -706,6 +707,7 @@ export default function ProcessCharacterizationPage() {
                 {rightPanel === 'riesgos'      && 'Gestion de Riesgos'}
                 {rightPanel === 'auditoria'    && 'Programa de Auditoria'}
                 {rightPanel === 'analisis'     && 'Analisis de Valor'}
+                {rightPanel === 'mejoras'      && 'Oportunidades de Mejora'}
               </h3>
               <div className="flex items-center gap-1">
                 {rightPanel !== 'info' && (
@@ -794,6 +796,16 @@ export default function ProcessCharacterizationPage() {
                   bpmnXml={hasBpmn ? bpmnXml : undefined}
                   isExpanded={panelExpanded}
                 />
+              )}
+              {rightPanel === 'mejoras' && (
+                <ErrorBoundary>
+                  <ImprovementTab
+                    processId={processId!}
+                    processName={process.name}
+                    bpmnXml={hasBpmn ? bpmnXml : undefined}
+                    isExpanded={panelExpanded}
+                  />
+                </ErrorBoundary>
               )}
             </div>
           </div>

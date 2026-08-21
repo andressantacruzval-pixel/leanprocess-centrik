@@ -2006,6 +2006,81 @@ export type Database = {
         }
         Relationships: []
       }
+      improvement_opportunities: {
+        Row: {
+          close_date: string | null
+          company_id: string
+          complexity_score: number
+          cost_score: number
+          created_at: string
+          description: string
+          end_date: string | null
+          id: string
+          name: string
+          process_id: string
+          progress_notes: string
+          progress_pct: number
+          responsible: string | null
+          start_date: string | null
+          status: string
+          time_score: number
+          updated_at: string
+        }
+        Insert: {
+          close_date?: string | null
+          company_id: string
+          complexity_score?: number
+          cost_score?: number
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          name: string
+          process_id: string
+          progress_notes?: string
+          progress_pct?: number
+          responsible?: string | null
+          start_date?: string | null
+          status?: string
+          time_score?: number
+          updated_at?: string
+        }
+        Update: {
+          close_date?: string | null
+          company_id?: string
+          complexity_score?: number
+          cost_score?: number
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          name?: string
+          process_id?: string
+          progress_notes?: string
+          progress_pct?: number
+          responsible?: string | null
+          start_date?: string | null
+          status?: string
+          time_score?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "improvement_opportunities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "improvement_opportunities_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       value_activities: {
         Row: {
           bpmn_node_id: string | null

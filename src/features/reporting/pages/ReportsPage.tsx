@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import {
   FileText, ShieldAlert, TrendingUp, Activity, ClipboardCheck,
-  Download, Search, X, BarChart3,
+  Download, Search, X, BarChart3, Lightbulb,
 } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -17,8 +17,13 @@ import type { Macroprocess, Process } from '@/types/process'
 import type { StoredIndicator } from '@/stores/indicatorStore'
 import type { StoredProcedure } from '@/stores/procedureStore'
 import type { AuditItem } from '@/lib/procedureAi'
+import { useImprovementStore } from '@/stores/improvementStore'
+import {
+  type ImprovementOpportunity, type ImprovementStatus,
+  STATUS_LABELS, STATUS_OPTIONS, priorityScore, priorityLabel,
+} from '@/types/improvement'
 
-type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria'
+type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras'
 
 const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'inventario', label: 'Inventario', icon: FileText },
@@ -26,6 +31,7 @@ const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'kpis', label: 'KPIs', icon: TrendingUp },
   { key: 'valor', label: 'Valor', icon: Activity },
   { key: 'auditoria', label: 'Auditoria', icon: ClipboardCheck },
+  { key: 'mejoras', label: 'Mejoras', icon: Lightbulb },
 ]
 
 export default function ReportsPage() {
@@ -43,7 +49,9 @@ export default function ReportsPage() {
     macroprocesses, processes,
     risks: allRisks, indicators: allIndicators,
     procedures: allProcedures, audits: allAudits, analyses: allAnalyses,
+    improvements: allImprovements,
   } = useCompanyScopedData()
+  const updateOpportunity = useImprovementStore((s) => s.updateOpportunity)
 
   const macroMap = useMemo(() => new Map(macroprocesses.map(m => [m.id, m])), [macroprocesses])
   const processMap = useMemo(() => new Map(processes.map(p => [p.id, p])), [processes])
@@ -177,6 +185,7 @@ export default function ReportsPage() {
           {activeTab === 'kpis' && <KpisReport processes={filteredProcesses} macroMap={macroMap} allIndicators={allIndicators} />}
           {activeTab === 'valor' && <ValueReport processes={filteredProcesses} macroMap={macroMap} allAnalyses={allAnalyses} />}
           {activeTab === 'auditoria' && <AuditReport processes={filteredProcesses} macroMap={macroMap} allAudits={allAudits} />}
+          {activeTab === 'mejoras' && <ImprovementsReport processes={filteredProcesses} allImprovements={allImprovements} onUpdate={updateOpportunity} />}
         </div>
       )}
     </div>
@@ -418,6 +427,85 @@ function AuditReport({ processes, allAudits }: { processes: Process[]; macroMap?
         ))}
         {rows.length === 0 && <EmptyRow cols={9} />}
         <VerMasRow cols={9} ocultas={ocultas} onVerMas={verMas} />
+      </tbody>
+    </table>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// IMPROVEMENTS REPORT (planes de acción — gestión)
+// ═══════════════════════════════════════════════════════════════════════
+
+function ImprovementsReport({
+  processes, allImprovements, onUpdate,
+}: {
+  processes: Process[]
+  allImprovements: ImprovementOpportunity[]
+  onUpdate: (id: string, updates: Partial<ImprovementOpportunity>) => void
+}) {
+  const rows = useMemo(() => {
+    const byProcess = new Set(processes.map((p) => p.id))
+    const pMap = new Map(processes.map((p) => [p.id, p]))
+    return allImprovements
+      .filter((o) => byProcess.has(o.processId))
+      .map((o) => ({ o, process: pMap.get(o.processId)! }))
+  }, [processes, allImprovements])
+
+  const { visibles, ocultas, verMas } = useVerMas(rows)
+  const inputCls = 'bg-white/5 border border-white/10 rounded px-1.5 py-1 text-[11px] text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/40'
+
+  return (
+    <table className="w-full text-left min-w-[1300px]">
+      <thead>
+        <tr className="bg-white/[0.03] border-b border-white/5">
+          <Th>Gerencia</Th><Th>Proceso</Th><Th>Oportunidad</Th><Th>Prioridad</Th>
+          <Th>Costo</Th><Th>Compl.</Th><Th>Tiempo</Th><Th>Responsable</Th>
+          <Th>Inicio</Th><Th>Fin</Th><Th>Estado</Th><Th>Avance</Th><Th>Cierre</Th>
+        </tr>
+      </thead>
+      <tbody>
+        {visibles.map(({ o, process }) => {
+          const total = priorityScore(o)
+          const prio = priorityLabel(total)
+          return (
+            <tr key={o.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
+              <Td>{process.management || '-'}</Td>
+              <Td className="max-w-[150px]"><div className="truncate">{process.name}</div></Td>
+              <Td className="text-white font-medium max-w-[240px]">
+                <div className="truncate" title={o.name}>{o.name}</div>
+                <div className="text-white/30 text-[10px] truncate max-w-[240px]" title={o.description}>{o.description}</div>
+              </Td>
+              <Td><span className="text-[10px] font-semibold">{total}/15 · {prio.label}</span></Td>
+              <Td>{o.costScore}</Td>
+              <Td>{o.complexityScore}</Td>
+              <Td>{o.timeScore}</Td>
+              <Td className="max-w-[120px]"><div className="truncate">{o.responsible || '-'}</div></Td>
+              <Td>{o.startDate || '-'}</Td>
+              <Td>{o.endDate || '-'}</Td>
+              <Td>
+                <select value={o.status} onChange={(e) => onUpdate(o.id, { status: e.target.value as ImprovementStatus })} className={inputCls}>
+                  {STATUS_OPTIONS.map((s) => <option key={s} value={s} className="bg-[#0a0f1a]">{STATUS_LABELS[s]}</option>)}
+                </select>
+              </Td>
+              <Td>
+                <input
+                  type="number" min={0} max={100} step={5} defaultValue={o.progressPct}
+                  onBlur={(e) => {
+                    const v = Math.max(0, Math.min(100, Number(e.target.value) || 0))
+                    if (v !== o.progressPct) onUpdate(o.id, { progressPct: v })
+                  }}
+                  className={inputCls + ' w-14'}
+                />
+                <span className="text-white/30 text-[10px]">%</span>
+              </Td>
+              <Td>
+                <input type="date" value={o.closeDate ?? ''} onChange={(e) => onUpdate(o.id, { closeDate: e.target.value || null })} className={inputCls} />
+              </Td>
+            </tr>
+          )
+        })}
+        {rows.length === 0 && <EmptyRow cols={13} />}
+        <VerMasRow cols={13} ocultas={ocultas} onVerMas={verMas} />
       </tbody>
     </table>
   )

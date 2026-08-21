@@ -1,4 +1,4 @@
-import { FileText, Book, BarChart3, ShieldAlert, ClipboardCheck, Activity } from 'lucide-react'
+import { FileText, Book, BarChart3, ShieldAlert, ClipboardCheck, Activity, Lightbulb } from 'lucide-react'
 import type { Process } from '@/types'
 
 // ─── Blank BPMN (Bizagi-compatible A4 Landscape: 1122 x 792) ─────────────
@@ -46,7 +46,7 @@ export const BLANK_BPMN = `<?xml version="1.0" encoding="UTF-8"?>
 
 // ─── Right panel tab types ────────────────────────────────────────────────
 
-export type RightPanelTab = 'info' | 'procedimiento' | 'indicadores' | 'riesgos' | 'auditoria' | 'analisis' | null
+export type RightPanelTab = 'info' | 'procedimiento' | 'indicadores' | 'riesgos' | 'auditoria' | 'analisis' | 'mejoras' | null
 
 export const TOOLBAR_TABS: {
   key: RightPanelTab
@@ -61,6 +61,7 @@ export const TOOLBAR_TABS: {
   { key: 'riesgos',      label: 'Riesgos',        icon: ShieldAlert,   requires: 'bpmn', requiresMessage: 'Necesitas un flujograma BPMN para identificar riesgos' },
   { key: 'auditoria',    label: 'Auditoria',      icon: ClipboardCheck, requires: 'bpmn', requiresMessage: 'Necesitas un flujograma BPMN para crear un programa de auditoria' },
   { key: 'analisis',     label: 'Valor',          icon: Activity,      requires: 'bpmn', requiresMessage: 'Necesitas un flujograma BPMN para hacer el analisis de valor' },
+  { key: 'mejoras',      label: 'Mejoras',        icon: Lightbulb },
 ]
 
 export const TOGGLE_FIELDS: { key: keyof Process; label: string }[] = [
