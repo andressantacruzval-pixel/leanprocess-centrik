@@ -372,3 +372,77 @@ html[data-theme="light"]{ background-color:#e9eff8; }
 :root[data-theme="light"] .text-orange-400{color:#ea580c !important}
 :root[data-theme="light"] .text-teal-400{color:#0d9488 !important}
 :root[data-theme="light"] .text-rose-400{color:#e11d48 !important}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ACENTOS FUERTES (cian de marca ProcessUp) — que se sienta "top", no lavado
+   ───────────────────────────────────────────────────────────────────────
+   Los tintes cian/azul a baja opacidad se volvían casi blancos sobre el
+   lienzo claro (bg-cyan-500/10 se usa 73 veces: estados activos, chips,
+   badges). Aquí se remapean a tintes cian CLAROS pero SATURADOS, con bordes
+   cian visibles y un GLOW cian en los botones primarios — el mismo lenguaje
+   bold de los toggles/botones, ahora en toda la app.
+   Los glows se definen DESPUÉS de las utilidades shadow-* para ganarles.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Tintes de fondo cian → claros pero saturados (activos/chips/badges) ── */
+:root[data-theme="light"] .bg-cyan-500\/5,
+:root[data-theme="light"] .bg-cyan-500\/\[0\.06\]{background-color:#e6f6fb !important}
+:root[data-theme="light"] .bg-cyan-500\/\[0\.04\]{background-color:#ecf8fc !important}
+:root[data-theme="light"] .bg-cyan-500\/\[0\.03\]{background-color:#f1fafd !important}
+:root[data-theme="light"] .bg-cyan-400\/\[0\.05\]{background-color:#e9f7fb !important}
+:root[data-theme="light"] .bg-cyan-500\/10{background-color:#d3eff7 !important}
+:root[data-theme="light"] .bg-cyan-500\/15{background-color:#bfe8f3 !important}
+:root[data-theme="light"] .bg-cyan-500\/20,
+:root[data-theme="light"] .bg-cyan-600\/20{background-color:#a9e0ef !important}
+:root[data-theme="light"] .bg-cyan-500\/25{background-color:#96d8eb !important}
+:root[data-theme="light"] .bg-cyan-400\/30{background-color:#8bd6ea !important}
+:root[data-theme="light"] .bg-cyan-500\/30,
+:root[data-theme="light"] .bg-cyan-600\/30{background-color:#7fcfe6 !important}
+:root[data-theme="light"] .bg-cyan-500\/60{background-color:#1fc2dc !important}
+
+/* ── Tintes azul → saturados ─────────────────────────────────────────── */
+:root[data-theme="light"] .bg-blue-500\/5,
+:root[data-theme="light"] .bg-blue-500\/\[0\.05\]{background-color:#edf3fe !important}
+:root[data-theme="light"] .bg-blue-500\/10{background-color:#dae7fd !important}
+:root[data-theme="light"] .bg-blue-500\/15{background-color:#c8ddfc !important}
+:root[data-theme="light"] .bg-blue-500\/20{background-color:#b5d2fb !important}
+
+/* ── Tintes teal → saturados ─────────────────────────────────────────── */
+:root[data-theme="light"] .bg-teal-500\/10{background-color:#d1efeb !important}
+:root[data-theme="light"] .bg-teal-500\/20{background-color:#a7e1d9 !important}
+
+/* ── Bordes cian/azul → visibles, con carácter de marca ──────────────── */
+:root[data-theme="light"] .border-cyan-500\/10{border-color:#cceaf3 !important}
+:root[data-theme="light"] .border-cyan-500\/20{border-color:#a3daeb !important}
+:root[data-theme="light"] .border-cyan-500\/25{border-color:#8ed3e7 !important}
+:root[data-theme="light"] .border-cyan-500\/30{border-color:#79cce4 !important}
+:root[data-theme="light"] .border-cyan-500\/40{border-color:#45bed9 !important}
+:root[data-theme="light"] .border-cyan-500\/50{border-color:#1fb0d2 !important}
+:root[data-theme="light"] .border-cyan-400\/60{border-color:#38bed8 !important}
+:root[data-theme="light"] .border-cyan-400\/50{border-color:#57c6dd !important}
+:root[data-theme="light"] .border-cyan-400\/40{border-color:#76cfe2 !important}
+:root[data-theme="light"] .border-blue-500\/20{border-color:#b5d2fb !important}
+:root[data-theme="light"] .border-blue-500\/30{border-color:#9bc1f8 !important}
+:root[data-theme="light"] .border-blue-400\/30{border-color:#a6caf7 !important}
+
+/* ── Focos (rings) cian → vívidos (feedback premium al enfocar) ──────── */
+:root[data-theme="light"] .ring-cyan-500\/50{--tw-ring-color:rgba(6,182,212,.60) !important}
+:root[data-theme="light"] .ring-cyan-500\/40{--tw-ring-color:rgba(6,182,212,.50) !important}
+:root[data-theme="light"] .ring-cyan-500\/30{--tw-ring-color:rgba(6,182,212,.42) !important}
+:root[data-theme="light"] .ring-cyan-500\/20{--tw-ring-color:rgba(6,182,212,.34) !important}
+
+/* ── GLOW cian en botones primarios (shadow-cyan-*): el “pop” premium.
+   Definido al final para ganar a los shadow-* generales. ─────────────── */
+:root[data-theme="light"] .shadow-cyan-500\/5{box-shadow:0 3px 12px -3px rgba(6,182,212,.22) !important}
+:root[data-theme="light"] .shadow-cyan-500\/10{box-shadow:0 4px 16px -4px rgba(6,182,212,.30) !important}
+:root[data-theme="light"] .shadow-cyan-500\/20{box-shadow:0 6px 20px -4px rgba(6,182,212,.40) !important}
+:root[data-theme="light"] .shadow-cyan-500\/25{box-shadow:0 6px 22px -4px rgba(6,182,212,.44) !important}
+:root[data-theme="light"] .shadow-cyan-500\/30{box-shadow:0 8px 24px -5px rgba(6,182,212,.48) !important}
+:root[data-theme="light"] .shadow-cyan-500\/40{box-shadow:0 8px 26px -5px rgba(6,182,212,.52) !important}
+:root[data-theme="light"] .shadow-cyan-500\/50{box-shadow:0 10px 30px -6px rgba(6,182,212,.56) !important}
+:root[data-theme="light"] .shadow-purple-500\/15{box-shadow:0 5px 18px -4px rgba(124,58,237,.28) !important}
+:root[data-theme="light"] .shadow-purple-500\/20{box-shadow:0 6px 20px -4px rgba(124,58,237,.34) !important}
+:root[data-theme="light"] .shadow-purple-500\/30{box-shadow:0 8px 24px -5px rgba(124,58,237,.42) !important}
+:root[data-theme="light"] .shadow-emerald-500\/20{box-shadow:0 6px 20px -4px rgba(16,185,129,.34) !important}
+:root[data-theme="light"] .shadow-blue-500\/20{box-shadow:0 6px 20px -4px rgba(37,99,235,.34) !important}
+:root[data-theme="light"] .shadow-amber-500\/20{box-shadow:0 6px 20px -4px rgba(217,119,6,.32) !important}
