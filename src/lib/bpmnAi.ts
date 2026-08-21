@@ -12,12 +12,27 @@ import {
   MAX_FILE_SIZE_BYTES,
 } from '@/lib/prompts/bpmnPrompts'
 import { IS_PHASE_1 } from '@/lib/phaseFlags'
+import { useCatalogStore } from '@/stores/catalogStore'
 
 export type { SupportedMimeType } from '@/lib/prompts/bpmnPrompts'
 export { SUPPORTED_MIME_TYPES, MAX_FILE_SIZE_BYTES }
 
 // Temperatura baja para diagramas consistentes y sin alucinaciones geométricas
 const BPMN_TEMPERATURE = 0.15
+
+// Inyecta el catálogo de cargos de la empresa para que la IA nombre las lanes
+// con cargos existentes. Si un ejecutor no encaja, igual lo nombra (se detecta
+// luego como "sin catalogar" en el editor). Vacío si no hay catálogo.
+function cargosHint(): string {
+  try {
+    const items = useCatalogStore.getState().catalogItems
+      .filter((c) => c.catalog_type === 'cargo' && c.is_active)
+      .map((c) => c.value.trim())
+      .filter(Boolean)
+    if (!items.length) return ''
+    return `\n\nCARGOS EXISTENTES EN LA EMPRESA — usa preferentemente estos nombres EXACTOS para nombrar las lanes/roles cuando apliquen; si un ejecutor no corresponde a ninguno, nómbralo con el cargo real igualmente:\n${items.map((v) => `- ${v}`).join('\n')}`
+  } catch { return '' }
+}
 
 function extractXmlFromResponse(text: string): string {
   let xml = text.replace(/```(?:xml)?/g, '').trim()
@@ -62,7 +77,7 @@ export async function generateBpmnFromInterview(
 ): Promise<{ xml: string }> {
   const safeSummary = sanitizePromptInput(summary, 5000)
   const text = await callAiProxy(
-    [{ role: 'user', content: `Genera el diagrama BPMN 2.0 XML para el siguiente proceso:\n\n${safeSummary}` }],
+    [{ role: 'user', content: `Genera el diagrama BPMN 2.0 XML para el siguiente proceso:\n\n${safeSummary}${cargosHint()}` }],
     { systemPrompt: BIZAGI_PROMPT_MAESTRO, temperature: BPMN_TEMPERATURE, feature: 'bpmn_generation' }
   )
   return { xml: injectMissingBpmnEdges(fixBpmnWaypoints(extractXmlFromResponse(text))) }
@@ -77,9 +92,9 @@ export async function generateBpmnDirect(
   const safeDesc = sanitizePromptInput(description, 5000)
   const needsPreprocess = !options.skipPreprocess && looksUnstructured(safeDesc)
   const inputText = needsPreprocess ? await preprocessProcessText(safeDesc) : safeDesc
-  const userInstruction = needsPreprocess
+  const userInstruction = (needsPreprocess
     ? `Genera el diagrama BPMN 2.0 XML completo para el siguiente proceso (descripción ya estructurada):\n\n${inputText}`
-    : `Analiza la siguiente descripción de proceso y genera el diagrama BPMN 2.0 XML completo:\n\n${inputText}`
+    : `Analiza la siguiente descripción de proceso y genera el diagrama BPMN 2.0 XML completo:\n\n${inputText}`) + cargosHint()
   const text = await callAiProxy(
     [{ role: 'user', content: userInstruction }],
     { systemPrompt: BIZAGI_PROMPT_MAESTRO, temperature: BPMN_TEMPERATURE, feature: 'bpmn_generation' }
@@ -94,9 +109,9 @@ export async function generateBpmnFromFile(
   mimeType: string,
   description?: string
 ): Promise<{ xml: string }> {
-  const userPrompt = description
+  const userPrompt = (description
     ? `Analiza este archivo e identifica el proceso de negocio. Contexto adicional: ${sanitizePromptInput(description, 500)}. Genera el XML BPMN 2.0 completo.`
-    : 'Analiza este archivo e identifica el proceso de negocio descrito. Genera el XML BPMN 2.0 completo.'
+    : 'Analiza este archivo e identifica el proceso de negocio descrito. Genera el XML BPMN 2.0 completo.') + cargosHint()
 
   const rawContents = [
     {
