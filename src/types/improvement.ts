@@ -9,12 +9,21 @@ export type ImprovementStatus =
   | 'cerrada'
   | 'descartada'
 
+/** Hito / subtarea delegable dentro de una oportunidad (checklist tipo Trello). */
+export interface ImprovementMilestone {
+  id: string
+  title: string
+  responsible: string
+  done: boolean
+}
+
 export interface ImprovementOpportunity {
   id: string
   processId: string
   companyId: string
   name: string
   description: string
+  milestones: ImprovementMilestone[]
   /** 1/3/5 — 5 = muy bueno (bajo costo), 1 = muy malo (alto costo). */
   costScore: ScoreValue
   /** 1/3/5 — 5 = muy bueno (baja complejidad), 1 = muy malo (alta complejidad). */

@@ -8,7 +8,7 @@ import { useWorkspaceStore } from './workspaceStore'
 import { useAuthStore } from './authStore'
 import { useChangeLogStore } from './changeLogStore'
 import type { Database } from '@/types/database'
-import type { ImprovementOpportunity, ImprovementStatus, ScoreValue } from '@/types/improvement'
+import type { ImprovementOpportunity, ImprovementStatus, ScoreValue, ImprovementMilestone } from '@/types/improvement'
 import { clampScore } from '@/types/improvement'
 
 type Row = Database['public']['Tables']['improvement_opportunities']['Row']
@@ -41,6 +41,7 @@ function rowToApp(r: Row): ImprovementOpportunity {
     companyId: r.company_id,
     name: r.name,
     description: r.description ?? '',
+    milestones: Array.isArray(r.milestones) ? (r.milestones as unknown as ImprovementMilestone[]) : [],
     costScore: clampScore(r.cost_score),
     complexityScore: clampScore(r.complexity_score),
     timeScore: clampScore(r.time_score),
@@ -62,6 +63,7 @@ function appToRow(o: ImprovementOpportunity): Insert {
     process_id: o.processId,
     name: o.name,
     description: o.description,
+    milestones: o.milestones as unknown as Insert['milestones'],
     cost_score: o.costScore,
     complexity_score: o.complexityScore,
     time_score: o.timeScore,
@@ -82,6 +84,7 @@ function newOpportunity(processId: string, companyId: string, partial?: Partial<
     companyId,
     name: partial?.name ?? 'Nueva oportunidad de mejora',
     description: partial?.description ?? '',
+    milestones: partial?.milestones ?? [],
     costScore: partial?.costScore ?? 3,
     complexityScore: partial?.complexityScore ?? 3,
     timeScore: partial?.timeScore ?? 3,

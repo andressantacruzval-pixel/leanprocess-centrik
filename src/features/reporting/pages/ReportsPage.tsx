@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import {
   FileText, ShieldAlert, TrendingUp, Activity, ClipboardCheck,
-  Download, Search, X, BarChart3, Lightbulb,
+  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List,
 } from 'lucide-react'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -22,6 +22,7 @@ import {
   type ImprovementOpportunity, type ImprovementStatus,
   STATUS_LABELS, STATUS_OPTIONS, priorityScore, priorityLabel,
 } from '@/types/improvement'
+import { ImprovementsKanban } from '@/features/improvement/components/ImprovementsKanban'
 
 type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras'
 
@@ -41,6 +42,7 @@ export default function ReportsPage() {
   const [filterArea, setFilterArea] = useState<string>('')
   const [filterMacro, setFilterMacro] = useState<string>('')
   const [filterLevel, setFilterLevel] = useState<string>('')
+  const [mejorasView, setMejorasView] = useState<'tabla' | 'kanban'>('tabla')
 
   const company = useCompanyStore((s) => s.company)
   const profile = useAuthStore((s) => s.profile)
@@ -89,6 +91,12 @@ export default function ReportsPage() {
   }, [activeTab, company, profile, filteredProcesses, macroMap, processMap, allRisks, allIndicators, allProcedures, allAudits, allAnalyses])
 
   const hasFilters = search || filterManagement || filterArea || filterMacro || filterLevel
+
+  const filteredImprovements = useMemo(() => {
+    const ids = new Set(filteredProcesses.map((p) => p.id))
+    return allImprovements.filter((o) => ids.has(o.processId))
+  }, [filteredProcesses, allImprovements])
+  const processNameById = useMemo(() => new Map(processes.map((p) => [p.id, p.name])), [processes])
 
   return (
     <div className="space-y-4">
@@ -164,7 +172,24 @@ export default function ReportsPage() {
             className="text-[10px] text-white/30 hover:text-white/50 transition-colors">Limpiar</button>
         )}
 
-        <span className="text-[10px] text-white/20 ml-auto shrink-0">{filteredProcesses.length} de {processes.length}</span>
+        {activeTab === 'mejoras' && (
+          <div className="flex items-center gap-0.5 ml-auto rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+            <button
+              onClick={() => setMejorasView('tabla')}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] transition-colors ${mejorasView === 'tabla' ? 'bg-cyan-500/20 text-cyan-300' : 'text-white/40 hover:text-white/70'}`}
+            >
+              <List size={12} /> Tabla
+            </button>
+            <button
+              onClick={() => setMejorasView('kanban')}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] transition-colors ${mejorasView === 'kanban' ? 'bg-cyan-500/20 text-cyan-300' : 'text-white/40 hover:text-white/70'}`}
+            >
+              <LayoutGrid size={12} /> Vista Kanban
+            </button>
+          </div>
+        )}
+
+        <span className={`text-[10px] text-white/20 shrink-0 ${activeTab === 'mejoras' ? '' : 'ml-auto'}`}>{filteredProcesses.length} de {processes.length}</span>
       </div>
 
       {/* Report Content — scrollbar visible */}
@@ -185,7 +210,12 @@ export default function ReportsPage() {
           {activeTab === 'kpis' && <KpisReport processes={filteredProcesses} macroMap={macroMap} allIndicators={allIndicators} />}
           {activeTab === 'valor' && <ValueReport processes={filteredProcesses} macroMap={macroMap} allAnalyses={allAnalyses} />}
           {activeTab === 'auditoria' && <AuditReport processes={filteredProcesses} macroMap={macroMap} allAudits={allAudits} />}
-          {activeTab === 'mejoras' && <ImprovementsReport processes={filteredProcesses} allImprovements={allImprovements} onUpdate={updateOpportunity} />}
+          {activeTab === 'mejoras' && mejorasView === 'tabla' && <ImprovementsReport processes={filteredProcesses} allImprovements={allImprovements} onUpdate={updateOpportunity} />}
+          {activeTab === 'mejoras' && mejorasView === 'kanban' && (
+            <div className="p-3">
+              <ImprovementsKanban opportunities={filteredImprovements} processNameById={processNameById} onUpdate={updateOpportunity} />
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -2016,6 +2016,7 @@ export type Database = {
           description: string
           end_date: string | null
           id: string
+          milestones: Json
           name: string
           process_id: string
           progress_notes: string
@@ -2035,6 +2036,7 @@ export type Database = {
           description?: string
           end_date?: string | null
           id?: string
+          milestones?: Json
           name: string
           process_id: string
           progress_notes?: string
@@ -2054,6 +2056,7 @@ export type Database = {
           description?: string
           end_date?: string | null
           id?: string
+          milestones?: Json
           name?: string
           process_id?: string
           progress_notes?: string
