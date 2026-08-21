@@ -5,10 +5,9 @@ import {
 } from '@/types/risk'
 import type { Process } from '@/types/process'
 import {
-  Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge,
-  Th, Td, EmptyRow, VerMasRow, TableWrap, type Datum,
+  Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum,
 } from '../components/reportUi'
-import { useVerMas } from '../components/reportPaging'
+import { DataTable, type Column } from '../components/DataTable'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de Riesgos: tablero (nivel inherente/residual, categorías, control,
@@ -75,7 +74,6 @@ function HeatMap({ risks, mode }: { risks: RiskItem[]; mode: 'inh' | 'res' }) {
 
 export function RisksReport({ processes, allRisks }: { processes: Process[]; allRisks: RiskItem[] }) {
   const org = useOrgLabels()
-  const COLS = 20 + (org.hasL2 ? 1 : 0)
   const processMap = useMemo(() => new Map(processes.map((p) => [p.id, p])), [processes])
   const ids = useMemo(() => new Set(processes.map((p) => p.id)), [processes])
   const risks = useMemo(() => allRisks.filter((r) => ids.has(r.process_id)), [allRisks, ids])
@@ -84,7 +82,30 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
   const shown = useMemo(() => fLevel
     ? risks.filter((r) => getRiskLevel(r.inherentProbability, r.inherentImpact).label === fLevel)
     : risks, [risks, fLevel])
-  const { visibles, ocultas, verMas } = useVerMas(shown)
+
+  const columns = useMemo<Column<RiskItem>[]>(() => [
+    { key: 'l0', header: org.l0, accessor: (r) => processMap.get(r.process_id)?.management || '' },
+    { key: 'l1', header: org.l1, accessor: (r) => processMap.get(r.process_id)?.coordination || '' },
+    { key: 'l2', header: org.l2, hidden: !org.hasL2, accessor: (r) => processMap.get(r.process_id)?.operative || '' },
+    { key: 'proc', header: 'Proceso', accessor: (r) => processMap.get(r.process_id)?.name || '', className: 'max-w-[150px]', cell: (r) => <div className="truncate">{processMap.get(r.process_id)?.name || '-'}</div> },
+    { key: 'title', header: 'Riesgo', accessor: (r) => r.title || '', className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.title}>{r.title}</div> },
+    { key: 'desc', header: 'Descripción', accessor: (r) => r.description || '', className: 'max-w-[260px]', cell: (r) => <div className="truncate" title={r.description}>{r.description || '-'}</div> },
+    { key: 'cause', header: 'Causa', accessor: (r) => r.riskCause || '', className: 'max-w-[160px]', cell: (r) => <div className="truncate" title={r.riskCause}>{r.riskCause || '-'}</div> },
+    { key: 'event', header: 'Evento', accessor: (r) => r.riskEvent || '', className: 'max-w-[160px]', cell: (r) => <div className="truncate" title={r.riskEvent}>{r.riskEvent || '-'}</div> },
+    { key: 'effect', header: 'Efecto', accessor: (r) => r.riskEffect || '', className: 'max-w-[160px]', cell: (r) => <div className="truncate" title={r.riskEffect}>{r.riskEffect || '-'}</div> },
+    { key: 'cat', header: 'Categoría', accessor: (r) => r.category || '' },
+    { key: 'step', header: 'Actividad', accessor: (r) => r.processStep || '', className: 'max-w-[130px]', cell: (r) => <div className="truncate">{r.processStep || '-'}</div> },
+    { key: 'pi', header: 'P.I', accessor: (r) => r.inherentProbability },
+    { key: 'ii', header: 'I.I', accessor: (r) => r.inherentImpact },
+    { key: 'lvlInh', header: 'Nivel Inh.', accessor: (r) => getRiskLevel(r.inherentProbability, r.inherentImpact).label, cell: (r) => { const inh = getRiskLevel(r.inherentProbability, r.inherentImpact); return <Badge label={inh.label} hex={inh.hex} /> } },
+    { key: 'nctrl', header: 'Controles', accessor: (r) => r.controls.length },
+    { key: 'eff', header: 'Efectividad', accessor: (r) => effLabel(ctrlAvg(r)).label, cell: (r) => { const eff = effLabel(ctrlAvg(r)); return <Badge label={eff.label} hex={eff.hex} /> } },
+    { key: 'mit', header: 'Mitiga', accessor: (r) => mitigaSet(r) || '', cell: (r) => mitigaSet(r) || '-' },
+    { key: 'ctrlDet', header: 'Controles (detalle)', accessor: (r) => ctrlDescs(r) || '', className: 'max-w-[260px]', cell: (r) => <div className="truncate" title={ctrlDescs(r)}>{ctrlDescs(r) || '-'}</div> },
+    { key: 'pr', header: 'P.R', accessor: (r) => r.residualProbability },
+    { key: 'ir', header: 'I.R', accessor: (r) => r.residualImpact },
+    { key: 'lvlRes', header: 'Nivel Res.', accessor: (r) => getRiskLevel(r.residualProbability, r.residualImpact).label, cell: (r) => { const res = getRiskLevel(r.residualProbability, r.residualImpact); return <Badge label={res.label} hex={res.hex} /> } },
+  ], [org, processMap])
 
   const byInh = useMemo<Datum[]>(() => LEVELS.map((l) => ({
     label: l, color: LEVEL_HEX[l],
@@ -158,51 +179,7 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
         {critInh - critRes > 0 && <Insight tone="ok">Los controles ya bajaron {critInh - critRes} riesgo(s) desde crítico. Documenta esas evidencias para la auditoría.</Insight>}
       </div>
 
-      <TableWrap minWidth={1900}>
-        <thead>
-          <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>{org.l0}</Th><Th>{org.l1}</Th>{org.hasL2 && <Th>{org.l2}</Th>}<Th>Proceso</Th><Th>Riesgo</Th><Th>Descripción</Th>
-            <Th>Causa</Th><Th>Evento</Th><Th>Efecto</Th><Th>Categoría</Th><Th>Actividad</Th>
-            <Th>P.I</Th><Th>I.I</Th><Th>Nivel Inh.</Th><Th>Controles</Th><Th>Efectividad</Th><Th>Mitiga</Th><Th>Controles (detalle)</Th>
-            <Th>P.R</Th><Th>I.R</Th><Th>Nivel Res.</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {visibles.map((r) => {
-            const proc = processMap.get(r.process_id)
-            const inh = getRiskLevel(r.inherentProbability, r.inherentImpact)
-            const res = getRiskLevel(r.residualProbability, r.residualImpact)
-            const eff = effLabel(ctrlAvg(r))
-            return (
-              <tr key={r.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
-                <Td>{proc?.management || '-'}</Td>
-                <Td>{proc?.coordination || '-'}</Td>
-                {org.hasL2 && <Td>{proc?.operative || '-'}</Td>}
-                <Td className="max-w-[150px]"><div className="truncate">{proc?.name || '-'}</div></Td>
-                <Td className="text-white font-medium max-w-[200px]"><div className="truncate" title={r.title}>{r.title}</div></Td>
-                <Td className="max-w-[260px]"><div className="truncate" title={r.description}>{r.description || '-'}</div></Td>
-                <Td className="max-w-[160px]"><div className="truncate" title={r.riskCause}>{r.riskCause || '-'}</div></Td>
-                <Td className="max-w-[160px]"><div className="truncate" title={r.riskEvent}>{r.riskEvent || '-'}</div></Td>
-                <Td className="max-w-[160px]"><div className="truncate" title={r.riskEffect}>{r.riskEffect || '-'}</div></Td>
-                <Td>{r.category}</Td>
-                <Td className="max-w-[130px]"><div className="truncate">{r.processStep || '-'}</div></Td>
-                <Td>{r.inherentProbability}</Td>
-                <Td>{r.inherentImpact}</Td>
-                <Td><Badge label={inh.label} hex={inh.hex} /></Td>
-                <Td>{r.controls.length}</Td>
-                <Td><Badge label={eff.label} hex={eff.hex} /></Td>
-                <Td>{mitigaSet(r) || '-'}</Td>
-                <Td className="max-w-[260px]"><div className="truncate" title={ctrlDescs(r)}>{ctrlDescs(r) || '-'}</div></Td>
-                <Td>{r.residualProbability}</Td>
-                <Td>{r.residualImpact}</Td>
-                <Td><Badge label={res.label} hex={res.hex} /></Td>
-              </tr>
-            )
-          })}
-          {shown.length === 0 && <EmptyRow cols={COLS} />}
-          <VerMasRow cols={COLS} ocultas={ocultas} onVerMas={verMas} />
-        </tbody>
-      </TableWrap>
+      <DataTable columns={columns} rows={shown} minWidth={1900} rowKey={(r) => r.id} />
     </Dashboard>
   )
 }

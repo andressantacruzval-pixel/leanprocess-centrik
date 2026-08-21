@@ -6,11 +6,12 @@ import {
   IMPROVEMENT_TYPE_OPTIONS, IMPROVEMENT_TYPE_LABELS, IMPROVEMENT_TYPE_COLORS,
 } from '@/types/improvement'
 import {
-  Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge,
-  Th, Td, EmptyRow, VerMasRow, TableWrap, type Datum,
+  Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum,
 } from '../components/reportUi'
-import { useVerMas } from '../components/reportPaging'
+import { DataTable, type Column } from '../components/DataTable'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
+
+type ImpRow = { o: ImprovementOpportunity; process: Process }
 
 // Reporte de Mejoras: tablero (estado, prioridad, avance, quick wins) + tabla
 // de gestión editable (estado, avance %, fecha de cierre).
@@ -37,7 +38,37 @@ export function ImprovementsReport({
   }, [processes, allImprovements])
   const opps = useMemo(() => rows.map((r) => r.o), [rows])
   const shownRows = useMemo(() => (fType ? rows.filter((r) => r.o.type === fType) : rows), [rows, fType])
-  const { visibles, ocultas, verMas } = useVerMas(shownRows)
+
+  const columns = useMemo<Column<ImpRow>[]>(() => [
+    { key: 'l0', header: org.l0, accessor: (r) => r.process.management || '' },
+    { key: 'proc', header: 'Proceso', accessor: (r) => r.process.name || '', className: 'max-w-[150px]', cell: (r) => <div className="truncate">{r.process.name}</div> },
+    {
+      key: 'opp', header: 'Oportunidad', accessor: (r) => r.o.name || '', className: 'text-white font-medium max-w-[240px]',
+      cell: (r) => (<><div className="truncate" title={r.o.name}>{r.o.name}</div><div className="text-white/30 text-[10px] truncate max-w-[240px]" title={r.o.description}>{r.o.description}</div></>),
+    },
+    { key: 'type', header: 'Tipo', accessor: (r) => IMPROVEMENT_TYPE_LABELS[r.o.type], cell: (r) => <Badge label={IMPROVEMENT_TYPE_LABELS[r.o.type]} hex={IMPROVEMENT_TYPE_COLORS[r.o.type]} /> },
+    { key: 'prio', header: 'Prioridad', accessor: (r) => priorityScore(r.o), cell: (r) => { const total = priorityScore(r.o); const prio = priorityLabel(total); return <Badge label={`${total}/15 · ${prio.label}`} hex={PRIO_HEX[prio.tone]} /> } },
+    { key: 'cost', header: 'Costo', accessor: (r) => r.o.costScore },
+    { key: 'compl', header: 'Compl.', accessor: (r) => r.o.complexityScore },
+    { key: 'time', header: 'Tiempo', accessor: (r) => r.o.timeScore },
+    { key: 'resp', header: 'Responsable', accessor: (r) => r.o.responsible || '', className: 'max-w-[120px]', cell: (r) => <div className="truncate">{r.o.responsible || '-'}</div> },
+    { key: 'start', header: 'Inicio', accessor: (r) => r.o.startDate || '', cell: (r) => r.o.startDate || '-' },
+    { key: 'end', header: 'Fin', accessor: (r) => r.o.endDate || '', cell: (r) => r.o.endDate || '-' },
+    {
+      key: 'status', header: 'Estado', accessor: (r) => STATUS_LABELS[r.o.status],
+      cell: (r) => (<select value={r.o.status} onChange={(e) => onUpdate(r.o.id, { status: e.target.value as ImprovementStatus })} className={inputCls}>{STATUS_OPTIONS.map((s) => <option key={s} value={s} className="bg-[#0a0f1a]">{STATUS_LABELS[s]}</option>)}</select>),
+    },
+    {
+      key: 'progress', header: 'Avance', accessor: (r) => r.o.progressPct || 0, filterable: false,
+      cell: (r) => (<><input type="number" min={0} max={100} step={5} defaultValue={r.o.progressPct} onBlur={(e) => { const v = Math.max(0, Math.min(100, Number(e.target.value) || 0)); if (v !== r.o.progressPct) onUpdate(r.o.id, { progressPct: v }) }} className={inputCls + ' w-14'} /><span className="text-white/30 text-[10px]">%</span></>),
+    },
+    { key: 'milestones', header: 'Hitos', accessor: (r) => r.o.milestones.length, cell: (r) => r.o.milestones.length ? `${r.o.milestones.filter((m) => m.done).length}/${r.o.milestones.length}` : <span className="text-white/20">—</span> },
+    { key: 'notes', header: 'Notas', accessor: (r) => r.o.progressNotes || '', className: 'max-w-[200px]', cell: (r) => <div className="truncate" title={r.o.progressNotes}>{r.o.progressNotes || <span className="text-white/20">—</span>}</div> },
+    {
+      key: 'close', header: 'Cierre', accessor: (r) => r.o.closeDate || '', filterable: false,
+      cell: (r) => <input type="date" value={r.o.closeDate ?? ''} onChange={(e) => onUpdate(r.o.id, { closeDate: e.target.value || null })} className={inputCls} />,
+    },
+  ], [org, onUpdate])
 
   const byType = useMemo<Datum[]>(() => IMPROVEMENT_TYPE_OPTIONS.map((t) => ({
     label: IMPROVEMENT_TYPE_LABELS[t], color: IMPROVEMENT_TYPE_COLORS[t], value: opps.filter((o) => o.type === t).length,
@@ -98,55 +129,7 @@ export function ImprovementsReport({
         {abiertas.filter((o) => o.status === 'en_progreso' && (o.progressPct || 0) === 0).length > 0 && <Insight tone="warn">{abiertas.filter((o) => o.status === 'en_progreso' && (o.progressPct || 0) === 0).length} mejora(s) marcadas "en progreso" con 0% de avance. Actualiza el estado o el porcentaje.</Insight>}
       </div>
 
-      <TableWrap minWidth={1640}>
-        <thead>
-          <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>{org.l0}</Th><Th>Proceso</Th><Th>Oportunidad</Th><Th>Tipo</Th><Th>Prioridad</Th>
-            <Th>Costo</Th><Th>Compl.</Th><Th>Tiempo</Th><Th>Responsable</Th>
-            <Th>Inicio</Th><Th>Fin</Th><Th>Estado</Th><Th>Avance</Th><Th>Hitos</Th><Th>Notas</Th><Th>Cierre</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {visibles.map(({ o, process }) => {
-            const total = priorityScore(o)
-            const prio = priorityLabel(total)
-            return (
-              <tr key={o.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
-                <Td>{process.management || '-'}</Td>
-                <Td className="max-w-[150px]"><div className="truncate">{process.name}</div></Td>
-                <Td className="text-white font-medium max-w-[240px]">
-                  <div className="truncate" title={o.name}>{o.name}</div>
-                  <div className="text-white/30 text-[10px] truncate max-w-[240px]" title={o.description}>{o.description}</div>
-                </Td>
-                <Td><Badge label={IMPROVEMENT_TYPE_LABELS[o.type]} hex={IMPROVEMENT_TYPE_COLORS[o.type]} /></Td>
-                <Td><Badge label={`${total}/15 · ${prio.label}`} hex={PRIO_HEX[prio.tone]} /></Td>
-                <Td>{o.costScore}</Td>
-                <Td>{o.complexityScore}</Td>
-                <Td>{o.timeScore}</Td>
-                <Td className="max-w-[120px]"><div className="truncate">{o.responsible || '-'}</div></Td>
-                <Td>{o.startDate || '-'}</Td>
-                <Td>{o.endDate || '-'}</Td>
-                <Td>
-                  <select value={o.status} onChange={(e) => onUpdate(o.id, { status: e.target.value as ImprovementStatus })} className={inputCls}>
-                    {STATUS_OPTIONS.map((s) => <option key={s} value={s} className="bg-[#0a0f1a]">{STATUS_LABELS[s]}</option>)}
-                  </select>
-                </Td>
-                <Td>
-                  <input type="number" min={0} max={100} step={5} defaultValue={o.progressPct}
-                    onBlur={(e) => { const v = Math.max(0, Math.min(100, Number(e.target.value) || 0)); if (v !== o.progressPct) onUpdate(o.id, { progressPct: v }) }}
-                    className={inputCls + ' w-14'} />
-                  <span className="text-white/30 text-[10px]">%</span>
-                </Td>
-                <Td>{o.milestones.length ? `${o.milestones.filter((m) => m.done).length}/${o.milestones.length}` : <span className="text-white/20">—</span>}</Td>
-                <Td className="max-w-[200px]"><div className="truncate" title={o.progressNotes}>{o.progressNotes || <span className="text-white/20">—</span>}</div></Td>
-                <Td><input type="date" value={o.closeDate ?? ''} onChange={(e) => onUpdate(o.id, { closeDate: e.target.value || null })} className={inputCls} /></Td>
-              </tr>
-            )
-          })}
-          {shownRows.length === 0 && <EmptyRow cols={16} />}
-          <VerMasRow cols={16} ocultas={ocultas} onVerMas={verMas} />
-        </tbody>
-      </TableWrap>
+      <DataTable columns={columns} rows={shownRows} minWidth={1640} rowKey={(r) => r.o.id} />
     </Dashboard>
   )
 }

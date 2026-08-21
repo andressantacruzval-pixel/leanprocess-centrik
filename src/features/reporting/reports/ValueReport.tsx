@@ -5,11 +5,12 @@ import {
   type ValueActivity, type ValueClassification,
 } from '@/utils/valueAnalysis'
 import {
-  Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge,
-  Th, Td, EmptyRow, VerMasRow, TableWrap, type Datum,
+  Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum,
 } from '../components/reportUi'
-import { useVerMas } from '../components/reportPaging'
+import { DataTable, type Column } from '../components/DataTable'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
+
+type ValueRow = { process: Process; activity: ValueActivity }
 
 // Reporte de Análisis de Valor: tablero (VA/NVA/NVABN, eficiencia, desperdicio,
 // Pareto de las actividades que más tiempo consumen) + tabla de tiempos por
@@ -19,16 +20,33 @@ const CLS: ValueClassification[] = ['VA', 'NVA', 'NVABN']
 
 export function ValueReport({ processes, allAnalyses }: { processes: Process[]; allAnalyses: Record<string, ValueActivity[]> }) {
   const rows = useMemo(() => {
-    const out: { process: Process; activity: ValueActivity }[] = []
+    const out: ValueRow[] = []
     for (const p of processes) for (const a of (allAnalyses[p.id] || [])) out.push({ process: p, activity: a })
     return out
   }, [processes, allAnalyses])
   const org = useOrgLabels()
-  const COLS = 12 + (org.hasL2 ? 1 : 0)
   const activities = useMemo(() => rows.map((r) => r.activity), [rows])
   const k = useMemo(() => computeKPIs(activities), [activities])
   const pareto = useMemo(() => computePareto(activities, 'mes').slice(0, 8), [activities])
-  const { visibles, ocultas, verMas } = useVerMas(rows)
+
+  const columns = useMemo<Column<ValueRow>[]>(() => [
+    { key: 'l0', header: org.l0, accessor: (r) => r.process.management || '' },
+    { key: 'l1', header: org.l1, accessor: (r) => r.process.coordination || '' },
+    { key: 'l2', header: org.l2, hidden: !org.hasL2, accessor: (r) => r.process.operative || '' },
+    { key: 'proc', header: 'Proceso', accessor: (r) => r.process.name || '', className: 'max-w-[150px]', cell: (r) => <div className="truncate">{r.process.name}</div> },
+    { key: 'act', header: 'Actividad', accessor: (r) => r.activity.name || '', className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.activity.name}>{r.activity.name}</div> },
+    { key: 'resp', header: 'Responsable', accessor: (r) => r.activity.laneName || '', className: 'max-w-[120px]', cell: (r) => <div className="truncate">{r.activity.laneName || '-'}</div> },
+    {
+      key: 'cls', header: 'Clasificación', accessor: (r) => r.activity.classification || '',
+      cell: (r) => { const cls = r.activity.classification; const c = cls ? CLASSIFICATION_COLORS[cls] : null; return cls && c ? <Badge label={cls} hex={c.hex} /> : '-' },
+    },
+    { key: 'freq', header: 'Frecuencia', accessor: (r) => r.activity.frequency || '' },
+    { key: 'tpo', header: 'Min/ocurr.', accessor: (r) => r.activity.timePerOccurrence || 0, cell: (r) => r.activity.timePerOccurrence || '-' },
+    { key: 'occ', header: 'Ocurr.', accessor: (r) => r.activity.occurrences || 0, cell: (r) => r.activity.occurrences || '-' },
+    { key: 'dia', header: 'Min/día', accessor: (r) => r.activity.dailyMinutes || 0, cell: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(dm * 10) / 10 : '-' } },
+    { key: 'mes', header: 'Min/mes', accessor: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(scaleToPeriod(dm, 'mes')) : 0 }, cell: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(scaleToPeriod(dm, 'mes')) : '-' } },
+    { key: 'anio', header: 'Hrs/año', accessor: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(scaleToPeriod(dm, 'año') / 60 * 10) / 10 : 0 }, cell: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(scaleToPeriod(dm, 'año') / 60 * 10) / 10 : '-' } },
+  ], [org])
 
   const byClassTime = useMemo<Datum[]>(() => CLS.map((c) => ({
     label: CLASSIFICATION_COLORS[c].label, color: CLASSIFICATION_COLORS[c].hex,
@@ -67,40 +85,7 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
         {k.vaEfficiency >= 60 && <Insight tone="ok">Eficiencia de valor del {Math.round(k.vaEfficiency)}%. Buen punto de partida; enfoca la mejora en el {Math.round(k.wastePercentage)}% NVA.</Insight>}
       </div>
 
-      <TableWrap minWidth={1300}>
-        <thead>
-          <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>{org.l0}</Th><Th>{org.l1}</Th>{org.hasL2 && <Th>{org.l2}</Th>}<Th>Proceso</Th><Th>Actividad</Th><Th>Responsable</Th>
-            <Th>Clasificación</Th><Th>Frecuencia</Th><Th>Min/ocurr.</Th><Th>Ocurr.</Th><Th>Min/día</Th><Th>Min/mes</Th><Th>Hrs/año</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {visibles.map((row, i) => {
-            const cls = row.activity.classification
-            const c = cls ? CLASSIFICATION_COLORS[cls] : null
-            const dm = row.activity.dailyMinutes
-            return (
-              <tr key={`${row.process.id}-${row.activity.id}-${i}`} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
-                <Td>{row.process.management || '-'}</Td>
-                <Td>{row.process.coordination || '-'}</Td>
-                {org.hasL2 && <Td>{row.process.operative || '-'}</Td>}
-                <Td className="max-w-[150px]"><div className="truncate">{row.process.name}</div></Td>
-                <Td className="text-white font-medium max-w-[200px]"><div className="truncate" title={row.activity.name}>{row.activity.name}</div></Td>
-                <Td className="max-w-[120px]"><div className="truncate">{row.activity.laneName || '-'}</div></Td>
-                <Td>{cls && c ? <Badge label={cls} hex={c.hex} /> : '-'}</Td>
-                <Td>{row.activity.frequency || '-'}</Td>
-                <Td>{row.activity.timePerOccurrence || '-'}</Td>
-                <Td>{row.activity.occurrences || '-'}</Td>
-                <Td>{dm ? Math.round(dm * 10) / 10 : '-'}</Td>
-                <Td>{dm ? Math.round(scaleToPeriod(dm, 'mes')) : '-'}</Td>
-                <Td>{dm ? Math.round(scaleToPeriod(dm, 'año') / 60 * 10) / 10 : '-'}</Td>
-              </tr>
-            )
-          })}
-          {rows.length === 0 && <EmptyRow cols={COLS} />}
-          <VerMasRow cols={COLS} ocultas={ocultas} onVerMas={verMas} />
-        </tbody>
-      </TableWrap>
+      <DataTable columns={columns} rows={rows} minWidth={1300} rowKey={(r, i) => `${r.process.id}-${r.activity.id}-${i}`} />
     </Dashboard>
   )
 }

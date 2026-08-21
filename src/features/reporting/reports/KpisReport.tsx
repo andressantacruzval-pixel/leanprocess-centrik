@@ -2,10 +2,9 @@ import { useMemo } from 'react'
 import type { Process } from '@/types/process'
 import type { StoredIndicator } from '@/stores/indicatorStore'
 import {
-  Dashboard, Grid, Card, Stat, Donut, HBars, Insight,
-  Th, Td, EmptyRow, VerMasRow, TableWrap, type Datum,
+  Dashboard, Grid, Card, Stat, Donut, HBars, Insight, type Datum,
 } from '../components/reportUi'
-import { useVerMas } from '../components/reportPaging'
+import { DataTable, type Column } from '../components/DataTable'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de KPIs: tablero (cobertura por proceso, frecuencias, calidad de la
@@ -25,11 +24,28 @@ const hasThresholds = (i: StoredIndicator) =>
 
 export function KpisReport({ processes, allIndicators }: { processes: Process[]; allIndicators: StoredIndicator[] }) {
   const org = useOrgLabels()
-  const COLS = 15 + (org.hasL2 ? 1 : 0)
   const processMap = useMemo(() => new Map(processes.map((p) => [p.id, p])), [processes])
   const ids = useMemo(() => new Set(processes.map((p) => p.id)), [processes])
   const kpis = useMemo(() => allIndicators.filter((i) => ids.has(i.process_id)), [allIndicators, ids])
-  const { visibles, ocultas, verMas } = useVerMas(kpis)
+
+  const columns = useMemo<Column<StoredIndicator>[]>(() => [
+    { key: 'l0', header: org.l0, accessor: (i) => processMap.get(i.process_id)?.management || '' },
+    { key: 'l1', header: org.l1, accessor: (i) => processMap.get(i.process_id)?.coordination || '' },
+    { key: 'l2', header: org.l2, hidden: !org.hasL2, accessor: (i) => processMap.get(i.process_id)?.operative || '' },
+    { key: 'proc', header: 'Proceso', accessor: (i) => processMap.get(i.process_id)?.name || '', className: 'max-w-[150px]', cell: (i) => <div className="truncate">{processMap.get(i.process_id)?.name || '-'}</div> },
+    { key: 'ind', header: 'Indicador', accessor: (i) => i.name || '', className: 'text-white font-medium max-w-[160px]', cell: (i) => <div className="truncate" title={i.name}>{i.name}</div> },
+    { key: 'obj', header: 'Objetivo', accessor: (i) => i.description || '', className: 'max-w-[200px]', cell: (i) => <div className="truncate" title={i.description}>{i.description || '-'}</div> },
+    { key: 'form', header: 'Fórmula', accessor: (i) => i.formula || '', className: 'max-w-[160px]', cell: (i) => <div className="truncate" title={i.formula}>{i.formula || '-'}</div> },
+    { key: 'src', header: 'Fuente', accessor: (i) => i.data_source || '', className: 'max-w-[140px]', cell: (i) => <div className="truncate" title={i.data_source}>{i.data_source || '-'}</div> },
+    { key: 'unit', header: 'Unidad', accessor: (i) => i.unit || '' },
+    { key: 'freq', header: 'Frecuencia', accessor: (i) => i.frequency || '' },
+    { key: 'meta', header: 'Meta', accessor: (i) => i.target_value || '', className: 'text-white/85' },
+    { key: 'green', header: 'Verde', accessor: (i) => range(i.threshold_green_min, i.threshold_green_max), cell: (i) => <span className="text-emerald-400">{range(i.threshold_green_min, i.threshold_green_max)}</span> },
+    { key: 'yellow', header: 'Amarillo', accessor: (i) => range(i.threshold_yellow_min, i.threshold_yellow_max), cell: (i) => <span className="text-amber-400">{range(i.threshold_yellow_min, i.threshold_yellow_max)}</span> },
+    { key: 'red', header: 'Rojo', accessor: (i) => range(i.threshold_red_min, i.threshold_red_max), cell: (i) => <span className="text-red-400">{range(i.threshold_red_min, i.threshold_red_max)}</span> },
+    { key: 'owner', header: 'Resp. reporte', accessor: (i) => i.owner || '', className: 'max-w-[120px]', cell: (i) => <div className="truncate">{i.owner || '-'}</div> },
+    { key: 'reporter', header: 'Resp. monitoreo', accessor: (i) => i.reporter || '', className: 'max-w-[120px]', cell: (i) => <div className="truncate">{i.reporter || '-'}</div> },
+  ], [org, processMap])
 
   const withKpi = useMemo(() => new Set(kpis.map((i) => i.process_id)).size, [kpis])
   const byFreq = useMemo<Datum[]>(() => {
@@ -74,42 +90,7 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
         {conUmbral === kpis.length && kpis.length > 0 && <Insight tone="ok">Todos los indicadores tienen semáforo (umbrales) configurado. Listos para tablero de control.</Insight>}
       </div>
 
-      <TableWrap minWidth={1500}>
-        <thead>
-          <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>{org.l0}</Th><Th>{org.l1}</Th>{org.hasL2 && <Th>{org.l2}</Th>}<Th>Proceso</Th><Th>Indicador</Th><Th>Objetivo</Th>
-            <Th>Fórmula</Th><Th>Fuente</Th><Th>Unidad</Th><Th>Frecuencia</Th><Th>Meta</Th>
-            <Th>Verde</Th><Th>Amarillo</Th><Th>Rojo</Th><Th>Resp. reporte</Th><Th>Resp. monitoreo</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {visibles.map((i) => {
-            const proc = processMap.get(i.process_id)
-            return (
-              <tr key={i.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
-                <Td>{proc?.management || '-'}</Td>
-                <Td>{proc?.coordination || '-'}</Td>
-                {org.hasL2 && <Td>{proc?.operative || '-'}</Td>}
-                <Td className="max-w-[150px]"><div className="truncate">{proc?.name || '-'}</div></Td>
-                <Td className="text-white font-medium max-w-[160px]"><div className="truncate" title={i.name}>{i.name}</div></Td>
-                <Td className="max-w-[200px]"><div className="truncate" title={i.description}>{i.description || '-'}</div></Td>
-                <Td className="max-w-[160px]"><div className="truncate" title={i.formula}>{i.formula || '-'}</div></Td>
-                <Td className="max-w-[140px]"><div className="truncate" title={i.data_source}>{i.data_source || '-'}</div></Td>
-                <Td>{i.unit || '-'}</Td>
-                <Td>{i.frequency || '-'}</Td>
-                <Td className="text-white/85">{i.target_value || '-'}</Td>
-                <Td><span className="text-emerald-400">{range(i.threshold_green_min, i.threshold_green_max)}</span></Td>
-                <Td><span className="text-amber-400">{range(i.threshold_yellow_min, i.threshold_yellow_max)}</span></Td>
-                <Td><span className="text-red-400">{range(i.threshold_red_min, i.threshold_red_max)}</span></Td>
-                <Td className="max-w-[120px]"><div className="truncate">{i.owner || '-'}</div></Td>
-                <Td className="max-w-[120px]"><div className="truncate">{i.reporter || '-'}</div></Td>
-              </tr>
-            )
-          })}
-          {kpis.length === 0 && <EmptyRow cols={COLS} />}
-          <VerMasRow cols={COLS} ocultas={ocultas} onVerMas={verMas} />
-        </tbody>
-      </TableWrap>
+      <DataTable columns={columns} rows={kpis} minWidth={1500} rowKey={(i) => i.id} />
     </Dashboard>
   )
 }
