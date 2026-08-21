@@ -8,7 +8,7 @@ import { useInventoryReportRows, EMPTY_FILTERS, BANDERAS, type RepFilters, type 
 import { TIPO_COLOR, type InvTipo } from '../types'
 import { OriginBadge } from './OriginBadge'
 import { InventoryReportSidebar } from './InventoryReportSidebar'
-import { useOrgLabels } from '@/hooks/useOrgLabels'
+import { useOrgLabels, useOrgUnitNamesByLevel } from '@/hooks/useOrgLabels'
 
 // Reporte unificado del Inventario: barra lateral (navegación + filtros) + KPIs
 // + gráficos + tabla con TODA la caracterización (crítico, efectivo, nivel,
@@ -16,6 +16,7 @@ import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 export function InventoryReport() {
   const org = useOrgLabels()
+  const orgNames = useOrgUnitNamesByLevel()
   const { companyId, appMacros, appAreas, doc } = useInventoryData()
   const editSub = useInventoryStore((s) => s.editSub)
   const macros = doc?.macros?.length ? doc.macros : appMacros
@@ -27,7 +28,12 @@ export function InventoryReport() {
   const all = useInventoryReportRows(companyId, macros)
   const hojas = useMemo(() => leafAreas(areas, macros), [areas, macros])
   const niveles = useMemo(() => [...new Set(all.map((r) => r.nivelEjecucion).filter(Boolean))].sort(), [all])
-  const gerencias = useMemo(() => [...new Set(all.map((r) => r.gerencia).filter(Boolean))].sort(), [all])
+  // Unión con la estructura viva del organigrama: todas las gerencias aparecen
+  // aunque aún no tengan subprocesos (#3), sin perder valores huérfanos.
+  const gerencias = useMemo(
+    () => [...new Set([...orgNames.managements, ...all.map((r) => r.gerencia).filter(Boolean)])].sort((a, b) => a.localeCompare(b, 'es')),
+    [orgNames, all]
+  )
   const frecuencias = useMemo(() => [...new Set(all.map((r) => r.frecuencia).filter(Boolean))].sort(), [all])
   const tiposProceso = useMemo(() => [...new Set(all.map((r) => r.tipoProceso).filter(Boolean))].sort(), [all])
 
