@@ -18,6 +18,12 @@ function ctrlAvg(r: RiskItem): number {
   if (!r.controls.length) return 0
   return r.controls.reduce((s, c) => s + (c.score || 0), 0) / r.controls.length
 }
+function ctrlDescs(r: RiskItem): string {
+  return r.controls.map((c) => c.description?.trim()).filter(Boolean).join(' · ')
+}
+function mitigaSet(r: RiskItem): string {
+  return [...new Set(r.controls.map((c) => c.mitigates).filter(Boolean))].join(', ')
+}
 function effLabel(score: number): { label: string; hex: string } {
   if (score === 0) return { label: 'Sin control', hex: '#6b7280' }
   if (score >= 33) return { label: 'Óptimo', hex: '#22d3ee' }
@@ -97,12 +103,12 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
         {critInh - critRes > 0 && <Insight tone="ok">Los controles ya bajaron {critInh - critRes} riesgo(s) desde crítico. Documenta esas evidencias para la auditoría.</Insight>}
       </div>
 
-      <TableWrap minWidth={1600}>
+      <TableWrap minWidth={1900}>
         <thead>
           <tr className="bg-white/[0.03] border-b border-white/5">
             <Th>Gerencia</Th><Th>Área</Th><Th>Proceso</Th><Th>Riesgo</Th><Th>Descripción</Th>
             <Th>Causa</Th><Th>Evento</Th><Th>Efecto</Th><Th>Categoría</Th><Th>Actividad</Th>
-            <Th>P.I</Th><Th>I.I</Th><Th>Nivel Inh.</Th><Th>Controles</Th><Th>Efectividad</Th>
+            <Th>P.I</Th><Th>I.I</Th><Th>Nivel Inh.</Th><Th>Controles</Th><Th>Efectividad</Th><Th>Mitiga</Th><Th>Controles (detalle)</Th>
             <Th>P.R</Th><Th>I.R</Th><Th>Nivel Res.</Th>
           </tr>
         </thead>
@@ -129,14 +135,16 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
                 <Td><Badge label={inh.label} hex={inh.hex} /></Td>
                 <Td>{r.controls.length}</Td>
                 <Td><Badge label={eff.label} hex={eff.hex} /></Td>
+                <Td>{mitigaSet(r) || '-'}</Td>
+                <Td className="max-w-[260px]"><div className="truncate" title={ctrlDescs(r)}>{ctrlDescs(r) || '-'}</div></Td>
                 <Td>{r.residualProbability}</Td>
                 <Td>{r.residualImpact}</Td>
                 <Td><Badge label={res.label} hex={res.hex} /></Td>
               </tr>
             )
           })}
-          {shown.length === 0 && <EmptyRow cols={18} />}
-          <VerMasRow cols={18} ocultas={ocultas} onVerMas={verMas} />
+          {shown.length === 0 && <EmptyRow cols={20} />}
+          <VerMasRow cols={20} ocultas={ocultas} onVerMas={verMas} />
         </tbody>
       </TableWrap>
     </Dashboard>

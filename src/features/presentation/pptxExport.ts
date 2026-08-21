@@ -5,6 +5,11 @@ import { addMapOverviewSlides } from './mapOverviewSlide'
 import type { RiskItem } from '@/types/risk'
 import type { StoredIndicator } from '@/stores/indicatorStore'
 import type { ValueActivity } from '@/utils/valueAnalysis'
+import type { AuditItem } from '@/lib/procedureAi'
+import {
+  type ImprovementOpportunity, priorityScore, priorityLabel,
+  IMPROVEMENT_TYPE_LABELS, IMPROVEMENT_TYPE_OPTIONS,
+} from '@/types/improvement'
 import type { ProcessHealthMap } from '@/hooks/useProcessHealth'
 
 interface PptxExportData {
@@ -13,13 +18,15 @@ interface PptxExportData {
   risks: RiskItem[]
   indicators: StoredIndicator[]
   analyses: Record<string, ValueActivity[]>
+  audits: Record<string, AuditItem[]>
+  improvements: ImprovementOpportunity[]
   procedures: unknown[]
   healthMap: ProcessHealthMap
 }
 
 export async function exportPresentationToPptx(
   slides: Slide[],
-  { macroprocesses, processes, risks, indicators, analyses, procedures, healthMap }: PptxExportData,
+  { macroprocesses, processes, risks, indicators, analyses, audits, improvements, procedures, healthMap }: PptxExportData,
   companyName?: string,
 ): Promise<void> {
   const pptx = new pptxgen()
@@ -241,6 +248,62 @@ export async function exportPresentationToPptx(
           rowH: 0.35,
           fontSize: 10,
           autoPage: false,
+        })
+        break
+      }
+
+      case 'audit-program': {
+        pptSlide.addText('Programa de Auditoria', {
+          x: 0.5, y: 0.4, w: 12.33, h: 0.8,
+          fontSize: 32, fontFace: 'Arial', color: 'FFFFFF', bold: true, align: 'center',
+        })
+        const auditRows = Object.entries(audits).flatMap(([pid, items]) =>
+          items.map((it) => ({ ...it, process: processes.find((p) => p.id === pid)?.name ?? '-' })))
+        const aHead: pptxgen.TableRow = ['Proceso', 'Que auditar', 'Criterio', 'Frecuencia', 'Responsable'].map((t) => ({
+          text: t, options: { bold: true, color: '9CA3AF', fontSize: 11, align: 'center' as const },
+        }))
+        const aData: pptxgen.TableRow[] = auditRows.slice(0, 14).map((r) => [
+          { text: r.process, options: { color: 'FFFFFF', fontSize: 10 } },
+          { text: r.queAuditar || r.actividad || '-', options: { color: 'D1D5DB', fontSize: 10 } },
+          { text: r.criterio || '-', options: { color: 'D1D5DB', fontSize: 10 } },
+          { text: r.frecuencia || '-', options: { color: '22D3EE', fontSize: 10, align: 'center' as const } },
+          { text: r.responsable || '-', options: { color: 'D1D5DB', fontSize: 10 } },
+        ])
+        pptSlide.addTable([aHead, ...aData], {
+          x: 0.3, y: 1.5, w: 12.73, h: 5.5, border: { type: 'solid', pt: 0.5, color: '1F2937' },
+          colW: [2.6, 3.5, 3.4, 1.5, 1.73], rowH: 0.35, fontSize: 10, autoPage: false,
+        })
+        break
+      }
+
+      case 'improvements': {
+        pptSlide.addText('Oportunidades de Mejora', {
+          x: 0.5, y: 0.4, w: 12.33, h: 0.8,
+          fontSize: 32, fontFace: 'Arial', color: 'FFFFFF', bold: true, align: 'center',
+        })
+        // Resumen por tipo (izquierda) + tabla de prioritarias (derecha)
+        const byType = IMPROVEMENT_TYPE_OPTIONS
+          .map((t) => ({ t, n: improvements.filter((o) => o.type === t).length }))
+          .filter((x) => x.n > 0)
+        byType.forEach((x, i) => {
+          pptSlide.addText(`${IMPROVEMENT_TYPE_LABELS[x.t]}: ${x.n}`, {
+            x: 0.5, y: 1.6 + i * 0.55, w: 3.6, h: 0.45, fontSize: 13, color: 'D1D5DB', fontFace: 'Arial',
+          })
+        })
+        const iHead: pptxgen.TableRow = ['Oportunidad', 'Tipo', 'Prioridad', 'Estado', 'Avance'].map((t) => ({
+          text: t, options: { bold: true, color: '9CA3AF', fontSize: 11, align: 'center' as const },
+        }))
+        const top = [...improvements].sort((a, b) => priorityScore(b) - priorityScore(a)).slice(0, 12)
+        const iData: pptxgen.TableRow[] = top.map((o) => [
+          { text: o.name, options: { color: 'FFFFFF', fontSize: 10 } },
+          { text: IMPROVEMENT_TYPE_LABELS[o.type], options: { color: 'D1D5DB', fontSize: 10 } },
+          { text: `${priorityScore(o)}/15 ${priorityLabel(priorityScore(o)).label}`, options: { color: 'FBBF24', fontSize: 10, align: 'center' as const } },
+          { text: o.status, options: { color: 'D1D5DB', fontSize: 10, align: 'center' as const } },
+          { text: `${o.progressPct}%`, options: { color: '34D399', fontSize: 10, align: 'center' as const } },
+        ])
+        pptSlide.addTable([iHead, ...iData], {
+          x: 4.3, y: 1.5, w: 8.73, h: 5.5, border: { type: 'solid', pt: 0.5, color: '1F2937' },
+          colW: [3.2, 2.0, 1.83, 1.0, 0.7], rowH: 0.35, fontSize: 10, autoPage: false,
         })
         break
       }

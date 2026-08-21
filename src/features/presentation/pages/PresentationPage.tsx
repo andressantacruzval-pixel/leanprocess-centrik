@@ -16,7 +16,7 @@ export default function PresentationPage() {
   const [current, setCurrent] = useState(0)
   const [fade, setFade] = useState(true)
 
-  const { macroprocesses, processes, risks, indicators, analyses, procedures } = useCompanyScopedData()
+  const { macroprocesses, processes, risks, indicators, analyses, audits, improvements, procedures } = useCompanyScopedData()
   const healthMap = useProcessHealth()
   const company = useCompanyStore((s) => s.company)
 
@@ -39,12 +39,14 @@ export default function PresentationPage() {
     if (risks.length > 0) s.push({ type: 'risk-heatmap', title: 'Mapa de Calor de Riesgos' })
     if (indicators.length > 0) s.push({ type: 'kpi-dashboard', title: 'Indicadores de Gestion' })
     if (Object.values(analyses).flat().length > 0) s.push({ type: 'value-analysis', title: 'Analisis de Valor' })
+    if (Object.values(audits).flat().length > 0) s.push({ type: 'audit-program', title: 'Programa de Auditoria' })
+    if (improvements.length > 0) s.push({ type: 'improvements', title: 'Oportunidades de Mejora' })
     if (processes.length > 0) s.push({ type: 'coverage', title: 'Cobertura por Proceso' })
     s.push({ type: 'org-stats', title: 'Estadisticas Organizacionales' })
     s.push({ type: 'summary', title: 'Resumen Ejecutivo' })
 
     return s
-  }, [macroprocesses, processes, risks, indicators, analyses])
+  }, [macroprocesses, processes, risks, indicators, analyses, audits, improvements])
 
   // ── Slide selection state ─────────────────────────────────────────────
 
@@ -142,6 +144,8 @@ export default function PresentationPage() {
         risks,
         indicators,
         analyses,
+        audits,
+        improvements,
         procedures,
         healthMap,
       }, company?.name)
@@ -150,7 +154,7 @@ export default function PresentationPage() {
     } finally {
       setExporting(null)
     }
-  }, [slides, macroprocesses, processes, risks, indicators, analyses, procedures, healthMap, company])
+  }, [slides, macroprocesses, processes, risks, indicators, analyses, audits, improvements, procedures, healthMap, company])
 
   // ── Render: Preparation screen ────────────────────────────────────────
 
@@ -237,6 +241,8 @@ export default function PresentationPage() {
             risks={risks}
             indicators={indicators}
             analyses={analyses}
+            audits={audits}
+            improvements={improvements}
             procedures={procedures}
             healthMap={healthMap}
           />

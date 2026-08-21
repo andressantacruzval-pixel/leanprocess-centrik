@@ -13,15 +13,42 @@ import { allSubs, norm, type FlatSub } from './inventoryUtils'
 export interface RepFilters {
   tipo: string; macro: string; area: string; origen: string
   nivel: string; gerencia: string; critico: string; efectivo: string
+  frecuencia: string; tipoProceso: string; bandera: string
 }
 
-export const EMPTY_FILTERS: RepFilters = { tipo: '', macro: '', area: '', origen: '', nivel: '', gerencia: '', critico: '', efectivo: '' }
+export const EMPTY_FILTERS: RepFilters = {
+  tipo: '', macro: '', area: '', origen: '', nivel: '', gerencia: '', critico: '', efectivo: '',
+  frecuencia: '', tipoProceso: '', bandera: '',
+}
+
+/** Las 5 banderas de cumplimiento/continuidad de la caracterización. */
+export const BANDERAS: { key: keyof InvReportRow; label: string }[] = [
+  { key: 'contingencia', label: 'Plan de contingencia' },
+  { key: 'impuestos', label: 'Operaciones tributarias' },
+  { key: 'contabilidad', label: 'Afecta contabilidad' },
+  { key: 'datosPersonales', label: 'Datos personales' },
+  { key: 'terceros', label: 'Provisto por terceros' },
+]
 
 export interface InvReportRow extends FlatSub {
   critico: boolean | null
   efectivo: boolean | null
   nivelEjecucion: string
   gerencia: string
+  // Caracterización adicional (del proceso real ya volcado)
+  objetivo: string
+  responsable: string
+  frecuencia: string
+  tipoProceso: string
+  tipoEjecucion: string
+  medioEntrega: string
+  supervision: string
+  contingencia: boolean | null
+  impuestos: boolean | null
+  contabilidad: boolean | null
+  datosPersonales: boolean | null
+  terceros: boolean | null
+  // SIPOC
   proveedores: string
   entradas: string
   salidas: string
@@ -72,6 +99,18 @@ export function useInventoryReportRows(companyId: string, macros: InvMacro[]): I
         efectivo: match ? match.involves_cash_movement : null,
         nivelEjecucion: match?.execution_level ?? '',
         gerencia: match?.management ?? '',
+        objetivo: match?.description ?? s.objetivo ?? '',
+        responsable: match?.responsible ?? '',
+        frecuencia: match?.execution_frequency ?? '',
+        tipoProceso: match?.process_type ?? '',
+        tipoEjecucion: match?.execution_type ?? '',
+        medioEntrega: match?.delivery_method ?? '',
+        supervision: match?.supervision_level ?? '',
+        contingencia: match ? match.has_contingency_plan : null,
+        impuestos: match ? match.has_tax_operations : null,
+        contabilidad: match ? match.affects_accounting : null,
+        datosPersonales: match ? match.handles_personal_data : null,
+        terceros: match ? match.provided_by_third_party : null,
         proveedores: uniqJoin(entries.map((e) => e.supplier_name)),
         entradas: uniqJoin(entries.map((e) => e.input_description)),
         salidas: uniqJoin(entries.map((e) => e.output_description)),

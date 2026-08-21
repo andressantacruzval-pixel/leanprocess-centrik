@@ -1,9 +1,14 @@
-import { ShieldAlert, TrendingUp, Activity, CheckSquare, BarChart3 } from 'lucide-react'
+import { ShieldAlert, TrendingUp, Activity, CheckSquare, BarChart3, Lightbulb, ClipboardCheck } from 'lucide-react'
 import type { Slide } from '../presentationTypes'
 import type { Macroprocess, Process } from '@/types/process'
 import type { RiskItem } from '@/types/risk'
 import type { StoredIndicator } from '@/stores/indicatorStore'
 import type { ValueActivity } from '@/utils/valueAnalysis'
+import type { AuditItem } from '@/lib/procedureAi'
+import {
+  type ImprovementOpportunity, priorityScore, priorityLabel,
+  IMPROVEMENT_TYPE_LABELS, IMPROVEMENT_TYPE_COLORS, IMPROVEMENT_TYPE_OPTIONS,
+} from '@/types/improvement'
 import type { ProcessHealthMap } from '@/hooks/useProcessHealth'
 
 // ── Category display helpers ──────────────────────────────────────────────
@@ -35,13 +40,15 @@ export interface SlideRendererProps {
   risks: RiskItem[]
   indicators: StoredIndicator[]
   analyses: Record<string, ValueActivity[]>
+  audits: Record<string, AuditItem[]>
+  improvements: ImprovementOpportunity[]
   procedures: unknown[]
   healthMap: ProcessHealthMap
 }
 
 // ── Component ────────────────────────────────────────────────────────────
 
-export function SlideRenderer({ slide, macroprocesses, processes, risks, indicators, analyses, procedures, healthMap }: SlideRendererProps) {
+export function SlideRenderer({ slide, macroprocesses, processes, risks, indicators, analyses, audits, improvements, procedures, healthMap }: SlideRendererProps) {
   switch (slide.type) {
     // ─── Title ─────────────────────────────────────────────────────
     case 'title':
@@ -317,6 +324,122 @@ export function SlideRenderer({ slide, macroprocesses, processes, risks, indicat
       )
     }
 
+    // ─── Programa de Auditoria ──────────────────────────────────────
+    case 'audit-program': {
+      const rows = Object.entries(audits).flatMap(([pid, items]) =>
+        items.map((it) => ({ ...it, process: processes.find((p) => p.id === pid)?.name ?? pid })))
+      const covered = Object.entries(audits).filter(([, items]) => items.length > 0).length
+      const byResp = new globalThis.Map<string, number>()
+      rows.forEach((r) => byResp.set(r.responsable || 'Sin asignar', (byResp.get(r.responsable || 'Sin asignar') || 0) + 1))
+      const topResp = [...byResp.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6)
+      const maxResp = Math.max(1, ...topResp.map(([, n]) => n))
+      return (
+        <div className="flex flex-col h-full px-6 lg:px-12 py-6 lg:py-10">
+          <div className="flex items-center gap-3 mb-8">
+            <ClipboardCheck className="w-8 h-8 text-cyan-400" />
+            <h2 className="text-4xl font-bold text-white">Programa de Auditoria</h2>
+          </div>
+          <div className="flex gap-6 mb-8">
+            <StatBox value={rows.length} label="Puntos de control" tone="text-cyan-400" />
+            <StatBox value={`${covered}/${processes.length}`} label="Procesos cubiertos" tone="text-emerald-400" />
+            <StatBox value={byResp.size} label="Responsables" tone="text-violet-400" />
+          </div>
+          <div className="flex-1 grid grid-cols-2 gap-10 min-h-0">
+            <div className="min-h-0 flex flex-col">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Carga por responsable</h3>
+              <div className="space-y-2">
+                {topResp.map(([name, n]) => (
+                  <div key={name} className="flex items-center gap-3">
+                    <span className="w-40 text-right text-sm text-gray-300 truncate">{name}</span>
+                    <span className="flex-1 h-5 rounded bg-white/5 overflow-hidden">
+                      <span className="h-full rounded bg-violet-400/80 flex items-center justify-end px-2" style={{ width: `${Math.max(8, n / maxResp * 100)}%` }}>
+                        <span className="text-[11px] font-bold text-white">{n}</span>
+                      </span>
+                    </span>
+                  </div>
+                ))}
+                {!topResp.length && <p className="text-sm text-gray-500">Sin puntos de control aun.</p>}
+              </div>
+            </div>
+            <div className="min-h-0 overflow-y-auto space-y-2">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Puntos de control</h3>
+              {rows.slice(0, 12).map((r, i) => (
+                <div key={i} className="rounded-lg border border-white/5 bg-white/[0.02] px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="flex-1 text-sm text-white truncate">{r.queAuditar || r.actividad}</span>
+                    <span className="text-[11px] text-cyan-300 shrink-0">{r.frecuencia}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">{r.process} · {r.responsable || 'sin responsable'}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // ─── Oportunidades de Mejora ────────────────────────────────────
+    case 'improvements': {
+      const opps = improvements
+      const abiertas = opps.filter((o) => o.status !== 'cerrada' && o.status !== 'descartada').length
+      const quickWins = opps.filter((o) => priorityLabel(priorityScore(o)).tone === 'high' && o.status !== 'cerrada' && o.status !== 'descartada').length
+      const cerradas = opps.filter((o) => o.status === 'cerrada').length
+      const byType = IMPROVEMENT_TYPE_OPTIONS
+        .map((t) => ({ t, n: opps.filter((o) => o.type === t).length }))
+        .filter((x) => x.n > 0)
+      const maxType = Math.max(1, ...byType.map((x) => x.n))
+      const top = [...opps]
+        .sort((a, b) => priorityScore(b) - priorityScore(a))
+        .slice(0, 8)
+      return (
+        <div className="flex flex-col h-full px-6 lg:px-12 py-6 lg:py-10">
+          <div className="flex items-center gap-3 mb-8">
+            <Lightbulb className="w-8 h-8 text-amber-400" />
+            <h2 className="text-4xl font-bold text-white">Oportunidades de Mejora</h2>
+          </div>
+          <div className="flex gap-6 mb-8">
+            <StatBox value={opps.length} label="Oportunidades" tone="text-cyan-400" />
+            <StatBox value={quickWins} label="Quick wins" tone="text-emerald-400" />
+            <StatBox value={abiertas} label="Abiertas" tone="text-amber-400" />
+            <StatBox value={cerradas} label="Cerradas" tone="text-violet-400" />
+          </div>
+          <div className="flex-1 grid grid-cols-2 gap-10 min-h-0">
+            <div className="min-h-0 flex flex-col">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Por tipo de mejora</h3>
+              <div className="space-y-2">
+                {byType.map(({ t, n }) => (
+                  <div key={t} className="flex items-center gap-3">
+                    <span className="w-44 text-right text-sm text-gray-300 truncate">{IMPROVEMENT_TYPE_LABELS[t]}</span>
+                    <span className="flex-1 h-5 rounded bg-white/5 overflow-hidden">
+                      <span className="h-full rounded flex items-center justify-end px-2" style={{ width: `${Math.max(8, n / maxType * 100)}%`, background: IMPROVEMENT_TYPE_COLORS[t] }}>
+                        <span className="text-[11px] font-bold text-white">{n}</span>
+                      </span>
+                    </span>
+                  </div>
+                ))}
+                {!byType.length && <p className="text-sm text-gray-500">Sin oportunidades aun.</p>}
+              </div>
+            </div>
+            <div className="min-h-0 overflow-y-auto space-y-2">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Prioritarias (quick wins primero)</h3>
+              {top.map((o) => {
+                const prio = priorityLabel(priorityScore(o))
+                return (
+                  <div key={o.id} className="rounded-lg border border-white/5 bg-white/[0.02] px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex-1 text-sm text-white truncate">{o.name}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0" style={{ background: `${IMPROVEMENT_TYPE_COLORS[o.type]}22`, color: IMPROVEMENT_TYPE_COLORS[o.type] }}>{IMPROVEMENT_TYPE_LABELS[o.type]}</span>
+                    </div>
+                    <div className="text-xs text-gray-500">{prio.label} · {priorityScore(o)}/15 · {o.progressPct}% avance</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     // ─── Coverage Matrix ────────────────────────────────────────────
     case 'coverage': {
       const checkLabels = [
@@ -439,4 +562,13 @@ export function SlideRenderer({ slide, macroprocesses, processes, risks, indicat
     default:
       return null
   }
+}
+
+function StatBox({ value, label, tone }: { value: number | string; label: string; tone: string }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-3">
+      <div className={`text-3xl font-bold ${tone}`}>{value}</div>
+      <div className="text-xs text-gray-400 mt-0.5">{label}</div>
+    </div>
+  )
 }

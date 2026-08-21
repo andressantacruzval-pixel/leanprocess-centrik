@@ -1,10 +1,10 @@
 import type { ElementType } from 'react'
-import { Presentation, Map, LayoutGrid, BarChart3, ShieldAlert, TrendingUp, Activity, CheckSquare } from 'lucide-react'
+import { Presentation, Map, LayoutGrid, BarChart3, ShieldAlert, TrendingUp, Activity, CheckSquare, Lightbulb, ClipboardCheck } from 'lucide-react'
 
 // ── Slide type ────────────────────────────────────────────────────────────
 
 export interface Slide {
-  type: 'title' | 'map-overview' | 'macroprocess' | 'summary' | 'risk-heatmap' | 'kpi-dashboard' | 'value-analysis' | 'coverage' | 'org-stats'
+  type: 'title' | 'map-overview' | 'macroprocess' | 'summary' | 'risk-heatmap' | 'kpi-dashboard' | 'value-analysis' | 'audit-program' | 'improvements' | 'coverage' | 'org-stats'
   title: string
   data?: unknown
 }
@@ -19,6 +19,8 @@ export const slideDescriptions: Record<Slide['type'], string> = {
   'risk-heatmap': 'Matriz de riesgos organizacional',
   'kpi-dashboard': 'KPIs definidos por proceso',
   'value-analysis': 'Clasificacion de actividades VA/NVA/NVABN',
+  'audit-program': 'Programa de auditoria: cobertura y puntos de control',
+  improvements: 'Oportunidades de mejora por tipo, estado y prioridad',
   coverage: 'Estado de documentacion de cada proceso',
   'org-stats': 'Metricas clave de la organizacion',
 }
@@ -31,6 +33,8 @@ export const slideIcons: Record<Slide['type'], ElementType> = {
   'risk-heatmap': ShieldAlert,
   'kpi-dashboard': TrendingUp,
   'value-analysis': Activity,
+  'audit-program': ClipboardCheck,
+  improvements: Lightbulb,
   coverage: CheckSquare,
   'org-stats': BarChart3,
 }

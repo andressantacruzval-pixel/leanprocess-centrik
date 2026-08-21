@@ -27,6 +27,8 @@ const typeBadge: Record<Slide['type'], string> = {
   'risk-heatmap': 'Riesgos',
   'kpi-dashboard': 'KPIs',
   'value-analysis': 'Valor',
+  'audit-program': 'Auditoria',
+  improvements: 'Mejoras',
   coverage: 'Cobertura',
   'org-stats': 'Stats',
 }

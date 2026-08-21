@@ -96,12 +96,12 @@ export function ImprovementsReport({
         {abiertas.filter((o) => o.status === 'en_progreso' && (o.progressPct || 0) === 0).length > 0 && <Insight tone="warn">{abiertas.filter((o) => o.status === 'en_progreso' && (o.progressPct || 0) === 0).length} mejora(s) marcadas "en progreso" con 0% de avance. Actualiza el estado o el porcentaje.</Insight>}
       </div>
 
-      <TableWrap minWidth={1420}>
+      <TableWrap minWidth={1640}>
         <thead>
           <tr className="bg-white/[0.03] border-b border-white/5">
             <Th>Gerencia</Th><Th>Proceso</Th><Th>Oportunidad</Th><Th>Tipo</Th><Th>Prioridad</Th>
             <Th>Costo</Th><Th>Compl.</Th><Th>Tiempo</Th><Th>Responsable</Th>
-            <Th>Inicio</Th><Th>Fin</Th><Th>Estado</Th><Th>Avance</Th><Th>Cierre</Th>
+            <Th>Inicio</Th><Th>Fin</Th><Th>Estado</Th><Th>Avance</Th><Th>Hitos</Th><Th>Notas</Th><Th>Cierre</Th>
           </tr>
         </thead>
         <tbody>
@@ -135,12 +135,14 @@ export function ImprovementsReport({
                     className={inputCls + ' w-14'} />
                   <span className="text-white/30 text-[10px]">%</span>
                 </Td>
+                <Td>{o.milestones.length ? `${o.milestones.filter((m) => m.done).length}/${o.milestones.length}` : <span className="text-white/20">—</span>}</Td>
+                <Td className="max-w-[200px]"><div className="truncate" title={o.progressNotes}>{o.progressNotes || <span className="text-white/20">—</span>}</div></Td>
                 <Td><input type="date" value={o.closeDate ?? ''} onChange={(e) => onUpdate(o.id, { closeDate: e.target.value || null })} className={inputCls} /></Td>
               </tr>
             )
           })}
-          {shownRows.length === 0 && <EmptyRow cols={14} />}
-          <VerMasRow cols={14} ocultas={ocultas} onVerMas={verMas} />
+          {shownRows.length === 0 && <EmptyRow cols={16} />}
+          <VerMasRow cols={16} ocultas={ocultas} onVerMas={verMas} />
         </tbody>
       </TableWrap>
     </Dashboard>

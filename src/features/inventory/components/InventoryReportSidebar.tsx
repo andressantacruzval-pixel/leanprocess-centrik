@@ -1,7 +1,7 @@
 import { X } from 'lucide-react'
 import type { InvMacro, InvTipo } from '../types'
 import { TIPO_COLOR } from '../types'
-import type { RepFilters } from '../inventoryReportData'
+import { BANDERAS, type RepFilters } from '../inventoryReportData'
 
 // Barra lateral del reporte de inventario: navegación por franja/macroproceso
 // y filtros de caracterización (crítico, efectivo, nivel, gerencia, área).
@@ -13,6 +13,8 @@ interface Props {
   hojas: string[]
   niveles: string[]
   gerencias: string[]
+  frecuencias: string[]
+  tiposProceso: string[]
   f: RepFilters
   set: <K extends keyof RepFilters>(k: K, v: string) => void
   clear: () => void
@@ -20,7 +22,7 @@ interface Props {
   total: number
 }
 
-export function InventoryReportSidebar({ macros, hojas, niveles, gerencias, f, set, clear, shown, total }: Props) {
+export function InventoryReportSidebar({ macros, hojas, niveles, gerencias, frecuencias, tiposProceso, f, set, clear, shown, total }: Props) {
   const hasF = Object.values(f).some(Boolean)
   return (
     <aside className="lg:w-64 shrink-0 lg:sticky lg:top-3 self-start space-y-4">
@@ -60,6 +62,9 @@ export function InventoryReportSidebar({ macros, hojas, niveles, gerencias, f, s
         <Sel label="Mov. de efectivo" value={f.efectivo} onChange={(v) => set('efectivo', v)} options={[{ v: 'si', l: 'Sí' }, { v: 'no', l: 'No' }]} />
         <Sel label="Nivel de ejecución" value={f.nivel} onChange={(v) => set('nivel', v)} options={niveles} />
         <Sel label="Gerencia" value={f.gerencia} onChange={(v) => set('gerencia', v)} options={gerencias} />
+        <Sel label="Frecuencia" value={f.frecuencia} onChange={(v) => set('frecuencia', v)} options={frecuencias} />
+        <Sel label="Tipo de proceso" value={f.tipoProceso} onChange={(v) => set('tipoProceso', v)} options={tiposProceso} />
+        <Sel label="Bandera activa" value={f.bandera} onChange={(v) => set('bandera', v)} options={BANDERAS.map((b) => ({ v: b.key as string, l: b.label }))} />
         <div className="pt-1 text-[11px] text-white/40">{shown}{shown !== total ? ` de ${total}` : ''} subprocesos</div>
       </div>
     </aside>

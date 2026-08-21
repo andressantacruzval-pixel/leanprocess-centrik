@@ -4,7 +4,7 @@ import { useInventoryData } from '../useInventoryData'
 import { useInventoryStore } from '@/stores/inventoryStore'
 import { countBy, leafAreas } from '../inventoryUtils'
 import { findings, type FindingLevel } from '../inventoryStats'
-import { useInventoryReportRows, EMPTY_FILTERS, type RepFilters } from '../inventoryReportData'
+import { useInventoryReportRows, EMPTY_FILTERS, BANDERAS, type RepFilters, type InvReportRow } from '../inventoryReportData'
 import { TIPO_COLOR, type InvTipo } from '../types'
 import { OriginBadge } from './OriginBadge'
 import { InventoryReportSidebar } from './InventoryReportSidebar'
@@ -26,6 +26,8 @@ export function InventoryReport() {
   const hojas = useMemo(() => leafAreas(areas, macros), [areas, macros])
   const niveles = useMemo(() => [...new Set(all.map((r) => r.nivelEjecucion).filter(Boolean))].sort(), [all])
   const gerencias = useMemo(() => [...new Set(all.map((r) => r.gerencia).filter(Boolean))].sort(), [all])
+  const frecuencias = useMemo(() => [...new Set(all.map((r) => r.frecuencia).filter(Boolean))].sort(), [all])
+  const tiposProceso = useMemo(() => [...new Set(all.map((r) => r.tipoProceso).filter(Boolean))].sort(), [all])
 
   const subs = useMemo(() => all.filter((s) =>
     (!f.tipo || s.tipo === f.tipo) &&
@@ -34,8 +36,11 @@ export function InventoryReport() {
     (!f.origen || s.origen === f.origen) &&
     (!f.nivel || s.nivelEjecucion === f.nivel) &&
     (!f.gerencia || s.gerencia === f.gerencia) &&
+    (!f.frecuencia || s.frecuencia === f.frecuencia) &&
+    (!f.tipoProceso || s.tipoProceso === f.tipoProceso) &&
     (!f.critico || (f.critico === 'si' ? s.critico === true : s.critico === false)) &&
-    (!f.efectivo || (f.efectivo === 'si' ? s.efectivo === true : s.efectivo === false))
+    (!f.efectivo || (f.efectivo === 'si' ? s.efectivo === true : s.efectivo === false)) &&
+    (!f.bandera || s[f.bandera as keyof InvReportRow] === true)
   ), [all, f])
 
   if (!all.length) {
@@ -61,6 +66,7 @@ export function InventoryReport() {
   return (
     <div className="p-3 sm:p-4 flex flex-col lg:flex-row gap-4 text-white/80">
       <InventoryReportSidebar macros={macros} hojas={hojas} niveles={niveles} gerencias={gerencias}
+        frecuencias={frecuencias} tiposProceso={tiposProceso}
         f={f} set={set} clear={() => setF(EMPTY_FILTERS)} shown={subs.length} total={all.length} />
 
       <div className="min-w-0 flex-1 space-y-5">
@@ -96,8 +102,10 @@ export function InventoryReport() {
             <table className="w-full text-[12px] border-collapse">
               <thead>
                 <tr className="text-left text-white/45 border-b border-white/10">
-                  <Th>Área</Th><Th>Macroproceso</Th><Th>Proceso</Th><Th>Subproceso</Th>
-                  <Th>Crítico</Th><Th>Efectivo</Th><Th>Nivel ejec.</Th><Th>Gerencia</Th>
+                  <Th>Área</Th><Th>Macroproceso</Th><Th>Proceso</Th><Th>Subproceso</Th><Th>Objetivo</Th>
+                  <Th>Responsable</Th><Th>Crítico</Th><Th>Efectivo</Th><Th>Nivel ejec.</Th><Th>Gerencia</Th>
+                  <Th>Frecuencia</Th><Th>Tipo proceso</Th><Th>Tipo ejec.</Th><Th>Medio entrega</Th><Th>Supervisión</Th>
+                  <Th>Banderas</Th>
                   <Th>Proveedores</Th><Th>Entradas</Th><Th>Salidas</Th><Th>Clientes</Th>
                   <Th>Estado</Th>
                 </tr>
@@ -109,10 +117,18 @@ export function InventoryReport() {
                     <Td className="text-white/85"><span className="inline-flex items-center gap-1.5"><i className="w-2 h-2 rounded-full shrink-0" style={{ background: TIPO_COLOR[(s.tipo as InvTipo)] ?? '#3987e5' }} />{s.macro}</span></Td>
                     <Td className="text-cyan-300">{s.proceso}</Td>
                     <Td className="text-white font-medium">{s.nombre}</Td>
+                    <Td className="text-white/50 max-w-[220px]"><div className="truncate" title={s.objetivo}>{s.objetivo || <span className="text-white/20">—</span>}</div></Td>
+                    <Td className="text-white/60 max-w-[130px]"><div className="truncate">{s.responsable || <span className="text-white/20">—</span>}</div></Td>
                     <Td><Bool v={s.critico} yes="Sí" danger /></Td>
                     <Td><Bool v={s.efectivo} yes="Sí" /></Td>
                     <Td className="text-white/60">{s.nivelEjecucion || <span className="text-white/20">—</span>}</Td>
                     <Td className="text-white/60">{s.gerencia || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/60">{s.frecuencia || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/60">{s.tipoProceso || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/60">{s.tipoEjecucion || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/60">{s.medioEntrega || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/60">{s.supervision || <span className="text-white/20">—</span>}</Td>
+                    <Td><Banderas row={s} /></Td>
                     <Td className="text-white/55 max-w-[200px]">{s.proveedores || <span className="text-white/20">—</span>}</Td>
                     <Td className="text-white/55 max-w-[200px]">{s.entradas || <span className="text-white/20">—</span>}</Td>
                     <Td className="text-white/55 max-w-[200px]">{s.salidas || <span className="text-white/20">—</span>}</Td>
@@ -147,6 +163,24 @@ function Bool({ v, yes, danger }: { v: boolean | null; yes: string; danger?: boo
   if (v == null) return <span className="text-white/20">—</span>
   if (!v) return <span className="text-white/30">No</span>
   return <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${danger ? 'bg-red-500/15 text-red-300' : 'bg-emerald-500/15 text-emerald-300'}`}>{yes}</span>
+}
+
+// Chips compactos con las banderas de cumplimiento/continuidad activas.
+const BANDERA_SHORT: Record<string, string> = {
+  contingencia: 'Conting.', impuestos: 'Impuestos', contabilidad: 'Contab.', datosPersonales: 'Datos pers.', terceros: 'Terceros',
+}
+function Banderas({ row }: { row: InvReportRow }) {
+  const activas = BANDERAS.filter((b) => row[b.key] === true)
+  if (!activas.length) return <span className="text-white/20">—</span>
+  return (
+    <div className="flex flex-wrap gap-1 max-w-[190px]">
+      {activas.map((b) => (
+        <span key={b.key} title={b.label} className="inline-flex items-center rounded bg-amber-500/12 text-amber-300 px-1.5 py-0.5 text-[9px] font-semibold whitespace-nowrap">
+          {BANDERA_SHORT[b.key as string]}
+        </span>
+      ))}
+    </div>
+  )
 }
 
 function Kpi({ label, value, sub, accent }: { label: string; value: number | string; sub: string; accent?: boolean }) {
