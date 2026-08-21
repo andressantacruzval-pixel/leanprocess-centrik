@@ -4,15 +4,14 @@ import { useInventoryStore } from '@/stores/inventoryStore'
 import { useInventoryData } from '../useInventoryData'
 import type { InvDoc, InvFile } from '../types'
 import { WizardBase } from './WizardBase'
-import { WizardMethod } from './WizardMethod'
-import { WizardCapture } from './WizardCapture'
+import { WizardGenerate } from './WizardGenerate'
 
 // Asistente del Inventario de Procesos, lanzado desde el Mapa de Procesos.
-// Tres pasos: (1) Base — lee el mapa Nivel 0 y las áreas de la app; (2) Método y
-// prompt — Big Bang o Incremental; (3) Captura — pega la respuesta de la IA y las
-// tarjetas se generan solas. El dashboard completo vive en Reportes.
+// Dos pasos: (1) Base — lee el mapa Nivel 0 y las áreas de la app; (2) Generación
+// — la IA levanta el inventario AQUÍ mismo, macroproceso por macroproceso, y las
+// tarjetas se generan solas. El reporte completo (tabla + gráficos) vive en Reportes.
 
-const STEPS = ['Base', 'Método y prompt', 'Levantamiento']
+const STEPS = ['Base', 'Generación con IA']
 
 interface Props { onClose: () => void }
 
@@ -45,7 +44,7 @@ export function InventoryWizard({ onClose }: Props) {
       const o = JSON.parse(text) as InvFile
       if (o.tipo !== 'ai-process-manager-inventario') throw new Error('bad')
       replaceDoc(companyId, { proyecto: { ...view.proyecto, ...o.proyecto }, areas: o.areas || [], macros: o.macros || [] })
-      setStep(2)
+      setStep(1)
     } catch { alert('Ese archivo no es un inventario válido.') }
   }
 
@@ -86,15 +85,9 @@ export function InventoryWizard({ onClose }: Props) {
             />
           )}
           {step === 1 && (
-            <WizardMethod
+            <WizardGenerate
               companyId={companyId} doc={view}
-              onBack={() => setStep(0)} onNext={() => setStep(2)}
-            />
-          )}
-          {step === 2 && (
-            <WizardCapture
-              companyId={companyId} doc={view}
-              onBack={() => setStep(1)} onClose={onClose}
+              onBack={() => setStep(0)} onClose={onClose}
             />
           )}
         </div>

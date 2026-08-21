@@ -72,12 +72,12 @@ export function WizardBase({ companyId, doc, onImport, onNext }: Props) {
         )}
       </div>
 
-      {/* Ficha del proyecto */}
+      {/* Contexto para la IA (opcional) */}
       <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-        <h3 className="text-sm font-semibold text-white mb-4">Ficha del proyecto</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Consultor" value={P.consultor} onChange={(v) => setProyecto(companyId, { consultor: v })} placeholder="Nombre y apellido" />
-          <Field label="Organización cliente" value={P.cliente} onChange={(v) => setProyecto(companyId, { cliente: v })} placeholder="Ej. Centrik" />
+        <h3 className="text-sm font-semibold text-white mb-1">Contexto para la IA <span className="text-[11px] font-normal text-white/40">· opcional, mejora la precisión</span></h3>
+        <p className="text-[12px] text-white/40 mb-4">El sector y el alcance ayudan a la IA a deducir mejor los procesos.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Field label="Organización" value={P.cliente} onChange={(v) => setProyecto(companyId, { cliente: v })} placeholder="Ej. Centrik" />
           <Field label="Sector / giro" value={P.sector} onChange={(v) => setProyecto(companyId, { sector: v })} placeholder="Ej. Software B2B" />
           <Field label="Alcance" value={P.alcance} onChange={(v) => setProyecto(companyId, { alcance: v })} placeholder="Ej. Toda la empresa" />
         </div>
@@ -85,7 +85,7 @@ export function WizardBase({ companyId, doc, onImport, onNext }: Props) {
 
       <div className="flex items-center gap-3 flex-wrap">
         <button onClick={onNext} disabled={!doc.macros.length} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-cyan-500/30 disabled:opacity-40 disabled:shadow-none">
-          Elegir método <ArrowRight size={15} />
+          Generar con IA <ArrowRight size={15} />
         </button>
         <button onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/15 text-white/70 text-sm hover:bg-white/5">
           <Upload size={14} /> Importar inventario (.json)

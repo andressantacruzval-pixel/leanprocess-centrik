@@ -2,9 +2,9 @@ import { useState, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   FileText, ShieldAlert, TrendingUp, Activity, ClipboardCheck,
-  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List, Map as MapIcon,
+  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List,
 } from 'lucide-react'
-import { InventoryDashboard } from '@/features/inventory/components/InventoryDashboard'
+import { InventoryReport as InventoryReportUnified } from '@/features/inventory/components/InventoryReport'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { SelectFilter } from '@/components/ui/SelectFilter'
@@ -17,7 +17,6 @@ import { CLASSIFICATION_COLORS, scaleToPeriod, type ValueActivity } from '@/util
 import { exportReportToExcel, exportReportToPdf } from '@/utils/reportExporter'
 import type { Macroprocess, Process } from '@/types/process'
 import type { StoredIndicator } from '@/stores/indicatorStore'
-import type { StoredProcedure } from '@/stores/procedureStore'
 import type { AuditItem } from '@/lib/procedureAi'
 import { useImprovementStore } from '@/stores/improvementStore'
 import {
@@ -26,11 +25,10 @@ import {
 } from '@/types/improvement'
 import { ImprovementsKanban } from '@/features/improvement/components/ImprovementsKanban'
 
-type ReportTab = 'inventario' | 'inventario-ia' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras'
+type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras'
 
 const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'inventario', label: 'Inventario', icon: FileText },
-  { key: 'inventario-ia', label: 'Inventario IA', icon: MapIcon },
   { key: 'riesgos', label: 'Riesgos', icon: ShieldAlert },
   { key: 'kpis', label: 'KPIs', icon: TrendingUp },
   { key: 'valor', label: 'Valor', icon: Activity },
@@ -134,8 +132,10 @@ export default function ReportsPage() {
         ))}
       </div>
 
-      {activeTab === 'inventario-ia' ? (
-        <InventoryDashboard />
+      {activeTab === 'inventario' ? (
+        <div className="bg-white/[0.02] rounded-2xl border border-white/5">
+          <InventoryReportUnified />
+        </div>
       ) : (
       <>
       {/* Filters */}
@@ -217,7 +217,6 @@ export default function ReportsPage() {
         </div>
       ) : (
         <div className="bg-white/[0.02] rounded-2xl border border-white/5 overflow-x-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          {activeTab === 'inventario' && <InventoryReport processes={filteredProcesses} macroMap={macroMap} allProcedures={allProcedures} levelMap={levelMap} />}
           {activeTab === 'riesgos' && <RisksReport processes={filteredProcesses} macroMap={macroMap} allRisks={allRisks} />}
           {activeTab === 'kpis' && <KpisReport processes={filteredProcesses} macroMap={macroMap} allIndicators={allIndicators} />}
           {activeTab === 'valor' && <ValueReport processes={filteredProcesses} macroMap={macroMap} allAnalyses={allAnalyses} />}
@@ -233,53 +232,6 @@ export default function ReportsPage() {
       </>
       )}
     </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// INVENTORY REPORT
-// ═══════════════════════════════════════════════════════════════════════
-
-function InventoryReport({ processes, macroMap, allProcedures, levelMap }: {
-  processes: Process[]
-  macroMap: Map<string, Macroprocess>
-  allProcedures: StoredProcedure[]
-  levelMap: Map<string, string>
-}) {
-  const procedureSet = useMemo(() => new Set(allProcedures.map(p => p.process_id)), [allProcedures])
-  const { visibles, ocultas, verMas } = useVerMas(processes)
-
-  return (
-    <table className="w-full text-left min-w-[1200px]">
-      <thead>
-        <tr className="bg-white/[0.03] border-b border-white/5">
-          <Th>Gerencia</Th><Th>Area</Th><Th>Nivel</Th><Th>Macroproceso</Th><Th>Subproceso</Th>
-          <Th>Responsable</Th><Th>Tipo</Th><Th>Frecuencia</Th><Th>Critico</Th><Th>BPMN</Th><Th>Procedimiento</Th>
-        </tr>
-      </thead>
-      <tbody>
-        {visibles.map((p) => {
-          const macro = macroMap.get(p.macroprocess_id)
-          return (
-            <tr key={p.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-              <Td>{p.management || '-'}</Td>
-              <Td>{p.coordination || '-'}</Td>
-              <Td>{p.level_definition_id ? (levelMap.get(p.level_definition_id) ?? '-') : '-'}</Td>
-              <Td>{macro?.name || '-'}</Td>
-              <Td className="text-white font-medium">{p.name}</Td>
-              <Td>{p.responsible || '-'}</Td>
-              <Td>{p.process_type || '-'}</Td>
-              <Td>{p.execution_frequency || '-'}</Td>
-              <Td>{p.is_critical ? <Badge label="Si" color="red" /> : <Badge label="No" color="gray" />}</Td>
-              <Td>{p.bpmn_xml ? <Badge label="Si" color="emerald" /> : <Badge label="No" color="gray" />}</Td>
-              <Td>{procedureSet.has(p.id) ? <Badge label="Si" color="emerald" /> : <Badge label="No" color="gray" />}</Td>
-            </tr>
-          )
-        })}
-        {processes.length === 0 && <EmptyRow cols={11} />}
-        <VerMasRow cols={11} ocultas={ocultas} onVerMas={verMas} />
-      </tbody>
-    </table>
   )
 }
 
@@ -619,16 +571,6 @@ function VerMasRow({ cols, ocultas, onVerMas }: { cols: number; ocultas: number;
       </td>
     </tr>
   )
-}
-
-function Badge({ label, color }: { label: string; color: string }) {
-  const styles: Record<string, string> = {
-    emerald: 'bg-emerald-500/15 text-emerald-400',
-    red: 'bg-red-500/15 text-red-400',
-    amber: 'bg-amber-500/15 text-amber-400',
-    gray: 'bg-white/5 text-white/20',
-  }
-  return <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${styles[color] || styles.gray}`}>{label}</span>
 }
 
 function RiskBadge({ label, hex }: { label: string; hex: string }) {

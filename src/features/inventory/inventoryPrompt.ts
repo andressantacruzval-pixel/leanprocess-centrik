@@ -60,15 +60,10 @@ export function progresoGlobal(macros: InvMacro[]) {
 
 export interface PromptOpts { modo: 'foco' | 'todos'; focoIndex: number }
 
-export function buildInventoryPrompt(P: InvProyecto, macros: InvMacro[], areas: InvArea[], opts: PromptOpts): string {
-  if (!macros.length) return 'Carga primero el mapa de procesos Nivel 0 en el paso 1.'
-  const BB = P.metodo === 'bigbang'
-  const foco = opts.modo === 'foco'
-  const m = macros[opts.focoIndex] || macros[0]
-  const G = progresoGlobal(macros)
-  const origen = BB ? 'deducido' : 'confirmado'
-
-  let t = `Eres Arquitecto Senior de Procesos con 20 años de experiencia en BPM (CBOK), marco APQC PCF, ISO 9001, ISO 31000, ISO 22301 y Lean. Vamos a construir el INVENTARIO DE PROCESOS de una organización real. Yo soy el consultor a cargo; tú eres el arquitecto que ejecuta y me advierte cuando algo no cuadra.
+// Secciones 1–4 (contexto + canon): compartidas por el prompt manual y el motor
+// embebido, para no duplicar la metodología.
+function contextoYCanon(P: InvProyecto, macros: InvMacro[], areas: InvArea[]): string {
+  return `Eres Arquitecto Senior de Procesos con 20 años de experiencia en BPM (CBOK), marco APQC PCF, ISO 9001, ISO 31000, ISO 22301 y Lean. Vamos a construir el INVENTARIO DE PROCESOS de una organización real. Yo soy el consultor a cargo; tú eres el arquitecto que ejecuta y me advierte cuando algo no cuadra.
 
 Trabajas con un protocolo estricto. No lo resumas, no lo comentes, no lo negocies: ejecútalo.
 
@@ -147,6 +142,17 @@ Ante la duda, quédate CORTO.
 · Español, tono profesional y directo. Sin relleno.
 
 `
+}
+
+export function buildInventoryPrompt(P: InvProyecto, macros: InvMacro[], areas: InvArea[], opts: PromptOpts): string {
+  if (!macros.length) return 'Carga primero el mapa de procesos Nivel 0 en el paso 1.'
+  const BB = P.metodo === 'bigbang'
+  const foco = opts.modo === 'foco'
+  const m = macros[opts.focoIndex] || macros[0]
+  const G = progresoGlobal(macros)
+  const origen = BB ? 'deducido' : 'confirmado'
+
+  let t = contextoYCanon(P, macros, areas)
 
   if (BB) {
     t += `═══════════ 5 · MÉTODO: BIG BANG ═══════════
@@ -212,6 +218,25 @@ Empieza ahora por el PASO 1.`
   }
 
   return t
+}
+
+/**
+ * Prompt de PRODUCCIÓN DIRECTA para el motor embebido: la IA deduce y devuelve
+ * SOLO el JSON de un macroproceso, sin preguntas ni texto. Se usa en bucle,
+ * macroproceso por macroproceso, para que las tarjetas se generen automáticamente.
+ */
+export function buildAutoPrompt(P: InvProyecto, macros: InvMacro[], areas: InvArea[], macroIndex: number): string {
+  const m = macros[macroIndex] || macros[0]
+  return contextoYCanon(P, macros, areas) + `═══════════ 5 · PRODUCCIÓN DIRECTA (SIN PREGUNTAS) ═══════════
+Produce YA el inventario del macroproceso «${m.nombre}» (franja: ${m.tipo}).
+· NO hagas preguntas. NO uses matriz de contribución. NO escribas ningún texto fuera del JSON.
+· Deduce los procesos y subprocesos aplicando el canon de la sección 4 (nombres nominales, granularidad de etapa, 2–5 subprocesos por proceso).
+· Usa EXCLUSIVAMENTE las áreas hoja de la sección 3. Cada subproceso con UNA sola área.
+· Todos los subprocesos llevan "origen": "deducido" (son hipótesis a validar).
+· "macroproceso" debe ser EXACTAMENTE «${m.nombre}».
+
+Responde ÚNICAMENTE con este objeto JSON (sin \`\`\`, sin comentarios, sin nada más):
+${SCHEMA}`
 }
 
 export function buildRescuePrompt(macros: InvMacro[]): string {
