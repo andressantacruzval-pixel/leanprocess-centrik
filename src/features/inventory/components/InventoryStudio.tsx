@@ -34,15 +34,23 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
   const G = globalStats(doc.macros, doc.areas)
   const selMacro = sel != null ? doc.macros[sel] : null
   const porVolcar = pendientesDeVolcar(companyId)
+  const [volcando, setVolcando] = useState(false)
 
-  const volcar = () => {
-    const r = volcarAceptadosAlMapa(companyId)
-    setVolcadoMsg(
-      (r.procesos || r.subprocesos)
+  const volcar = async () => {
+    if (volcando) return
+    setVolcando(true); setVolcadoMsg('')
+    try {
+      const r = await volcarAceptadosAlMapa(companyId)
+      const base = (r.procesos || r.subprocesos)
         ? `Volcado al mapa: +${r.procesos} proceso(s) y +${r.subprocesos} subproceso(s) ✓`
         : 'No había nada nuevo aceptado por volcar.'
-    )
-    setTimeout(() => setVolcadoMsg(''), 4000)
+      setVolcadoMsg(r.failed ? `${base} · ${r.failed} no se pudieron guardar (reintenta o revisa el límite de plan).` : base)
+    } catch {
+      setVolcadoMsg('No se pudo volcar al mapa. Reintenta.')
+    } finally {
+      setVolcando(false)
+      setTimeout(() => setVolcadoMsg(''), 6000)
+    }
   }
 
   const runBigBang = async (mi: number) => {
@@ -145,7 +153,7 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
         </div>
         <div className="flex-1" />
         {volcadoMsg && <span className="text-[12px] text-emerald-300">{volcadoMsg}</span>}
-        <button onClick={volcar} disabled={busy || !porVolcar} title={porVolcar ? 'Crea en el mapa los procesos/subprocesos aceptados' : 'No hay subprocesos aceptados nuevos'} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[13px] hover:bg-emerald-500/15 disabled:opacity-40"><Upload size={14} /> Volcar al mapa{porVolcar ? ` (${porVolcar})` : ''}</button>
+        <button onClick={volcar} disabled={busy || volcando || !porVolcar} title={porVolcar ? 'Crea en el mapa los procesos/subprocesos aceptados' : 'No hay subprocesos aceptados nuevos'} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[13px] hover:bg-emerald-500/15 disabled:opacity-40">{volcando ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />} Volcar al mapa{porVolcar ? ` (${porVolcar})` : ''}</button>
         <button onClick={() => navigate('/app/reports?tab=inventario')} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[13px] hover:bg-cyan-500/15"><BarChart3 size={14} /> Reporte</button>
         <button onClick={() => { if (!busy && confirm('¿Vaciar lo levantado? El mapa y las áreas se conservan.')) { reset(companyId); setSel(null) } }} disabled={busy} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-white/10 text-white/40 text-[13px] hover:text-red-300 disabled:opacity-40"><RotateCcw size={14} /> Reiniciar</button>
         <button onClick={onClose} disabled={busy} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-cyan-500/30 disabled:opacity-40">Cerrar</button>

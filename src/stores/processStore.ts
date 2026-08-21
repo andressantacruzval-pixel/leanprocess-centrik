@@ -37,6 +37,12 @@ interface ProcessState {
 
   // Process CRUD
   addProcess: (name: string, macroprocessId: string, parentProcessId?: string | null) => Process
+  /**
+   * Alta en lote (padres antes que hijos). Persiste EN ORDEN y esperando cada
+   * INSERT, para que un subproceso no viole la FK a su proceso padre aún no
+   * confirmado. Devuelve cuántos se crearon y cuántos fallaron.
+   */
+  bulkAddProcesses: (procs: Process[]) => Promise<{ ok: number; failed: number }>
   updateProcess: (id: string, updates: Partial<Process>) => void
   /** `silent` evita el toast por proceso: lo usa el borrado múltiple, que da un único resumen. */
   deleteProcess: (id: string, opts?: { silent?: boolean }) => void
@@ -259,6 +265,27 @@ export const useProcessStore = create<ProcessState>()(
           }
         })()
         return proc
+      },
+
+      bulkAddProcesses: async (procs) => {
+        if (!procs.length) return { ok: 0, failed: 0 }
+        // Alta optimista de todo el lote.
+        set((s) => ({ processes: [...s.processes, ...procs] }))
+        const { createProcess } = await import('@/services/processes.service')
+        const failed = new Set<string>()
+        let ok = 0
+        // Secuencial y en orden: los padres se confirman antes que sus hijos.
+        for (const p of procs) {
+          if (p.parent_process_id && failed.has(p.parent_process_id)) { failed.add(p.id); continue }
+          const res = await dbWrite('process:createProcess', createProcess(p as never), { silent: true })
+          if (res.ok) ok++
+          else failed.add(p.id)
+        }
+        if (failed.size) {
+          // Revierte solo lo que no se pudo guardar; conserva lo que sí.
+          set((s) => ({ processes: s.processes.filter((p) => !failed.has(p.id)) }))
+        }
+        return { ok, failed: failed.size }
       },
 
       updateProcess: (id, updates) => {
