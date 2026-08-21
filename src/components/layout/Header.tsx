@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import {
   Bell, CheckCheck, AlertTriangle, Trophy, Flame, Info, Zap,
-  ChevronDown, Settings, CreditCard, LogOut, Menu as MenuIcon,
+  ChevronDown, Settings, CreditCard, LogOut, Menu as MenuIcon, Sun, Moon,
 } from 'lucide-react'
 import { useUiStore } from '@/stores/uiStore'
 import { SearchTrigger } from '@/features/search/GlobalSearch'
@@ -32,6 +32,8 @@ type Menu = 'notificaciones' | 'perfil' | null
 export function Header() {
   const profile = useAuthStore((s) => s.profile)
   const signOut = useAuthStore((s) => s.signOut)
+  const theme = useUiStore((s) => s.theme)
+  const toggleTheme = useUiStore((s) => s.toggleTheme)
   const [menu, setMenu] = useState<Menu>(null)
   const open = menu === 'notificaciones'
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -207,6 +209,15 @@ export function Header() {
             </span>
           </div>
         )}
+
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/30 hover:text-white/60 transition-colors"
+          title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          aria-label="Cambiar tema"
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
 
         <div className="relative">
           <button

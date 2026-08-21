@@ -31,13 +31,15 @@ interface UiState {
    * apareciera abierto al entrar.
    */
   drawerOpen: boolean
-  darkMode: boolean
+  /** Tema de la interfaz. 'dark' (por defecto, versión tecnológica) o 'light'. */
+  theme: 'dark' | 'light'
   muro: MuroDePlan
   toggleSidebar: () => void
   setSidebarOpen: (value: boolean) => void
   toggleDrawer: () => void
   setDrawerOpen: (value: boolean) => void
-  toggleDarkMode: () => void
+  toggleTheme: () => void
+  setTheme: (theme: 'dark' | 'light') => void
   abrirMuroDePlan: (nivel: number, cupo: number | null, motivo?: 'documentar' | 'crear') => void
   cerrarMuroDePlan: () => void
 }
@@ -47,13 +49,14 @@ export const useUiStore = create<UiState>()(
     (set) => ({
       sidebarOpen: true,
       drawerOpen: false,
-      darkMode: false,
+      theme: 'dark',
       muro: { abierto: false, nivel: 0, cupo: null, motivo: 'documentar' },
       toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
       setSidebarOpen: (value) => set({ sidebarOpen: value }),
       toggleDrawer: () => set((s) => ({ drawerOpen: !s.drawerOpen })),
       setDrawerOpen: (value) => set({ drawerOpen: value }),
-      toggleDarkMode: () => set((s) => ({ darkMode: !s.darkMode })),
+      toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+      setTheme: (theme) => set({ theme }),
       abrirMuroDePlan: (nivel, cupo, motivo = 'documentar') =>
         set({ muro: { abierto: true, nivel, cupo, motivo } }),
       cerrarMuroDePlan: () => set((s) => ({ muro: { ...s.muro, abierto: false } })),
@@ -72,7 +75,7 @@ export const useUiStore = create<UiState>()(
        * `darkMode` tampoco: hoy no lo lee nadie y persistir un ajuste muerto solo crea
        * una clave de localStorage que confunde el dia que se implemente de verdad.
        */
-      partialize: (state) => ({ sidebarOpen: state.sidebarOpen }),
+      partialize: (state) => ({ sidebarOpen: state.sidebarOpen, theme: state.theme }),
       migrate: identityMigration(),
       merge: (persisted, current) => ({ ...current, ...(persisted as object) }),
     }

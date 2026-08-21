@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useCompanyStore } from '@/stores/companyStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { useMembershipStore } from '@/stores/membershipStore'
+import { useUiStore } from '@/stores/uiStore'
 import { useAuthBootstrap } from '@/hooks/useAuthBootstrap'
 import { toast } from '@/stores/toastStore'
 import { MainLayout } from '@/components/layout'
@@ -174,10 +175,16 @@ function ProtectedOnboarding({ children }: { children: React.ReactNode }) {
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth)
+  const theme = useUiStore((s) => s.theme)
 
   useEffect(() => {
     return initializeAuth()
   }, [initializeAuth])
+
+  // Aplica el tema (claro/oscuro) al <html> para que la capa CSS de tema actúe.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
   return (
     <QueryClientProvider client={queryClient}>

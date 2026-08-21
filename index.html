@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Tema (claro/oscuro) aplicado antes del render para evitar parpadeo. -->
+    <script>
+      try {
+        var ui = JSON.parse(localStorage.getItem('lean-process-ui') || '{}');
+        var t = (ui && ui.state && ui.state.theme) || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    </script>
+
     <!-- Branding -->
     <title>Lean Process — Gestión de Procesos con IA</title>
     <meta name="description" content="Modela, documenta y optimiza tus procesos de negocio con diagramas BPMN, procedimientos automáticos y análisis de indicadores impulsados por IA." />
