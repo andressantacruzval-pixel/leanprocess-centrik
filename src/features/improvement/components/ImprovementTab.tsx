@@ -8,7 +8,10 @@ import { useCompanyStore } from '@/stores/companyStore'
 import { useTokenBudget } from '@/hooks/useTokenBudget'
 import { InsufficientTokensModal } from '@/components/ui/InsufficientTokensModal'
 import { generateImprovementOpportunities } from '@/lib/procedureAi'
-import { clampScore, SCORE_LABELS, priorityScore, priorityLabel, type ScoreValue } from '@/types/improvement'
+import {
+  clampScore, SCORE_LABELS, STATUS_LABELS, priorityScore, priorityLabel,
+  type ScoreValue, type ImprovementStatus, type ImprovementOpportunity,
+} from '@/types/improvement'
 import { getRiskLevel } from '@/types/risk'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { ImprovementCard } from './ImprovementCard'
@@ -19,6 +22,16 @@ interface Props {
   bpmnXml?: string
   isExpanded?: boolean
 }
+
+const STATUS_CHIP: Record<ImprovementStatus, string> = {
+  propuesta:   'bg-slate-500/15 text-slate-300',
+  aprobada:    'bg-blue-500/15 text-blue-300',
+  en_progreso: 'bg-amber-500/15 text-amber-300',
+  cerrada:     'bg-emerald-500/15 text-emerald-400',
+  descartada:  'bg-red-500/15 text-red-300',
+}
+// Estados terminales: van al final, atenuados (consultables, pero no primero).
+const TERMINAL_STATUS = new Set<ImprovementStatus>(['cerrada', 'descartada'])
 
 export function ImprovementTab({ processId, processName, bpmnXml, isExpanded }: Props) {
   const company = useCompanyStore((s) => s.company)
@@ -77,6 +90,44 @@ export function ImprovementTab({ processId, processName, bpmnXml, isExpanded }: 
 
   const busy = isGenerating || budget.isConsuming
   const closedCount = opportunities.filter((o) => o.status === 'cerrada').length
+
+  // Activas arriba; terminales (cerradas/descartadas) al final, atenuadas.
+  const activeOpps = useMemo(() => opportunities.filter((o) => !TERMINAL_STATUS.has(o.status)), [opportunities])
+  const terminalOpps = useMemo(() => opportunities.filter((o) => TERMINAL_STATUS.has(o.status)), [opportunities])
+
+  const renderRow = (o: ImprovementOpportunity, dim: boolean) => {
+    const isOpen = openId === o.id
+    const total = priorityScore(o)
+    const prio = priorityLabel(total)
+    const prioCls = prio.tone === 'high'
+      ? 'bg-emerald-500/15 text-emerald-400'
+      : prio.tone === 'mid' ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400'
+    return (
+      <div key={o.id} className={`rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden ${dim ? 'opacity-60 hover:opacity-100 transition-opacity' : ''}`}>
+        <button
+          type="button"
+          onClick={() => setOpenId(isOpen ? null : o.id)}
+          className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-white/[0.03] transition-colors"
+        >
+          {isOpen
+            ? <ChevronDown size={14} className="text-white/40 shrink-0" />
+            : <ChevronRight size={14} className="text-white/40 shrink-0" />}
+          <span className="flex-1 text-xs font-medium text-white truncate">{o.name}</span>
+          <span className={`text-[8px] px-1.5 py-0.5 rounded shrink-0 ${STATUS_CHIP[o.status]}`}>{STATUS_LABELS[o.status]}</span>
+          <span className={`text-[8px] px-1 py-0.5 rounded shrink-0 ${prioCls}`}>{total}/15</span>
+        </button>
+        {isOpen && (
+          <div className="px-3 pb-3">
+            <ImprovementCard
+              opportunity={o}
+              onChange={(updates) => updateOpportunity(o.id, updates)}
+              onDelete={() => { deleteOpportunity(o.id); setOpenId(null) }}
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -144,41 +195,18 @@ export function ImprovementTab({ processId, processName, bpmnXml, isExpanded }: 
         )}
 
         <div className="space-y-2">
-          {opportunities.map((o) => {
-            const isOpen = openId === o.id
-            const total = priorityScore(o)
-            const prio = priorityLabel(total)
-            const prioCls = prio.tone === 'high'
-              ? 'bg-emerald-500/15 text-emerald-400'
-              : prio.tone === 'mid' ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400'
-            return (
-              <div key={o.id} className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setOpenId(isOpen ? null : o.id)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-white/[0.03] transition-colors"
-                >
-                  {isOpen
-                    ? <ChevronDown size={14} className="text-white/40 shrink-0" />
-                    : <ChevronRight size={14} className="text-white/40 shrink-0" />}
-                  <span className="flex-1 text-xs font-medium text-white truncate">{o.name}</span>
-                  {o.status === 'cerrada' && (
-                    <span className="text-[8px] px-1 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Cerrada</span>
-                  )}
-                  <span className={`text-[8px] px-1 py-0.5 rounded shrink-0 ${prioCls}`}>{total}/15</span>
-                </button>
-                {isOpen && (
-                  <div className="px-3 pb-3">
-                    <ImprovementCard
-                      opportunity={o}
-                      onChange={(updates) => updateOpportunity(o.id, updates)}
-                      onDelete={() => { deleteOpportunity(o.id); setOpenId(null) }}
-                    />
-                  </div>
-                )}
-              </div>
-            )
-          })}
+          {activeOpps.map((o) => renderRow(o, false))}
+
+          {terminalOpps.length > 0 && (
+            <div className="flex items-center gap-2 pt-3 pb-1">
+              <div className="flex-1 h-px bg-white/5" />
+              <span className="text-[9px] uppercase tracking-wide text-white/25">
+                Cerradas / descartadas ({terminalOpps.length})
+              </span>
+              <div className="flex-1 h-px bg-white/5" />
+            </div>
+          )}
+          {terminalOpps.map((o) => renderRow(o, true))}
         </div>
 
         <button
