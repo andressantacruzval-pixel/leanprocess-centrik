@@ -54,6 +54,7 @@ export default function ReportsPage() {
     improvements: allImprovements,
   } = useCompanyScopedData()
   const updateOpportunity = useImprovementStore((s) => s.updateOpportunity)
+  const deleteOpportunity = useImprovementStore((s) => s.deleteOpportunity)
 
   const macroMap = useMemo(() => new Map(macroprocesses.map(m => [m.id, m])), [macroprocesses])
   const processMap = useMemo(() => new Map(processes.map(p => [p.id, p])), [processes])
@@ -213,7 +214,7 @@ export default function ReportsPage() {
           {activeTab === 'mejoras' && mejorasView === 'tabla' && <ImprovementsReport processes={filteredProcesses} allImprovements={allImprovements} onUpdate={updateOpportunity} />}
           {activeTab === 'mejoras' && mejorasView === 'kanban' && (
             <div className="p-3">
-              <ImprovementsKanban opportunities={filteredImprovements} processNameById={processNameById} onUpdate={updateOpportunity} />
+              <ImprovementsKanban opportunities={filteredImprovements} processNameById={processNameById} onUpdate={updateOpportunity} onDelete={deleteOpportunity} />
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback } from 'react'
 import { Lightbulb, Sparkles, Loader2, Plus } from 'lucide-react'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { useImprovementStore } from '@/stores/improvementStore'
 import { useRiskStore } from '@/stores/riskStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
@@ -7,7 +8,7 @@ import { useCompanyStore } from '@/stores/companyStore'
 import { useTokenBudget } from '@/hooks/useTokenBudget'
 import { InsufficientTokensModal } from '@/components/ui/InsufficientTokensModal'
 import { generateImprovementOpportunities } from '@/lib/procedureAi'
-import { clampScore } from '@/types/improvement'
+import { clampScore, SCORE_LABELS, type ScoreValue } from '@/types/improvement'
 import { getRiskLevel } from '@/types/risk'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { ImprovementCard } from './ImprovementCard'
@@ -100,6 +101,18 @@ export function ImprovementTab({ processId, processName, bpmnXml, isExpanded }: 
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-thin p-3 space-y-3">
+        {opportunities.length > 0 && (
+          <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
+            <p className="text-[9px] text-white/30 uppercase mb-2">
+              {opportunities.length} oportunidad(es) · {closedCount} cerrada(s)
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <MiniPie title="Costo" kind="cost" values={opportunities.map((o) => o.costScore)} />
+              <MiniPie title="Complejidad" kind="complexity" values={opportunities.map((o) => o.complexityScore)} />
+              <MiniPie title="Tiempo" kind="time" values={opportunities.map((o) => o.timeScore)} />
+            </div>
+          </div>
+        )}
         {!hasInputs && opportunities.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
             <Lightbulb size={24} className="text-white/10 mb-3" />
@@ -154,6 +167,48 @@ export function ImprovementTab({ processId, processName, bpmnXml, isExpanded }: 
         onClose={budget.closeInsufficientModal}
         operationKey="improvement_opportunities"
       />
+    </div>
+  )
+}
+
+const SCORE_COLORS: Record<ScoreValue, string> = { 5: '#34d399', 3: '#fbbf24', 1: '#f87171' }
+
+function MiniPie({ title, kind, values }: {
+  title: string
+  kind: 'cost' | 'complexity' | 'time'
+  values: ScoreValue[]
+}) {
+  const data = ([5, 3, 1] as ScoreValue[])
+    .map((v) => ({ name: SCORE_LABELS[kind][v], value: values.filter((x) => x === v).length, color: SCORE_COLORS[v] }))
+    .filter((d) => d.value > 0)
+
+  return (
+    <div className="rounded-lg bg-white/[0.02] p-1.5">
+      <p className="text-[9px] text-white/40 text-center mb-1">{title}</p>
+      <div className="h-[70px]">
+        {data.length > 0 && (
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+            <PieChart>
+              <Pie data={data} dataKey="value" cx="50%" cy="50%" innerRadius={16} outerRadius={30} paddingAngle={2}>
+                {data.map((d, i) => <Cell key={i} fill={d.color} />)}
+              </Pie>
+              <Tooltip
+                contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 10 }}
+                itemStyle={{ color: '#fff' }}
+                formatter={(value, name) => [`${value}`, name] as [string, string]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+      <div className="flex flex-col gap-0.5 mt-1">
+        {data.map((d) => (
+          <div key={d.name} className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+            <span className="text-[8px] text-white/40">{d.name} ({d.value})</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import {
   SCORE_VALUES, SCORE_LABELS, STATUS_LABELS, STATUS_OPTIONS,
   priorityScore, priorityLabel,
 } from '@/types/improvement'
+import { MilestoneChecklist } from './MilestoneChecklist'
 
 interface Props {
   opportunity: ImprovementOpportunity
@@ -118,6 +119,12 @@ export function ImprovementCard({ opportunity: o, onChange, onDelete }: Props) {
           className={inputCls + ' resize-y'}
           placeholder="Registra aquí el avance del plan de acción..."
         />
+      </div>
+
+      {/* Hitos / subtareas */}
+      <div>
+        <label className={labelCls}>Hitos / subtareas</label>
+        <MilestoneChecklist milestones={o.milestones} onChange={(milestones) => onChange({ milestones })} />
       </div>
 
       {/* Cierre */}

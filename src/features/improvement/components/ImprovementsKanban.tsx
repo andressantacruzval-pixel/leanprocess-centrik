@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react'
-import { Plus, Trash2, User, GripVertical, CheckSquare, Square } from 'lucide-react'
-import { generateId } from '@/utils/id'
+import { User, GripVertical, Maximize2, X } from 'lucide-react'
 import {
-  type ImprovementOpportunity, type ImprovementMilestone, type ImprovementStatus,
+  type ImprovementOpportunity, type ImprovementStatus,
   STATUS_LABELS, STATUS_OPTIONS, priorityScore, priorityLabel,
 } from '@/types/improvement'
+import { MilestoneChecklist } from './MilestoneChecklist'
+import { ImprovementCard } from './ImprovementCard'
 
 interface Props {
   opportunities: ImprovementOpportunity[]
   processNameById: Map<string, string>
   onUpdate: (id: string, updates: Partial<ImprovementOpportunity>) => void
+  onDelete?: (id: string) => void
 }
 
 const COLUMN_TONE: Record<ImprovementStatus, { bar: string; chip: string }> = {
@@ -26,9 +28,11 @@ const PRIO_TONE = {
   low: 'bg-red-500/15 text-red-400',
 } as const
 
-export function ImprovementsKanban({ opportunities, processNameById, onUpdate }: Props) {
+export function ImprovementsKanban({ opportunities, processNameById, onUpdate, onDelete }: Props) {
   const [dragId, setDragId] = useState<string | null>(null)
   const [overCol, setOverCol] = useState<ImprovementStatus | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const expanded = expandedId ? opportunities.find((o) => o.id === expandedId) ?? null : null
 
   const byStatus = useMemo(() => {
     const map: Record<ImprovementStatus, ImprovementOpportunity[]> = {
@@ -54,6 +58,7 @@ export function ImprovementsKanban({ opportunities, processNameById, onUpdate }:
   }
 
   return (
+    <>
     <div className="flex gap-3 overflow-x-auto pb-4 min-h-[400px]">
       {STATUS_OPTIONS.map((status) => {
         const items = byStatus[status]
@@ -83,6 +88,7 @@ export function ImprovementsKanban({ opportunities, processNameById, onUpdate }:
                   processName={processNameById.get(o.processId) ?? ''}
                   onDragStart={() => setDragId(o.id)}
                   onUpdate={(u) => onUpdate(o.id, u)}
+                  onExpand={() => setExpandedId(o.id)}
                 />
               ))}
               {items.length === 0 && (
@@ -93,30 +99,52 @@ export function ImprovementsKanban({ opportunities, processNameById, onUpdate }:
         )
       })}
     </div>
+
+    {expanded && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+        onClick={() => setExpandedId(null)}
+      >
+        <div
+          className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#0a0f1a] shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 sticky top-0 bg-[#0a0f1a] z-10">
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-white truncate">Oportunidad de mejora</h3>
+              <p className="text-[10px] text-white/40 truncate">{processNameById.get(expanded.processId) ?? ''}</p>
+            </div>
+            <button onClick={() => setExpandedId(null)} className="p-1 rounded hover:bg-white/5 text-white/40 hover:text-white/70">
+              <X size={16} />
+            </button>
+          </div>
+          <div className="p-4">
+            <ImprovementCard
+              opportunity={expanded}
+              onChange={(u) => onUpdate(expanded.id, u)}
+              onDelete={() => {
+                if (onDelete) onDelete(expanded.id)
+                else onUpdate(expanded.id, { status: 'descartada' })
+                setExpandedId(null)
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
 
-function KanbanCard({ o, processName, onDragStart, onUpdate }: {
+function KanbanCard({ o, processName, onDragStart, onUpdate, onExpand }: {
   o: ImprovementOpportunity
   processName: string
   onDragStart: () => void
   onUpdate: (updates: Partial<ImprovementOpportunity>) => void
+  onExpand: () => void
 }) {
-  const [newTitle, setNewTitle] = useState('')
-  const [newResp, setNewResp] = useState('')
   const total = priorityScore(o)
   const prio = priorityLabel(total)
-  const done = o.milestones.filter((m) => m.done).length
-
-  const setMilestones = (ms: ImprovementMilestone[]) => onUpdate({ milestones: ms })
-  const addMilestone = () => {
-    if (!newTitle.trim()) return
-    setMilestones([...o.milestones, { id: generateId(), title: newTitle.trim(), responsible: newResp.trim(), done: false }])
-    setNewTitle(''); setNewResp('')
-  }
-  const toggle = (id: string) => setMilestones(o.milestones.map((m) => (m.id === id ? { ...m, done: !m.done } : m)))
-  const remove = (id: string) => setMilestones(o.milestones.filter((m) => m.id !== id))
-  const editResp = (id: string, responsible: string) => setMilestones(o.milestones.map((m) => (m.id === id ? { ...m, responsible } : m)))
 
   return (
     <div
@@ -128,6 +156,15 @@ function KanbanCard({ o, processName, onDragStart, onUpdate }: {
         <GripVertical size={12} className="text-white/20 mt-0.5 shrink-0" />
         <p className="flex-1 text-xs font-medium text-white leading-snug">{o.name}</p>
         <span className={`shrink-0 text-[8px] px-1 py-0.5 rounded ${PRIO_TONE[prio.tone]}`}>{total}</span>
+        <button
+          type="button"
+          onClick={onExpand}
+          onMouseDown={(e) => e.stopPropagation()}
+          title="Ampliar / ver todo"
+          className="shrink-0 p-0.5 rounded text-white/30 hover:text-cyan-400 hover:bg-white/5"
+        >
+          <Maximize2 size={12} />
+        </button>
       </div>
 
       {processName && <p className="text-[9px] text-white/30 pl-4 truncate">{processName}</p>}
@@ -145,48 +182,9 @@ function KanbanCard({ o, processName, onDragStart, onUpdate }: {
         </div>
       </div>
 
-      {/* Checklist de hitos */}
-      <div className="pl-4 space-y-1">
-        {o.milestones.length > 0 && (
-          <p className="text-[9px] text-white/30 uppercase tracking-wide">Hitos {done}/{o.milestones.length}</p>
-        )}
-        {o.milestones.map((m) => (
-          <div key={m.id} className="flex items-center gap-1.5 group">
-            <button type="button" onClick={() => toggle(m.id)} className="shrink-0 text-white/40 hover:text-cyan-400">
-              {m.done ? <CheckSquare size={13} className="text-emerald-400" /> : <Square size={13} />}
-            </button>
-            <span className={`flex-1 text-[11px] leading-tight ${m.done ? 'line-through text-white/30' : 'text-white/80'}`}>{m.title}</span>
-            <input
-              defaultValue={m.responsible}
-              onBlur={(e) => e.target.value !== m.responsible && editResp(m.id, e.target.value)}
-              placeholder="Delegar"
-              className="w-16 bg-transparent text-[9px] text-white/40 border-b border-transparent hover:border-white/10 focus:border-cyan-500/40 focus:outline-none"
-            />
-            <button type="button" onClick={() => remove(m.id)} className="shrink-0 text-white/15 group-hover:text-red-400">
-              <Trash2 size={11} />
-            </button>
-          </div>
-        ))}
-        {/* Añadir hito */}
-        <div className="flex items-center gap-1 pt-0.5">
-          <input
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') addMilestone() }}
-            placeholder="+ hito / subtarea"
-            className="flex-1 bg-white/5 border border-white/10 rounded px-1.5 py-1 text-[10px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
-          />
-          <input
-            value={newResp}
-            onChange={(e) => setNewResp(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') addMilestone() }}
-            placeholder="quién"
-            className="w-14 bg-white/5 border border-white/10 rounded px-1.5 py-1 text-[10px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
-          />
-          <button type="button" onClick={addMilestone} className="shrink-0 p-1 rounded bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25">
-            <Plus size={12} />
-          </button>
-        </div>
+      {/* Checklist de hitos (compartido) */}
+      <div className="pl-4">
+        <MilestoneChecklist milestones={o.milestones} onChange={(ms) => onUpdate({ milestones: ms })} />
       </div>
     </div>
   )
