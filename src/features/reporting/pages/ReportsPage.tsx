@@ -2,10 +2,11 @@ import { useState, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   FileText, ShieldAlert, TrendingUp, Activity, ClipboardCheck,
-  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List, UserCog,
+  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List, UserCog, IdCard,
 } from 'lucide-react'
 import { InventoryReport as InventoryReportUnified } from '@/features/inventory/components/InventoryReport'
 import { CargosReport } from '../reports/CargosReport'
+import { CargoManualsReport } from '../reports/CargoManualsReport'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { SelectFilter } from '@/components/ui/SelectFilter'
@@ -24,7 +25,7 @@ import { ValueReport } from '../reports/ValueReport'
 import { AuditReport } from '../reports/AuditReport'
 import { ImprovementsReport } from '../reports/ImprovementsReport'
 
-type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras' | 'cargos'
+type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras' | 'cargos' | 'manuales'
 
 const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'inventario', label: 'Inventario', icon: FileText },
@@ -34,11 +35,12 @@ const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'auditoria', label: 'Auditoria', icon: ClipboardCheck },
   { key: 'mejoras', label: 'Mejoras', icon: Lightbulb },
   { key: 'cargos', label: 'Cargos', icon: UserCog },
+  { key: 'manuales', label: 'Manuales de Cargo', icon: IdCard },
 ]
 
 // Reportes que se pintan a ancho completo (componente propio, sin la barra de
 // filtros por proceso): tienen sus propios filtros internos.
-const STANDALONE: ReportTab[] = ['inventario', 'cargos']
+const STANDALONE: ReportTab[] = ['inventario', 'cargos', 'manuales']
 
 const isTab = (v: string | null): v is ReportTab => !!v && TABS.some((t) => t.key === v)
 
@@ -144,6 +146,7 @@ export default function ReportsPage() {
         <div className="bg-white/[0.02] rounded-2xl border border-white/5">
           {activeTab === 'inventario' && <InventoryReportUnified />}
           {activeTab === 'cargos' && <CargosReport />}
+          {activeTab === 'manuales' && <CargoManualsReport />}
         </div>
       ) : (
         <>
