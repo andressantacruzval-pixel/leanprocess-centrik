@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react'
-import { Map, Sparkles, Save, Check } from 'lucide-react'
+import { Map, Sparkles, Save, Check, ClipboardList } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useProcesses } from '@/hooks/useProcesses'
 import { useCompanyStore } from '@/stores/companyStore'
 import { ProcessBand } from './ProcessBand'
 import { NewMacroprocessModal } from './NewMacroprocessModal'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { InventoryWizard } from '@/features/inventory/components/InventoryWizard'
 import type { Macroprocess } from '@/types'
 
 const CATEGORIES = ['estrategico', 'productivo', 'apoyo'] as const
@@ -36,6 +37,9 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
   // Save confirmation state
   const [hasChanges, setHasChanges] = useState(false)
   const [showSaved, setShowSaved] = useState(false)
+
+  // Asistente de Inventario de Procesos (lee mapa + áreas de la app)
+  const [inventoryOpen, setInventoryOpen] = useState(false)
 
   const handleOrderChanged = useCallback(() => {
     setHasChanges(true)
@@ -83,13 +87,24 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
         title="Mapa de Procesos"
         subtitle={company?.name ?? undefined}
         actions={
-          <Link
-            to="/app/process-map/onboarding"
-            className="whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium shadow-lg shadow-cyan-500/20 transition-all"
-          >
-            <Sparkles size={14} />
-            Construir con IA
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setInventoryOpen(true)}
+              disabled={isEmpty}
+              title={isEmpty ? 'Crea primero tus macroprocesos' : 'Levantar el inventario de procesos con IA'}
+              className="whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/15 text-cyan-300 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <ClipboardList size={14} />
+              Inventario de Procesos IA
+            </button>
+            <Link
+              to="/app/process-map/onboarding"
+              className="whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium shadow-lg shadow-cyan-500/20 transition-all"
+            >
+              <Sparkles size={14} />
+              Construir con IA
+            </Link>
+          </div>
         }
       />
 
@@ -180,6 +195,8 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
         editMacro={editMacro}
         defaultCategory={defaultCategory}
       />
+
+      {inventoryOpen && <InventoryWizard onClose={() => setInventoryOpen(false)} />}
     </div>
   )
 }

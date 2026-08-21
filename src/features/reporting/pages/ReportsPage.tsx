@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   FileText, ShieldAlert, TrendingUp, Activity, ClipboardCheck,
-  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List,
+  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List, Map as MapIcon,
 } from 'lucide-react'
+import { InventoryDashboard } from '@/features/inventory/components/InventoryDashboard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { SelectFilter } from '@/components/ui/SelectFilter'
@@ -24,10 +26,11 @@ import {
 } from '@/types/improvement'
 import { ImprovementsKanban } from '@/features/improvement/components/ImprovementsKanban'
 
-type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras'
+type ReportTab = 'inventario' | 'inventario-ia' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras'
 
 const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'inventario', label: 'Inventario', icon: FileText },
+  { key: 'inventario-ia', label: 'Inventario IA', icon: MapIcon },
   { key: 'riesgos', label: 'Riesgos', icon: ShieldAlert },
   { key: 'kpis', label: 'KPIs', icon: TrendingUp },
   { key: 'valor', label: 'Valor', icon: Activity },
@@ -35,8 +38,12 @@ const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'mejoras', label: 'Mejoras', icon: Lightbulb },
 ]
 
+const isTab = (v: string | null): v is ReportTab => !!v && TABS.some((t) => t.key === v)
+
 export default function ReportsPage() {
-  const [activeTab, setActiveTab] = useState<ReportTab>('inventario')
+  const [searchParams] = useSearchParams()
+  const initialTab = isTab(searchParams.get('tab')) ? (searchParams.get('tab') as ReportTab) : 'inventario'
+  const [activeTab, setActiveTab] = useState<ReportTab>(initialTab)
   const [search, setSearch] = useState('')
   const [filterManagement, setFilterManagement] = useState<string>('')
   const [filterArea, setFilterArea] = useState<string>('')
@@ -127,6 +134,10 @@ export default function ReportsPage() {
         ))}
       </div>
 
+      {activeTab === 'inventario-ia' ? (
+        <InventoryDashboard />
+      ) : (
+      <>
       {/* Filters */}
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 bg-white/[0.03] rounded-lg border border-white/5 px-3 py-1.5 flex-1 max-w-[200px]">
@@ -218,6 +229,8 @@ export default function ReportsPage() {
             </div>
           )}
         </div>
+      )}
+      </>
       )}
     </div>
   )
