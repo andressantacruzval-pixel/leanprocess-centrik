@@ -4,7 +4,7 @@ import { useInventoryStore } from '@/stores/inventoryStore'
 import { useInventoryData } from '../useInventoryData'
 import type { InvDoc } from '../types'
 import { WizardBase } from './WizardBase'
-import { InventoryChat } from './InventoryChat'
+import { InventoryStudio } from './InventoryStudio'
 
 // Asistente del Inventario de Procesos, lanzado desde el Mapa de Procesos.
 // Dos pasos: (1) Base — confirma el mapa Nivel 0 y las áreas leídas de la app;
@@ -12,7 +12,7 @@ import { InventoryChat } from './InventoryChat'
 // la metodología (Big Bang o Incremental). Todo ocurre aquí: sin IA externa, sin
 // pegar prompts ni JSON. Las tarjetas se generan solas conforme el chat avanza.
 
-const STEPS = ['Base', 'Chat con IA']
+const STEPS = ['Base', 'Estudio del inventario']
 
 interface Props { onClose: () => void }
 
@@ -75,7 +75,7 @@ export function InventoryWizard({ onClose }: Props) {
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-6xl mx-auto px-4 lg:px-6 py-6">
           {step === 0 && <WizardBase companyId={companyId} doc={view} onNext={() => setStep(1)} />}
-          {step === 1 && <InventoryChat companyId={companyId} doc={view} onBack={() => setStep(0)} onClose={onClose} />}
+          {step === 1 && <InventoryStudio companyId={companyId} doc={view} onBack={() => setStep(0)} onClose={onClose} />}
         </div>
       </div>
     </div>

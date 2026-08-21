@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Map, AlertTriangle, CheckCircle2, XCircle, X } from 'lucide-react'
 import { useInventoryData } from '../useInventoryData'
-import { allSubs, countBy, leafAreas, type FlatSub } from '../inventoryUtils'
+import { useInventoryStore } from '@/stores/inventoryStore'
+import { allSubs, countBy, leafAreas } from '../inventoryUtils'
 import { findings, globalStats, type FindingLevel } from '../inventoryStats'
 import { TIPO_COLOR, type InvTipo } from '../types'
+import { OriginBadge } from './OriginBadge'
 
 // Reporte unificado del Inventario: filtros gráficos + tabla + gráficos + hallazgos.
 // Fuente única = el inventario de la empresa (mapa Nivel 0 de la app + lo generado
@@ -12,7 +14,8 @@ import { TIPO_COLOR, type InvTipo } from '../types'
 const FRANJAS: InvTipo[] = ['Productivo', 'Apoyo', 'Estratégico']
 
 export function InventoryReport() {
-  const { appMacros, appAreas, doc } = useInventoryData()
+  const { companyId, appMacros, appAreas, doc } = useInventoryData()
+  const editSub = useInventoryStore((s) => s.editSub)
   const macros = doc?.macros?.length ? doc.macros : appMacros
   const areas = doc?.areas?.length ? doc.areas : appAreas
 
@@ -107,7 +110,16 @@ export function InventoryReport() {
                   <Td className="text-cyan-300">{s.proceso}</Td>
                   <Td className="text-white/85">{s.nombre}</Td>
                   <Td className="text-white/45 max-w-[280px]">{s.objetivo}</Td>
-                  <Td><OriginBadge s={s} /></Td>
+                  <Td>
+                    <button
+                      title={s.origen === 'confirmado' ? 'Aceptado — clic para volver a deducido' : 'Deducido por IA — clic para aceptar'}
+                      onClick={() => editSub(companyId, s.mi, s.pi, s.si, { origen: s.origen === 'confirmado' ? 'deducido' : 'confirmado' })}
+                      className="inline-flex items-center gap-1.5 hover:opacity-80"
+                    >
+                      <OriginBadge origen={s.origen} />
+                      <span className="text-[11px] text-white/50">{s.origen === 'confirmado' ? 'Aceptado' : 'Deducido'}</span>
+                    </button>
+                  </Td>
                 </tr>
               ))}
             </tbody>
@@ -164,11 +176,6 @@ function BarRow({ label, value, max, color, onClick }: { label: string; value: n
       </span>
     </button>
   )
-}
-
-function OriginBadge({ s }: { s: FlatSub }) {
-  const ok = s.origen === 'confirmado'
-  return <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap" style={{ background: ok ? 'rgba(22,163,74,.14)' : 'rgba(245,158,11,.14)', color: ok ? '#16a34a' : '#d97706' }}>{ok ? 'Confirmado' : 'Deducido'}</span>
 }
 
 function Th({ children }: { children: React.ReactNode }) { return <th className="py-2 px-2 font-medium uppercase tracking-wide text-[10px]">{children}</th> }

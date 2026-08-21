@@ -61,13 +61,13 @@ export function areaPath(areas: InvArea[], name: string): string[] {
   return out
 }
 
-export interface FlatSub extends InvSub { macro: string; tipo: string; proceso: string }
+export interface FlatSub extends InvSub { macro: string; tipo: string; proceso: string; mi: number; pi: number; si: number }
 
-/** Todos los subprocesos aplanados con su macro/proceso. */
+/** Todos los subprocesos aplanados con su macro/proceso e índices (mi/pi/si). */
 export function allSubs(macros: InvMacro[]): FlatSub[] {
   const o: FlatSub[] = []
-  macros.forEach((m) => (m.procesos || []).forEach((p) => (p.subprocesos || []).forEach((s) => {
-    o.push({ ...s, macro: m.nombre, tipo: m.tipo, proceso: p.nombre })
+  macros.forEach((m, mi) => (m.procesos || []).forEach((p, pi) => (p.subprocesos || []).forEach((s, si) => {
+    o.push({ ...s, macro: m.nombre, tipo: m.tipo, proceso: p.nombre, mi, pi, si })
   })))
   return o
 }

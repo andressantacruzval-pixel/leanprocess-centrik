@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { identityMigration } from '@/utils/storeUtils'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
-import type { InvArea, InvDoc, InvMacro, InvMetodo, InvProyecto } from '@/features/inventory/types'
+import type { InvArea, InvDoc, InvMacro, InvOrigen, InvProceso, InvSub, InvMetodo, InvProyecto } from '@/features/inventory/types'
 import { parseChunk, mergeChunk, type MergeReport } from '@/features/inventory/inventoryMerge'
 
 // Inventario de procesos por empresa (documento único). Persistido en el
@@ -24,6 +24,26 @@ interface InventoryState {
   mergeText: (companyId: string, text: string) => { ok: true; report: MergeReport } | { ok: false; error: string }
   replaceDoc: (companyId: string, doc: InvDoc) => void
   reset: (companyId: string) => void
+  /** Edición en vivo (por índices mi=macro, pi=proceso, si=subproceso). */
+  editSub: (companyId: string, mi: number, pi: number, si: number, patch: Partial<InvSub>) => void
+  removeSub: (companyId: string, mi: number, pi: number, si: number) => void
+  addSub: (companyId: string, mi: number, pi: number, sub: InvSub) => void
+  editProceso: (companyId: string, mi: number, pi: number, nombre: string) => void
+  removeProceso: (companyId: string, mi: number, pi: number) => void
+  addProceso: (companyId: string, mi: number, nombre: string) => void
+  /** Marca todos los subprocesos de un macro como aceptados (origen confirmado). */
+  acceptMacro: (companyId: string, mi: number) => void
+}
+
+/** Aplica una transformación inmutable a los macros de una empresa. */
+function mutMacros(
+  byCompany: Record<string, InvDoc>,
+  companyId: string,
+  fn: (macros: InvMacro[]) => InvMacro[],
+): { byCompany: Record<string, InvDoc> } {
+  const prev = byCompany[companyId] ?? emptyDoc()
+  const macros = prev.macros.map((m) => ({ ...m, procesos: m.procesos.map((p) => ({ ...p, subprocesos: p.subprocesos.map((x) => ({ ...x })) })) }))
+  return { byCompany: { ...byCompany, [companyId]: { ...prev, macros: fn(macros) } } }
 }
 
 export const useInventoryStore = create<InventoryState>()(
@@ -77,6 +97,46 @@ export const useInventoryStore = create<InventoryState>()(
         // Vacía lo levantado pero conserva el mapa base y las áreas y la ficha.
         return { byCompany: { ...s.byCompany, [companyId]: { ...prev, macros: prev.macros.map((m) => ({ ...m, procesos: [] })) } } }
       }),
+
+      editSub: (companyId, mi, pi, si, patch) => set((s) => mutMacros(s.byCompany, companyId, (macros) => {
+        const sub = macros[mi]?.procesos[pi]?.subprocesos[si]
+        if (sub) Object.assign(sub, patch)
+        return macros
+      })),
+
+      removeSub: (companyId, mi, pi, si) => set((s) => mutMacros(s.byCompany, companyId, (macros) => {
+        const proc = macros[mi]?.procesos[pi]
+        if (proc) proc.subprocesos.splice(si, 1)
+        return macros
+      })),
+
+      addSub: (companyId, mi, pi, sub) => set((s) => mutMacros(s.byCompany, companyId, (macros) => {
+        const proc = macros[mi]?.procesos[pi]
+        if (proc) proc.subprocesos.push(sub)
+        return macros
+      })),
+
+      editProceso: (companyId, mi, pi, nombre) => set((s) => mutMacros(s.byCompany, companyId, (macros) => {
+        const proc = macros[mi]?.procesos[pi]
+        if (proc) proc.nombre = nombre
+        return macros
+      })),
+
+      removeProceso: (companyId, mi, pi) => set((s) => mutMacros(s.byCompany, companyId, (macros) => {
+        if (macros[mi]) macros[mi].procesos.splice(pi, 1)
+        return macros
+      })),
+
+      addProceso: (companyId, mi, nombre) => set((s) => mutMacros(s.byCompany, companyId, (macros) => {
+        const proc: InvProceso = { nombre, subprocesos: [] }
+        if (macros[mi]) macros[mi].procesos.push(proc)
+        return macros
+      })),
+
+      acceptMacro: (companyId, mi) => set((s) => mutMacros(s.byCompany, companyId, (macros) => {
+        macros[mi]?.procesos.forEach((p) => p.subprocesos.forEach((x) => { x.origen = 'confirmado' as InvOrigen }))
+        return macros
+      })),
     }),
     {
       name: 'lean-process-inventory',

@@ -1,0 +1,27 @@
+import { callAiProxy, type AiMessage } from '@/lib/aiClient'
+import type { InvArea, InvMacro, InvProyecto } from './types'
+import { buildAutoPrompt } from './inventoryPrompt'
+
+// Motor embebido para el Big Bang por macroproceso: pide a la IA de la app
+// (Edge Function ai-proxy / Gemini) que deduzca DE UNA los subprocesos de un
+// macroproceso y los agrupe en procesos. Devuelve el JSON crudo que el store
+// fusiona con inventoryStore.mergeText.
+
+export async function generateMacro(
+  proyecto: InvProyecto,
+  macros: InvMacro[],
+  areas: InvArea[],
+  macroIndex: number,
+  companyId?: string,
+): Promise<string> {
+  const prompt = buildAutoPrompt(proyecto, macros, areas, macroIndex)
+  const messages: AiMessage[] = [{ role: 'user', content: prompt }]
+  return callAiProxy(messages, {
+    systemPrompt: 'Eres un arquitecto de procesos. Devuelves EXCLUSIVAMENTE JSON válido, sin texto adicional, sin markdown, sin explicaciones.',
+    feature: 'inventory',
+    companyId,
+    temperature: 0.3,
+    responseMimeType: 'application/json',
+    maxOutputTokens: 4096,
+  })
+}
