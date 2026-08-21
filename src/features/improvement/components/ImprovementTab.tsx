@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react'
-import { Lightbulb, Sparkles, Loader2, Plus } from 'lucide-react'
+import { Lightbulb, Sparkles, Loader2, Plus, ChevronDown, ChevronRight } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { useImprovementStore } from '@/stores/improvementStore'
 import { useRiskStore } from '@/stores/riskStore'
@@ -8,7 +8,7 @@ import { useCompanyStore } from '@/stores/companyStore'
 import { useTokenBudget } from '@/hooks/useTokenBudget'
 import { InsufficientTokensModal } from '@/components/ui/InsufficientTokensModal'
 import { generateImprovementOpportunities } from '@/lib/procedureAi'
-import { clampScore, SCORE_LABELS, type ScoreValue } from '@/types/improvement'
+import { clampScore, SCORE_LABELS, priorityScore, priorityLabel, type ScoreValue } from '@/types/improvement'
 import { getRiskLevel } from '@/types/risk'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { ImprovementCard } from './ImprovementCard'
@@ -38,6 +38,7 @@ export function ImprovementTab({ processId, processName, bpmnXml, isExpanded }: 
   const activities = useMemo(() => analyses[processId] ?? [], [analyses, processId])
 
   const [isGenerating, setIsGenerating] = useState(false)
+  const [openId, setOpenId] = useState<string | null>(null)
   const budget = useTokenBudget({ operationKey: 'improvement_opportunities' })
 
   const hasInputs = risks.length > 0 || activities.length > 0
@@ -142,15 +143,42 @@ export function ImprovementTab({ processId, processName, bpmnXml, isExpanded }: 
           </div>
         )}
 
-        <div className={isExpanded ? 'grid grid-cols-1 lg:grid-cols-2 gap-3' : 'space-y-3'}>
-          {opportunities.map((o) => (
-            <ImprovementCard
-              key={o.id}
-              opportunity={o}
-              onChange={(updates) => updateOpportunity(o.id, updates)}
-              onDelete={() => deleteOpportunity(o.id)}
-            />
-          ))}
+        <div className="space-y-2">
+          {opportunities.map((o) => {
+            const isOpen = openId === o.id
+            const total = priorityScore(o)
+            const prio = priorityLabel(total)
+            const prioCls = prio.tone === 'high'
+              ? 'bg-emerald-500/15 text-emerald-400'
+              : prio.tone === 'mid' ? 'bg-amber-500/15 text-amber-400' : 'bg-red-500/15 text-red-400'
+            return (
+              <div key={o.id} className="rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setOpenId(isOpen ? null : o.id)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-white/[0.03] transition-colors"
+                >
+                  {isOpen
+                    ? <ChevronDown size={14} className="text-white/40 shrink-0" />
+                    : <ChevronRight size={14} className="text-white/40 shrink-0" />}
+                  <span className="flex-1 text-xs font-medium text-white truncate">{o.name}</span>
+                  {o.status === 'cerrada' && (
+                    <span className="text-[8px] px-1 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Cerrada</span>
+                  )}
+                  <span className={`text-[8px] px-1 py-0.5 rounded shrink-0 ${prioCls}`}>{total}/15</span>
+                </button>
+                {isOpen && (
+                  <div className="px-3 pb-3">
+                    <ImprovementCard
+                      opportunity={o}
+                      onChange={(updates) => updateOpportunity(o.id, updates)}
+                      onDelete={() => { deleteOpportunity(o.id); setOpenId(null) }}
+                    />
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
 
         <button
