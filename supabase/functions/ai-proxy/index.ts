@@ -67,6 +67,8 @@ const ALLOWED_ORIGINS = [
   'https://leanprocess.app',
   'https://leanprocessapp.vercel.app',
   'https://lean-process-2.vercel.app',
+  // Despliegue de prueba en GitHub Pages
+  'https://andressantacruzval-pixel.github.io',
   'http://localhost:5173',
   'http://localhost:5174',
 ]

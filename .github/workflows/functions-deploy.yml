@@ -53,3 +53,5 @@ jobs:
 # trigger deploy ai-proxy 9e46c33
 
 # retry deploy ai-proxy 2d14263
+
+# redeploy ai-proxy (CORS github pages) 47ca916
