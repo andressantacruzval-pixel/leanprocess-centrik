@@ -51,7 +51,12 @@ export interface ReportData {
   allAnalyses: Record<string, ValueActivity[]>
   allImprovements?: ImprovementOpportunity[]
   cargoCatalog?: string[]
+  orgLabels?: { l0: string; l1: string; l2: string; hasL2: boolean }
 }
+
+// Etiquetas de nivel organizacional según lo parametrizó el usuario.
+const gL = (d: ReportData) => d.orgLabels?.l0 ?? 'Gerencia'
+const aL = (d: ReportData) => d.orgLabels?.l1 ?? 'Area'
 
 // Efectividad promedio de los controles de un riesgo (0–40) → etiqueta.
 function controlEffLabel(r: RiskItem): string {
@@ -164,7 +169,7 @@ function colorCell(cell: ExcelJS.Cell, textArgb: string, bgArgb: string) {
 
 function excelInventory(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Inventario de Procesos')
-  const H = ['Gerencia', 'Area', 'Macroproceso', 'Subproceso', 'Responsable', 'Tipo', 'Frecuencia', 'Critico', 'BPMN', 'Procedimiento']
+  const H = [gL(data), aL(data), 'Macroproceso', 'Subproceso', 'Responsable', 'Tipo', 'Frecuencia', 'Critico', 'BPMN', 'Procedimiento']
   ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 3 ? 22 : 14 }))
   const procSet = new Set(data.allProcedures.map(p => p.process_id))
   const rows: (string | number)[][] = data.processes.map(p => {
@@ -190,7 +195,7 @@ function excelInventory(wb: ExcelJS.Workbook, data: ReportData, company: string,
 
 function excelRisks(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Riesgos y Controles')
-  const H = ['Gerencia', 'Area', 'Proceso', 'Riesgo', 'Descripcion', 'Causa', 'Evento', 'Efecto', 'Categoria', 'Actividad', 'P.I', 'I.I', 'Nivel Inh.', 'Controles', 'Efectividad', 'P.R', 'I.R', 'Nivel Res.']
+  const H = [gL(data), aL(data), 'Proceso', 'Riesgo', 'Descripcion', 'Causa', 'Evento', 'Efecto', 'Categoria', 'Actividad', 'P.I', 'I.I', 'Nivel Inh.', 'Controles', 'Efectividad', 'P.R', 'I.R', 'Nivel Res.']
   ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 3 ? 22 : i === 4 ? 32 : (i >= 5 && i <= 7) ? 24 : 12 }))
   const pIds = new Set(data.processes.map(p => p.id))
   const pMap = new Map(data.processes.map(p => [p.id, p]))
@@ -217,7 +222,7 @@ function excelRisks(wb: ExcelJS.Workbook, data: ReportData, company: string, dat
 
 function excelKpis(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Indicadores KPI')
-  const H = ['Gerencia', 'Area', 'Proceso', 'Indicador', 'Objetivo', 'Formula', 'Fuente', 'Unidad', 'Frecuencia', 'Meta', 'Verde', 'Amarillo', 'Rojo', 'Resp. Reporte', 'Resp. Monitoreo']
+  const H = [gL(data), aL(data), 'Proceso', 'Indicador', 'Objetivo', 'Formula', 'Fuente', 'Unidad', 'Frecuencia', 'Meta', 'Verde', 'Amarillo', 'Rojo', 'Resp. Reporte', 'Resp. Monitoreo']
   ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 4 ? 22 : (i >= 10 && i <= 12) ? 11 : 14 }))
   const pIds = new Set(data.processes.map(p => p.id))
   const pMap = new Map(data.processes.map(p => [p.id, p]))
@@ -275,7 +280,7 @@ function excelCargos(wb: ExcelJS.Workbook, data: ReportData, company: string, da
 
 function excelMejoras(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Plan de Mejoras')
-  const H = ['Gerencia', 'Proceso', 'Oportunidad', 'Tipo', 'Descripcion', 'Prioridad', 'Costo', 'Complejidad', 'Tiempo', 'Responsable', 'Inicio', 'Fin', 'Estado', 'Avance %', 'Cierre']
+  const H = [gL(data), 'Proceso', 'Oportunidad', 'Tipo', 'Descripcion', 'Prioridad', 'Costo', 'Complejidad', 'Tiempo', 'Responsable', 'Inicio', 'Fin', 'Estado', 'Avance %', 'Cierre']
   ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i === 2 || i === 4 ? 30 : i <= 1 ? 20 : 14 }))
   const pIds = new Set(data.processes.map(p => p.id))
   const pMap = new Map(data.processes.map(p => [p.id, p]))
@@ -293,7 +298,7 @@ function excelMejoras(wb: ExcelJS.Workbook, data: ReportData, company: string, d
 
 function excelValue(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Analisis de Valor')
-  const H = ['Gerencia', 'Area', 'Proceso', 'Actividad', 'Responsable', 'Clasificacion', 'Frecuencia', 'Min', 'Ocurr.', 'Min/Dia', 'Min/Mes', 'Hrs/Ano']
+  const H = [gL(data), aL(data), 'Proceso', 'Actividad', 'Responsable', 'Clasificacion', 'Frecuencia', 'Min', 'Ocurr.', 'Min/Dia', 'Min/Mes', 'Hrs/Ano']
   ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 3 ? 22 : 12 }))
   const rows: (string | number)[][] = []
   for (const p of data.processes) {
@@ -315,7 +320,7 @@ function excelValue(wb: ExcelJS.Workbook, data: ReportData, company: string, dat
 
 function excelAudit(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Programa de Auditoria')
-  const H = ['Gerencia', 'Area', 'Proceso', 'Actividad', 'Que Auditar', 'Criterio', 'Evidencia', 'Frecuencia', 'Responsable']
+  const H = [gL(data), aL(data), 'Proceso', 'Actividad', 'Que Auditar', 'Criterio', 'Evidencia', 'Frecuencia', 'Responsable']
   ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 4 ? 24 : 16 }))
   const rows: string[][] = []
   for (const p of data.processes) {
@@ -373,7 +378,7 @@ export function exportReportToPdf(data: ReportData) {
   switch (data.tab) {
     case 'inventario': {
       const procSet = new Set(data.allProcedures.map(p => p.process_id))
-      head = [['Gerencia', 'Area', 'Macro', 'Subproceso', 'Responsable', 'Tipo', 'Critico', 'BPMN', 'Proced.']]
+      head = [[gL(data), aL(data), 'Macro', 'Subproceso', 'Responsable', 'Tipo', 'Critico', 'BPMN', 'Proced.']]
       body = data.processes.map(p => {
         const macro = data.macroMap.get(p.macroprocess_id)
         return [p.management || '-', p.coordination || '-', macro?.name || '-', p.name, p.responsible || '-', p.process_type || '-', p.is_critical ? 'SI' : 'No', p.bpmn_xml ? 'SI' : 'No', procSet.has(p.id) ? 'SI' : 'No']
@@ -381,7 +386,7 @@ export function exportReportToPdf(data: ReportData) {
       break
     }
     case 'riesgos': {
-      head = [['Gerencia', 'Area', 'Proceso', 'Riesgo', 'Descripcion', 'Categ.', 'P.I', 'I.I', 'Nivel I.', 'Ctrl', 'Efect.', 'P.R', 'I.R', 'Nivel R.']]
+      head = [[gL(data), aL(data), 'Proceso', 'Riesgo', 'Descripcion', 'Categ.', 'P.I', 'I.I', 'Nivel I.', 'Ctrl', 'Efect.', 'P.R', 'I.R', 'Nivel R.']]
       const risks = data.allRisks.filter(r => pIds.has(r.process_id))
       body = risks.map(r => {
         const proc = pMap.get(r.process_id)
@@ -393,7 +398,7 @@ export function exportReportToPdf(data: ReportData) {
       break
     }
     case 'kpis': {
-      head = [['Gerencia', 'Area', 'Proceso', 'Indicador', 'Objetivo', 'Formula', 'Fuente', 'Unidad', 'Frecuencia', 'Meta', 'Umbrales V/A/R']]
+      head = [[gL(data), aL(data), 'Proceso', 'Indicador', 'Objetivo', 'Formula', 'Fuente', 'Unidad', 'Frecuencia', 'Meta', 'Umbrales V/A/R']]
       const items = data.allIndicators.filter(i => pIds.has(i.process_id))
       body = items.map(i => {
         const proc = pMap.get(i.process_id)
@@ -403,7 +408,7 @@ export function exportReportToPdf(data: ReportData) {
       break
     }
     case 'valor': {
-      head = [['Gerencia', 'Area', 'Proceso', 'Actividad', 'Resp.', 'Clasif.', 'Freq.', 'Min', 'Ocurr.', 'Min/Dia', 'Min/Mes', 'Hrs/Ano']]
+      head = [[gL(data), aL(data), 'Proceso', 'Actividad', 'Resp.', 'Clasif.', 'Freq.', 'Min', 'Ocurr.', 'Min/Dia', 'Min/Mes', 'Hrs/Ano']]
       body = []
       for (const p of data.processes) {
         for (const a of (data.allAnalyses[p.id] || [])) {
@@ -414,7 +419,7 @@ export function exportReportToPdf(data: ReportData) {
       break
     }
     case 'auditoria': {
-      head = [['Gerencia', 'Area', 'Proceso', 'Actividad', 'Que Auditar', 'Criterio', 'Evidencia', 'Frecuencia', 'Responsable']]
+      head = [[gL(data), aL(data), 'Proceso', 'Actividad', 'Que Auditar', 'Criterio', 'Evidencia', 'Frecuencia', 'Responsable']]
       body = []
       for (const p of data.processes) {
         for (const item of (data.allAudits[p.id] || [])) {
@@ -424,7 +429,7 @@ export function exportReportToPdf(data: ReportData) {
       break
     }
     case 'mejoras': {
-      head = [['Gerencia', 'Proceso', 'Oportunidad', 'Tipo', 'Prioridad', 'Responsable', 'Estado', 'Avance', 'Cierre']]
+      head = [[gL(data), 'Proceso', 'Oportunidad', 'Tipo', 'Prioridad', 'Responsable', 'Estado', 'Avance', 'Cierre']]
       const items = (data.allImprovements || []).filter(o => pIds.has(o.processId))
       body = items.map(o => {
         const proc = pMap.get(o.processId)

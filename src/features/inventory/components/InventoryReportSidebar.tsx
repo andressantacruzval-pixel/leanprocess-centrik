@@ -13,6 +13,7 @@ interface Props {
   hojas: string[]
   niveles: string[]
   gerencias: string[]
+  gerenciaLabel: string
   frecuencias: string[]
   tiposProceso: string[]
   f: RepFilters
@@ -22,7 +23,7 @@ interface Props {
   total: number
 }
 
-export function InventoryReportSidebar({ macros, hojas, niveles, gerencias, frecuencias, tiposProceso, f, set, clear, shown, total }: Props) {
+export function InventoryReportSidebar({ macros, hojas, niveles, gerencias, gerenciaLabel, frecuencias, tiposProceso, f, set, clear, shown, total }: Props) {
   const hasF = Object.values(f).some(Boolean)
   return (
     <aside className="lg:w-64 shrink-0 lg:sticky lg:top-3 self-start space-y-4">
@@ -61,7 +62,7 @@ export function InventoryReportSidebar({ macros, hojas, niveles, gerencias, frec
         <Sel label="Proceso crítico" value={f.critico} onChange={(v) => set('critico', v)} options={[{ v: 'si', l: 'Sí' }, { v: 'no', l: 'No' }]} />
         <Sel label="Mov. de efectivo" value={f.efectivo} onChange={(v) => set('efectivo', v)} options={[{ v: 'si', l: 'Sí' }, { v: 'no', l: 'No' }]} />
         <Sel label="Nivel de ejecución" value={f.nivel} onChange={(v) => set('nivel', v)} options={niveles} />
-        <Sel label="Gerencia" value={f.gerencia} onChange={(v) => set('gerencia', v)} options={gerencias} />
+        <Sel label={gerenciaLabel} value={f.gerencia} onChange={(v) => set('gerencia', v)} options={gerencias} />
         <Sel label="Frecuencia" value={f.frecuencia} onChange={(v) => set('frecuencia', v)} options={frecuencias} />
         <Sel label="Tipo de proceso" value={f.tipoProceso} onChange={(v) => set('tipoProceso', v)} options={tiposProceso} />
         <Sel label="Bandera activa" value={f.bandera} onChange={(v) => set('bandera', v)} options={BANDERAS.map((b) => ({ v: b.key as string, l: b.label }))} />

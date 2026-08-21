@@ -9,6 +9,7 @@ import {
   Th, Td, EmptyRow, VerMasRow, TableWrap, type Datum,
 } from '../components/reportUi'
 import { useVerMas } from '../components/reportPaging'
+import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de Análisis de Valor: tablero (VA/NVA/NVABN, eficiencia, desperdicio,
 // Pareto de las actividades que más tiempo consumen) + tabla de tiempos por
@@ -22,6 +23,8 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
     for (const p of processes) for (const a of (allAnalyses[p.id] || [])) out.push({ process: p, activity: a })
     return out
   }, [processes, allAnalyses])
+  const org = useOrgLabels()
+  const COLS = 12 + (org.hasL2 ? 1 : 0)
   const activities = useMemo(() => rows.map((r) => r.activity), [rows])
   const k = useMemo(() => computeKPIs(activities), [activities])
   const pareto = useMemo(() => computePareto(activities, 'mes').slice(0, 8), [activities])
@@ -67,7 +70,7 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
       <TableWrap minWidth={1300}>
         <thead>
           <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>Gerencia</Th><Th>Área</Th><Th>Proceso</Th><Th>Actividad</Th><Th>Responsable</Th>
+            <Th>{org.l0}</Th><Th>{org.l1}</Th>{org.hasL2 && <Th>{org.l2}</Th>}<Th>Proceso</Th><Th>Actividad</Th><Th>Responsable</Th>
             <Th>Clasificación</Th><Th>Frecuencia</Th><Th>Min/ocurr.</Th><Th>Ocurr.</Th><Th>Min/día</Th><Th>Min/mes</Th><Th>Hrs/año</Th>
           </tr>
         </thead>
@@ -80,6 +83,7 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
               <tr key={`${row.process.id}-${row.activity.id}-${i}`} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
                 <Td>{row.process.management || '-'}</Td>
                 <Td>{row.process.coordination || '-'}</Td>
+                {org.hasL2 && <Td>{row.process.operative || '-'}</Td>}
                 <Td className="max-w-[150px]"><div className="truncate">{row.process.name}</div></Td>
                 <Td className="text-white font-medium max-w-[200px]"><div className="truncate" title={row.activity.name}>{row.activity.name}</div></Td>
                 <Td className="max-w-[120px]"><div className="truncate">{row.activity.laneName || '-'}</div></Td>
@@ -93,8 +97,8 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
               </tr>
             )
           })}
-          {rows.length === 0 && <EmptyRow cols={12} />}
-          <VerMasRow cols={12} ocultas={ocultas} onVerMas={verMas} />
+          {rows.length === 0 && <EmptyRow cols={COLS} />}
+          <VerMasRow cols={COLS} ocultas={ocultas} onVerMas={verMas} />
         </tbody>
       </TableWrap>
     </Dashboard>

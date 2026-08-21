@@ -8,12 +8,14 @@ import { useInventoryReportRows, EMPTY_FILTERS, BANDERAS, type RepFilters, type 
 import { TIPO_COLOR, type InvTipo } from '../types'
 import { OriginBadge } from './OriginBadge'
 import { InventoryReportSidebar } from './InventoryReportSidebar'
+import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte unificado del Inventario: barra lateral (navegación + filtros) + KPIs
 // + gráficos + tabla con TODA la caracterización (crítico, efectivo, nivel,
 // gerencia, área) y el SIPOC completo por fila + hallazgos automáticos.
 
 export function InventoryReport() {
+  const org = useOrgLabels()
   const { companyId, appMacros, appAreas, doc } = useInventoryData()
   const editSub = useInventoryStore((s) => s.editSub)
   const macros = doc?.macros?.length ? doc.macros : appMacros
@@ -65,7 +67,7 @@ export function InventoryReport() {
 
   return (
     <div className="p-3 sm:p-4 flex flex-col lg:flex-row gap-4 text-white/80">
-      <InventoryReportSidebar macros={macros} hojas={hojas} niveles={niveles} gerencias={gerencias}
+      <InventoryReportSidebar macros={macros} hojas={hojas} niveles={niveles} gerencias={gerencias} gerenciaLabel={org.l0}
         frecuencias={frecuencias} tiposProceso={tiposProceso}
         f={f} set={set} clear={() => setF(EMPTY_FILTERS)} shown={subs.length} total={all.length} />
 
@@ -103,7 +105,7 @@ export function InventoryReport() {
               <thead>
                 <tr className="text-left text-white/45 border-b border-white/10">
                   <Th>Área</Th><Th>Macroproceso</Th><Th>Proceso</Th><Th>Subproceso</Th><Th>Objetivo</Th>
-                  <Th>Responsable</Th><Th>Crítico</Th><Th>Efectivo</Th><Th>Nivel ejec.</Th><Th>Gerencia</Th>
+                  <Th>Responsable</Th><Th>Crítico</Th><Th>Efectivo</Th><Th>Nivel ejec.</Th><Th>{org.l0}</Th>
                   <Th>Frecuencia</Th><Th>Tipo proceso</Th><Th>Tipo ejec.</Th><Th>Medio entrega</Th><Th>Supervisión</Th>
                   <Th>Banderas</Th>
                   <Th>Proveedores</Th><Th>Entradas</Th><Th>Salidas</Th><Th>Clientes</Th>

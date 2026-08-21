@@ -14,6 +14,7 @@ import { useCompanyStore } from '@/stores/companyStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
+import { useOrgLabels } from '@/hooks/useOrgLabels'
 import { exportReportToExcel, exportReportToPdf } from '@/utils/reportExporter'
 import { useImprovementStore } from '@/stores/improvementStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
@@ -51,6 +52,7 @@ export default function ReportsPage() {
   const [search, setSearch] = useState('')
   const [filterManagement, setFilterManagement] = useState<string>('')
   const [filterArea, setFilterArea] = useState<string>('')
+  const [filterOperative, setFilterOperative] = useState<string>('')
   const [filterMacro, setFilterMacro] = useState<string>('')
   const [filterLevel, setFilterLevel] = useState<string>('')
   const [mejorasView, setMejorasView] = useState<'tabla' | 'kanban'>('tabla')
@@ -73,8 +75,10 @@ export default function ReportsPage() {
   const processMap = useMemo(() => new Map(processes.map((p) => [p.id, p])), [processes])
   const levelMap = useMemo(() => new Map(levelDefinitions.map((l) => [l.id, l.level_name])), [levelDefinitions])
 
+  const org = useOrgLabels()
   const managements = useMemo(() => [...new Set(processes.map((p) => p.management).filter(Boolean))].sort() as string[], [processes])
   const areas = useMemo(() => [...new Set(processes.map((p) => p.coordination).filter(Boolean))].sort() as string[], [processes])
+  const operatives = useMemo(() => [...new Set(processes.map((p) => p.operative).filter(Boolean))].sort() as string[], [processes])
   const macroNames = useMemo(() => macroprocesses.map((m) => ({ id: m.id, name: m.name })), [macroprocesses])
   const levels = useMemo(
     () => [...new Set(processes.map((p) => (p.level_definition_id ? levelMap.get(p.level_definition_id) : null)).filter(Boolean))].sort() as string[],
@@ -89,22 +93,23 @@ export default function ReportsPage() {
     }
     if (filterManagement) result = result.filter((p) => p.management === filterManagement)
     if (filterArea) result = result.filter((p) => p.coordination === filterArea)
+    if (filterOperative) result = result.filter((p) => p.operative === filterOperative)
     if (filterMacro) result = result.filter((p) => p.macroprocess_id === filterMacro)
     if (filterLevel) result = result.filter((p) => (p.level_definition_id ? levelMap.get(p.level_definition_id) : null) === filterLevel)
     return result
-  }, [processes, search, filterManagement, filterArea, filterMacro, filterLevel, levelMap])
+  }, [processes, search, filterManagement, filterArea, filterOperative, filterMacro, filterLevel, levelMap])
 
   const handleExport = useCallback((format: 'pdf' | 'excel') => {
     const data = {
       tab: activeTab, company, generatedBy: profile?.full_name ?? null,
       processes: filteredProcesses, macroMap, processMap,
-      allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog,
+      allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog, orgLabels: org,
     }
     if (format === 'excel') exportReportToExcel(data)
     else exportReportToPdf(data)
-  }, [activeTab, company, profile, filteredProcesses, macroMap, processMap, allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog])
+  }, [activeTab, company, profile, filteredProcesses, macroMap, processMap, allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog, org])
 
-  const hasFilters = search || filterManagement || filterArea || filterMacro || filterLevel
+  const hasFilters = search || filterManagement || filterArea || filterOperative || filterMacro || filterLevel
 
   const filteredImprovements = useMemo(() => {
     const ids = new Set(filteredProcesses.map((p) => p.id))
@@ -160,12 +165,13 @@ export default function ReportsPage() {
             </div>
 
             <SelectFilter value={filterMacro} onChange={setFilterMacro} options={macroNames.map((m) => ({ value: m.id, label: m.name }))} placeholder="Macroproceso" className={fInput} />
-            <SelectFilter value={filterManagement} onChange={setFilterManagement} options={managements.map((m) => ({ value: m, label: m }))} placeholder="Gerencia" className={fInput} />
-            <SelectFilter value={filterArea} onChange={setFilterArea} options={areas.map((a) => ({ value: a, label: a }))} placeholder="Area" className={fInput} />
-            <SelectFilter value={filterLevel} onChange={setFilterLevel} options={levels.map((l) => ({ value: l, label: l }))} placeholder="Nivel" className={fInput} />
+            <SelectFilter value={filterManagement} onChange={setFilterManagement} options={managements.map((m) => ({ value: m, label: m }))} placeholder={org.l0} className={fInput} />
+            <SelectFilter value={filterArea} onChange={setFilterArea} options={areas.map((a) => ({ value: a, label: a }))} placeholder={org.l1} className={fInput} />
+            {org.hasL2 && <SelectFilter value={filterOperative} onChange={setFilterOperative} options={operatives.map((a) => ({ value: a, label: a }))} placeholder={org.l2} className={fInput} />}
+            <SelectFilter value={filterLevel} onChange={setFilterLevel} options={levels.map((l) => ({ value: l, label: l }))} placeholder="Nivel de proceso" className={fInput} />
 
             {hasFilters && (
-              <button onClick={() => { setSearch(''); setFilterManagement(''); setFilterArea(''); setFilterMacro(''); setFilterLevel('') }}
+              <button onClick={() => { setSearch(''); setFilterManagement(''); setFilterArea(''); setFilterOperative(''); setFilterMacro(''); setFilterLevel('') }}
                 className="text-[10px] text-white/30 hover:text-white/50 transition-colors">Limpiar</button>
             )}
 

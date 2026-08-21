@@ -10,6 +10,7 @@ import {
   Th, Td, EmptyRow, VerMasRow, TableWrap, type Datum,
 } from '../components/reportUi'
 import { useVerMas } from '../components/reportPaging'
+import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de Mejoras: tablero (estado, prioridad, avance, quick wins) + tabla
 // de gestión editable (estado, avance %, fecha de cierre).
@@ -27,6 +28,7 @@ export function ImprovementsReport({
   allImprovements: ImprovementOpportunity[]
   onUpdate: (id: string, updates: Partial<ImprovementOpportunity>) => void
 }) {
+  const org = useOrgLabels()
   const [fType, setFType] = useState('')
   const rows = useMemo(() => {
     const byProcess = new Set(processes.map((p) => p.id))
@@ -99,7 +101,7 @@ export function ImprovementsReport({
       <TableWrap minWidth={1640}>
         <thead>
           <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>Gerencia</Th><Th>Proceso</Th><Th>Oportunidad</Th><Th>Tipo</Th><Th>Prioridad</Th>
+            <Th>{org.l0}</Th><Th>Proceso</Th><Th>Oportunidad</Th><Th>Tipo</Th><Th>Prioridad</Th>
             <Th>Costo</Th><Th>Compl.</Th><Th>Tiempo</Th><Th>Responsable</Th>
             <Th>Inicio</Th><Th>Fin</Th><Th>Estado</Th><Th>Avance</Th><Th>Hitos</Th><Th>Notas</Th><Th>Cierre</Th>
           </tr>

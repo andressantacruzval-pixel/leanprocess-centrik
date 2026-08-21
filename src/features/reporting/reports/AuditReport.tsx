@@ -6,6 +6,7 @@ import {
   Th, Td, EmptyRow, VerMasRow, TableWrap, type Datum,
 } from '../components/reportUi'
 import { useVerMas } from '../components/reportPaging'
+import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de Programa de Auditoría: tablero (cobertura, carga por responsable,
 // frecuencias, calidad del criterio) + tabla completa de puntos de control.
@@ -13,6 +14,8 @@ import { useVerMas } from '../components/reportPaging'
 const FREQ_COLORS = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#ec4899']
 
 export function AuditReport({ processes, allAudits }: { processes: Process[]; allAudits: Record<string, AuditItem[]> }) {
+  const org = useOrgLabels()
+  const COLS = 9 + (org.hasL2 ? 1 : 0)
   const rows = useMemo(() => {
     const out: { process: Process; item: AuditItem }[] = []
     for (const p of processes) for (const item of (allAudits[p.id] || [])) out.push({ process: p, item })
@@ -66,7 +69,7 @@ export function AuditReport({ processes, allAudits }: { processes: Process[]; al
       <TableWrap minWidth={1200}>
         <thead>
           <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>Gerencia</Th><Th>Área</Th><Th>Proceso</Th><Th>Actividad</Th>
+            <Th>{org.l0}</Th><Th>{org.l1}</Th>{org.hasL2 && <Th>{org.l2}</Th>}<Th>Proceso</Th><Th>Actividad</Th>
             <Th>Qué auditar</Th><Th>Criterio</Th><Th>Evidencia</Th><Th>Frecuencia</Th><Th>Responsable</Th>
           </tr>
         </thead>
@@ -75,6 +78,7 @@ export function AuditReport({ processes, allAudits }: { processes: Process[]; al
             <tr key={`${row.process.id}-${i}`} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
               <Td>{row.process.management || '-'}</Td>
               <Td>{row.process.coordination || '-'}</Td>
+              {org.hasL2 && <Td>{row.process.operative || '-'}</Td>}
               <Td className="max-w-[150px]"><div className="truncate">{row.process.name}</div></Td>
               <Td className="max-w-[200px]"><div className="truncate" title={row.item.actividad}>{row.item.actividad}</div></Td>
               <Td className="text-white font-medium max-w-[200px]"><div className="truncate" title={row.item.queAuditar}>{row.item.queAuditar}</div></Td>
@@ -84,8 +88,8 @@ export function AuditReport({ processes, allAudits }: { processes: Process[]; al
               <Td className="max-w-[130px]"><div className="truncate">{row.item.responsable}</div></Td>
             </tr>
           ))}
-          {rows.length === 0 && <EmptyRow cols={9} />}
-          <VerMasRow cols={9} ocultas={ocultas} onVerMas={verMas} />
+          {rows.length === 0 && <EmptyRow cols={COLS} />}
+          <VerMasRow cols={COLS} ocultas={ocultas} onVerMas={verMas} />
         </tbody>
       </TableWrap>
     </Dashboard>

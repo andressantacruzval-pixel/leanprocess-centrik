@@ -6,6 +6,7 @@ import {
   Th, Td, EmptyRow, VerMasRow, TableWrap, type Datum,
 } from '../components/reportUi'
 import { useVerMas } from '../components/reportPaging'
+import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de KPIs: tablero (cobertura por proceso, frecuencias, calidad de la
 // definición) + tabla con TODOS los campos del indicador, incluidos fuente de
@@ -23,6 +24,8 @@ const hasThresholds = (i: StoredIndicator) =>
   [i.threshold_green_min, i.threshold_green_max, i.threshold_yellow_min, i.threshold_yellow_max, i.threshold_red_min, i.threshold_red_max].some((v) => v != null)
 
 export function KpisReport({ processes, allIndicators }: { processes: Process[]; allIndicators: StoredIndicator[] }) {
+  const org = useOrgLabels()
+  const COLS = 15 + (org.hasL2 ? 1 : 0)
   const processMap = useMemo(() => new Map(processes.map((p) => [p.id, p])), [processes])
   const ids = useMemo(() => new Set(processes.map((p) => p.id)), [processes])
   const kpis = useMemo(() => allIndicators.filter((i) => ids.has(i.process_id)), [allIndicators, ids])
@@ -74,7 +77,7 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
       <TableWrap minWidth={1500}>
         <thead>
           <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>Gerencia</Th><Th>Área</Th><Th>Proceso</Th><Th>Indicador</Th><Th>Objetivo</Th>
+            <Th>{org.l0}</Th><Th>{org.l1}</Th>{org.hasL2 && <Th>{org.l2}</Th>}<Th>Proceso</Th><Th>Indicador</Th><Th>Objetivo</Th>
             <Th>Fórmula</Th><Th>Fuente</Th><Th>Unidad</Th><Th>Frecuencia</Th><Th>Meta</Th>
             <Th>Verde</Th><Th>Amarillo</Th><Th>Rojo</Th><Th>Resp. reporte</Th><Th>Resp. monitoreo</Th>
           </tr>
@@ -86,6 +89,7 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
               <tr key={i.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
                 <Td>{proc?.management || '-'}</Td>
                 <Td>{proc?.coordination || '-'}</Td>
+                {org.hasL2 && <Td>{proc?.operative || '-'}</Td>}
                 <Td className="max-w-[150px]"><div className="truncate">{proc?.name || '-'}</div></Td>
                 <Td className="text-white font-medium max-w-[160px]"><div className="truncate" title={i.name}>{i.name}</div></Td>
                 <Td className="max-w-[200px]"><div className="truncate" title={i.description}>{i.description || '-'}</div></Td>
@@ -102,8 +106,8 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
               </tr>
             )
           })}
-          {kpis.length === 0 && <EmptyRow cols={15} />}
-          <VerMasRow cols={15} ocultas={ocultas} onVerMas={verMas} />
+          {kpis.length === 0 && <EmptyRow cols={COLS} />}
+          <VerMasRow cols={COLS} ocultas={ocultas} onVerMas={verMas} />
         </tbody>
       </TableWrap>
     </Dashboard>

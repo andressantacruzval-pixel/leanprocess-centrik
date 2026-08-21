@@ -6,6 +6,7 @@ import {
   Th, Td, EmptyRow, VerMasRow, TableWrap, type Datum,
 } from '../components/reportUi'
 import { useVerMas } from '../components/reportPaging'
+import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de Riesgos: tablero (nivel inherente/residual, categorías, control,
 // procesos más expuestos) + tabla con TODA la caracterización del riesgo
@@ -34,6 +35,8 @@ function effLabel(score: number): { label: string; hex: string } {
 }
 
 export function RisksReport({ processes, allRisks }: { processes: Process[]; allRisks: RiskItem[] }) {
+  const org = useOrgLabels()
+  const COLS = 20 + (org.hasL2 ? 1 : 0)
   const processMap = useMemo(() => new Map(processes.map((p) => [p.id, p])), [processes])
   const ids = useMemo(() => new Set(processes.map((p) => p.id)), [processes])
   const risks = useMemo(() => allRisks.filter((r) => ids.has(r.process_id)), [allRisks, ids])
@@ -106,7 +109,7 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
       <TableWrap minWidth={1900}>
         <thead>
           <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>Gerencia</Th><Th>Área</Th><Th>Proceso</Th><Th>Riesgo</Th><Th>Descripción</Th>
+            <Th>{org.l0}</Th><Th>{org.l1}</Th>{org.hasL2 && <Th>{org.l2}</Th>}<Th>Proceso</Th><Th>Riesgo</Th><Th>Descripción</Th>
             <Th>Causa</Th><Th>Evento</Th><Th>Efecto</Th><Th>Categoría</Th><Th>Actividad</Th>
             <Th>P.I</Th><Th>I.I</Th><Th>Nivel Inh.</Th><Th>Controles</Th><Th>Efectividad</Th><Th>Mitiga</Th><Th>Controles (detalle)</Th>
             <Th>P.R</Th><Th>I.R</Th><Th>Nivel Res.</Th>
@@ -122,6 +125,7 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
               <tr key={r.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
                 <Td>{proc?.management || '-'}</Td>
                 <Td>{proc?.coordination || '-'}</Td>
+                {org.hasL2 && <Td>{proc?.operative || '-'}</Td>}
                 <Td className="max-w-[150px]"><div className="truncate">{proc?.name || '-'}</div></Td>
                 <Td className="text-white font-medium max-w-[200px]"><div className="truncate" title={r.title}>{r.title}</div></Td>
                 <Td className="max-w-[260px]"><div className="truncate" title={r.description}>{r.description || '-'}</div></Td>
@@ -143,8 +147,8 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
               </tr>
             )
           })}
-          {shown.length === 0 && <EmptyRow cols={20} />}
-          <VerMasRow cols={20} ocultas={ocultas} onVerMas={verMas} />
+          {shown.length === 0 && <EmptyRow cols={COLS} />}
+          <VerMasRow cols={COLS} ocultas={ocultas} onVerMas={verMas} />
         </tbody>
       </TableWrap>
     </Dashboard>
