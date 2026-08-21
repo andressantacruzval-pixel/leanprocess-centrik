@@ -11,6 +11,7 @@ import type { DocCodePattern } from '@/utils/docCode'
 import { toast } from './toastStore'
 import { useAuthStore } from './authStore'
 import { useWorkspaceStore } from './workspaceStore'
+import { useProcessStore } from './processStore'
 import { supabase } from '@/lib/supabase'
 import { generateId } from '@/utils/id'
 import { identityMigration } from '@/utils/storeUtils'
@@ -263,11 +264,21 @@ export const useCompanyStore = create<CompanyState>()(
 
       updateOrgUnit: (id: string, updates: Partial<OrgUnit>) => {
         const prev = get().orgUnits
+        const before = prev.find((u) => u.id === id)
         set((state) => ({
           orgUnits: state.orgUnits.map((u) =>
             u.id === id ? { ...u, ...updates, updated_at: new Date().toISOString() } : u
           ),
         }))
+        // Cascada de renombre: los procesos guardan el NOMBRE de la unidad en
+        // management/coordination/operative. Sin esto el nombre viejo persiste
+        // en los filtros de reportes y en la caracterización. El nivel (profundidad
+        // en el organigrama) decide qué campo del proceso corresponde.
+        if (before && typeof updates.name === 'string' && updates.name.trim() && updates.name !== before.name) {
+          const depth = getNodeDepth(id, prev)
+          const field = depth === 0 ? 'management' : depth === 1 ? 'coordination' : depth === 2 ? 'operative' : null
+          if (field) useProcessStore.getState().renameOrgReference(field, before.name, updates.name)
+        }
         void dbWrite(
           'company:updateOrgUnit',
           supabase.from('org_units').update({ ...updates, updated_at: new Date().toISOString() } as never).eq('id', id),

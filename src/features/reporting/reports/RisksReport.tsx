@@ -1,5 +1,8 @@
-import { useMemo, useState } from 'react'
-import { getRiskLevel, type RiskItem, type RiskLevel } from '@/types/risk'
+import { Fragment, useMemo, useState } from 'react'
+import {
+  getRiskLevel, heatMapCellColor, PROBABILITY_LABELS, IMPACT_LABELS,
+  type RiskItem, type RiskLevel,
+} from '@/types/risk'
 import type { Process } from '@/types/process'
 import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge,
@@ -32,6 +35,42 @@ function effLabel(score: number): { label: string; hex: string } {
   if (score >= 17) return { label: 'Regular', hex: '#facc15' }
   if (score >= 9) return { label: 'Débil', hex: '#f97316' }
   return { label: 'Deficiente', hex: '#ef4444' }
+}
+
+// Mapa de calor 5×5: probabilidad (filas, 5→1) × impacto (columnas, 1→5).
+const PROB_ROWS = [5, 4, 3, 2, 1]
+const IMP_COLS = [1, 2, 3, 4, 5]
+
+function HeatMap({ risks, mode }: { risks: RiskItem[]; mode: 'inh' | 'res' }) {
+  const counts = useMemo(() => {
+    const m: Record<string, number> = {}
+    risks.forEach((r) => {
+      const p = mode === 'inh' ? r.inherentProbability : r.residualProbability
+      const i = mode === 'inh' ? r.inherentImpact : r.residualImpact
+      const k = `${p}-${i}`
+      m[k] = (m[k] || 0) + 1
+    })
+    return m
+  }, [risks, mode])
+  return (
+    <div className="grid grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-1 text-[10px]">
+      {PROB_ROWS.map((p) => (
+        <Fragment key={p}>
+          <span className="flex items-center justify-end pr-1 text-right leading-tight text-white/40">{PROBABILITY_LABELS[p]}</span>
+          {IMP_COLS.map((i) => {
+            const c = counts[`${p}-${i}`] || 0
+            return (
+              <div key={i} className={`aspect-square rounded flex items-center justify-center font-bold text-white ${heatMapCellColor(p, i)} ${c === 0 ? 'opacity-20' : ''}`}>
+                {c > 0 ? c : ''}
+              </div>
+            )
+          })}
+        </Fragment>
+      ))}
+      <span />
+      {IMP_COLS.map((i) => <span key={i} className="text-center leading-tight pt-0.5 text-white/40">{IMPACT_LABELS[i]}</span>)}
+    </div>
+  )
 }
 
 export function RisksReport({ processes, allRisks }: { processes: Process[]; allRisks: RiskItem[] }) {
@@ -76,15 +115,28 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
   const critRes = byRes[0].value + byRes[1].value
   const sinControl = risks.filter((r) => ctrlAvg(r) < 17).length
   const avgEff = risks.length ? Math.round(risks.reduce((s, r) => s + ctrlAvg(r), 0) / risks.length) : 0
+  const totalControles = risks.reduce((s, r) => s + r.controls.length, 0)
+  const riesgosSinControl = risks.filter((r) => r.controls.length === 0).length
 
   return (
     <Dashboard>
-      <Grid cols={4}>
+      <Grid cols={6}>
         <Stat label="Riesgos" value={risks.length} sub="identificados" tone="cyan" />
         <Stat label="Extremos + altos" value={critInh} sub={`${risks.length ? Math.round(critInh / risks.length * 100) : 0}% inherente`} tone="red" />
         <Stat label="Críticos residuales" value={critRes} sub={`tras controles (${critInh - critRes} mitigados)`} tone="amber" />
         <Stat label="Control promedio" value={effLabel(avgEff).label} sub={`${avgEff}/40 de efectividad`} tone="emerald" />
+        <Stat label="Total de controles" value={totalControles} sub={`${risks.length ? (totalControles / risks.length).toFixed(1) : 0} por riesgo`} tone="violet" />
+        <Stat label="Riesgos sin control" value={riesgosSinControl} sub={`${risks.length ? Math.round(riesgosSinControl / risks.length * 100) : 0}% del total`} tone="red" />
       </Grid>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card title="Mapa de calor · Riesgo inherente" sub="Probabilidad × impacto antes de los controles.">
+          <HeatMap risks={risks} mode="inh" />
+        </Card>
+        <Card title="Mapa de calor · Riesgo residual" sub="Distribución después de aplicar los controles.">
+          <HeatMap risks={risks} mode="res" />
+        </Card>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card title="Riesgo inherente" sub="Antes de controles. Clic para filtrar la tabla.">

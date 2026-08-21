@@ -19,3 +19,28 @@ export function useOrgLabels(): OrgLabels {
     }
   }, [defs])
 }
+
+// Nombres de las unidades organizacionales por nivel de profundidad, tomados de
+// la estructura VIVA del organigrama (no de los valores usados en procesos). Así
+// TODAS las gerencias/jefaturas/áreas aparecen en los filtros aunque todavía no
+// tengan procesos asociados. Mapeo por profundidad en el árbol: 0 = management,
+// 1 = coordination, 2 = operative (coherente con CharacterizationPanel).
+export interface OrgUnitNames { managements: string[]; areas: string[]; operatives: string[] }
+
+const uniqSort = (arr: (string | null | undefined)[]): string[] =>
+  [...new Set(arr.filter((v): v is string => !!v))].sort((a, b) => a.localeCompare(b, 'es'))
+
+export function useOrgUnitNamesByLevel(): OrgUnitNames {
+  const units = useCompanyStore((s) => s.orgUnits)
+  return useMemo(() => {
+    const mgmtIds = new Set(units.filter((u) => !u.parent_id).map((u) => u.id))
+    const areaUnits = units.filter((u) => u.parent_id && mgmtIds.has(u.parent_id))
+    const areaIds = new Set(areaUnits.map((u) => u.id))
+    const opUnits = units.filter((u) => u.parent_id && areaIds.has(u.parent_id))
+    return {
+      managements: uniqSort(units.filter((u) => !u.parent_id).map((u) => u.name)),
+      areas: uniqSort(areaUnits.map((u) => u.name)),
+      operatives: uniqSort(opUnits.map((u) => u.name)),
+    }
+  }, [units])
+}

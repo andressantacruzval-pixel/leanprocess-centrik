@@ -14,7 +14,7 @@ import { useCompanyStore } from '@/stores/companyStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
-import { useOrgLabels } from '@/hooks/useOrgLabels'
+import { useOrgLabels, useOrgUnitNamesByLevel } from '@/hooks/useOrgLabels'
 import { exportReportToExcel, exportReportToPdf } from '@/utils/reportExporter'
 import { useImprovementStore } from '@/stores/improvementStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
@@ -44,6 +44,10 @@ const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
 const STANDALONE: ReportTab[] = ['inventario', 'cargos', 'manuales']
 
 const isTab = (v: string | null): v is ReportTab => !!v && TABS.some((t) => t.key === v)
+
+// Unión ordenada y deduplicada de nombres (estructura org + valores en procesos).
+const uniqNames = (a: string[], b: (string | null | undefined)[]): string[] =>
+  [...new Set([...a, ...b.filter((v): v is string => !!v)])].sort((x, y) => x.localeCompare(y, 'es'))
 
 export default function ReportsPage() {
   const [searchParams] = useSearchParams()
@@ -76,9 +80,13 @@ export default function ReportsPage() {
   const levelMap = useMemo(() => new Map(levelDefinitions.map((l) => [l.id, l.level_name])), [levelDefinitions])
 
   const org = useOrgLabels()
-  const managements = useMemo(() => [...new Set(processes.map((p) => p.management).filter(Boolean))].sort() as string[], [processes])
-  const areas = useMemo(() => [...new Set(processes.map((p) => p.coordination).filter(Boolean))].sort() as string[], [processes])
-  const operatives = useMemo(() => [...new Set(processes.map((p) => p.operative).filter(Boolean))].sort() as string[], [processes])
+  const orgNames = useOrgUnitNamesByLevel()
+  // Unión de la estructura viva del organigrama con los valores realmente usados
+  // en procesos: garantiza que TODAS las unidades aparezcan (aunque no tengan
+  // procesos) y que cualquier valor huérfano siga siendo filtrable.
+  const managements = useMemo(() => uniqNames(orgNames.managements, processes.map((p) => p.management)), [orgNames, processes])
+  const areas = useMemo(() => uniqNames(orgNames.areas, processes.map((p) => p.coordination)), [orgNames, processes])
+  const operatives = useMemo(() => uniqNames(orgNames.operatives, processes.map((p) => p.operative)), [orgNames, processes])
   const macroNames = useMemo(() => macroprocesses.map((m) => ({ id: m.id, name: m.name })), [macroprocesses])
   const levels = useMemo(
     () => [...new Set(processes.map((p) => (p.level_definition_id ? levelMap.get(p.level_definition_id) : null)).filter(Boolean))].sort() as string[],

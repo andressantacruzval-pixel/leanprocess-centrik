@@ -52,6 +52,13 @@ interface ProcessState {
    */
   bulkAddProcesses: (procs: Process[]) => Promise<{ ok: number; failed: number }>
   updateProcess: (id: string, updates: Partial<Process>) => void
+  /**
+   * Propaga el renombre de una unidad organizacional a los procesos que la
+   * referencian. Los campos `management`/`coordination`/`operative` guardan el
+   * NOMBRE de la unidad (no su id), así que al renombrar en el organigrama hay
+   * que actualizar en cascada o quedan valores obsoletos en los filtros.
+   */
+  renameOrgReference: (field: 'management' | 'coordination' | 'operative', oldName: string, newName: string) => void
   /** `silent` evita el toast por proceso: lo usa el borrado múltiple, que da un único resumen. */
   deleteProcess: (id: string, opts?: { silent?: boolean }) => void
   reorderProcesses: (parentId: string | null, macroId: string, orderedIds: string[]) => void
@@ -338,6 +345,33 @@ export const useProcessStore = create<ProcessState>()(
               rollback: () => set({ processes: prev }),
             }
           )
+        })()
+      },
+
+      renameOrgReference: (field, oldName, newName) => {
+        const clean = newName.trim()
+        if (!oldName || !clean || oldName === clean) return
+        const affected = get().processes.filter((p) => (p[field] as string | undefined) === oldName)
+        if (!affected.length) return
+        const prev = get().processes
+        set((s) => ({
+          processes: s.processes.map((p) =>
+            (p[field] as string | undefined) === oldName
+              ? { ...p, [field]: clean, updated_at: new Date().toISOString() }
+              : p
+          ),
+        }))
+        void (async () => {
+          const cid = currentCompanyId()
+          let q = supabase
+            .from('processes')
+            .update({ [field]: clean, updated_at: new Date().toISOString() } as never)
+            .eq(field, oldName)
+          if (cid) q = q.eq('company_id', cid)
+          await dbWrite('process:renameOrgReference', q, {
+            silent: true,
+            rollback: () => set({ processes: prev }),
+          })
         })()
       },
 
