@@ -30,11 +30,12 @@ describe('el «ver mas» no puede recortar la exportacion', () => {
   })
 
   it('las tablas pintan `visibles`, no la lista entera', () => {
-    // Las cinco pestañas: inventario, riesgos, kpis, valor y auditoria.
-    expect((src.match(/\{visibles\.map\(/g) ?? []).length).toBe(5)
+    // Las seis pestañas con tabla: inventario, riesgos, kpis, valor, auditoria y
+    // mejoras. (La pestaña «Inventario IA» es un dashboard, no una tabla paginada.)
+    expect((src.match(/\{visibles\.map\(/g) ?? []).length).toBe(6)
   })
 
-  it('las cinco pestañas ofrecen «ver mas»', () => {
-    expect((src.match(/<VerMasRow /g) ?? []).length).toBe(5)
+  it('las seis pestañas de tabla ofrecen «ver mas»', () => {
+    expect((src.match(/<VerMasRow /g) ?? []).length).toBe(6)
   })
 })
