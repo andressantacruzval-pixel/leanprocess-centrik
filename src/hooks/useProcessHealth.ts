@@ -1,8 +1,8 @@
 /**
  * useProcessHealth
  * ────────────────
- * Calculates a health/completeness score (0-100%) for each process.
- * 6 checkpoints, each worth ~16.7%.
+ * Calcula el % de MADUREZ (antes «salud») de cada proceso.
+ * 7 hitos, cada uno vale ~14,3%.
  */
 
 import { useMemo } from 'react'
@@ -12,6 +12,7 @@ import { useIndicatorStore } from '@/stores/indicatorStore'
 import { useProcedureStore } from '@/stores/procedureStore'
 import { useAuditStore } from '@/stores/auditStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
+import { useImprovementStore } from '@/stores/improvementStore'
 import { useCompanyStore } from '@/stores/companyStore'
 import { isDocumentable } from '@/lib/processLevels'
 
@@ -22,6 +23,7 @@ export interface ProcessHealthChecks {
   risks: boolean
   audit: boolean
   valueAnalysis: boolean
+  improvements: boolean
 }
 
 export interface ProcessHealthEntry {
@@ -38,6 +40,7 @@ export function useProcessHealth(): ProcessHealthMap {
   const procedures = useProcedureStore((s) => s.procedures)
   const audits = useAuditStore((s) => s.audits)
   const analyses = useValueAnalysisStore((s) => s.analyses)
+  const improvements = useImprovementStore((s) => s.opportunities)
   const processLevelCount = useCompanyStore((s) => s.company?.process_level_count ?? 3)
 
   return useMemo(() => {
@@ -57,15 +60,16 @@ export function useProcessHealth(): ProcessHealthMap {
       const risksCheck = risks.filter((r) => r.process_id === process.id).length > 0
       const audit = (audits[process.id]?.length ?? 0) > 0
       const valueAnalysis = (analyses[process.id]?.length ?? 0) > 0
+      const improvementsCheck = improvements.some((o) => o.processId === process.id)
 
-      const checks: ProcessHealthChecks = { bpmn, procedure, kpis, risks: risksCheck, audit, valueAnalysis }
+      const checks: ProcessHealthChecks = { bpmn, procedure, kpis, risks: risksCheck, audit, valueAnalysis, improvements: improvementsCheck }
       const passed = Object.values(checks).filter(Boolean).length
-      result[process.id] = { score: Math.round((passed / 6) * 100), checks }
+      result[process.id] = { score: Math.round((passed / 7) * 100), checks }
     }
 
     // Pasada 2: procesos agrupadores → score = promedio de sus hijos. Sin hijos
     // aún, 0% es honesto: lo que falta es crear los subprocesos, no documentar aquí.
-    const noChecks: ProcessHealthChecks = { bpmn: false, procedure: false, kpis: false, risks: false, audit: false, valueAnalysis: false }
+    const noChecks: ProcessHealthChecks = { bpmn: false, procedure: false, kpis: false, risks: false, audit: false, valueAnalysis: false, improvements: false }
     for (const process of processes) {
       if (isDocumentable(process, processLevelCount)) continue
 
@@ -77,5 +81,5 @@ export function useProcessHealth(): ProcessHealthMap {
     }
 
     return result
-  }, [processes, risks, indicators, procedures, audits, analyses, processLevelCount])
+  }, [processes, risks, indicators, procedures, audits, analyses, improvements, processLevelCount])
 }

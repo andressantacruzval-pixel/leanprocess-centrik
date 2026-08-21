@@ -30,6 +30,7 @@ const CHECKS: { key: keyof ProcessHealthChecks; short: string; label: string }[]
   { key: 'risks',         short: 'R', label: 'Riesgos' },
   { key: 'audit',         short: 'A', label: 'Auditoría' },
   { key: 'valueAnalysis', short: 'V', label: 'Valor' },
+  { key: 'improvements',  short: 'M', label: 'Mejoras' },
 ]
 
 // ── Helpers de UI ──────────────────────────────────────────────────────────

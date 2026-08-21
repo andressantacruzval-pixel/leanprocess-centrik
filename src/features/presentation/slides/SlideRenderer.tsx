@@ -326,6 +326,7 @@ export function SlideRenderer({ slide, macroprocesses, processes, risks, indicat
         { key: 'risks' as const, label: 'Riesgos' },
         { key: 'audit' as const, label: 'Auditoria' },
         { key: 'valueAnalysis' as const, label: 'Valor' },
+        { key: 'improvements' as const, label: 'Mejoras' },
       ]
       return (
         <div className="flex flex-col h-full px-6 lg:px-12 py-6 lg:py-10">
@@ -341,7 +342,7 @@ export function SlideRenderer({ slide, macroprocesses, processes, risks, indicat
                   {checkLabels.map((cl) => (
                     <th key={cl.key} className="text-center py-2 text-gray-400 font-semibold w-20">{cl.label}</th>
                   ))}
-                  <th className="text-center py-2 text-gray-400 font-semibold w-20">Salud</th>
+                  <th className="text-center py-2 text-gray-400 font-semibold w-20">Madurez</th>
                 </tr>
               </thead>
               <tbody>

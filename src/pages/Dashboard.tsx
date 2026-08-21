@@ -9,6 +9,7 @@ import { useIndicatorStore } from '@/stores/indicatorStore'
 import { useProcedureStore } from '@/stores/procedureStore'
 import { useAuditStore } from '@/stores/auditStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
+import { useImprovementStore } from '@/stores/improvementStore'
 import { useCompanyStore } from '@/stores/companyStore'
 import { useBenchmarkStore } from '@/features/benchmarking/benchmarkStore'
 import { useDashboardSnapshotStore } from '@/stores/dashboardSnapshotStore'
@@ -70,6 +71,7 @@ export default function Dashboard() {
   const allStoreProcedures = useProcedureStore((s) => s.procedures)
   const allAudits = useAuditStore((s) => s.audits)
   const allAnalyses = useValueAnalysisStore((s) => s.analyses)
+  const allStoreImprovements = useImprovementStore((s) => s.opportunities)
 
   // Filter by active company
   const processes = useMemo(() => allStoreProcesses.filter((p) => !p.company_id || p.company_id === activeCompanyId), [allStoreProcesses, activeCompanyId])
@@ -93,6 +95,11 @@ export default function Dashboard() {
   const allRisks = useMemo(() => allStoreRisks.filter((r) => processIds.has(r.process_id)), [allStoreRisks, processIds])
   const allIndicators = useMemo(() => allStoreIndicators.filter((i) => !i.company_id || i.company_id === activeCompanyId), [allStoreIndicators, activeCompanyId])
   const allProcedures = useMemo(() => allStoreProcedures.filter((p) => processIds.has(p.process_id)), [allStoreProcedures, processIds])
+  const improvementsByProcess = useMemo(() => {
+    const counts: Record<string, number> = {}
+    allStoreImprovements.forEach((o) => { if (processIds.has(o.processId)) counts[o.processId] = (counts[o.processId] || 0) + 1 })
+    return counts
+  }, [allStoreImprovements, processIds])
 
   // Weekly digest stores
   const scoreHistory = useBenchmarkStore((s) => s.scoreHistory)
@@ -408,8 +415,8 @@ export default function Dashboard() {
         {/* `overflow-x-auto`, no `overflow-hidden`: son 8 columnas de datos y antes se
             aplastaban dentro de un contenedor que ademas impedia desplazarlas. */}
         <div className="bg-white/[0.03] rounded-2xl border border-white/5 overflow-x-auto">
-          <div className="min-w-[760px]">
-          <div className="grid grid-cols-9 gap-px bg-white/5 text-[10px] text-white/30 uppercase">
+          <div className="min-w-[860px]">
+          <div className="grid grid-cols-10 gap-px bg-white/5 text-[10px] text-white/30 uppercase">
             <div className="bg-[#0a0f1a] px-3 py-2 col-span-2">{coverageLabel}</div>
             <div className="bg-[#0a0f1a] px-3 py-2 text-center">BPMN</div>
             <div className="bg-[#0a0f1a] px-3 py-2 text-center">Procedimiento</div>
@@ -417,7 +424,8 @@ export default function Dashboard() {
             <div className="bg-[#0a0f1a] px-3 py-2 text-center">Riesgos</div>
             <div className="bg-[#0a0f1a] px-3 py-2 text-center">Auditoria</div>
             <div className="bg-[#0a0f1a] px-3 py-2 text-center">Valor</div>
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center">Salud</div>
+            <div className="bg-[#0a0f1a] px-3 py-2 text-center">Mejoras</div>
+            <div className="bg-[#0a0f1a] px-3 py-2 text-center">Madurez</div>
           </div>
           {documentableProcesses.slice(0, 10).map((p) => {
             const hasBpmn = !!p.bpmn_xml
@@ -426,6 +434,7 @@ export default function Dashboard() {
             const riskCount = allRisks.filter(r => r.process_id === p.id).length
             const auditCount = allAudits[p.id]?.length || 0
             const valueCount = allAnalyses[p.id]?.length || 0
+            const improvementCount = improvementsByProcess[p.id] || 0
             const health = healthMap[p.id]
 
             // Sin cupo, la caracterizacion rebota (tiene `useDocumentableGuard`), asi
@@ -446,7 +455,7 @@ export default function Dashboard() {
               <Fila
                 key={p.id}
                 {...(propsDeFila as { to: string })}
-                className={`grid grid-cols-9 gap-px bg-white/5 transition-colors group ${
+                className={`grid grid-cols-10 gap-px bg-white/5 transition-colors group ${
                   sinCupo ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/[0.08]'
                 }`}
               >
@@ -459,6 +468,7 @@ export default function Dashboard() {
                 <CoverageCell active={riskCount > 0} count={riskCount} />
                 <CoverageCell active={auditCount > 0} count={auditCount} />
                 <CoverageCell active={valueCount > 0} count={valueCount} />
+                <CoverageCell active={improvementCount > 0} count={improvementCount} />
                 <div className="bg-[#0a0f1a] px-3 py-2 flex items-center justify-center gap-1">
                   <span className={`w-2 h-2 rounded-full ${
                     (health?.score ?? 0) >= 67 ? 'bg-emerald-400' :

@@ -210,16 +210,16 @@ export async function exportPresentationToPptx(
           fontSize: 32, fontFace: 'Arial', color: 'FFFFFF', bold: true,
         })
 
-        const checkKeys = ['bpmn', 'procedure', 'kpis', 'risks', 'audit', 'valueAnalysis'] as const
+        const checkKeys = ['bpmn', 'procedure', 'kpis', 'risks', 'audit', 'valueAnalysis', 'improvements'] as const
         const checkLabelsMap: Record<string, string> = {
           bpmn: 'BPMN', procedure: 'Proced.', kpis: 'KPIs',
-          risks: 'Riesgos', audit: 'Audit.', valueAnalysis: 'Valor',
+          risks: 'Riesgos', audit: 'Audit.', valueAnalysis: 'Valor', improvements: 'Mejoras',
         }
 
         const headerRow: pptxgen.TableRow = [
           { text: 'Proceso', options: { bold: true, color: '9CA3AF', fontSize: 11 } },
           ...checkKeys.map((k) => ({ text: checkLabelsMap[k], options: { bold: true, color: '9CA3AF', fontSize: 10, align: 'center' as const } })),
-          { text: 'Salud', options: { bold: true, color: '9CA3AF', fontSize: 10, align: 'center' as const } },
+          { text: 'Madurez', options: { bold: true, color: '9CA3AF', fontSize: 10, align: 'center' as const } },
         ]
 
         const dataRows: pptxgen.TableRow[] = processes.slice(0, 15).map((p) => {
