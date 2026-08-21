@@ -176,80 +176,78 @@ select option {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   TEMA CLARO  (data-theme="light")
+   TEMA CLARO  (data-theme="light")  — paleta slate, elegante y legible
    ───────────────────────────────────────────────────────────────────────
-   El diseño es "dark-first": los componentes usan text/bg/border-white/…
-   (tinta blanca sobre fondo oscuro) y fondos navy hardcodeados. Aquí se
-   remapea, sin tocar componentes: el blanco pasa a tinta oscura (#0f172a)
-   con el MISMO alfa, y los fondos navy pasan a claros (blancos/azulados).
-   Acentos (cyan, emerald, blue, amber, red, purple) se conservan.
+   El diseño es dark-first (text/bg/border-white/… + fondos navy). Aquí se
+   remapea SIN tocar componentes a una escala slate coherente:
+     · Lienzo:  #eff3fa      · Paneles: #ffffff
+     · Texto:   slate 900→400 (siempre legible, no translúcido)
+     · Bordes:  slate 100→300 · Overlays: slate 50→200
+   Acentos (cyan/blue/emerald/amber/red/purple) se conservan.
    ═══════════════════════════════════════════════════════════════════════ */
 
-html[data-theme="light"] { background-color: #eef3fa; }
+html[data-theme="light"] { background-color: #eff3fa; }
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="light"] body { background-color: #eff3fa; color: #0f172a; }
 
-:root[data-theme="light"] {
-  color-scheme: light;
-  --color-white: #0f172a; /* cubre text-white (var) y opacidades arbitrarias */
-}
-:root[data-theme="light"] body { background-color: #eef3fa; color: #0f172a; }
-
-/* ── Tinta: blanco → #0f172a con el mismo alfa ───────────────────────── */
+/* ── Texto: escala slate sólida (legible sobre claro) ────────────────── */
 :root[data-theme="light"] .text-white{color:#0f172a !important}
-:root[data-theme="light"] .text-white\/90{color:#0f172ae6 !important}
-:root[data-theme="light"] .text-white\/85{color:#0f172ad9 !important}
-:root[data-theme="light"] .text-white\/80{color:#0f172acc !important}
-:root[data-theme="light"] .text-white\/70{color:#0f172ab3 !important}
-:root[data-theme="light"] .text-white\/60{color:#0f172a99 !important}
-:root[data-theme="light"] .text-white\/55{color:#0f172a8c !important}
-:root[data-theme="light"] .text-white\/50{color:#0f172a80 !important}
-:root[data-theme="light"] .text-white\/45{color:#0f172a73 !important}
-:root[data-theme="light"] .text-white\/40{color:#0f172a66 !important}
-:root[data-theme="light"] .text-white\/35{color:#0f172a59 !important}
-:root[data-theme="light"] .text-white\/30{color:#0f172a4d !important}
-:root[data-theme="light"] .text-white\/25{color:#0f172a40 !important}
-:root[data-theme="light"] .text-white\/20{color:#0f172a33 !important}
-:root[data-theme="light"] .text-white\/15{color:#0f172a26 !important}
-:root[data-theme="light"] .text-white\/10{color:#0f172a1a !important}
+:root[data-theme="light"] .text-white\/90{color:#1e293b !important}
+:root[data-theme="light"] .text-white\/85{color:#1e293b !important}
+:root[data-theme="light"] .text-white\/80{color:#1e293b !important}
+:root[data-theme="light"] .text-white\/70{color:#334155 !important}
+:root[data-theme="light"] .text-white\/60{color:#475569 !important}
+:root[data-theme="light"] .text-white\/55{color:#475569 !important}
+:root[data-theme="light"] .text-white\/50{color:#64748b !important}
+:root[data-theme="light"] .text-white\/45{color:#64748b !important}
+:root[data-theme="light"] .text-white\/40{color:#64748b !important}
+:root[data-theme="light"] .text-white\/35{color:#64748b !important}
+:root[data-theme="light"] .text-white\/30{color:#6b7a90 !important}
+:root[data-theme="light"] .text-white\/25{color:#8393a7 !important}
+:root[data-theme="light"] .text-white\/20{color:#94a3b8 !important}
+:root[data-theme="light"] .text-white\/15{color:#94a3b8 !important}
+:root[data-theme="light"] .text-white\/10{color:#a3b0c2 !important}
 
-/* ── Superficies claras: bg-white (lleno) se queda blanco; overlays a tinta ── */
+/* ── Superficies (overlays) → escala slate clara ─────────────────────── */
 :root[data-theme="light"] .bg-white{background-color:#ffffff !important}
-:root[data-theme="light"] .bg-white\/20{background-color:#0f172a33 !important}
-:root[data-theme="light"] .bg-white\/10{background-color:#0f172a1a !important}
-:root[data-theme="light"] .bg-white\/5{background-color:#0f172a0d !important}
-:root[data-theme="light"] .bg-white\/\[0\.08\]{background-color:#0f172a14 !important}
-:root[data-theme="light"] .bg-white\/\[0\.07\]{background-color:#0f172a12 !important}
-:root[data-theme="light"] .bg-white\/\[0\.06\]{background-color:#0f172a0f !important}
-:root[data-theme="light"] .bg-white\/\[0\.05\]{background-color:#0f172a0d !important}
-:root[data-theme="light"] .bg-white\/\[0\.04\]{background-color:#0f172a0a !important}
-:root[data-theme="light"] .bg-white\/\[0\.03\]{background-color:#0f172a08 !important}
-:root[data-theme="light"] .bg-white\/\[0\.02\]{background-color:#0f172a05 !important}
-:root[data-theme="light"] .bg-white\/\[0\.015\]{background-color:#0f172a04 !important}
-:root[data-theme="light"] .bg-white\/\[0\.01\]{background-color:#0f172a03 !important}
+:root[data-theme="light"] .bg-white\/20{background-color:#cbd5e1 !important}
+:root[data-theme="light"] .bg-white\/10{background-color:#e2e8f0 !important}
+:root[data-theme="light"] .bg-white\/5{background-color:#f1f5f9 !important}
+:root[data-theme="light"] .bg-white\/\[0\.08\]{background-color:#e9eef5 !important}
+:root[data-theme="light"] .bg-white\/\[0\.07\]{background-color:#e9eef5 !important}
+:root[data-theme="light"] .bg-white\/\[0\.06\]{background-color:#f1f5f9 !important}
+:root[data-theme="light"] .bg-white\/\[0\.05\]{background-color:#f1f5f9 !important}
+:root[data-theme="light"] .bg-white\/\[0\.04\]{background-color:#f4f7fb !important}
+:root[data-theme="light"] .bg-white\/\[0\.03\]{background-color:#f4f7fb !important}
+:root[data-theme="light"] .bg-white\/\[0\.02\]{background-color:#f8fafc !important}
+:root[data-theme="light"] .bg-white\/\[0\.015\]{background-color:#f8fafc !important}
+:root[data-theme="light"] .bg-white\/\[0\.01\]{background-color:#f8fafc !important}
 
-/* ── Bordes ──────────────────────────────────────────────────────────── */
-:root[data-theme="light"] .border-white\/20{border-color:#0f172a33 !important}
-:root[data-theme="light"] .border-white\/15{border-color:#0f172a26 !important}
-:root[data-theme="light"] .border-white\/10{border-color:#0f172a1a !important}
-:root[data-theme="light"] .border-white\/8{border-color:#0f172a14 !important}
-:root[data-theme="light"] .border-white\/5{border-color:#0f172a0d !important}
-:root[data-theme="light"] .border-white\/\[0\.12\]{border-color:#0f172a1f !important}
-:root[data-theme="light"] .border-white\/\[0\.07\]{border-color:#0f172a12 !important}
-:root[data-theme="light"] .border-white\/\[0\.06\]{border-color:#0f172a0f !important}
-:root[data-theme="light"] .border-white\/\[0\.04\]{border-color:#0f172a0a !important}
-:root[data-theme="light"] .border-white\/\[0\.03\]{border-color:#0f172a08 !important}
+/* ── Bordes → slate ──────────────────────────────────────────────────── */
+:root[data-theme="light"] .border-white\/20{border-color:#cbd5e1 !important}
+:root[data-theme="light"] .border-white\/15{border-color:#d5dde7 !important}
+:root[data-theme="light"] .border-white\/10{border-color:#e2e8f0 !important}
+:root[data-theme="light"] .border-white\/8{border-color:#e6ebf2 !important}
+:root[data-theme="light"] .border-white\/5{border-color:#eef2f7 !important}
+:root[data-theme="light"] .border-white\/\[0\.12\]{border-color:#d5dde7 !important}
+:root[data-theme="light"] .border-white\/\[0\.07\]{border-color:#e6ebf2 !important}
+:root[data-theme="light"] .border-white\/\[0\.06\]{border-color:#e9eef5 !important}
+:root[data-theme="light"] .border-white\/\[0\.04\]{border-color:#eef2f7 !important}
+:root[data-theme="light"] .border-white\/\[0\.03\]{border-color:#eef2f7 !important}
 
 /* ── Placeholders y rings ────────────────────────────────────────────── */
-:root[data-theme="light"] .placeholder-white\/30::placeholder{color:#0f172a4d !important}
-:root[data-theme="light"] .placeholder-white\/25::placeholder{color:#0f172a40 !important}
-:root[data-theme="light"] .placeholder-white\/20::placeholder{color:#0f172a33 !important}
+:root[data-theme="light"] .placeholder-white\/30::placeholder{color:#94a3b8 !important}
+:root[data-theme="light"] .placeholder-white\/25::placeholder{color:#94a3b8 !important}
+:root[data-theme="light"] .placeholder-white\/20::placeholder{color:#a3b0c2 !important}
 :root[data-theme="light"] .ring-white\/80{--tw-ring-color:#0f172acc !important}
 :root[data-theme="light"] .ring-white\/60{--tw-ring-color:#0f172a99 !important}
-:root[data-theme="light"] .ring-white\/20{--tw-ring-color:#0f172a33 !important}
-:root[data-theme="light"] .ring-white\/5{--tw-ring-color:#0f172a0d !important}
+:root[data-theme="light"] .ring-white\/20{--tw-ring-color:#cbd5e1 !important}
+:root[data-theme="light"] .ring-white\/5{--tw-ring-color:#eef2f7 !important}
 
-/* ── Fondos navy hardcodeados → claros (acentos NO se tocan) ──────────── */
+/* ── Fondos navy hardcodeados → claros ───────────────────────────────── */
 :root[data-theme="light"] .bg-\[\#070b14\],
-:root[data-theme="light"] .bg-\[\#0b1020\]{background-color:#eef3fa !important}
+:root[data-theme="light"] .bg-\[\#0b1020\]{background-color:#eff3fa !important}
+:root[data-theme="light"] .bg-\[\#16223a\]{background-color:#f1f5f9 !important}
 :root[data-theme="light"] .bg-\[\#0a0f1a\],
 :root[data-theme="light"] .bg-\[\#0d1420\],
 :root[data-theme="light"] .bg-\[\#0d1424\],
@@ -262,16 +260,47 @@ html[data-theme="light"] { background-color: #eef3fa; }
 :root[data-theme="light"] .bg-\[\#111827\],
 :root[data-theme="light"] .bg-\[\#111a28\],
 :root[data-theme="light"] .bg-\[\#0c172b\],
-:root[data-theme="light"] .bg-\[\#16223a\],
 :root[data-theme="light"] .bg-\[\#071c27\]{background-color:#ffffff !important}
 :root[data-theme="light"] .bg-\[\#17122b\]{background-color:#f5f3ff !important}
 
-/* ── Opciones de <select> en claro ───────────────────────────────────── */
-:root[data-theme="light"] select option{background-color:#ffffff;color:#0f172a}
-
-/* Fondos navy con opacidad (barras con backdrop-blur) → claros translúcidos */
-:root[data-theme="light"] .bg-\[\#0a0f1a\]\/80{background-color:#ffffffcc !important}
+/* ── Variantes navy con opacidad (barras con blur) → claras ──────────── */
+:root[data-theme="light"] .bg-\[\#0a0f1a\]\/80{background-color:#ffffffe6 !important}
 :root[data-theme="light"] .bg-\[\#0c1322\]\/90,
 :root[data-theme="light"] .bg-\[\#0d1420\]\/90{background-color:#ffffffe6 !important}
-:root[data-theme="light"] .bg-\[\#070b14\]\/95{background-color:#eef3faf2 !important}
-:root[data-theme="light"] .bg-\[\#070b14\]\/80{background-color:#eef3facc !important}
+:root[data-theme="light"] .bg-\[\#070b14\]\/95{background-color:#eff3faf2 !important}
+:root[data-theme="light"] .bg-\[\#070b14\]\/80{background-color:#eff3facc !important}
+
+/* ── Stops de gradiente navy (sidebar, cabeceras) → claros ───────────── */
+:root[data-theme="light"] .from-\[\#0a0f1a\]{--tw-gradient-from:#ffffff !important}
+:root[data-theme="light"] .to-\[\#0d1420\]{--tw-gradient-to:#f6f9fd !important}
+:root[data-theme="light"] .to-\[\#0d1117\]{--tw-gradient-to:#f6f9fd !important}
+:root[data-theme="light"] .via-\[\#0a1628\]{--tw-gradient-via:#eef3fa !important}
+
+/* ── <select> options en claro ───────────────────────────────────────── */
+:root[data-theme="light"] select option{background-color:#ffffff;color:#0f172a}
+
+/* ── Diagramador BPMN: cuadrícula sutil en claro ─────────────────────── */
+:root[data-theme="light"] .bjs-container{
+  background-image:
+    linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px) !important;
+}
+
+/* ── Acentos de texto: tonos 300/400 → 600/700 en claro (contraste) ──── */
+:root[data-theme="light"] .text-cyan-400{color:#0891b2 !important}
+:root[data-theme="light"] .text-cyan-300{color:#0e7490 !important}
+:root[data-theme="light"] .text-red-400{color:#dc2626 !important}
+:root[data-theme="light"] .text-red-300{color:#dc2626 !important}
+:root[data-theme="light"] .text-amber-400{color:#d97706 !important}
+:root[data-theme="light"] .text-amber-300{color:#b45309 !important}
+:root[data-theme="light"] .text-emerald-400{color:#059669 !important}
+:root[data-theme="light"] .text-emerald-300{color:#047857 !important}
+:root[data-theme="light"] .text-green-400{color:#16a34a !important}
+:root[data-theme="light"] .text-blue-400{color:#2563eb !important}
+:root[data-theme="light"] .text-blue-300{color:#1d4ed8 !important}
+:root[data-theme="light"] .text-purple-400{color:#7c3aed !important}
+:root[data-theme="light"] .text-purple-300{color:#6d28d9 !important}
+:root[data-theme="light"] .text-violet-400{color:#7c3aed !important}
+:root[data-theme="light"] .text-orange-400{color:#ea580c !important}
+:root[data-theme="light"] .text-teal-400{color:#0d9488 !important}
+:root[data-theme="light"] .text-rose-400{color:#e11d48 !important}

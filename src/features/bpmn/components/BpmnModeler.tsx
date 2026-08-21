@@ -16,6 +16,7 @@ import type {
   BpmnModelerInstance,
 } from '@/types/bpmn'
 import { injectMissingBpmnEdges } from '@/lib/bpmnLayoutFix'
+import { useUiStore } from '@/stores/uiStore'
 
 // Elimina waypoints con coordenadas NaN del XML antes de importar.
 function sanitizeBpmnXml(xml: string): string {
@@ -82,6 +83,7 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
   const xmlRef = useRef(xml)
   const [error, setError] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
+  const theme = useUiStore((s) => s.theme)
   const internalChangeRef = useRef(false)
   const handleChanged = useCallback(async () => {
     if (!modelerRef.current || !onXmlChange) return
@@ -479,7 +481,7 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
       <div
         ref={containerRef}
         className="w-full h-full overflow-hidden border border-white/5"
-        style={{ background: '#111827' }}
+        style={{ background: theme === 'light' ? '#f8fafc' : '#111827' }}
       />
 
 
