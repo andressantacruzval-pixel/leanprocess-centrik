@@ -89,8 +89,9 @@ Cada subproceso tiene UNA sola área: la que responde por el resultado. Si parti
 
 ═══════════ 3 · ESTRUCTURA ORGANIZACIONAL ═══════════
 ${bloqueAreas(areas, macros)}
-
-Cuando la tengas, y antes de cualquier otra cosa, me devuelves el árbol normalizado por niveles con una marca ✔ en cada área hoja y me pides confirmación en una línea. Esa confirmación es obligatoria.
+${leafAreas(areas, macros).length
+  ? '⚠️ ESTA ESTRUCTURA YA ESTÁ CONFIRMADA. Úsala tal cual. NO la vuelvas a mostrar, NO la pidas y NO pidas confirmarla: salta ese paso por completo y empieza directo con el trabajo del macroproceso.'
+  : 'Cuando la tengas, me devuelves el árbol normalizado por niveles con ✔ en cada área hoja y me pides confirmación en una línea.'}
 
 ═══════════ 4 · CANON DE CONSTRUCCIÓN (no cambia nunca) ═══════════
 
@@ -151,14 +152,18 @@ export function buildInventoryPrompt(P: InvProyecto, macros: InvMacro[], areas: 
   const m = macros[opts.focoIndex] || macros[0]
   const G = progresoGlobal(macros)
   const origen = BB ? 'deducido' : 'confirmado'
+  const tieneAreas = leafAreas(areas, macros).length > 0
 
   let t = contextoYCanon(P, macros, areas)
 
+  const paso1 = tieneAreas
+    ? 'PASO 1 · Estructura organizacional: YA está confirmada en la sección 3. NO la pidas, NO la muestres, NO pidas confirmarla. Sáltala y empieza directo.'
+    : 'PASO 1 · Estructura organizacional: pídeme el organigrama, normalízalo, marca las áreas hoja con ✔ y pídeme confirmación. Una sola pregunta.'
   if (BB) {
     t += `═══════════ 5 · MÉTODO: BIG BANG ═══════════
-Vas a deducir el inventario completo con la mínima cantidad de preguntas. Solo DOS preguntas antes de producir.
-PASO 1 · Estructura organizacional: pídeme el organigrama, normalízalo, marca las áreas hoja con ✔ y pídeme confirmación. Una sola pregunta.
-PASO 2 · Matriz de contribución: muéstrame una tabla de dos columnas (cada ÁREA HOJA y los macroprocesos a los que contribuye). Pídeme confirmarla. Segunda y última pregunta.
+Vas a deducir el inventario con la mínima cantidad de preguntas.
+${paso1}
+PASO 2 · Matriz de contribución: muéstrame una tabla de dos columnas (cada ÁREA HOJA y los macroprocesos a los que contribuye). Pídeme confirmarla.
 PASO 3 · Producción: deduces el inventario y me entregas UN BLOQUE JSON POR MACROPROCESO, en el orden de trabajo (PRODUCTIVOS → APOYO → ESTRATÉGICOS). Todos los subprocesos llevan "origen": "deducido". Tras cada bloque escribes la línea de avance y te DETIENES hasta que yo escriba "sigue". En el primer bloque incluyes el arreglo "areas".
 PASO 4 · Cierre: 6 líneas con nombres que nominalizaste, total de procesos y subprocesos, áreas con más/menos carga, áreas sin subproceso, dudas de ubicación y qué revisar primero.
 RECUERDA: todo es una HIPÓTESIS de trabajo que voy a depurar con el cliente.
@@ -167,8 +172,7 @@ RECUERDA: todo es una HIPÓTESIS de trabajo que voy a depurar con el cliente.
   } else {
     t += `═══════════ 5 · MÉTODO: INCREMENTAL ═══════════
 Vas macroproceso por macroproceso. Por cada uno haces entre 2 y 5 preguntas CORTAS, de respuesta numérica, y solo entonces entregas su bloque JSON.
-PASO 1 · Estructura organizacional: igual que en Big Bang, con confirmación.
-PASO 2 · Matriz de contribución: tabla área hoja → macroprocesos, para confirmar.
+${paso1}
 PASO 3 · Ciclo por macroproceso, UNA pregunta por mensaje:
   P1 — Subprocesos candidatos: lista de 8 a 14, numerados, en FORMA NOMINAL, cada uno con el área hoja entre corchetes. Cierra con: "Responde con los números que SÍ hacen, separados por comas. Agrega en texto libre lo que falte."
   P2 — Áreas dudosas (solo si las hay).
