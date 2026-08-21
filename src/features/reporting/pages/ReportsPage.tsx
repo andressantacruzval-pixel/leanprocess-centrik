@@ -2,9 +2,10 @@ import { useState, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   FileText, ShieldAlert, TrendingUp, Activity, ClipboardCheck,
-  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List,
+  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List, UserCog,
 } from 'lucide-react'
 import { InventoryReport as InventoryReportUnified } from '@/features/inventory/components/InventoryReport'
+import { CargosReport } from '../reports/CargosReport'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { SelectFilter } from '@/components/ui/SelectFilter'
@@ -14,6 +15,8 @@ import { useProcessStore } from '@/stores/processStore'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { exportReportToExcel, exportReportToPdf } from '@/utils/reportExporter'
 import { useImprovementStore } from '@/stores/improvementStore'
+import { useCatalogStore } from '@/features/catalog/catalogStore'
+import { CARGO_CATALOG } from '@/features/cargos/cargoData'
 import { ImprovementsKanban } from '@/features/improvement/components/ImprovementsKanban'
 import { RisksReport } from '../reports/RisksReport'
 import { KpisReport } from '../reports/KpisReport'
@@ -21,7 +24,7 @@ import { ValueReport } from '../reports/ValueReport'
 import { AuditReport } from '../reports/AuditReport'
 import { ImprovementsReport } from '../reports/ImprovementsReport'
 
-type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras'
+type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras' | 'cargos'
 
 const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'inventario', label: 'Inventario', icon: FileText },
@@ -30,7 +33,12 @@ const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'valor', label: 'Valor', icon: Activity },
   { key: 'auditoria', label: 'Auditoria', icon: ClipboardCheck },
   { key: 'mejoras', label: 'Mejoras', icon: Lightbulb },
+  { key: 'cargos', label: 'Cargos', icon: UserCog },
 ]
+
+// Reportes que se pintan a ancho completo (componente propio, sin la barra de
+// filtros por proceso): tienen sus propios filtros internos.
+const STANDALONE: ReportTab[] = ['inventario', 'cargos']
 
 const isTab = (v: string | null): v is ReportTab => !!v && TABS.some((t) => t.key === v)
 
@@ -56,6 +64,8 @@ export default function ReportsPage() {
   } = useCompanyScopedData()
   const updateOpportunity = useImprovementStore((s) => s.updateOpportunity)
   const deleteOpportunity = useImprovementStore((s) => s.deleteOpportunity)
+  const catalogItems = useCatalogStore((s) => s.catalogItems)
+  const cargoCatalog = useMemo(() => catalogItems.filter((c) => c.catalog_type === CARGO_CATALOG && c.is_active).map((c) => c.value), [catalogItems])
 
   const macroMap = useMemo(() => new Map(macroprocesses.map((m) => [m.id, m])), [macroprocesses])
   const processMap = useMemo(() => new Map(processes.map((p) => [p.id, p])), [processes])
@@ -86,11 +96,11 @@ export default function ReportsPage() {
     const data = {
       tab: activeTab, company, generatedBy: profile?.full_name ?? null,
       processes: filteredProcesses, macroMap, processMap,
-      allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements,
+      allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog,
     }
     if (format === 'excel') exportReportToExcel(data)
     else exportReportToPdf(data)
-  }, [activeTab, company, profile, filteredProcesses, macroMap, processMap, allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements])
+  }, [activeTab, company, profile, filteredProcesses, macroMap, processMap, allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog])
 
   const hasFilters = search || filterManagement || filterArea || filterMacro || filterLevel
 
@@ -130,9 +140,10 @@ export default function ReportsPage() {
         ))}
       </div>
 
-      {activeTab === 'inventario' ? (
+      {STANDALONE.includes(activeTab) ? (
         <div className="bg-white/[0.02] rounded-2xl border border-white/5">
-          <InventoryReportUnified />
+          {activeTab === 'inventario' && <InventoryReportUnified />}
+          {activeTab === 'cargos' && <CargosReport />}
         </div>
       ) : (
         <>

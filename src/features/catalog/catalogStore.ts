@@ -134,6 +134,7 @@ export const MANAGED_CATALOGS: { type: string; label: string; description: strin
   { type: 'business_line', label: 'Linea de negocio', description: 'Lineas de negocio o unidades comerciales de la empresa' },
   { type: 'delivery_method', label: 'Medio de entrega', description: 'Canal por el cual se entrega el resultado del proceso' },
   { type: 'supervision_level', label: 'Nivel de supervision', description: 'Intensidad del control jerarquico requerido por el proceso' },
+  { type: 'cargo', label: 'Cargos', description: 'Cargos que ejecutan actividades en los diagramas (lanes). Se usa para la analitica por cargo y para que la IA nombre los roles con cargos existentes.' },
 ]
 
 function seedCatalogs(): CatalogItem[] {

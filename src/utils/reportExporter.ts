@@ -14,6 +14,7 @@ import type { AuditItem } from '@/lib/procedureAi'
 import {
   type ImprovementOpportunity, priorityScore, priorityLabel, STATUS_LABELS, IMPROVEMENT_TYPE_LABELS,
 } from '@/types/improvement'
+import { computeCargos } from '@/features/cargos/cargoData'
 
 export interface ReportData {
   tab: string
@@ -28,6 +29,7 @@ export interface ReportData {
   allAudits: Record<string, AuditItem[]>
   allAnalyses: Record<string, ValueActivity[]>
   allImprovements?: ImprovementOpportunity[]
+  cargoCatalog?: string[]
 }
 
 // Efectividad promedio de los controles de un riesgo (0–40) → etiqueta.
@@ -74,6 +76,7 @@ export async function exportReportToExcel(data: ReportData) {
     case 'valor': excelValue(wb, data, company, now); break
     case 'auditoria': excelAudit(wb, data, company, now); break
     case 'mejoras': excelMejoras(wb, data, company, now); break
+    case 'cargos': excelCargos(wb, data, company, now); break
   }
 
   const buffer = await wb.xlsx.writeBuffer()
@@ -216,6 +219,21 @@ function excelKpis(wb: ExcelJS.Workbook, data: ReportData, company: string, date
   }
 }
 
+function excelCargos(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
+  const ws = wb.addWorksheet('Analitica por Cargo')
+  const H = ['Cargo', 'En catalogo', 'Procesos', 'Actividades', 'VA min/mes', 'NVA min/mes', 'NVABN min/mes', '% Valor']
+  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i === 0 ? 30 : 14 }))
+  const { cargos } = computeCargos(data.processes, data.allAnalyses, data.cargoCatalog ?? [])
+  const rows = cargos.filter((c) => c.activities.length > 0).map((c) => {
+    const pv = c.totalMin > 0 ? Math.round(c.vaMin / c.totalMin * 100) : ''
+    return [c.cargo, c.inCatalog ? 'Si' : 'No', c.processes.size, c.activities.length, Math.round(c.vaMin), Math.round(c.nvaMin), Math.round(c.nvabnMin), pv === '' ? '-' : `${pv}%`]
+  })
+  rows.forEach((r) => ws.addRow(r))
+  styleHeaders(ws, H.length, 1)
+  addTitle(ws, `Analitica por Cargo — ${company}`, `${company} | ${date}`, H.length, company, data.generatedBy || '')
+  styleData(ws, 4, H.length, rows.length)
+}
+
 function excelMejoras(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Plan de Mejoras')
   const H = ['Gerencia', 'Proceso', 'Oportunidad', 'Tipo', 'Descripcion', 'Prioridad', 'Costo', 'Complejidad', 'Tiempo', 'Responsable', 'Inicio', 'Fin', 'Estado', 'Avance %', 'Cierre']
@@ -293,7 +311,7 @@ export function exportReportToPdf(data: ReportData) {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
   const company = data.company?.name || 'Empresa'
   const now = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' })
-  const titleMap: Record<string, string> = { inventario: 'Inventario de Procesos', riesgos: 'Riesgos y Controles', kpis: 'Indicadores KPI', valor: 'Analisis de Valor', auditoria: 'Programa de Auditoria', mejoras: 'Plan de Mejoras' }
+  const titleMap: Record<string, string> = { inventario: 'Inventario de Procesos', riesgos: 'Riesgos y Controles', kpis: 'Indicadores KPI', valor: 'Analisis de Valor', auditoria: 'Programa de Auditoria', mejoras: 'Plan de Mejoras', cargos: 'Analitica por Cargo' }
 
   // Header
   doc.setFillColor(27, 42, 74); doc.rect(0, 0, 297, 35, 'F')
@@ -373,6 +391,15 @@ export function exportReportToPdf(data: ReportData) {
         const proc = pMap.get(o.processId)
         const total = priorityScore(o)
         return [proc?.management || '-', proc?.name || '-', o.name, IMPROVEMENT_TYPE_LABELS[o.type], `${total}/15 ${priorityLabel(total).label}`, o.responsible || '-', STATUS_LABELS[o.status], `${o.progressPct ?? 0}%`, o.closeDate || '-']
+      })
+      break
+    }
+    case 'cargos': {
+      head = [['Cargo', 'En catalogo', 'Procesos', 'Actividades', 'VA min/mes', 'NVA min/mes', 'NVABN min/mes', '% Valor']]
+      const { cargos } = computeCargos(data.processes, data.allAnalyses, data.cargoCatalog ?? [])
+      body = cargos.filter((c) => c.activities.length > 0).map((c) => {
+        const pv = c.totalMin > 0 ? `${Math.round(c.vaMin / c.totalMin * 100)}%` : '-'
+        return [c.cargo, c.inCatalog ? 'Si' : 'No', String(c.processes.size), String(c.activities.length), String(Math.round(c.vaMin)), String(Math.round(c.nvaMin)), String(Math.round(c.nvabnMin)), pv]
       })
       break
     }
