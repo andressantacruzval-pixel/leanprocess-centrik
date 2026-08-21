@@ -39,7 +39,7 @@ jobs:
 
       - name: Build
         env:
-          VITE_BASE: /andr-s-santacruz-pruebas/
+          VITE_BASE: /Andr-s-Santacruz-Pruebas/
           VITE_STANDALONE_AUTH: '1'
         run: npm run build
 
