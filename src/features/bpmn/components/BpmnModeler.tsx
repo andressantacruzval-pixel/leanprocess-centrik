@@ -481,7 +481,7 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
       <div
         ref={containerRef}
         className="w-full h-full overflow-hidden border border-white/5"
-        style={{ background: theme === 'light' ? '#f8fafc' : '#111827' }}
+        style={{ background: theme === 'light' ? '#f7faff' : '#111827' }}
       />
 
 

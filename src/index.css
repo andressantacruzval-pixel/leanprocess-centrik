@@ -176,78 +176,105 @@ select option {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   TEMA CLARO  (data-theme="light")  — paleta slate, elegante y legible
+   TEMA CLARO  (data-theme="light")  — PREMIUM, con profundidad
    ───────────────────────────────────────────────────────────────────────
    El diseño es dark-first (text/bg/border-white/… + fondos navy). Aquí se
-   remapea SIN tocar componentes a una escala slate coherente:
-     · Lienzo:  #eff3fa      · Paneles: #ffffff
-     · Texto:   slate 900→400 (siempre legible, no translúcido)
-     · Bordes:  slate 100→300 · Overlays: slate 50→200
-   Acentos (cyan/blue/emerald/amber/red/purple) se conservan.
+   remapea SIN tocar componentes buscando la MISMA sensación premium que el
+   oscuro: no gris plano, sino superficies BLANCAS que flotan sobre un lienzo
+   con un leve tinte azul de marca, elevadas por SOMBRAS suaves en capas y con
+   texto en negro-azulado profundo. Las señales premium del oscuro (degradados
+   cian/azul, glows, cristal esmerilado) se conservan.
+     · Lienzo:  near-white azulado + foco de luz superior
+     · Paneles: #ffffff con sombra fría en capas (flotan, no “cajas grises”)
+     · Texto:   negro-azulado 950→400 (nunca translúcido)
+     · Bordes:  hairline azul-frío (no gris neutro)
    ═══════════════════════════════════════════════════════════════════════ */
 
-html[data-theme="light"] { background-color: #eff3fa; }
-:root[data-theme="light"] { color-scheme: light; }
-:root[data-theme="light"] body { background-color: #eff3fa; color: #0f172a; }
+:root[data-theme="light"]{
+  color-scheme: light;
+  /* Sombras FRÍAS (azul-navy) en capas: lo que hace que una superficie clara
+     se sienta cara. Una capa de contacto fina + una capa ambiental difusa. */
+  --lp-sh-sm:   0 1px 2px rgba(20,40,90,.06);
+  --lp-sh-card: 0 1px 2px rgba(20,40,90,.05), 0 8px 20px -10px rgba(20,40,90,.14);
+  --lp-sh-md:   0 2px 6px -1px rgba(20,40,90,.07), 0 14px 32px -12px rgba(20,40,90,.18);
+  --lp-sh-lg:   0 10px 24px -8px rgba(20,40,90,.12), 0 30px 60px -18px rgba(20,40,90,.26);
+}
 
-/* ── Texto: escala slate sólida (legible sobre claro) ────────────────── */
-:root[data-theme="light"] .text-white{color:#0f172a !important}
-:root[data-theme="light"] .text-white\/90{color:#1e293b !important}
-:root[data-theme="light"] .text-white\/85{color:#1e293b !important}
-:root[data-theme="light"] .text-white\/80{color:#1e293b !important}
-:root[data-theme="light"] .text-white\/70{color:#334155 !important}
-:root[data-theme="light"] .text-white\/60{color:#475569 !important}
-:root[data-theme="light"] .text-white\/55{color:#475569 !important}
-:root[data-theme="light"] .text-white\/50{color:#64748b !important}
-:root[data-theme="light"] .text-white\/45{color:#64748b !important}
-:root[data-theme="light"] .text-white\/40{color:#64748b !important}
-:root[data-theme="light"] .text-white\/35{color:#64748b !important}
-:root[data-theme="light"] .text-white\/30{color:#6b7a90 !important}
-:root[data-theme="light"] .text-white\/25{color:#8393a7 !important}
-:root[data-theme="light"] .text-white\/20{color:#94a3b8 !important}
-:root[data-theme="light"] .text-white\/15{color:#94a3b8 !important}
-:root[data-theme="light"] .text-white\/10{color:#a3b0c2 !important}
+/* ── Lienzo: near-white azulado con un foco de luz arriba (no gris) ───── */
+html[data-theme="light"]{ background-color:#e9eff8; }
+:root[data-theme="light"] body{
+  color:#0b1220;
+  background:
+    radial-gradient(1200px 560px at 50% -12%, #ffffff 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, #f2f6fd 0%, #e8eff8 100%);
+  background-attachment: fixed;
+}
+:root[data-theme="light"] .bg-\[\#070b14\],
+:root[data-theme="light"] .bg-\[\#0b1020\]{
+  background:
+    radial-gradient(1200px 560px at 50% -12%, #ffffff 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, #f2f6fd 0%, #e8eff8 100%) !important;
+  background-attachment: fixed !important;
+}
 
-/* ── Superficies (overlays) → escala slate clara ─────────────────────── */
+/* ── Texto: escala negro-azulado sólida (profunda arriba, legible) ────── */
+:root[data-theme="light"] .text-white{color:#0b1220 !important}
+:root[data-theme="light"] .text-white\/90{color:#1a2540 !important}
+:root[data-theme="light"] .text-white\/85{color:#1a2540 !important}
+:root[data-theme="light"] .text-white\/80{color:#22304c !important}
+:root[data-theme="light"] .text-white\/70{color:#33415e !important}
+:root[data-theme="light"] .text-white\/60{color:#475572 !important}
+:root[data-theme="light"] .text-white\/55{color:#4f5d7a !important}
+:root[data-theme="light"] .text-white\/50{color:#5c6a86 !important}
+:root[data-theme="light"] .text-white\/45{color:#63718d !important}
+:root[data-theme="light"] .text-white\/40{color:#6b7994 !important}
+:root[data-theme="light"] .text-white\/35{color:#76839d !important}
+:root[data-theme="light"] .text-white\/30{color:#8794ac !important}
+:root[data-theme="light"] .text-white\/25{color:#96a2b8 !important}
+:root[data-theme="light"] .text-white\/20{color:#a6b1c5 !important}
+:root[data-theme="light"] .text-white\/15{color:#b3bcce !important}
+:root[data-theme="light"] .text-white\/10{color:#c2cad9 !important}
+
+/* ── Superficies (overlays) → blanco / azul-frío MUY claro (no gris) ─── */
 :root[data-theme="light"] .bg-white{background-color:#ffffff !important}
-:root[data-theme="light"] .bg-white\/20{background-color:#cbd5e1 !important}
-:root[data-theme="light"] .bg-white\/10{background-color:#e2e8f0 !important}
-:root[data-theme="light"] .bg-white\/5{background-color:#f1f5f9 !important}
-:root[data-theme="light"] .bg-white\/\[0\.08\]{background-color:#e9eef5 !important}
-:root[data-theme="light"] .bg-white\/\[0\.07\]{background-color:#e9eef5 !important}
-:root[data-theme="light"] .bg-white\/\[0\.06\]{background-color:#f1f5f9 !important}
-:root[data-theme="light"] .bg-white\/\[0\.05\]{background-color:#f1f5f9 !important}
-:root[data-theme="light"] .bg-white\/\[0\.04\]{background-color:#f4f7fb !important}
-:root[data-theme="light"] .bg-white\/\[0\.03\]{background-color:#f4f7fb !important}
-:root[data-theme="light"] .bg-white\/\[0\.02\]{background-color:#f8fafc !important}
-:root[data-theme="light"] .bg-white\/\[0\.015\]{background-color:#f8fafc !important}
-:root[data-theme="light"] .bg-white\/\[0\.01\]{background-color:#f8fafc !important}
+:root[data-theme="light"] .bg-white\/20{background-color:#c8d4e7 !important}
+:root[data-theme="light"] .bg-white\/10{background-color:#dde6f3 !important}
+:root[data-theme="light"] .bg-white\/5{background-color:#f3f7fd !important}
+:root[data-theme="light"] .bg-white\/\[0\.08\]{background-color:#eef4fc !important}
+:root[data-theme="light"] .bg-white\/\[0\.07\]{background-color:#eef4fc !important}
+:root[data-theme="light"] .bg-white\/\[0\.06\]{background-color:#f3f7fd !important}
+:root[data-theme="light"] .bg-white\/\[0\.05\]{background-color:#f3f7fd !important}
+:root[data-theme="light"] .bg-white\/\[0\.04\]{background-color:#f7fafe !important}
+:root[data-theme="light"] .bg-white\/\[0\.03\]{background-color:#f7fafe !important}
+:root[data-theme="light"] .bg-white\/\[0\.02\]{background-color:#fafcff !important}
+:root[data-theme="light"] .bg-white\/\[0\.015\]{background-color:#fafcff !important}
+:root[data-theme="light"] .bg-white\/\[0\.01\]{background-color:#fafcff !important}
 
-/* ── Bordes → slate ──────────────────────────────────────────────────── */
-:root[data-theme="light"] .border-white\/20{border-color:#cbd5e1 !important}
-:root[data-theme="light"] .border-white\/15{border-color:#d5dde7 !important}
-:root[data-theme="light"] .border-white\/10{border-color:#e2e8f0 !important}
-:root[data-theme="light"] .border-white\/8{border-color:#e6ebf2 !important}
-:root[data-theme="light"] .border-white\/5{border-color:#eef2f7 !important}
-:root[data-theme="light"] .border-white\/\[0\.12\]{border-color:#d5dde7 !important}
-:root[data-theme="light"] .border-white\/\[0\.07\]{border-color:#e6ebf2 !important}
-:root[data-theme="light"] .border-white\/\[0\.06\]{border-color:#e9eef5 !important}
-:root[data-theme="light"] .border-white\/\[0\.04\]{border-color:#eef2f7 !important}
-:root[data-theme="light"] .border-white\/\[0\.03\]{border-color:#eef2f7 !important}
+/* ── Bordes → hairline azul-frío (aporta “marca”, no gris muerto) ────── */
+:root[data-theme="light"] .border-white\/20{border-color:#ccd8ea !important}
+:root[data-theme="light"] .border-white\/15{border-color:#d6e0ef !important}
+:root[data-theme="light"] .border-white\/10{border-color:#e1e9f5 !important}
+:root[data-theme="light"] .border-white\/8{border-color:#e6edf7 !important}
+:root[data-theme="light"] .border-white\/5{border-color:#eef3fb !important}
+:root[data-theme="light"] .border-white\/\[0\.12\]{border-color:#d6e0ef !important}
+:root[data-theme="light"] .border-white\/\[0\.07\]{border-color:#e6edf7 !important}
+:root[data-theme="light"] .border-white\/\[0\.06\]{border-color:#e9f0f8 !important}
+:root[data-theme="light"] .border-white\/\[0\.04\]{border-color:#eef3fb !important}
+:root[data-theme="light"] .border-white\/\[0\.03\]{border-color:#eef3fb !important}
 
 /* ── Placeholders y rings ────────────────────────────────────────────── */
-:root[data-theme="light"] .placeholder-white\/30::placeholder{color:#94a3b8 !important}
-:root[data-theme="light"] .placeholder-white\/25::placeholder{color:#94a3b8 !important}
-:root[data-theme="light"] .placeholder-white\/20::placeholder{color:#a3b0c2 !important}
-:root[data-theme="light"] .ring-white\/80{--tw-ring-color:#0f172acc !important}
-:root[data-theme="light"] .ring-white\/60{--tw-ring-color:#0f172a99 !important}
-:root[data-theme="light"] .ring-white\/20{--tw-ring-color:#cbd5e1 !important}
-:root[data-theme="light"] .ring-white\/5{--tw-ring-color:#eef2f7 !important}
+:root[data-theme="light"] .placeholder-white\/30::placeholder{color:#96a2b8 !important}
+:root[data-theme="light"] .placeholder-white\/25::placeholder{color:#96a2b8 !important}
+:root[data-theme="light"] .placeholder-white\/20::placeholder{color:#a6b1c5 !important}
+:root[data-theme="light"] .ring-white\/80{--tw-ring-color:#0b1220cc !important}
+:root[data-theme="light"] .ring-white\/60{--tw-ring-color:#0b122099 !important}
+:root[data-theme="light"] .ring-white\/20{--tw-ring-color:#ccd8ea !important}
+:root[data-theme="light"] .ring-white\/5{--tw-ring-color:#eef3fb !important}
 
-/* ── Fondos navy hardcodeados → claros ───────────────────────────────── */
-:root[data-theme="light"] .bg-\[\#070b14\],
-:root[data-theme="light"] .bg-\[\#0b1020\]{background-color:#eff3fa !important}
-:root[data-theme="light"] .bg-\[\#16223a\]{background-color:#f1f5f9 !important}
+/* ── Fondo de página (shell) navy → lienzo con foco de luz (arriba) ──── */
+:root[data-theme="light"] .bg-\[\#16223a\]{background-color:#eef4fc !important}
+
+/* ── Paneles / tarjetas navy → BLANCO que FLOTA (sombra fría en capas) ─ */
 :root[data-theme="light"] .bg-\[\#0a0f1a\],
 :root[data-theme="light"] .bg-\[\#0d1420\],
 :root[data-theme="light"] .bg-\[\#0d1424\],
@@ -260,33 +287,74 @@ html[data-theme="light"] { background-color: #eff3fa; }
 :root[data-theme="light"] .bg-\[\#111827\],
 :root[data-theme="light"] .bg-\[\#111a28\],
 :root[data-theme="light"] .bg-\[\#0c172b\],
-:root[data-theme="light"] .bg-\[\#071c27\]{background-color:#ffffff !important}
-:root[data-theme="light"] .bg-\[\#17122b\]{background-color:#f5f3ff !important}
+:root[data-theme="light"] .bg-\[\#071c27\]{
+  background-color:#ffffff !important;
+  box-shadow: var(--lp-sh-card);
+}
+:root[data-theme="light"] .bg-\[\#17122b\]{background-color:#f6f4ff !important; box-shadow: var(--lp-sh-card);}
 
-/* ── Variantes navy con opacidad (barras con blur) → claras ──────────── */
-:root[data-theme="light"] .bg-\[\#0a0f1a\]\/80{background-color:#ffffffe6 !important}
+/* ── Variantes navy con opacidad (barras con blur) → cristal blanco ──── */
+:root[data-theme="light"] .bg-\[\#0a0f1a\]\/80{background-color:rgba(255,255,255,.72) !important}
 :root[data-theme="light"] .bg-\[\#0c1322\]\/90,
-:root[data-theme="light"] .bg-\[\#0d1420\]\/90{background-color:#ffffffe6 !important}
-:root[data-theme="light"] .bg-\[\#070b14\]\/95{background-color:#eff3faf2 !important}
-:root[data-theme="light"] .bg-\[\#070b14\]\/80{background-color:#eff3facc !important}
+:root[data-theme="light"] .bg-\[\#0d1420\]\/90{background-color:rgba(255,255,255,.85) !important}
+:root[data-theme="light"] .bg-\[\#070b14\]\/95{background-color:rgba(242,246,253,.9) !important}
+:root[data-theme="light"] .bg-\[\#070b14\]\/80{background-color:rgba(242,246,253,.8) !important}
 
-/* ── Stops de gradiente navy (sidebar, cabeceras) → claros ───────────── */
+/* ── Stops de gradiente navy (sidebar, cabeceras) → blanco→azul suave ── */
 :root[data-theme="light"] .from-\[\#0a0f1a\]{--tw-gradient-from:#ffffff !important}
-:root[data-theme="light"] .to-\[\#0d1420\]{--tw-gradient-to:#f6f9fd !important}
-:root[data-theme="light"] .to-\[\#0d1117\]{--tw-gradient-to:#f6f9fd !important}
-:root[data-theme="light"] .via-\[\#0a1628\]{--tw-gradient-via:#eef3fa !important}
+:root[data-theme="light"] .to-\[\#0d1420\]{--tw-gradient-to:#eef4fd !important}
+:root[data-theme="light"] .to-\[\#0d1117\]{--tw-gradient-to:#eef4fd !important}
+:root[data-theme="light"] .via-\[\#0a1628\]{--tw-gradient-via:#f2f6fd !important}
+
+/* ── Sombras: negro plano → sombras FRÍAS en capas (clave de lo premium)
+   Se definen DESPUÉS de los paneles para que un modal con shadow-2xl gane. ── */
+:root[data-theme="light"] .shadow-sm{box-shadow: var(--lp-sh-sm) !important}
+:root[data-theme="light"] .shadow-md{box-shadow: var(--lp-sh-card) !important}
+:root[data-theme="light"] .shadow-lg{box-shadow: var(--lp-sh-md) !important}
+:root[data-theme="light"] .shadow-xl{box-shadow: var(--lp-sh-md) !important}
+:root[data-theme="light"] .shadow-2xl{box-shadow: var(--lp-sh-lg) !important}
+:root[data-theme="light"] .shadow-\[0_8px_60px_rgba\(0\,0\,0\,0\.8\)\]{box-shadow: var(--lp-sh-lg) !important}
+:root[data-theme="light"] .shadow-\[0_8px_20px_-6px_rgba\(0\,0\,0\,0\.6\)\]{box-shadow: 0 8px 22px -8px rgba(20,40,90,.28) !important}
+:root[data-theme="light"] .shadow-black\/40,
+:root[data-theme="light"] .shadow-black\/50,
+:root[data-theme="light"] .shadow-black\/60{--tw-shadow-color:rgba(20,40,90,.18) !important}
+
+/* ── Elevación de las superficies estructurales (barra lateral y cabecera)
+   No tienen clase única: se elevan por elemento para separarlas del lienzo. ── */
+:root[data-theme="light"] aside{ box-shadow: 6px 0 28px -18px rgba(20,40,90,.35), 1px 0 0 rgba(20,40,90,.05); }
+:root[data-theme="light"] header{ box-shadow: 0 1px 0 rgba(20,40,90,.05), 0 8px 24px -16px rgba(20,40,90,.30); }
+
+/* ── Campos de formulario: blanco puro (premium, no gris). El color del borde
+   lo sigue poniendo la utilidad de cada campo (border-white/… ya mapeada a azul
+   frío), para no pisar los bordes de foco/validación. ── */
+:root[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+:root[data-theme="light"] textarea,
+:root[data-theme="light"] select{
+  background-color:#ffffff !important;
+}
+:root[data-theme="light"] input::placeholder,
+:root[data-theme="light"] textarea::placeholder{ color:#9aa6bc !important }
+
+/* ── Scrollbars: en oscuro son blancas (invisibles en claro) → slate frío ── */
+:root[data-theme="light"] *{ scrollbar-color:#c4cfe0 transparent; }
+:root[data-theme="light"] *::-webkit-scrollbar-thumb{ background:#c4cfe0; }
+:root[data-theme="light"] *::-webkit-scrollbar-thumb:hover{ background:#a9b6cd; }
+:root[data-theme="light"] .scrollbar-thin::-webkit-scrollbar-thumb{ background:#ccd7e6; }
+:root[data-theme="light"] .scrollbar-thin::-webkit-scrollbar-thumb:hover{ background:#b3c0d5; }
+
+/* ── Velo (scrim) de modales: negro puro → navy suave ────────────────── */
+:root[data-theme="light"] .bg-black\/60{background-color:rgba(11,18,32,.42) !important}
+:root[data-theme="light"] .bg-black\/50{background-color:rgba(11,18,32,.38) !important}
+:root[data-theme="light"] .bg-black\/40{background-color:rgba(11,18,32,.30) !important}
 
 /* ── <select> options en claro ───────────────────────────────────────── */
-:root[data-theme="light"] select option{background-color:#ffffff;color:#0f172a}
+:root[data-theme="light"] select option{background-color:#ffffff;color:#0b1220}
 
-/* ── Diagramador BPMN: cuadrícula sutil en claro ─────────────────────── */
-:root[data-theme="light"] .bjs-container{
-  background-image:
-    linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px) !important;
-}
+/* El lienzo premium del diagramador (near-white + cuadrícula de puntos azul)
+   vive en bpmn-dark-theme.css para no competir con el `background` shorthand
+   que esa hoja aplica a `.bjs-container`. */
 
-/* ── Acentos de texto: tonos 300/400 → 600/700 en claro (contraste) ──── */
+/* ── Acentos de texto: tonos 300/400 → 600/700 en claro (contraste AA) ── */
 :root[data-theme="light"] .text-cyan-400{color:#0891b2 !important}
 :root[data-theme="light"] .text-cyan-300{color:#0e7490 !important}
 :root[data-theme="light"] .text-red-400{color:#dc2626 !important}

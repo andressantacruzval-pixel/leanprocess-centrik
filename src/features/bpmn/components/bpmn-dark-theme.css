@@ -263,7 +263,15 @@
    figuras en tinta oscura (en oscuro eran casi blancos → invisibles en claro).
    Las figuras siguen con contorno cyan (elegante sobre claro).
    ═══════════════════════════════════════════════════════════════════════ */
-:root[data-theme="light"] .bjs-container { background: #f8fafc !important; }
+/* Lienzo premium en claro: near-white azulado con cuadrícula de PUNTOS (estilo
+   Figma/Miro), no líneas. Aporta profundidad sin ensuciar. Se define en una sola
+   declaración (color + imagen + tamaño) para que gane al grid de líneas que el
+   componente inyecta con menor especificidad. */
+:root[data-theme="light"] .bjs-container {
+  background-color: #f7faff !important;
+  background-image: radial-gradient(rgba(37,99,235,0.11) 1px, transparent 1.5px) !important;
+  background-size: 22px 22px !important;
+}
 
 /* Textos de tareas/eventos → tinta oscura legible */
 :root[data-theme="light"] .djs-label .djs-visual text,
