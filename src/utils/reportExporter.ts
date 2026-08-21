@@ -12,7 +12,7 @@ import type { StoredIndicator } from '@/stores/indicatorStore'
 import type { StoredProcedure } from '@/stores/procedureStore'
 import type { AuditItem } from '@/lib/procedureAi'
 import {
-  type ImprovementOpportunity, priorityScore, priorityLabel, STATUS_LABELS,
+  type ImprovementOpportunity, priorityScore, priorityLabel, STATUS_LABELS, IMPROVEMENT_TYPE_LABELS,
 } from '@/types/improvement'
 
 export interface ReportData {
@@ -218,15 +218,15 @@ function excelKpis(wb: ExcelJS.Workbook, data: ReportData, company: string, date
 
 function excelMejoras(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Plan de Mejoras')
-  const H = ['Gerencia', 'Proceso', 'Oportunidad', 'Descripcion', 'Prioridad', 'Costo', 'Complejidad', 'Tiempo', 'Responsable', 'Inicio', 'Fin', 'Estado', 'Avance %', 'Cierre']
-  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i === 2 || i === 3 ? 30 : i <= 1 ? 20 : 13 }))
+  const H = ['Gerencia', 'Proceso', 'Oportunidad', 'Tipo', 'Descripcion', 'Prioridad', 'Costo', 'Complejidad', 'Tiempo', 'Responsable', 'Inicio', 'Fin', 'Estado', 'Avance %', 'Cierre']
+  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i === 2 || i === 4 ? 30 : i <= 1 ? 20 : 14 }))
   const pIds = new Set(data.processes.map(p => p.id))
   const pMap = new Map(data.processes.map(p => [p.id, p]))
   const items = (data.allImprovements || []).filter(o => pIds.has(o.processId))
   const rows = items.map(o => {
     const proc = pMap.get(o.processId)
     const total = priorityScore(o)
-    return [proc?.management || '-', proc?.name || '-', o.name, o.description || '-', `${total}/15 ${priorityLabel(total).label}`, o.costScore, o.complexityScore, o.timeScore, o.responsible || '-', o.startDate || '-', o.endDate || '-', STATUS_LABELS[o.status], o.progressPct ?? 0, o.closeDate || '-']
+    return [proc?.management || '-', proc?.name || '-', o.name, IMPROVEMENT_TYPE_LABELS[o.type], o.description || '-', `${total}/15 ${priorityLabel(total).label}`, o.costScore, o.complexityScore, o.timeScore, o.responsible || '-', o.startDate || '-', o.endDate || '-', STATUS_LABELS[o.status], o.progressPct ?? 0, o.closeDate || '-']
   })
   rows.forEach(r => ws.addRow(r))
   styleHeaders(ws, H.length, 1)
@@ -367,12 +367,12 @@ export function exportReportToPdf(data: ReportData) {
       break
     }
     case 'mejoras': {
-      head = [['Gerencia', 'Proceso', 'Oportunidad', 'Prioridad', 'Responsable', 'Estado', 'Avance', 'Cierre']]
+      head = [['Gerencia', 'Proceso', 'Oportunidad', 'Tipo', 'Prioridad', 'Responsable', 'Estado', 'Avance', 'Cierre']]
       const items = (data.allImprovements || []).filter(o => pIds.has(o.processId))
       body = items.map(o => {
         const proc = pMap.get(o.processId)
         const total = priorityScore(o)
-        return [proc?.management || '-', proc?.name || '-', o.name, `${total}/15 ${priorityLabel(total).label}`, o.responsible || '-', STATUS_LABELS[o.status], `${o.progressPct ?? 0}%`, o.closeDate || '-']
+        return [proc?.management || '-', proc?.name || '-', o.name, IMPROVEMENT_TYPE_LABELS[o.type], `${total}/15 ${priorityLabel(total).label}`, o.responsible || '-', STATUS_LABELS[o.status], `${o.progressPct ?? 0}%`, o.closeDate || '-']
       })
       break
     }

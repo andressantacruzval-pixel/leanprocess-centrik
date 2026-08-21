@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Process } from '@/types/process'
 import {
   type ImprovementOpportunity, type ImprovementStatus,
   STATUS_LABELS, STATUS_OPTIONS, priorityScore, priorityLabel,
+  IMPROVEMENT_TYPE_OPTIONS, IMPROVEMENT_TYPE_LABELS, IMPROVEMENT_TYPE_COLORS,
 } from '@/types/improvement'
 import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge,
@@ -26,13 +27,19 @@ export function ImprovementsReport({
   allImprovements: ImprovementOpportunity[]
   onUpdate: (id: string, updates: Partial<ImprovementOpportunity>) => void
 }) {
+  const [fType, setFType] = useState('')
   const rows = useMemo(() => {
     const byProcess = new Set(processes.map((p) => p.id))
     const pMap = new Map(processes.map((p) => [p.id, p]))
     return allImprovements.filter((o) => byProcess.has(o.processId)).map((o) => ({ o, process: pMap.get(o.processId)! }))
   }, [processes, allImprovements])
   const opps = useMemo(() => rows.map((r) => r.o), [rows])
-  const { visibles, ocultas, verMas } = useVerMas(rows)
+  const shownRows = useMemo(() => (fType ? rows.filter((r) => r.o.type === fType) : rows), [rows, fType])
+  const { visibles, ocultas, verMas } = useVerMas(shownRows)
+
+  const byType = useMemo<Datum[]>(() => IMPROVEMENT_TYPE_OPTIONS.map((t) => ({
+    label: IMPROVEMENT_TYPE_LABELS[t], color: IMPROVEMENT_TYPE_COLORS[t], value: opps.filter((o) => o.type === t).length,
+  })).filter((d) => d.value > 0), [opps])
 
   const byStatus = useMemo<Datum[]>(() => STATUS_OPTIONS.map((s) => ({
     label: STATUS_LABELS[s], color: STATUS_COLOR[s], value: opps.filter((o) => o.status === s).length,
@@ -66,7 +73,18 @@ export function ImprovementsReport({
         <Stat label="Cerradas" value={cerradas} sub={`${opps.length ? Math.round(cerradas / opps.length * 100) : 0}% del total`} tone="violet" />
       </Grid>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card title="Por tipo de mejora" sub="Catálogo. Clic para filtrar la tabla.">
+          <Donut data={byType} center={String(opps.length)} unit="mejoras" />
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {IMPROVEMENT_TYPE_OPTIONS.map((t) => (
+              <button key={t} onClick={() => setFType(fType === t ? '' : t)}
+                className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${fType === t ? 'border-white/40 text-white' : 'border-white/10 text-white/50 hover:text-white/80'}`}>
+                {IMPROVEMENT_TYPE_LABELS[t]}
+              </button>
+            ))}
+          </div>
+        </Card>
         <Card title="Por estado" sub="Embudo de ejecución."><Donut data={byStatus} center={String(opps.length)} unit="mejoras" /></Card>
         <Card title="Por prioridad" sub="Costo + complejidad + tiempo."><HBars data={byPrio} /></Card>
         <Card title="Mejoras por proceso" sub="Top 8."><HBars data={topProc} /></Card>
@@ -78,10 +96,10 @@ export function ImprovementsReport({
         {abiertas.filter((o) => o.status === 'en_progreso' && (o.progressPct || 0) === 0).length > 0 && <Insight tone="warn">{abiertas.filter((o) => o.status === 'en_progreso' && (o.progressPct || 0) === 0).length} mejora(s) marcadas "en progreso" con 0% de avance. Actualiza el estado o el porcentaje.</Insight>}
       </div>
 
-      <TableWrap minWidth={1300}>
+      <TableWrap minWidth={1420}>
         <thead>
           <tr className="bg-white/[0.03] border-b border-white/5">
-            <Th>Gerencia</Th><Th>Proceso</Th><Th>Oportunidad</Th><Th>Prioridad</Th>
+            <Th>Gerencia</Th><Th>Proceso</Th><Th>Oportunidad</Th><Th>Tipo</Th><Th>Prioridad</Th>
             <Th>Costo</Th><Th>Compl.</Th><Th>Tiempo</Th><Th>Responsable</Th>
             <Th>Inicio</Th><Th>Fin</Th><Th>Estado</Th><Th>Avance</Th><Th>Cierre</Th>
           </tr>
@@ -98,6 +116,7 @@ export function ImprovementsReport({
                   <div className="truncate" title={o.name}>{o.name}</div>
                   <div className="text-white/30 text-[10px] truncate max-w-[240px]" title={o.description}>{o.description}</div>
                 </Td>
+                <Td><Badge label={IMPROVEMENT_TYPE_LABELS[o.type]} hex={IMPROVEMENT_TYPE_COLORS[o.type]} /></Td>
                 <Td><Badge label={`${total}/15 · ${prio.label}`} hex={PRIO_HEX[prio.tone]} /></Td>
                 <Td>{o.costScore}</Td>
                 <Td>{o.complexityScore}</Td>
@@ -120,8 +139,8 @@ export function ImprovementsReport({
               </tr>
             )
           })}
-          {rows.length === 0 && <EmptyRow cols={13} />}
-          <VerMasRow cols={13} ocultas={ocultas} onVerMas={verMas} />
+          {shownRows.length === 0 && <EmptyRow cols={14} />}
+          <VerMasRow cols={14} ocultas={ocultas} onVerMas={verMas} />
         </tbody>
       </TableWrap>
     </Dashboard>

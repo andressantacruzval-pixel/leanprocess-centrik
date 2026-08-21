@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Trash2, CheckCircle2 } from 'lucide-react'
 import {
-  type ImprovementOpportunity, type ScoreValue, type ImprovementStatus,
+  type ImprovementOpportunity, type ScoreValue, type ImprovementStatus, type ImprovementType,
   SCORE_VALUES, SCORE_LABELS, STATUS_LABELS, STATUS_OPTIONS,
+  IMPROVEMENT_TYPE_OPTIONS, IMPROVEMENT_TYPE_LABELS,
   priorityScore, priorityLabel,
 } from '@/types/improvement'
 import { MilestoneChecklist } from './MilestoneChecklist'
@@ -67,6 +68,20 @@ export function ImprovementCard({ opportunity: o, onChange, onDelete }: Props) {
           className={inputCls + ' resize-y leading-relaxed'}
           placeholder="Descripción de la mejora (generada con IA o manual)"
         />
+      </div>
+
+      {/* Tipo de mejora (catálogo) */}
+      <div>
+        <label className={labelCls}>Tipo de mejora</label>
+        <select
+          value={o.type}
+          onChange={(e) => onChange({ type: e.target.value as ImprovementType })}
+          className={inputCls}
+        >
+          {IMPROVEMENT_TYPE_OPTIONS.map((t) => (
+            <option key={t} value={t} className="bg-[#0a0f1a]">{IMPROVEMENT_TYPE_LABELS[t]}</option>
+          ))}
+        </select>
       </div>
 
       {/* Variables 1/3/5 */}

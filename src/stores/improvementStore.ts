@@ -8,8 +8,8 @@ import { useWorkspaceStore } from './workspaceStore'
 import { useAuthStore } from './authStore'
 import { useChangeLogStore } from './changeLogStore'
 import type { Database } from '@/types/database'
-import type { ImprovementOpportunity, ImprovementStatus, ScoreValue, ImprovementMilestone } from '@/types/improvement'
-import { clampScore } from '@/types/improvement'
+import type { ImprovementOpportunity, ImprovementStatus, ScoreValue, ImprovementMilestone, ImprovementType } from '@/types/improvement'
+import { clampScore, clampImprovementType } from '@/types/improvement'
 
 type Row = Database['public']['Tables']['improvement_opportunities']['Row']
 type Insert = Database['public']['Tables']['improvement_opportunities']['Insert']
@@ -46,6 +46,8 @@ function rowToApp(r: Row): ImprovementOpportunity {
     complexityScore: clampScore(r.complexity_score),
     timeScore: clampScore(r.time_score),
     responsible: r.responsible ?? '',
+    // `category` puede no existir aún en la DB (migración pendiente) → default.
+    type: clampImprovementType((r as { category?: string }).category),
     startDate: r.start_date,
     endDate: r.end_date,
     status: (r.status as ImprovementStatus) ?? 'propuesta',
@@ -77,6 +79,18 @@ function appToRow(o: ImprovementOpportunity): Insert {
   }
 }
 
+// Persiste el `category` por separado y sin romper nada: si la columna aún no
+// existe en la DB (migración pendiente) el error se ignora y el tipo vive en
+// localStorage; en cuanto la migración se aplique, empieza a round-trip.
+function persistCategory(id: string, type: ImprovementType) {
+  void supabase.from('improvement_opportunities')
+    .update({ category: type } as never)
+    .eq('id', id)
+    .then(({ error }) => {
+      if (error) console.warn('[improvementStore] categoría no persistida en DB (¿migración pendiente?):', error.message)
+    })
+}
+
 function newOpportunity(processId: string, companyId: string, partial?: Partial<ImprovementOpportunity>): ImprovementOpportunity {
   return {
     id: generateId(),
@@ -89,6 +103,7 @@ function newOpportunity(processId: string, companyId: string, partial?: Partial<
     complexityScore: partial?.complexityScore ?? 3,
     timeScore: partial?.timeScore ?? 3,
     responsible: partial?.responsible ?? '',
+    type: partial?.type ?? 'eficiencia',
     startDate: partial?.startDate ?? null,
     endDate: partial?.endDate ?? null,
     status: partial?.status ?? 'propuesta',
@@ -112,11 +127,14 @@ export const useImprovementStore = create<ImprovementState>()(
         const prev = get().opportunities
         set({ opportunities: [...prev, created] })
         if (companyId) {
-          void dbWrite(
-            'improvement:insert',
-            supabase.from('improvement_opportunities').insert(appToRow(created)),
-            { errorMessage: 'No se pudo guardar la oportunidad de mejora.', rollback: () => set({ opportunities: prev }) }
-          )
+          void (async () => {
+            const res = await dbWrite(
+              'improvement:insert',
+              supabase.from('improvement_opportunities').insert(appToRow(created)),
+              { errorMessage: 'No se pudo guardar la oportunidad de mejora.', rollback: () => set({ opportunities: prev }) }
+            )
+            if (res.ok && created.type !== 'eficiencia') persistCategory(created.id, created.type)
+          })()
         }
         return created
       },
@@ -153,11 +171,14 @@ export const useImprovementStore = create<ImprovementState>()(
         set({ opportunities: next })
         const target = next.find((o) => o.id === id)
         if (!target) return
-        void dbWrite(
-          'improvement:update',
-          supabase.from('improvement_opportunities').update(appToRow(target)).eq('id', id),
-          { errorMessage: 'No se pudo actualizar la oportunidad.', rollback: () => set({ opportunities: prev }) }
-        )
+        void (async () => {
+          const res = await dbWrite(
+            'improvement:update',
+            supabase.from('improvement_opportunities').update(appToRow(target)).eq('id', id),
+            { errorMessage: 'No se pudo actualizar la oportunidad.', rollback: () => set({ opportunities: prev }) }
+          )
+          if (res.ok && 'type' in updates) persistCategory(id, target.type)
+        })()
       },
 
       deleteOpportunity: (id) => {
