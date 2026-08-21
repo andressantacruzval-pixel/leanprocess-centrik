@@ -22,7 +22,10 @@ const DEFAULT_MILESTONES: Omit<OnboardingMilestone, 'completed'>[] = [
   { id: 'risk', title: 'Riesgos Identificados', description: 'Identifica riesgos y controles en tu proceso', icon: 'ShieldAlert' },
   { id: 'audit', title: 'Programa de Auditoria', description: 'Genera un programa de auditoria', icon: 'ClipboardCheck' },
   { id: 'value-analysis', title: 'Analisis de Valor', description: 'Clasifica actividades VA/NVA/NVABN', icon: 'Activity' },
+  { id: 'improvement', title: 'Mejoras Identificadas', description: 'Identifica oportunidades de mejora en un proceso', icon: 'Lightbulb' },
+  { id: 'improvement-close', title: 'Mejora Cerrada', description: 'Cierra una oportunidad de mejora', icon: 'CheckCircle2' },
   { id: 'report', title: 'Primer Reporte', description: 'Exporta tu primer reporte en PDF o Excel', icon: 'FileText', route: '/app/reports' },
+  { id: 'cargo-manual', title: 'Manual de Cargo', description: 'Genera tu primer manual de cargo con IA', icon: 'IdCard', route: '/app/reports?tab=manuales' },
 ]
 
 interface OnboardingState {
@@ -154,14 +157,22 @@ export const useOnboardingStore = create<OnboardingState>()(
     }),
     {
       name: 'lean-process-onboarding',
-      version: 2,
+      version: 3,
       partialize: (state) => ({
         milestones: state.milestones,
         dismissed: state.dismissed,
         showChecklist: state.showChecklist,
       }),
       migrate: identityMigration(),
-      merge: (persisted, current) => ({ ...current, ...(persisted as object) }),
+      // Reconciliar contra DEFAULT_MILESTONES: conserva el estado `completed`
+      // persistido pero añade los hitos nuevos (y actualiza títulos/orden), para
+      // que quien ya tenía la guía vea los pasos recién agregados.
+      merge: (persisted, current) => {
+        const p = persisted as Partial<OnboardingState> | undefined
+        const done = new Map((p?.milestones ?? []).map((m) => [m.id, m.completed]))
+        const milestones = DEFAULT_MILESTONES.map((m) => ({ ...m, completed: done.get(m.id) ?? false }))
+        return { ...current, ...(p as object), milestones }
+      },
     }
   )
 )

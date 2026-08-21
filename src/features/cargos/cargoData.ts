@@ -3,7 +3,7 @@ import { useProcessStore } from '@/stores/processStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
 import { parseBpmnXml } from '@/utils/bpmnParser'
-import { scaleToPeriod, type ValueActivity, type ValueClassification } from '@/utils/valueAnalysis'
+import type { ValueActivity, ValueClassification } from '@/utils/valueAnalysis'
 import type { Process } from '@/types/process'
 
 // Analítica por CARGO. El dato ya existe: cada actividad del BPMN conoce su lane
@@ -29,7 +29,8 @@ export interface CargoActivity {
   processName: string
   activityName: string
   classification: ValueClassification | null
-  monthlyMinutes: number
+  /** Minutos/día normalizados (base para escalar a cualquier periodo). */
+  dailyMinutes: number
 }
 
 export interface CargoAgg {
@@ -38,10 +39,27 @@ export interface CargoAgg {
   inCatalog: boolean
   processes: Set<string>
   activities: CargoActivity[]
-  vaMin: number
-  nvaMin: number
-  nvabnMin: number
-  totalMin: number
+  // Minutos/DÍA (base). Se escalan a día/semana/mes/semestre/año en la UI/export.
+  vaDaily: number
+  nvaDaily: number
+  nvabnDaily: number
+  totalDaily: number
+}
+
+// ─── Escalado de tiempos (mismas convenciones que el análisis de valor) ─────
+
+export type CargoPeriod = 'dia' | 'semana' | 'mes' | 'semestre' | 'anio'
+
+/** Días laborables por periodo (mes=20, año=240; semestre=120). */
+const PERIOD_DAYS: Record<CargoPeriod, number> = { dia: 1, semana: 5, mes: 20, semestre: 120, anio: 240 }
+
+export const PERIOD_LABELS: Record<CargoPeriod, string> = { dia: 'Día', semana: 'Semana', mes: 'Mes', semestre: 'Semestre', anio: 'Año' }
+export const PERIOD_OPTIONS: CargoPeriod[] = ['dia', 'semana', 'mes', 'semestre', 'anio']
+
+/** Convierte minutos/día a la unidad pedida (minutos u horas) para un periodo. */
+export function scaleDaily(dailyMinutes: number, period: CargoPeriod, unit: 'min' | 'h'): number {
+  const mins = dailyMinutes * PERIOD_DAYS[period]
+  return unit === 'h' ? mins / 60 : mins
 }
 
 export interface CargoData {
@@ -64,7 +82,7 @@ export function computeCargos(procs: Process[], analyses: Record<string, ValueAc
       if (!a) {
         a = {
           key, cargo: catalogKeys.get(key) ?? name, inCatalog: catalogKeys.has(key),
-          processes: new Set(), activities: [], vaMin: 0, nvaMin: 0, nvabnMin: 0, totalMin: 0,
+          processes: new Set(), activities: [], vaDaily: 0, nvaDaily: 0, nvabnDaily: 0, totalDaily: 0,
         }
         map.set(key, a)
       }
@@ -79,12 +97,12 @@ export function computeCargos(procs: Process[], analyses: Record<string, ValueAc
           if (!lane) continue
           const agg = ensure(lane)
           agg.processes.add(p.id)
-          const mm = scaleToPeriod(a.dailyMinutes || 0, 'mes')
-          agg.activities.push({ processId: p.id, processName: p.name, activityName: a.name, classification: a.classification, monthlyMinutes: mm })
-          agg.totalMin += mm
-          if (a.classification === 'VA') agg.vaMin += mm
-          else if (a.classification === 'NVA') agg.nvaMin += mm
-          else if (a.classification === 'NVABN') agg.nvabnMin += mm
+          const dm = a.dailyMinutes || 0
+          agg.activities.push({ processId: p.id, processName: p.name, activityName: a.name, classification: a.classification, dailyMinutes: dm })
+          agg.totalDaily += dm
+          if (a.classification === 'VA') agg.vaDaily += dm
+          else if (a.classification === 'NVA') agg.nvaDaily += dm
+          else if (a.classification === 'NVABN') agg.nvabnDaily += dm
         }
       } else if (p.bpmn_xml) {
         // Sin análisis de valor: estructura desde el BPMN (sin tiempo).
@@ -95,7 +113,7 @@ export function computeCargos(procs: Process[], analyses: Record<string, ValueAc
             if (!lane) continue
             const agg = ensure(lane)
             agg.processes.add(p.id)
-            agg.activities.push({ processId: p.id, processName: p.name, activityName: act.name, classification: null, monthlyMinutes: 0 })
+            agg.activities.push({ processId: p.id, processName: p.name, activityName: act.name, classification: null, dailyMinutes: 0 })
           }
         } catch { /* xml inválido → se ignora */ }
       }
@@ -104,7 +122,7 @@ export function computeCargos(procs: Process[], analyses: Record<string, ValueAc
   // Cargos del catálogo aún sin uso → aparecen con cero para que se vean.
   catalogValues.forEach((v) => { if (!map.has(normCargo(v))) ensure(v) })
 
-  const cargos = [...map.values()].sort((a, b) => b.activities.length - a.activities.length || b.totalMin - a.totalMin)
+  const cargos = [...map.values()].sort((a, b) => b.activities.length - a.activities.length || b.totalDaily - a.totalDaily)
   const sinCatalogar = cargos.filter((c) => !c.inCatalog && c.activities.length > 0)
   return { cargos, sinCatalogar, catalogCount: catalogValues.length }
 }

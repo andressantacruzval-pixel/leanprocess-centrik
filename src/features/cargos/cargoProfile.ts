@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { identityMigration } from '@/utils/storeUtils'
 import type { Process } from '@/types/process'
 import type { StoredIndicator } from '@/stores/indicatorStore'
-import { normCargo, type CargoAgg } from './cargoData'
+import { normCargo, scaleDaily, type CargoAgg } from './cargoData'
 
 // Perfil / manual de cargo. La IA genera las partes cualitativas (objetivo,
 // responsabilidades y perfil requerido, inferido de las actividades reales del
@@ -59,7 +59,7 @@ export function buildCargoContext({ agg, processes, indicators, companyName, ind
     `PARTICIPA EN ${agg.processes.size} PROCESO(S): ${procNames.join(', ') || '(sin nombre)'}`,
     areas.length ? `GERENCIA(S): ${areas.join(', ')}` : '',
     coords.length ? `ÁREA(S): ${coords.join(', ')}` : '',
-    `CARGA MENSUAL ESTIMADA: ${Math.round(agg.totalMin)} min/mes (VA ${Math.round(agg.vaMin)} · NVA ${Math.round(agg.nvaMin)} · NVABN ${Math.round(agg.nvabnMin)}).`,
+    `CARGA MENSUAL ESTIMADA: ${Math.round(scaleDaily(agg.totalDaily, 'mes', 'min'))} min/mes (VA ${Math.round(scaleDaily(agg.vaDaily, 'mes', 'min'))} · NVA ${Math.round(scaleDaily(agg.nvaDaily, 'mes', 'min'))} · NVABN ${Math.round(scaleDaily(agg.nvabnDaily, 'mes', 'min'))}).`,
     `ACTIVIDADES QUE AGREGAN VALOR (VA):\n${list(va)}`,
     `ACTIVIDADES SIN VALOR NECESARIAS (NVABN):\n${list(nvabn)}`,
     `ACTIVIDADES SIN VALOR (NVA):\n${list(nva)}`,

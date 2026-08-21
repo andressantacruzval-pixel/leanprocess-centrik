@@ -17,7 +17,7 @@ import { getRiskLevel } from '@/types/risk'
 import {
   Layers, BarChart3, GitBranch, ShieldAlert, ClipboardCheck,
   Activity, FileText, TrendingUp, AlertTriangle, BookOpen,
-  ArrowRight, Map, Zap, Target, LayoutDashboard,
+  ArrowRight, Map, Zap, Target, LayoutDashboard, Lightbulb, CheckCircle2,
   Footprints, Building2, Crown, Workflow, Shield, ShieldCheck, ShieldPlus,
   BookMarked, Flame, Sparkles, Trophy, Star, Award, Share2, Users,
   ChevronDown, ChevronUp,
@@ -99,6 +99,14 @@ export default function Dashboard() {
     const counts: Record<string, number> = {}
     allStoreImprovements.forEach((o) => { if (processIds.has(o.processId)) counts[o.processId] = (counts[o.processId] || 0) + 1 })
     return counts
+  }, [allStoreImprovements, processIds])
+
+  const improvementStats = useMemo(() => {
+    const opps = allStoreImprovements.filter((o) => processIds.has(o.processId))
+    const abiertas = opps.filter((o) => o.status !== 'cerrada' && o.status !== 'descartada').length
+    const cerradas = opps.filter((o) => o.status === 'cerrada').length
+    const quickWins = opps.filter((o) => (o.costScore + o.complexityScore + o.timeScore) >= 12 && o.status !== 'cerrada' && o.status !== 'descartada').length
+    return { total: opps.length, abiertas, cerradas, quickWins }
   }, [allStoreImprovements, processIds])
 
   // Weekly digest stores
@@ -409,7 +417,18 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ═══ Row 4: Coverage Matrix ═══ */}
+      {/* ═══ Row 4: Mejoras ═══ */}
+      <div>
+        <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider mb-3">Mejoras</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard icon={Lightbulb} color="amber" label="Oportunidades" value={improvementStats.total} />
+          <StatCard icon={Zap} color="emerald" label="Quick wins" value={improvementStats.quickWins} />
+          <StatCard icon={Activity} color="cyan" label="Abiertas" value={improvementStats.abiertas} />
+          <StatCard icon={CheckCircle2} color="violet" label="Cerradas" value={improvementStats.cerradas} />
+        </div>
+      </div>
+
+      {/* ═══ Row 5: Coverage Matrix ═══ */}
       <div>
         <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider mb-3">Cobertura por Proceso</h2>
         {/* `overflow-x-auto`, no `overflow-hidden`: son 8 columnas de datos y antes se

@@ -14,7 +14,28 @@ import type { AuditItem } from '@/lib/procedureAi'
 import {
   type ImprovementOpportunity, priorityScore, priorityLabel, STATUS_LABELS, IMPROVEMENT_TYPE_LABELS,
 } from '@/types/improvement'
-import { computeCargos } from '@/features/cargos/cargoData'
+import { computeCargos, scaleDaily } from '@/features/cargos/cargoData'
+
+// Filas de detalle por actividad de cada cargo, con su jerarquía (macro →
+// proceso → subproceso) resuelta desde el mapa de procesos. Base para la
+// pestaña "Detalle" de Excel y PDF.
+function cargoDetailRows(data: ReportData) {
+  const { cargos } = computeCargos(data.processes, data.allAnalyses, data.cargoCatalog ?? [])
+  const out: { cargo: string; macro: string; proceso: string; sub: string; actividad: string; clase: string; daily: number }[] = []
+  for (const c of cargos) {
+    for (const a of c.activities) {
+      const p = data.processMap.get(a.processId)
+      const parent = p?.parent_process_id ? data.processMap.get(p.parent_process_id) : null
+      const macro = p ? (data.macroMap.get(p.macroprocess_id)?.name ?? '-') : '-'
+      const proceso = parent ? parent.name : (p?.name ?? '-')
+      const sub = parent ? (p?.name ?? '') : ''
+      out.push({ cargo: c.cargo, macro, proceso, sub, actividad: a.activityName, clase: a.classification ?? '-', daily: a.dailyMinutes })
+    }
+  }
+  return out
+}
+const r0 = (n: number) => Math.round(n)
+const r1 = (n: number) => Math.round(n * 10) / 10
 
 export interface ReportData {
   tab: string
@@ -220,18 +241,36 @@ function excelKpis(wb: ExcelJS.Workbook, data: ReportData, company: string, date
 }
 
 function excelCargos(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
-  const ws = wb.addWorksheet('Analitica por Cargo')
-  const H = ['Cargo', 'En catalogo', 'Procesos', 'Actividades', 'VA min/mes', 'NVA min/mes', 'NVABN min/mes', '% Valor']
-  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i === 0 ? 30 : 14 }))
   const { cargos } = computeCargos(data.processes, data.allAnalyses, data.cargoCatalog ?? [])
-  const rows = cargos.filter((c) => c.activities.length > 0).map((c) => {
-    const pv = c.totalMin > 0 ? Math.round(c.vaMin / c.totalMin * 100) : ''
-    return [c.cargo, c.inCatalog ? 'Si' : 'No', c.processes.size, c.activities.length, Math.round(c.vaMin), Math.round(c.nvaMin), Math.round(c.nvabnMin), pv === '' ? '-' : `${pv}%`]
+  const conAct = cargos.filter((c) => c.activities.length > 0)
+
+  // ── Pestaña 1: Resumen de tiempos por cargo (min y horas: día/mes/semestre/año) ──
+  const ws1 = wb.addWorksheet('Resumen por Cargo')
+  const H1 = ['Cargo', 'En catalogo', 'Procesos', 'Actividades',
+    'Min/dia', 'Min/mes', 'Min/semestre', 'Min/año', 'Horas/dia', 'Horas/mes', 'Horas/semestre', 'Horas/año', '% Valor']
+  ws1.columns = H1.map((h, i) => ({ header: h, key: `c${i}`, width: i === 0 ? 30 : 13 }))
+  const rows1 = conAct.map((c) => {
+    const d = c.totalDaily
+    const pv = c.totalDaily > 0 ? `${Math.round(c.vaDaily / c.totalDaily * 100)}%` : '-'
+    return [c.cargo, c.inCatalog ? 'Si' : 'No', c.processes.size, c.activities.length,
+      r0(scaleDaily(d, 'dia', 'min')), r0(scaleDaily(d, 'mes', 'min')), r0(scaleDaily(d, 'semestre', 'min')), r0(scaleDaily(d, 'anio', 'min')),
+      r1(scaleDaily(d, 'dia', 'h')), r1(scaleDaily(d, 'mes', 'h')), r1(scaleDaily(d, 'semestre', 'h')), r1(scaleDaily(d, 'anio', 'h')), pv]
   })
-  rows.forEach((r) => ws.addRow(r))
-  styleHeaders(ws, H.length, 1)
-  addTitle(ws, `Analitica por Cargo — ${company}`, `${company} | ${date}`, H.length, company, data.generatedBy || '')
-  styleData(ws, 4, H.length, rows.length)
+  rows1.forEach((r) => ws1.addRow(r))
+  styleHeaders(ws1, H1.length, 1)
+  addTitle(ws1, `Analitica por Cargo — Resumen — ${company}`, `${company} | ${date}`, H1.length, company, data.generatedBy || '')
+  styleData(ws1, 4, H1.length, rows1.length)
+
+  // ── Pestaña 2: Detalle por actividad (para tablas dinámicas) ──
+  const ws2 = wb.addWorksheet('Detalle por Actividad')
+  const H2 = ['Cargo', 'Macroproceso', 'Proceso', 'Subproceso', 'Actividad', 'Clasificacion', 'Min/dia', 'Min/mes', 'Horas/mes']
+  ws2.columns = H2.map((h, i) => ({ header: h, key: `d${i}`, width: i >= 6 ? 12 : 24 }))
+  const det = cargoDetailRows(data)
+  const rows2 = det.map((x) => [x.cargo, x.macro, x.proceso, x.sub, x.actividad, x.clase, r0(scaleDaily(x.daily, 'dia', 'min')), r0(scaleDaily(x.daily, 'mes', 'min')), r1(scaleDaily(x.daily, 'mes', 'h'))])
+  rows2.forEach((r) => ws2.addRow(r))
+  styleHeaders(ws2, H2.length, 1)
+  addTitle(ws2, `Analitica por Cargo — Detalle por Actividad — ${company}`, `${company} | ${date}`, H2.length, company, data.generatedBy || '')
+  styleData(ws2, 4, H2.length, rows2.length)
 }
 
 function excelMejoras(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
@@ -395,11 +434,11 @@ export function exportReportToPdf(data: ReportData) {
       break
     }
     case 'cargos': {
-      head = [['Cargo', 'En catalogo', 'Procesos', 'Actividades', 'VA min/mes', 'NVA min/mes', 'NVABN min/mes', '% Valor']]
+      head = [['Cargo', 'Procesos', 'Actividades', 'Min/mes', 'Horas/mes', 'VA min/mes', 'NVA min/mes', '% Valor']]
       const { cargos } = computeCargos(data.processes, data.allAnalyses, data.cargoCatalog ?? [])
       body = cargos.filter((c) => c.activities.length > 0).map((c) => {
-        const pv = c.totalMin > 0 ? `${Math.round(c.vaMin / c.totalMin * 100)}%` : '-'
-        return [c.cargo, c.inCatalog ? 'Si' : 'No', String(c.processes.size), String(c.activities.length), String(Math.round(c.vaMin)), String(Math.round(c.nvaMin)), String(Math.round(c.nvabnMin)), pv]
+        const pv = c.totalDaily > 0 ? `${Math.round(c.vaDaily / c.totalDaily * 100)}%` : '-'
+        return [c.cargo, String(c.processes.size), String(c.activities.length), String(r0(scaleDaily(c.totalDaily, 'mes', 'min'))), String(r1(scaleDaily(c.totalDaily, 'mes', 'h'))), String(r0(scaleDaily(c.vaDaily, 'mes', 'min'))), String(r0(scaleDaily(c.nvaDaily, 'mes', 'min'))), pv]
       })
       break
     }
@@ -434,6 +473,26 @@ export function exportReportToPdf(data: ReportData) {
       doc.text(`Pagina ${doc.getCurrentPageInfo().pageNumber}`, 287, h - 4, { align: 'right' })
     },
   })
+
+  // Cargos: segunda tabla con el DETALLE por actividad (macro → proceso → subproceso).
+  if (data.tab === 'cargos') {
+    const det = cargoDetailRows(data)
+    if (det.length) {
+      doc.addPage()
+      doc.setFillColor(27, 42, 74); doc.rect(0, 0, 297, 12, 'F')
+      doc.setTextColor(255, 255, 255); doc.setFontSize(11); doc.setFont('helvetica', 'bold')
+      doc.text('Detalle por Actividad', 10, 8)
+      autoTable(doc, {
+        startY: 16, theme: 'grid',
+        head: [['Cargo', 'Macroproceso', 'Proceso', 'Subproceso', 'Actividad', 'Clasif.', 'Min/mes', 'Horas/mes']],
+        body: det.map((x) => [x.cargo, x.macro, x.proceso, x.sub, x.actividad, x.clase, String(r0(scaleDaily(x.daily, 'mes', 'min'))), String(r1(scaleDaily(x.daily, 'mes', 'h')))]),
+        styles: { fontSize: 7, cellPadding: 2, textColor: [55, 65, 81], lineColor: [209, 213, 219], lineWidth: 0.3 },
+        headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7.5, halign: 'center' },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        margin: { left: 10, right: 10 },
+      })
+    }
+  }
 
   doc.save(`Lean_Process_${data.tab}_${Date.now()}.pdf`)
   useAnalyticsStore.getState().trackEvent('export', `report-pdf-${data.tab}`)

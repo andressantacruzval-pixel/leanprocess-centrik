@@ -8,6 +8,9 @@ import { useProcedureStore } from '@/stores/procedureStore'
 import { useAuditStore } from '@/stores/auditStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
 import { useAnalyticsStore } from '@/stores/analyticsStore'
+import { useImprovementStore } from '@/stores/improvementStore'
+import { useWorkspaceStore } from '@/stores/workspaceStore'
+import { useCargoProfileStore } from '@/features/cargos/cargoProfile'
 
 export function useOnboardingTracker() {
   const requestConfirmation = useOnboardingStore((s) => s.requestConfirmation)
@@ -23,6 +26,9 @@ export function useOnboardingTracker() {
   const audits = useAuditStore((s) => s.audits)
   const analyses = useValueAnalysisStore((s) => s.analyses)
   const events = useAnalyticsStore((s) => s.events)
+  const improvements = useImprovementStore((s) => s.opportunities)
+  const activeCompanyId = useWorkspaceStore((s) => s.activeCompanyId)
+  const cargoProfiles = useCargoProfileStore((s) => s.profiles)
 
   useEffect(() => {
     const isIncomplete = (id: string) => !milestones.find(m => m.id === id)?.completed
@@ -76,5 +82,20 @@ export function useOnboardingTracker() {
     if (isIncomplete('report') && events.some(e => e.type === 'export')) {
       requestConfirmation('report')
     }
-  }, [company, orgUnits, macroprocesses, processes, risks, indicators, procedures, audits, analyses, milestones, events, requestConfirmation])
+
+    // Mejoras identificadas — al menos una oportunidad de mejora
+    if (isIncomplete('improvement') && improvements.length > 0) {
+      requestConfirmation('improvement')
+    }
+
+    // Mejora cerrada — al menos una oportunidad en estado cerrada
+    if (isIncomplete('improvement-close') && improvements.some(o => o.status === 'cerrada')) {
+      requestConfirmation('improvement-close')
+    }
+
+    // Primer manual de cargo generado (perfiles guardados para la empresa activa)
+    if (isIncomplete('cargo-manual') && activeCompanyId && Object.keys(cargoProfiles).some(k => k.startsWith(`${activeCompanyId}::`))) {
+      requestConfirmation('cargo-manual')
+    }
+  }, [company, orgUnits, macroprocesses, processes, risks, indicators, procedures, audits, analyses, milestones, events, improvements, activeCompanyId, cargoProfiles, requestConfirmation])
 }

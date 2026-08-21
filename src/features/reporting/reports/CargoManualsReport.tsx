@@ -5,7 +5,7 @@ import { useCompanyStore } from '@/stores/companyStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useIndicatorStore } from '@/stores/indicatorStore'
 import { toast } from '@/stores/toastStore'
-import { useCargoData, type CargoAgg } from '@/features/cargos/cargoData'
+import { useCargoData, scaleDaily, type CargoAgg } from '@/features/cargos/cargoData'
 import { buildCargoContext, useCargoProfileStore, type CargoProfile } from '@/features/cargos/cargoProfile'
 import { generateCargoProfile } from '@/lib/cargoProfileAi'
 import { CargoProfileView, type CargoMetrics } from '@/features/cargos/components/CargoProfileView'
@@ -78,10 +78,24 @@ export function CargoManualsReport() {
     )
   }
 
-  const metrics: CargoMetrics | null = sel ? { procesos: sel.processes.size, actividades: sel.activities.length, vaMin: sel.vaMin, nvaMin: sel.nvaMin, nvabnMin: sel.nvabnMin } : null
+  const metrics: CargoMetrics | null = sel ? {
+    procesos: sel.processes.size, actividades: sel.activities.length,
+    vaMin: scaleDaily(sel.vaDaily, 'mes', 'min'), nvaMin: scaleDaily(sel.nvaDaily, 'mes', 'min'), nvabnMin: scaleDaily(sel.nvabnDaily, 'mes', 'min'),
+  } : null
+
+  const withManual = conActividad.filter((c) => !!getProfile(companyId, c.cargo)).length
+  const pending = conActividad.length - withManual
 
   return (
-    <div className="p-3 sm:p-4 flex flex-col lg:flex-row gap-4">
+    <div className="p-3 sm:p-4 space-y-4">
+      {/* Resumen de cobertura de manuales */}
+      <div className="grid grid-cols-3 gap-3">
+        <MiniStat label="Cargos" value={conActividad.length} tone="cyan" />
+        <MiniStat label="Con manual" value={withManual} tone="emerald" />
+        <MiniStat label="Pendientes" value={pending} tone={pending ? 'amber' : 'emerald'} />
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-4">
       {/* Lista de cargos */}
       <aside className="lg:w-64 shrink-0 space-y-2">
         <div className="flex items-center gap-1.5 bg-white/[0.03] rounded-lg border border-white/10 px-3 py-1.5">
@@ -145,6 +159,19 @@ export function CargoManualsReport() {
           </div>
         )}
       </div>
+      </div>
+    </div>
+  )
+}
+
+function MiniStat({ label, value, tone }: { label: string; value: number; tone: 'cyan' | 'emerald' | 'amber' }) {
+  const cls = tone === 'cyan' ? 'border-cyan-500/30 bg-cyan-500/[0.06] text-cyan-300'
+    : tone === 'emerald' ? 'border-emerald-500/30 bg-emerald-500/[0.06] text-emerald-300'
+    : 'border-amber-500/30 bg-amber-500/[0.06] text-amber-300'
+  return (
+    <div className={`rounded-2xl border p-4 ${cls}`}>
+      <div className="text-[10px] uppercase tracking-wide text-white/40">{label}</div>
+      <div className="text-2xl font-black mt-1 leading-none tabular-nums">{value}</div>
     </div>
   )
 }
