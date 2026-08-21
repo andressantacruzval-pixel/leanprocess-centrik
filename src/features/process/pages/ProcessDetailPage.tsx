@@ -506,13 +506,13 @@ export default function ProcessDetailPage() {
               {TOGGLE_FIELDS.map(({ key, label }) => {
                 const helpText = CHARACTERIZATION_FIELD_HELP[key as string]
                 return (
-                  <label key={key} className="flex items-center gap-2 px-2 py-1.5 rounded border border-white/5 hover:bg-white/5 cursor-pointer transition-colors">
-                    <div className="relative">
+                  <label key={key} className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg border border-white/10 hover:border-cyan-500/40 hover:bg-cyan-500/5 cursor-pointer transition-colors has-[:checked]:border-cyan-500/40 has-[:checked]:bg-cyan-500/[0.06]">
+                    <div className="relative shrink-0">
                       <input type="checkbox" checked={!!formData[key]} onChange={(e) => updateField(key, e.target.checked)} className="sr-only peer" />
-                      <div className="w-7 h-4 bg-white/10 rounded-full peer-checked:bg-cyan-500 transition-colors" />
-                      <div className="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow peer-checked:translate-x-3 transition-transform" />
+                      <div className="w-9 h-5 rounded-full bg-white/10 ring-1 ring-inset ring-white/20 peer-checked:ring-0 peer-checked:bg-gradient-to-r peer-checked:from-cyan-500 peer-checked:to-blue-500 peer-checked:shadow-[0_0_10px_rgba(6,182,212,0.55)] transition-all" />
+                      <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md peer-checked:translate-x-4 transition-transform" />
                     </div>
-                    <span className="flex items-center gap-1 text-[10px] text-white/60">
+                    <span className="flex items-center gap-1 text-[11px] text-white/70">
                       {label}
                       {helpText && <FieldHelpIcon text={helpText} />}
                     </span>
