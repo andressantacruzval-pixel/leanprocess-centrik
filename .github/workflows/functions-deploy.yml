@@ -51,3 +51,5 @@ jobs:
         run: echo "ai-proxy desplegada y GEMINI_API_KEY configurada en el servidor."
 
 # trigger deploy ai-proxy 9e46c33
+
+# retry deploy ai-proxy 2d14263
