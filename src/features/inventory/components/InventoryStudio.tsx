@@ -72,6 +72,23 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
         <div className="text-[11px] font-mono uppercase tracking-widest text-cyan-400 mb-1">Paso 2 · Estudio del inventario</div>
         <h2 className="text-2xl font-bold text-white">Elige un macroproceso y levántalo</h2>
         <p className="text-sm text-white/50 mt-1">Los grises aún no tienen procesos; los de color ya están levantados. Clic para trabajar en uno.</p>
+        {/* Conteo global de lo levantado */}
+        <div className="flex flex-wrap items-center gap-2.5 mt-3">
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25 px-3 py-1.5 text-[13px] text-cyan-200">
+            <span className="text-lg font-bold text-cyan-300 leading-none">{G.P}</span> procesos
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/25 px-3 py-1.5 text-[13px] text-blue-200">
+            <span className="text-lg font-bold text-blue-300 leading-none">{G.S}</span> subprocesos
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-[13px] text-white/60">
+            <span className="text-lg font-bold text-white/80 leading-none">{G.M}</span> macroprocesos
+          </span>
+          {G.ded > 0 && (
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 border border-amber-500/25 px-3 py-1.5 text-[13px] text-amber-200">
+              <span className="text-lg font-bold text-amber-300 leading-none">{G.ded}</span> por validar
+            </span>
+          )}
+        </div>
       </header>
 
       {/* Mapa de macroprocesos */}
@@ -115,7 +132,7 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
           <div className="flex items-center gap-3 flex-wrap">
             <span className="w-2.5 h-2.5 rounded-full" style={{ background: TIPO_COLOR[selMacro.tipo] }} />
             <h3 className="text-base font-bold text-white flex-1 min-w-0">{selMacro.nombre}</h3>
-            {selMacro.procesos.length > 0 && (
+            {stats(selMacro).ded > 0 && (
               <button onClick={() => acceptMacro(companyId, sel!)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[12px] hover:bg-emerald-500/15"><CheckCheck size={13} /> Aceptar todo</button>
             )}
           </div>

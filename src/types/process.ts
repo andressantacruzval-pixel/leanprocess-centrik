@@ -1,5 +1,7 @@
 export type Macroprocess = {
   id: string
+  /** Dueño (auth.users). Requerido por la RLS `auth.uid() = user_id` al insertar. */
+  user_id?: string
   company_id: string
   name: string
   category: 'estrategico' | 'productivo' | 'apoyo'
@@ -19,6 +21,8 @@ export type ProcessLevelDefinition = {
 
 export type Process = {
   id: string
+  /** Dueño (auth.users). Requerido por la RLS `auth.uid() = user_id` al insertar. */
+  user_id?: string
   company_id: string
   macroprocess_id: string
   parent_process_id?: string | null

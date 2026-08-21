@@ -16,6 +16,14 @@ function currentCompanyId(): string | null {
   return useWorkspaceStore.getState().activeCompanyId
 }
 
+// Helper: dueño (auth.users) del registro. La RLS de `macroprocesses` y
+// `processes` exige `auth.uid() = user_id` al INSERT; sin esto la fila se
+// rechaza y el volcado sube "unos sí y otros no".
+function currentUserId(): string {
+  const a = useAuthStore.getState()
+  return a.user?.id ?? a.profile?.id ?? ''
+}
+
 interface ProcessState {
   macroprocesses: Macroprocess[]
   processes: Process[]
@@ -80,6 +88,7 @@ export const useProcessStore = create<ProcessState>()(
         const existing = get().macroprocesses.filter((m) => m.category === category)
         const macro: Macroprocess = {
           id: generateId(),
+          user_id: currentUserId(),
           company_id: currentCompanyId() ?? '',
           name,
           category,
@@ -224,6 +233,7 @@ export const useProcessStore = create<ProcessState>()(
             )
         const proc: Process = {
           id: generateId(),
+          user_id: currentUserId(),
           company_id: currentCompanyId() ?? '',
           macroprocess_id: macroprocessId,
           parent_process_id: parentProcessId,
@@ -269,13 +279,22 @@ export const useProcessStore = create<ProcessState>()(
 
       bulkAddProcesses: async (procs) => {
         if (!procs.length) return { ok: 0, failed: 0 }
+        // Garantiza dueño y empresa: sin user_id la RLS rechaza el INSERT y el
+        // volcado subía "unos sí y otros no".
+        const uid = currentUserId()
+        const cid = currentCompanyId() ?? ''
+        const rows = procs.map((p) => ({
+          ...p,
+          user_id: p.user_id || uid,
+          company_id: p.company_id || cid,
+        }))
         // Alta optimista de todo el lote.
-        set((s) => ({ processes: [...s.processes, ...procs] }))
+        set((s) => ({ processes: [...s.processes, ...rows] }))
         const { createProcess } = await import('@/services/processes.service')
         const failed = new Set<string>()
         let ok = 0
         // Secuencial y en orden: los padres se confirman antes que sus hijos.
-        for (const p of procs) {
+        for (const p of rows) {
           if (p.parent_process_id && failed.has(p.parent_process_id)) { failed.add(p.id); continue }
           const res = await dbWrite('process:createProcess', createProcess(p as never), { silent: true })
           if (res.ok) ok++

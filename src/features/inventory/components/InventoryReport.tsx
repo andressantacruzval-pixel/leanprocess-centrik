@@ -1,17 +1,17 @@
 import { useMemo, useState } from 'react'
-import { Map, AlertTriangle, CheckCircle2, XCircle, X } from 'lucide-react'
+import { Map, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
 import { useInventoryData } from '../useInventoryData'
 import { useInventoryStore } from '@/stores/inventoryStore'
-import { allSubs, countBy, leafAreas } from '../inventoryUtils'
-import { findings, globalStats, type FindingLevel } from '../inventoryStats'
+import { countBy, leafAreas } from '../inventoryUtils'
+import { findings, type FindingLevel } from '../inventoryStats'
+import { useInventoryReportRows, EMPTY_FILTERS, type RepFilters } from '../inventoryReportData'
 import { TIPO_COLOR, type InvTipo } from '../types'
 import { OriginBadge } from './OriginBadge'
+import { InventoryReportSidebar } from './InventoryReportSidebar'
 
-// Reporte unificado del Inventario: filtros gráficos + tabla + gráficos + hallazgos.
-// Fuente única = el inventario de la empresa (mapa Nivel 0 de la app + lo generado
-// por la IA). Sustituye a los dos reportes separados (tabla y dashboard).
-
-const FRANJAS: InvTipo[] = ['Productivo', 'Apoyo', 'Estratégico']
+// Reporte unificado del Inventario: barra lateral (navegación + filtros) + KPIs
+// + gráficos + tabla con TODA la caracterización (crítico, efectivo, nivel,
+// gerencia, área) y el SIPOC completo por fila + hallazgos automáticos.
 
 export function InventoryReport() {
   const { companyId, appMacros, appAreas, doc } = useInventoryData()
@@ -19,20 +19,24 @@ export function InventoryReport() {
   const macros = doc?.macros?.length ? doc.macros : appMacros
   const areas = doc?.areas?.length ? doc.areas : appAreas
 
-  const [fTipo, setFTipo] = useState('')
-  const [fMacro, setFMacro] = useState('')
-  const [fArea, setFArea] = useState('')
-  const [fOrigen, setFOrigen] = useState('')
+  const [f, setF] = useState<RepFilters>(EMPTY_FILTERS)
+  const set = <K extends keyof RepFilters>(k: K, v: string) => setF((p) => ({ ...p, [k]: v }))
 
-  const all = useMemo(() => allSubs(macros), [macros])
+  const all = useInventoryReportRows(companyId, macros)
   const hojas = useMemo(() => leafAreas(areas, macros), [areas, macros])
+  const niveles = useMemo(() => [...new Set(all.map((r) => r.nivelEjecucion).filter(Boolean))].sort(), [all])
+  const gerencias = useMemo(() => [...new Set(all.map((r) => r.gerencia).filter(Boolean))].sort(), [all])
 
   const subs = useMemo(() => all.filter((s) =>
-    (!fTipo || s.tipo === fTipo) &&
-    (!fMacro || s.macro === fMacro) &&
-    (!fArea || s.area === fArea) &&
-    (!fOrigen || s.origen === fOrigen)
-  ), [all, fTipo, fMacro, fArea, fOrigen])
+    (!f.tipo || s.tipo === f.tipo) &&
+    (!f.macro || s.macro === f.macro) &&
+    (!f.area || s.area === f.area) &&
+    (!f.origen || s.origen === f.origen) &&
+    (!f.nivel || s.nivelEjecucion === f.nivel) &&
+    (!f.gerencia || s.gerencia === f.gerencia) &&
+    (!f.critico || (f.critico === 'si' ? s.critico === true : s.critico === false)) &&
+    (!f.efectivo || (f.efectivo === 'si' ? s.efectivo === true : s.efectivo === false))
+  ), [all, f])
 
   if (!all.length) {
     return (
@@ -44,105 +48,105 @@ export function InventoryReport() {
     )
   }
 
-  const hasF = fTipo || fMacro || fArea || fOrigen
   const conf = subs.filter((s) => s.origen === 'confirmado').length
-  const objOk = subs.filter((s) => (s.objetivo || '').trim().length >= 15).length
+  const criticos = subs.filter((s) => s.critico === true).length
+  const efectivo = subs.filter((s) => s.efectivo === true).length
   const areasConCarga = new Set(subs.map((s) => s.area).filter(Boolean)).size
   const porArea = countBy(subs, 'area')
   const porMacro = countBy(subs, 'macro')
   const maxArea = Math.max(1, ...porArea.map((x) => x.value))
   const maxMacro = Math.max(1, ...porMacro.map((x) => x.value))
-  const G = globalStats(macros, areas)
   const F = findings(macros, areas)
 
   return (
-    <div className="p-3 sm:p-4 space-y-5">
-      {/* Filtros gráficos */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <Sel value={fTipo} onChange={setFTipo} placeholder="Franja" options={FRANJAS.map((t) => ({ v: t, l: t }))} />
-        <Sel value={fMacro} onChange={setFMacro} placeholder="Macroproceso" options={macros.map((m) => ({ v: m.nombre, l: m.nombre }))} />
-        <Sel value={fArea} onChange={setFArea} placeholder="Área" options={hojas.map((a) => ({ v: a, l: a }))} />
-        <Sel value={fOrigen} onChange={setFOrigen} placeholder="Estado" options={[{ v: 'confirmado', l: 'Confirmado' }, { v: 'deducido', l: 'Deducido' }]} />
-        {hasF && <button onClick={() => { setFTipo(''); setFMacro(''); setFArea(''); setFOrigen('') }} className="inline-flex items-center gap-1 text-[11px] text-white/40 hover:text-white/70"><X size={12} /> Limpiar</button>}
-        <span className="ml-auto text-[11px] text-white/30">{subs.length}{subs.length !== all.length ? ` de ${all.length}` : ''} subprocesos</span>
-      </div>
+    <div className="p-3 sm:p-4 flex flex-col lg:flex-row gap-4 text-white/80">
+      <InventoryReportSidebar macros={macros} hojas={hojas} niveles={niveles} gerencias={gerencias}
+        f={f} set={set} clear={() => setF(EMPTY_FILTERS)} shown={subs.length} total={all.length} />
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Kpi label="Subprocesos" value={subs.length} sub="el trabajo real" accent />
-        <Kpi label="Procesos" value={new Set(subs.map((s) => s.macro + '||' + s.proceso)).size} sub="agrupaciones" />
-        <Kpi label="Áreas con carga" value={`${areasConCarga}/${hojas.length}`} sub={`${Math.max(0, hojas.length - areasConCarga)} sin trabajo`} />
-        <Kpi label="Macroprocesos" value={`${new Set(subs.map((s) => s.macro)).size}/${G.M}`} sub="cubiertos" />
-        <Kpi label="Confirmado" value={`${subs.length ? Math.round(conf / subs.length * 100) : 0}%`} sub={`${subs.length - conf} por validar`} />
-        <Kpi label="Con objetivo" value={`${subs.length ? Math.round(objOk / subs.length * 100) : 0}%`} sub={`${subs.length - objOk} sin redactar`} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card title="Carga por área" sub="Clic en una barra para filtrar.">
-          <div className="space-y-1.5">
-            {porArea.map((d) => <BarRow key={d.label} label={d.label} value={d.value} max={maxArea} color="#06b6d4" onClick={() => setFArea(fArea === d.label ? '' : d.label)} />)}
-          </div>
-        </Card>
-        <Card title="Subprocesos por macroproceso" sub="Color por franja. Clic para filtrar.">
-          <div className="space-y-1.5">
-            {porMacro.map((d) => {
-              const m = macros.find((x) => x.nombre === d.label)
-              return <BarRow key={d.label} label={d.label} value={d.value} max={maxMacro} color={m ? TIPO_COLOR[m.tipo] : '#3987e5'} onClick={() => setFMacro(fMacro === d.label ? '' : d.label)} />
-            })}
-          </div>
-        </Card>
-      </div>
-
-      {/* Tabla */}
-      <Card title="Inventario detallado" sub="Área → macroproceso → proceso → subproceso, con objetivo y estado.">
-        <div className="overflow-x-auto">
-          <table className="w-full text-[12px] border-collapse">
-            <thead>
-              <tr className="text-left text-white/40 border-b border-white/10">
-                <Th>Área</Th><Th>Macroproceso</Th><Th>Proceso</Th><Th>Subproceso</Th><Th>Objetivo</Th><Th>Estado</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {subs.map((s, i) => (
-                <tr key={i} className="border-b border-white/5 hover:bg-white/[0.03]">
-                  <Td>{s.area || <span className="text-white/25">—</span>}</Td>
-                  <Td><span className="inline-flex items-center gap-1.5"><i className="w-2 h-2 rounded-full shrink-0" style={{ background: TIPO_COLOR[(s.tipo as InvTipo)] ?? '#3987e5' }} />{s.macro}</span></Td>
-                  <Td className="text-cyan-300">{s.proceso}</Td>
-                  <Td className="text-white/85">{s.nombre}</Td>
-                  <Td className="text-white/45 max-w-[280px]">{s.objetivo}</Td>
-                  <Td>
-                    <button
-                      title={s.origen === 'confirmado' ? 'Aceptado — clic para volver a deducido' : 'Deducido por IA — clic para aceptar'}
-                      onClick={() => editSub(companyId, s.mi, s.pi, s.si, { origen: s.origen === 'confirmado' ? 'deducido' : 'confirmado' })}
-                      className="inline-flex items-center gap-1.5 hover:opacity-80"
-                    >
-                      <OriginBadge origen={s.origen} />
-                      <span className="text-[11px] text-white/50">{s.origen === 'confirmado' ? 'Aceptado' : 'Deducido'}</span>
-                    </button>
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="min-w-0 flex-1 space-y-5">
+        {/* KPIs */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <Kpi label="Subprocesos" value={subs.length} sub="el trabajo real" accent />
+          <Kpi label="Procesos" value={new Set(subs.map((s) => s.macro + '||' + s.proceso)).size} sub="agrupaciones" />
+          <Kpi label="Críticos" value={criticos} sub={`${subs.length ? Math.round(criticos / subs.length * 100) : 0}% del total`} />
+          <Kpi label="Mov. efectivo" value={efectivo} sub="tocan dinero" />
+          <Kpi label="Áreas con carga" value={`${areasConCarga}/${hojas.length}`} sub={`${Math.max(0, hojas.length - areasConCarga)} sin trabajo`} />
+          <Kpi label="Confirmado" value={`${subs.length ? Math.round(conf / subs.length * 100) : 0}%`} sub={`${subs.length - conf} por validar`} />
         </div>
-      </Card>
 
-      {/* Hallazgos */}
-      <Card title="Hallazgos automáticos" sub="Cruces sobre el inventario completo. Material directo para el informe.">
-        <div className="space-y-2">{F.map((f, i) => <FindingRow key={i} lvl={f.lvl} text={f.t} />)}</div>
-      </Card>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <Card title="Carga por área" sub="Clic en una barra para filtrar.">
+            <div className="space-y-1.5">
+              {porArea.map((d) => <BarRow key={d.label} label={d.label} value={d.value} max={maxArea} color="#06b6d4" onClick={() => set('area', f.area === d.label ? '' : d.label)} />)}
+            </div>
+          </Card>
+          <Card title="Subprocesos por macroproceso" sub="Color por franja. Clic para filtrar.">
+            <div className="space-y-1.5">
+              {porMacro.map((d) => {
+                const m = macros.find((x) => x.nombre === d.label)
+                return <BarRow key={d.label} label={d.label} value={d.value} max={maxMacro} color={m ? TIPO_COLOR[m.tipo] : '#3987e5'} onClick={() => set('macro', f.macro === d.label ? '' : d.label)} />
+              })}
+            </div>
+          </Card>
+        </div>
+
+        {/* Tabla */}
+        <Card title="Inventario detallado" sub="Caracterización completa y SIPOC por subproceso. Desliza para ver todas las columnas.">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[12px] border-collapse">
+              <thead>
+                <tr className="text-left text-white/45 border-b border-white/10">
+                  <Th>Área</Th><Th>Macroproceso</Th><Th>Proceso</Th><Th>Subproceso</Th>
+                  <Th>Crítico</Th><Th>Efectivo</Th><Th>Nivel ejec.</Th><Th>Gerencia</Th>
+                  <Th>Proveedores</Th><Th>Entradas</Th><Th>Salidas</Th><Th>Clientes</Th>
+                  <Th>Estado</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {subs.map((s, i) => (
+                  <tr key={i} className="border-b border-white/5 hover:bg-white/[0.03]">
+                    <Td className="text-white/70">{s.area || <span className="text-white/25">—</span>}</Td>
+                    <Td className="text-white/85"><span className="inline-flex items-center gap-1.5"><i className="w-2 h-2 rounded-full shrink-0" style={{ background: TIPO_COLOR[(s.tipo as InvTipo)] ?? '#3987e5' }} />{s.macro}</span></Td>
+                    <Td className="text-cyan-300">{s.proceso}</Td>
+                    <Td className="text-white font-medium">{s.nombre}</Td>
+                    <Td><Bool v={s.critico} yes="Sí" danger /></Td>
+                    <Td><Bool v={s.efectivo} yes="Sí" /></Td>
+                    <Td className="text-white/60">{s.nivelEjecucion || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/60">{s.gerencia || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/55 max-w-[200px]">{s.proveedores || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/55 max-w-[200px]">{s.entradas || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/55 max-w-[200px]">{s.salidas || <span className="text-white/20">—</span>}</Td>
+                    <Td className="text-white/55 max-w-[200px]">{s.clientes || <span className="text-white/20">—</span>}</Td>
+                    <Td>
+                      <button
+                        title={s.origen === 'confirmado' ? 'Aceptado — clic para volver a deducido' : 'Deducido por IA — clic para aceptar'}
+                        onClick={() => editSub(companyId, s.mi, s.pi, s.si, { origen: s.origen === 'confirmado' ? 'deducido' : 'confirmado' })}
+                        className="inline-flex items-center gap-1.5 hover:opacity-80"
+                      >
+                        <OriginBadge origen={s.origen} />
+                        <span className="text-[11px] text-white/50">{s.origen === 'confirmado' ? 'Aceptado' : 'Deducido'}</span>
+                      </button>
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+
+        {/* Hallazgos */}
+        <Card title="Hallazgos automáticos" sub="Cruces sobre el inventario completo. Material directo para el informe.">
+          <div className="space-y-2">{F.map((fd, i) => <FindingRow key={i} lvl={fd.lvl} text={fd.t} />)}</div>
+        </Card>
+      </div>
     </div>
   )
 }
 
-function Sel({ value, onChange, placeholder, options }: { value: string; onChange: (v: string) => void; placeholder: string; options: { v: string; l: string }[] }) {
-  return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}
-      className="appearance-none bg-white/[0.03] border border-white/10 rounded-lg pl-2.5 pr-6 py-1.5 text-[11px] text-white/70 outline-none cursor-pointer focus:ring-2 focus:ring-cyan-500/50">
-      <option value="">{placeholder}: todos</option>
-      {options.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
-    </select>
-  )
+function Bool({ v, yes, danger }: { v: boolean | null; yes: string; danger?: boolean }) {
+  if (v == null) return <span className="text-white/20">—</span>
+  if (!v) return <span className="text-white/30">No</span>
+  return <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${danger ? 'bg-red-500/15 text-red-300' : 'bg-emerald-500/15 text-emerald-300'}`}>{yes}</span>
 }
 
 function Kpi({ label, value, sub, accent }: { label: string; value: number | string; sub: string; accent?: boolean }) {
@@ -178,7 +182,7 @@ function BarRow({ label, value, max, color, onClick }: { label: string; value: n
   )
 }
 
-function Th({ children }: { children: React.ReactNode }) { return <th className="py-2 px-2 font-medium uppercase tracking-wide text-[10px]">{children}</th> }
+function Th({ children }: { children: React.ReactNode }) { return <th className="py-2 px-2 font-medium uppercase tracking-wide text-[10px] whitespace-nowrap">{children}</th> }
 function Td({ children, className = '' }: { children: React.ReactNode; className?: string }) { return <td className={`py-2 px-2 align-top ${className}`}>{children}</td> }
 
 const F_ICON: Record<FindingLevel, { icon: typeof XCircle; color: string }> = {
