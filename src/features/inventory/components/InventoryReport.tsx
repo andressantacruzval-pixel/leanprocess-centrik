@@ -12,6 +12,9 @@ import { OriginBadge } from './OriginBadge'
 import { InventoryReportSidebar } from './InventoryReportSidebar'
 import { DataTable, type Column } from '@/features/reporting/components/DataTable'
 import { useOrgLabels, useOrgUnitNamesByLevel } from '@/hooks/useOrgLabels'
+import { usePlanLimits } from '@/hooks/useActiveCompany'
+import { planName } from '@/lib/plans'
+import { avisarSiSinCupo } from '@/lib/planGateMessage'
 
 const boolTxt = (v: boolean | null): string => (v == null ? '' : v ? 'Sí' : 'No')
 const banderasTxt = (s: InvReportRow): string => BANDERAS.filter((b) => s[b.key] === true).map((b) => b.label).join(', ')
@@ -28,6 +31,8 @@ export function InventoryReport() {
   const editSub = useInventoryStore((s) => s.editSub)
   const macros = doc?.macros?.length ? doc.macros : appMacros
   const areas = doc?.areas?.length ? doc.areas : appAreas
+
+  const plan = usePlanLimits()
 
   const [f, setF] = useState<RepFilters>(EMPTY_FILTERS)
   const set = <K extends keyof RepFilters>(k: K, v: string) => setF((p) => ({ ...p, [k]: v }))
@@ -128,6 +133,12 @@ export function InventoryReport() {
           </button>
         </div>
 
+        {/* Uso del plan — cuántos procesos has documentado y cuántos te quedan */}
+        {plan.isCommunity && plan.cap !== null && (
+          <PlanUsageBanner documented={plan.documented.count} cap={plan.cap} level={plan.level}
+            reached={plan.documented.reached} hasNext={plan.hasNextLevel} />
+        )}
+
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <Kpi label="Subprocesos" value={subs.length} sub="el trabajo real" accent />
@@ -188,6 +199,45 @@ function Banderas({ row }: { row: InvReportRow }) {
           {BANDERA_SHORT[b.key as string]}
         </span>
       ))}
+    </div>
+  )
+}
+
+// Banner de uso del plan: documentados vs cupo y cuántos quedan por levantar.
+// Crear procesos es libre; el cupo gobierna DOCUMENTAR, así que el número que
+// importa aquí es cuántos puedes caracterizar/diagramar dentro de tu plan.
+function PlanUsageBanner({ documented, cap, level, reached, hasNext }: { documented: number; cap: number; level: number; reached: boolean; hasNext: boolean }) {
+  const restantes = Math.max(0, cap - documented)
+  const pct = Math.min(100, Math.round((documented / cap) * 100))
+  const near = !reached && documented >= cap * 0.8
+  const barColor = reached ? '#d03b3b' : near ? '#f59e0b' : '#06b6d4'
+  return (
+    <div className={`rounded-2xl border p-4 ${reached ? 'border-red-500/30 bg-red-500/[0.06]' : near ? 'border-amber-500/30 bg-amber-500/[0.06]' : 'border-cyan-500/25 bg-cyan-500/[0.05]'}`}>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <div className="text-[10px] uppercase tracking-wide text-white/40">Documentación de tu {planName(level)}</div>
+          <div className="text-2xl font-black mt-0.5 leading-none tabular-nums text-white">
+            {documented} <span className="text-white/40 text-lg font-bold">/ {cap}</span>
+            <span className="text-[12px] font-medium text-white/50 ml-2">procesos documentados</span>
+          </div>
+          <div className="text-[11px] mt-1 text-white/45">
+            {reached
+              ? 'Has usado todo el cupo de documentación de tu plan. Puedes seguir armando el mapa; para documentar más, amplía tu plan.'
+              : `Te quedan ${restantes} proceso${restantes === 1 ? '' : 's'} por documentar en tu plan. Crear la tarjeta del proceso es libre.`}
+          </div>
+        </div>
+        {hasNext && (
+          <button onClick={() => avisarSiSinCupo(true, level, cap)}
+            className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold border transition-colors ${
+              reached ? 'bg-red-500/15 text-red-300 border-red-500/25 hover:bg-red-500/25' : 'bg-white/5 text-cyan-300 border-cyan-500/25 hover:bg-cyan-500/10'
+            }`}>
+            Ampliar plan
+          </button>
+        )}
+      </div>
+      <div className="mt-3 h-2 rounded-full bg-white/8 overflow-hidden">
+        <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(3, pct)}%`, background: barColor }} />
+      </div>
     </div>
   )
 }
