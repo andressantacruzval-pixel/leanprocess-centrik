@@ -45,7 +45,7 @@ export function ImprovementsReport({
     { key: 'proc', header: 'Proceso', accessor: (r) => r.process.name || '', className: 'max-w-[150px]', cell: (r) => <div className="truncate">{r.process.name}</div> },
     {
       key: 'opp', header: 'Oportunidad', accessor: (r) => r.o.name || '', className: 'text-white font-medium max-w-[240px]',
-      cell: (r) => (<><div className="truncate" title={r.o.name}>{r.o.name}</div><div className="text-white/30 text-[10px] truncate max-w-[240px]" title={r.o.description}>{r.o.description}</div></>),
+      cell: (r) => (<><div className="truncate" title={r.o.name}>{r.o.name}</div><div className="text-white/30 text-[10px] truncate" title={r.o.description}>{r.o.description}</div></>),
     },
     { key: 'type', header: 'Tipo', accessor: (r) => IMPROVEMENT_TYPE_LABELS[r.o.type], cell: (r) => <Badge label={IMPROVEMENT_TYPE_LABELS[r.o.type]} hex={IMPROVEMENT_TYPE_COLORS[r.o.type]} /> },
     { key: 'prio', header: 'Prioridad', accessor: (r) => priorityScore(r.o), cell: (r) => { const total = priorityScore(r.o); const prio = priorityLabel(total); return <Badge label={`${total}/15 · ${prio.label}`} hex={PRIO_HEX[prio.tone]} /> } },

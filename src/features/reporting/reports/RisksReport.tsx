@@ -1,7 +1,8 @@
 import { Fragment, useMemo, useState } from 'react'
+import { X } from 'lucide-react'
 import {
-  getRiskLevel, heatMapCellColor, PROBABILITY_LABELS, IMPACT_LABELS,
-  type RiskItem, type RiskLevel,
+  getRiskLevel, heatMapCellColor, PROBABILITY_LABELS, IMPACT_LABELS, RISK_CATEGORIES,
+  type RiskItem, type RiskLevel, type RiskCategory,
 } from '@/types/risk'
 import type { Process } from '@/types/process'
 import {
@@ -41,7 +42,10 @@ function effLabel(score: number): { label: string; hex: string } {
 const PROB_ROWS = [5, 4, 3, 2, 1]
 const IMP_COLS = [1, 2, 3, 4, 5]
 
-function HeatMap({ risks, mode }: { risks: RiskItem[]; mode: 'inh' | 'res' }) {
+function HeatMap({ risks, mode, onCell, selected }: {
+  risks: RiskItem[]; mode: 'inh' | 'res'; onCell: (p: number, i: number) => void
+  selected: { p: number; i: number } | null
+}) {
   const counts = useMemo(() => {
     const m: Record<string, number> = {}
     risks.forEach((r) => {
@@ -59,10 +63,13 @@ function HeatMap({ risks, mode }: { risks: RiskItem[]; mode: 'inh' | 'res' }) {
           <span className="flex items-center justify-end pr-1 text-right leading-tight text-white/40">{PROBABILITY_LABELS[p]}</span>
           {IMP_COLS.map((i) => {
             const c = counts[`${p}-${i}`] || 0
+            const isSel = selected?.p === p && selected?.i === i
             return (
-              <div key={i} className={`aspect-square rounded flex items-center justify-center font-bold text-white ${heatMapCellColor(p, i)} ${c === 0 ? 'opacity-20' : ''}`}>
+              <button key={i} type="button" disabled={c === 0} onClick={() => onCell(p, i)}
+                title={`${PROBABILITY_LABELS[p]} × ${IMPACT_LABELS[i]}`}
+                className={`aspect-square rounded flex items-center justify-center font-bold text-white transition-all ${heatMapCellColor(p, i)} ${c === 0 ? 'opacity-20 cursor-default' : 'cursor-pointer hover:ring-2 hover:ring-white/70'} ${isSel ? 'ring-2 ring-white scale-105' : ''}`}>
                 {c > 0 ? c : ''}
-              </div>
+              </button>
             )
           })}
         </Fragment>
@@ -80,9 +87,26 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
   const risks = useMemo(() => allRisks.filter((r) => ids.has(r.process_id)), [allRisks, ids])
   const [fLevel, setFLevel] = useState('')
 
-  const shown = useMemo(() => fLevel
-    ? risks.filter((r) => getRiskLevel(r.inherentProbability, r.inherentImpact).label === fLevel)
-    : risks, [risks, fLevel])
+  // Mapas de calor interactivos: filtro por tipo de riesgo + clic en un cuadrante
+  // que filtra la TABLA a los riesgos de esa casilla (inherente o residual).
+  const [heatCategory, setHeatCategory] = useState<RiskCategory | ''>('')
+  const [heatCell, setHeatCell] = useState<{ mode: 'inh' | 'res'; p: number; i: number } | null>(null)
+  const heatRisks = useMemo(() => heatCategory ? risks.filter((r) => r.category === heatCategory) : risks, [risks, heatCategory])
+  const pickCell = (mode: 'inh' | 'res', p: number, i: number) =>
+    setHeatCell((prev) => (prev && prev.mode === mode && prev.p === p && prev.i === i ? null : { mode, p, i }))
+
+  const shown = useMemo(() => {
+    let out = heatRisks
+    if (heatCell) {
+      out = out.filter((r) => {
+        const p = heatCell.mode === 'inh' ? r.inherentProbability : r.residualProbability
+        const i = heatCell.mode === 'inh' ? r.inherentImpact : r.residualImpact
+        return p === heatCell.p && i === heatCell.i
+      })
+    }
+    if (fLevel) out = out.filter((r) => getRiskLevel(r.inherentProbability, r.inherentImpact).label === fLevel)
+    return out
+  }, [heatRisks, heatCell, fLevel])
 
   const columns = useMemo<Column<RiskItem>[]>(() => [
     { key: 'l0', header: org.l0, accessor: (r) => processMap.get(r.process_id)?.management || '' },
@@ -144,13 +168,26 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
         <Stat label="Riesgos sin control" value={riesgosSinControl} sub={`${risks.length ? Math.round(riesgosSinControl / risks.length * 100) : 0}% del total`} tone="red" />
       </Grid>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card title="Mapa de calor · Riesgo inherente" sub="Probabilidad × impacto antes de los controles.">
-          <HeatMap risks={risks} mode="inh" />
-        </Card>
-        <Card title="Mapa de calor · Riesgo residual" sub="Distribución después de aplicar los controles.">
-          <HeatMap risks={risks} mode="res" />
-        </Card>
+      <div>
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+          <h3 className="text-sm font-semibold text-white">Mapas de calor</h3>
+          <label className="flex items-center gap-2 text-[11px] text-white/50">
+            Tipo de riesgo
+            <select value={heatCategory} onChange={(e) => setHeatCategory(e.target.value as RiskCategory | '')}
+              className="bg-white/[0.03] border border-white/10 rounded-lg px-2 py-1 text-[11px] text-white/80 outline-none cursor-pointer">
+              <option value="">Todos</option>
+              {RISK_CATEGORIES.map((c) => <option key={c} value={c} className="bg-[#0d1117]">{c}</option>)}
+            </select>
+          </label>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card title="Riesgo inherente" sub="Antes de los controles. Clic en un cuadrante para filtrar la tabla.">
+            <HeatMap risks={heatRisks} mode="inh" onCell={(p, i) => pickCell('inh', p, i)} selected={heatCell?.mode === 'inh' ? heatCell : null} />
+          </Card>
+          <Card title="Riesgo residual" sub="Después de los controles. Clic en un cuadrante para filtrar la tabla.">
+            <HeatMap risks={heatRisks} mode="res" onCell={(p, i) => pickCell('res', p, i)} selected={heatCell?.mode === 'res' ? heatCell : null} />
+          </Card>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -172,6 +209,16 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
         {sinControl > 0 && <Insight tone="warn">{sinControl} riesgo(s) tienen control deficiente o débil (&lt;17/40). Reforzar el control baja el residual.</Insight>}
         {critInh - critRes > 0 && <Insight tone="ok">Los controles ya bajaron {critInh - critRes} riesgo(s) desde crítico. Documenta esas evidencias para la auditoría.</Insight>}
       </div>
+
+      {heatCell && (
+        <div className="flex items-center gap-2 flex-wrap -mb-1">
+          <span className="text-[11px] text-white/45">Tabla filtrada por cuadrante:</span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+            {heatCell.mode === 'inh' ? 'Inherente' : 'Residual'} · {PROBABILITY_LABELS[heatCell.p]} × {IMPACT_LABELS[heatCell.i]}
+            <button onClick={() => setHeatCell(null)} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+          </span>
+        </div>
+      )}
 
       <DataTable columns={columns} rows={shown} minWidth={1900} rowKey={(r) => r.id} />
     </Dashboard>

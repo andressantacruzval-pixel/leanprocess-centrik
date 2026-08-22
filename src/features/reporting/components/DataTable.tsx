@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
 import { ChevronDown, X } from 'lucide-react'
 import { FILAS_POR_TANDA, useVerMas } from './reportPaging'
-import { TableWrap } from './reportUi'
 
-// Tabla de reportes con control POR COLUMNA: ordenar A→Z / Z→A y filtrar por
-// "contiene" (texto libre) o "exactamente igual" (valor de la lista). Centraliza
-// la lógica para que cada reporte solo declare sus columnas (accessor + celda) y
-// se mantenga bajo el tope de 300 líneas. El menú usa position:fixed para no
-// quedar recortado por el overflow-x del contenedor de la tabla.
+// Tabla de reportes con control POR COLUMNA:
+//  · ordenar A→Z / Z→A y filtrar por "contiene" o "exactamente igual" (menú en
+//    la cabecera, con position:fixed para no recortarse con el overflow-x).
+//  · ancho de columna AJUSTABLE con el mouse (tipo Excel): se arrastra el borde
+//    derecho de cada cabecera. Con `table-fixed` el ancho lo manda el <colgroup>,
+//    así el texto largo se revela al ensanchar en vez de quedar en "…".
 
 type FilterMode = 'contains' | 'equals'
 
@@ -17,6 +17,7 @@ export interface Column<T> {
   accessor: (row: T) => string | number   // valor plano para ordenar/filtrar
   cell?: (row: T) => React.ReactNode        // render de la celda (default: accessor)
   className?: string                         // clases extra del <td>
+  width?: number                             // ancho inicial en px (default 160)
   sortable?: boolean                         // default true
   filterable?: boolean                       // default true
   hidden?: boolean                           // columnas condicionales (p.ej. nivel 2)
@@ -25,19 +26,25 @@ export interface Column<T> {
 interface ColFilter { mode: FilterMode; value: string }
 
 const asStr = (v: string | number): string => (typeof v === 'number' ? String(v) : v)
+const DEFAULT_W = 160
+const MIN_W = 60
 
 export function DataTable<T>({ columns, rows, rowKey, minWidth }: {
   columns: Column<T>[]
   rows: T[]
   rowKey: (row: T, i: number) => string
-  minWidth: number
+  minWidth?: number
 }) {
   const cols = useMemo(() => columns.filter((c) => !c.hidden), [columns])
   const colByKey = useMemo(() => new Map(cols.map((c) => [c.key, c])), [cols])
   const [sort, setSort] = useState<{ key: string; dir: 'asc' | 'desc' } | null>(null)
   const [filters, setFilters] = useState<Record<string, ColFilter>>({})
+  const [widths, setWidths] = useState<Record<string, number>>({})
   const [openKey, setOpenKey] = useState<string | null>(null)
   const [menuPos, setMenuPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 })
+
+  const effW = (c: Column<T>) => widths[c.key] ?? c.width ?? DEFAULT_W
+  const totalW = cols.reduce((s, c) => s + effW(c), 0)
 
   // Valores distintos por columna, para el modo "exactamente igual".
   const distinct = useMemo(() => {
@@ -90,6 +97,23 @@ export function DataTable<T>({ columns, rows, rowKey, minWidth }: {
     setSort((s) => (s?.key === key ? null : s))
   }
 
+  // Arrastre del borde de la cabecera para redimensionar la columna.
+  const startResize = (e: React.MouseEvent, c: Column<T>) => {
+    e.preventDefault(); e.stopPropagation()
+    const startX = e.clientX
+    const startW = effW(c)
+    const onMove = (ev: MouseEvent) => {
+      ev.preventDefault()
+      setWidths((w) => ({ ...w, [c.key]: Math.max(MIN_W, startW + (ev.clientX - startX)) }))
+    }
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
+
   const openCol = openKey ? colByKey.get(openKey) : null
   const openF = openKey ? filters[openKey] : undefined
   const isActive = (key: string) => !!filters[key]?.value || sort?.key === key
@@ -97,50 +121,59 @@ export function DataTable<T>({ columns, rows, rowKey, minWidth }: {
 
   return (
     <>
-      <TableWrap minWidth={minWidth}>
-        <thead>
-          <tr className="bg-white/[0.03] border-b border-white/5">
-            {cols.map((c) => (
-              <th key={c.key} className="px-3 py-2.5 text-[9px] font-semibold text-white/35 uppercase tracking-wider whitespace-nowrap sticky top-0 bg-[#0d1117] z-10">
-                {c.sortable === false && c.filterable === false ? (
-                  <span>{c.header}</span>
-                ) : (
-                  <button onClick={(e) => openMenu(e, c.key)} className={`inline-flex items-center gap-1 hover:text-white/70 transition-colors ${isActive(c.key) ? 'text-cyan-300' : ''}`}>
-                    {c.header}
-                    {sort?.key === c.key
-                      ? <span className="text-cyan-300 text-[8px]">{sort.dir === 'asc' ? '▲' : '▼'}</span>
-                      : <ChevronDown size={11} className="opacity-50" />}
-                  </button>
-                )}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {visibles.map((r, i) => (
-            <tr key={rowKey(r, i)} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
+      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent rounded-2xl border border-white/5 bg-white/[0.02]">
+        <table className="text-left table-fixed" style={{ width: Math.max(totalW, minWidth ?? 0) }}>
+          <colgroup>{cols.map((c) => <col key={c.key} style={{ width: effW(c) }} />)}</colgroup>
+          <thead>
+            <tr className="bg-white/[0.03] border-b border-white/5">
               {cols.map((c) => (
-                <td key={c.key} className={`px-3 py-2 text-[11px] text-white/65 whitespace-nowrap ${c.className ?? ''}`}>
-                  {c.cell ? c.cell(r) : (asStr(c.accessor(r)) || '-')}
-                </td>
+                <th key={c.key} className="relative px-3 py-2.5 text-[9px] font-semibold text-white/35 uppercase tracking-wider sticky top-0 bg-[#0d1117] z-10">
+                  {c.sortable === false && c.filterable === false ? (
+                    <span className="block truncate pr-2">{c.header}</span>
+                  ) : (
+                    <button onClick={(e) => openMenu(e, c.key)} className={`inline-flex items-center gap-1 max-w-full hover:text-white/70 transition-colors ${isActive(c.key) ? 'text-cyan-300' : ''}`}>
+                      <span className="truncate">{c.header}</span>
+                      {sort?.key === c.key
+                        ? <span className="text-cyan-300 text-[8px] shrink-0">{sort.dir === 'asc' ? '▲' : '▼'}</span>
+                        : <ChevronDown size={11} className="opacity-50 shrink-0" />}
+                    </button>
+                  )}
+                  {/* Manija de redimensionado (borde derecho de la cabecera) */}
+                  <span
+                    onMouseDown={(e) => startResize(e, c)}
+                    className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-cyan-400/50 active:bg-cyan-400/70"
+                    title="Arrastra para ajustar el ancho"
+                  />
+                </th>
               ))}
             </tr>
-          ))}
-          {processed.length === 0 && (
-            <tr><td colSpan={cols.length} className="px-3 py-8 text-center text-[11px] text-white/20">No hay datos para mostrar</td></tr>
-          )}
-          {ocultas > 0 && (
-            <tr>
-              <td colSpan={cols.length} className="px-3 py-3 text-center">
-                <button onClick={verMas} className="px-4 py-1.5 rounded-lg text-[11px] font-medium text-white/50 hover:text-white/80 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-colors">
-                  Ver {Math.min(ocultas, FILAS_POR_TANDA)} más · quedan {ocultas}
-                </button>
-                <p className="mt-1.5 text-[10px] text-white/20">La descarga incluye las {ocultas} restantes</p>
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </TableWrap>
+          </thead>
+          <tbody>
+            {visibles.map((r, i) => (
+              <tr key={rowKey(r, i)} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
+                {cols.map((c) => (
+                  <td key={c.key} className={`px-3 py-2 text-[11px] text-white/65 overflow-hidden ${c.className ?? ''}`}>
+                    {c.cell ? c.cell(r) : <div className="truncate" title={asStr(c.accessor(r))}>{asStr(c.accessor(r)) || '-'}</div>}
+                  </td>
+                ))}
+              </tr>
+            ))}
+            {processed.length === 0 && (
+              <tr><td colSpan={cols.length} className="px-3 py-8 text-center text-[11px] text-white/20">No hay datos para mostrar</td></tr>
+            )}
+            {ocultas > 0 && (
+              <tr>
+                <td colSpan={cols.length} className="px-3 py-3 text-center">
+                  <button onClick={verMas} className="px-4 py-1.5 rounded-lg text-[11px] font-medium text-white/50 hover:text-white/80 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-colors">
+                    Ver {Math.min(ocultas, FILAS_POR_TANDA)} más · quedan {ocultas}
+                  </button>
+                  <p className="mt-1.5 text-[10px] text-white/20">La descarga incluye las {ocultas} restantes</p>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {openKey && openCol && (
         <>
