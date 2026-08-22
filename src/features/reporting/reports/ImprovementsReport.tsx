@@ -9,6 +9,7 @@ import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 type ImpRow = { o: ImprovementOpportunity; process: Process }
@@ -86,11 +87,9 @@ export function ImprovementsReport({
       { label: 'Difícil', value: buckets.low, color: PRIO_HEX.low },
     ]
   }, [opps])
-  const topProc = useMemo<Datum[]>(() => {
-    const m = new Map<string, number>()
-    rows.forEach(({ process }) => m.set(process.name, (m.get(process.name) || 0) + 1))
-    return [...m.entries()].map(([label, value]) => ({ label, value, color: '#8b5cf6' })).sort((a, b) => b.value - a.value).slice(0, 8)
-  }, [rows])
+  const oppItems = useMemo<OrgTopItem[]>(() => rows.map(({ process }) => ({
+    management: process.management, coordination: process.coordination, operative: process.operative, process: process.name,
+  })), [rows])
 
   const abiertas = opps.filter((o) => o.status !== 'cerrada' && o.status !== 'descartada')
   const avgProgress = abiertas.length ? Math.round(abiertas.reduce((s, o) => s + (o.progressPct || 0), 0) / abiertas.length) : 0
@@ -120,7 +119,7 @@ export function ImprovementsReport({
         </Card>
         <Card title="Por estado" sub="Embudo de ejecución."><Donut data={byStatus} center={String(opps.length)} unit="mejoras" /></Card>
         <Card title="Por prioridad" sub="Costo + complejidad + tiempo."><HBars data={byPrio} /></Card>
-        <Card title="Mejoras por proceso" sub="Top 8."><HBars data={topProc} /></Card>
+        <OrgTopChart title="Mejoras" sub="Top 8 por nivel." items={oppItems} org={org} color="#8b5cf6" />
       </div>
 
       <div className="space-y-2">

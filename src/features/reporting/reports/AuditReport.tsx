@@ -5,6 +5,7 @@ import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 type AuditRow = { process: Process; item: AuditItem }
@@ -46,11 +47,9 @@ export function AuditReport({ processes, allAudits }: { processes: Process[]; al
     rows.forEach(({ item }) => { const k = item.responsable || 'Sin asignar'; m.set(k, (m.get(k) || 0) + 1) })
     return [...m.entries()].map(([label, value]) => ({ label, value, color: '#8b5cf6' })).sort((a, b) => b.value - a.value).slice(0, 8)
   }, [rows])
-  const byProc = useMemo<Datum[]>(() => {
-    const m = new Map<string, number>()
-    rows.forEach(({ process }) => m.set(process.name, (m.get(process.name) || 0) + 1))
-    return [...m.entries()].map(([label, value]) => ({ label, value, color: '#06b6d4' })).sort((a, b) => b.value - a.value).slice(0, 8)
-  }, [rows])
+  const controlItems = useMemo<OrgTopItem[]>(() => rows.map(({ process }) => ({
+    management: process.management, coordination: process.coordination, operative: process.operative, process: process.name,
+  })), [rows])
 
   const sinCriterio = rows.filter(({ item }) => !(item.criterio || '').trim()).length
   const sinEvidencia = rows.filter(({ item }) => !(item.evidencia || '').trim()).length
@@ -69,7 +68,7 @@ export function AuditReport({ processes, allAudits }: { processes: Process[]; al
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card title="Por frecuencia" sub="Cadencia de auditoría."><Donut data={byFreq} center={String(rows.length)} unit="controles" /></Card>
         <Card title="Carga por responsable" sub="Top 8 auditores."><HBars data={byResp} /></Card>
-        <Card title="Controles por proceso" sub="Top 8 más auditados."><HBars data={byProc} /></Card>
+        <OrgTopChart title="Controles" sub="Top 8 por nivel." items={controlItems} org={org} />
       </div>
 
       <div className="space-y-2">

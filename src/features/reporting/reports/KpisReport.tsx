@@ -5,6 +5,7 @@ import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de KPIs: tablero (cobertura por proceso, frecuencias, calidad de la
@@ -53,11 +54,10 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
     kpis.forEach((i) => { const k = i.frequency || 'Sin definir'; m.set(k, (m.get(k) || 0) + 1) })
     return [...m.entries()].map(([label, value], idx) => ({ label, value, color: FREQ_COLORS[idx % FREQ_COLORS.length] })).sort((a, b) => b.value - a.value)
   }, [kpis])
-  const byProc = useMemo<Datum[]>(() => {
-    const m = new Map<string, number>()
-    kpis.forEach((i) => { const n = processMap.get(i.process_id)?.name || '—'; m.set(n, (m.get(n) || 0) + 1) })
-    return [...m.entries()].map(([label, value]) => ({ label, value, color: '#06b6d4' })).sort((a, b) => b.value - a.value).slice(0, 8)
-  }, [kpis, processMap])
+  const kpiItems = useMemo<OrgTopItem[]>(() => kpis.map((i) => {
+    const p = processMap.get(i.process_id)
+    return { management: p?.management, coordination: p?.coordination, operative: p?.operative, process: p?.name }
+  }), [kpis, processMap])
 
   const conMeta = kpis.filter((i) => (i.target_value || '').trim()).length
   const conUmbral = kpis.filter(hasThresholds).length
@@ -80,7 +80,7 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card title="Por frecuencia" sub="Cada cuánto se mide."><Donut data={byFreq} center={String(kpis.length)} unit="KPIs" /></Card>
-        <Card title="KPIs por proceso" sub="Top 8 más medidos."><HBars data={byProc} /></Card>
+        <OrgTopChart title="KPIs" sub="Top 8 por nivel." items={kpiItems} org={org} />
         <Card title="Calidad de la definición" sub={`Sobre ${kpis.length} indicadores.`}><HBars data={calidad} /></Card>
       </div>
 

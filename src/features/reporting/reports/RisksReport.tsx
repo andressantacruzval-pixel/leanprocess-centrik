@@ -8,6 +8,7 @@ import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de Riesgos: tablero (nivel inherente/residual, categorías, control,
@@ -120,17 +121,10 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
     risks.forEach((r) => m.set(r.category, (m.get(r.category) || 0) + 1))
     return [...m.entries()].map(([label, value]) => ({ label, value, color: '#8b5cf6' })).sort((a, b) => b.value - a.value)
   }, [risks])
-  const topProc = useMemo<Datum[]>(() => {
-    const m = new Map<string, number>()
-    risks.forEach((r) => {
-      const lvl = getRiskLevel(r.inherentProbability, r.inherentImpact).label
-      if (lvl === 'Extremo' || lvl === 'Alto') {
-        const n = processMap.get(r.process_id)?.name || '—'
-        m.set(n, (m.get(n) || 0) + 1)
-      }
-    })
-    return [...m.entries()].map(([label, value]) => ({ label, value, color: '#f97316' })).sort((a, b) => b.value - a.value).slice(0, 8)
-  }, [risks, processMap])
+  const expuestosItems = useMemo<OrgTopItem[]>(() => risks
+    .filter((r) => { const l = getRiskLevel(r.inherentProbability, r.inherentImpact).label; return l === 'Extremo' || l === 'Alto' })
+    .map((r) => { const p = processMap.get(r.process_id); return { management: p?.management, coordination: p?.coordination, operative: p?.operative, process: p?.name } }),
+    [risks, processMap])
 
   const critInh = byInh[0].value + byInh[1].value
   const critRes = byRes[0].value + byRes[1].value
@@ -170,7 +164,7 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
           <Donut data={byRes} center={`${critInh ? Math.round((critInh - critRes) / critInh * 100) : 0}%`} unit="reducción crítica" />
         </Card>
         <Card title="Por categoría"><HBars data={byCat} /></Card>
-        <Card title="Procesos más expuestos" sub="Con más riesgos extremos/altos."><HBars data={topProc} /></Card>
+        <OrgTopChart title="Más expuestos" sub="Riesgos extremos/altos por nivel." items={expuestosItems} org={org} color="#f97316" />
       </div>
 
       <div className="space-y-2">

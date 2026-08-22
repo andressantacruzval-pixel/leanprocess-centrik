@@ -8,6 +8,7 @@ import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 type ValueRow = { process: Process; activity: ValueActivity }
@@ -52,13 +53,10 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
     label: CLASSIFICATION_COLORS[c].label, color: CLASSIFICATION_COLORS[c].hex,
     value: Math.round((c === 'VA' ? k.vaDailyMinutes : c === 'NVA' ? k.nvaDailyMinutes : k.nvabnDailyMinutes) * 20),
   })), [k])
-  const wasteByProc = useMemo<Datum[]>(() => {
-    const m = new Map<string, number>()
-    rows.forEach(({ process, activity }) => {
-      if (activity.classification === 'NVA') m.set(process.name, (m.get(process.name) || 0) + scaleToPeriod(activity.dailyMinutes, 'mes'))
-    })
-    return [...m.entries()].map(([label, value]) => ({ label, value: Math.round(value), color: '#f87171' })).sort((a, b) => b.value - a.value).slice(0, 8)
-  }, [rows])
+  const wasteItems = useMemo<OrgTopItem[]>(() => rows
+    .filter(({ activity }) => activity.classification === 'NVA')
+    .map(({ process, activity }) => ({ management: process.management, coordination: process.coordination, operative: process.operative, process: process.name, value: scaleToPeriod(activity.dailyMinutes, 'mes') })),
+    [rows])
   const topTime = useMemo<Datum[]>(() => pareto.map((p) => ({
     label: p.activity.name, value: Math.round(p.scaledMinutes),
     color: p.activity.classification ? CLASSIFICATION_COLORS[p.activity.classification].hex : '#64748b',
@@ -76,7 +74,7 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card title="Tiempo por clasificación" sub="Minutos/mes estimados."><Donut data={byClassTime} center={`${Math.round(k.vaEfficiency)}%`} unit="VA" /></Card>
         <Card title="Actividades que más tiempo consumen" sub="Pareto 80/20 (min/mes)."><HBars data={topTime} /></Card>
-        <Card title="Desperdicio por proceso" sub="Tiempo NVA (min/mes)."><HBars data={wasteByProc} /></Card>
+        <OrgTopChart title="Desperdicio" sub="Tiempo NVA (min/mes) por nivel." items={wasteItems} org={org} color="#f87171" />
       </div>
 
       <div className="space-y-2">
