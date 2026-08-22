@@ -200,7 +200,7 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
         <Card title="Riesgo residual" sub="Después de aplicar los controles evaluados.">
           <Donut data={byRes} center={`${critInh ? Math.round((critInh - critRes) / critInh * 100) : 0}%`} unit="reducción crítica" />
         </Card>
-        <Card title="Por categoría"><HBars data={byCat} /></Card>
+        <Card title="Por categoría" sub="Clic para filtrar mapas y tabla."><HBars data={byCat} onBar={(l) => setHeatCategory(heatCategory === l ? '' : (l as RiskCategory))} active={heatCategory} /></Card>
         <OrgTopChart title="Más expuestos" sub="Riesgos extremos/altos por nivel." items={expuestosItems} org={org} color="#f97316" />
       </div>
 

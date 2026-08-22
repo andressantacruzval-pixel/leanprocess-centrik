@@ -20,7 +20,7 @@ import {
   ArrowRight, Map, Zap, Target, LayoutDashboard, Lightbulb, CheckCircle2,
   Footprints, Building2, Crown, Workflow, Shield, ShieldCheck, ShieldPlus,
   BookMarked, Flame, Sparkles, Trophy, Star, Award, Share2, Users,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, Search, X,
   type LucideProps,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -89,6 +89,20 @@ export default function Dashboard() {
     () => processes.filter((p) => isDocumentable(p, processLevelCount)),
     [processes, processLevelCount]
   )
+  // Cobertura: búsqueda + expandir para llegar a CUALQUIER subproceso desde el
+  // dashboard (antes solo se veían 10 y el resto quedaba inalcanzable).
+  const [coverageQuery, setCoverageQuery] = useState('')
+  const [coverageExpanded, setCoverageExpanded] = useState(false)
+  const coverageFiltered = useMemo(() => {
+    const q = coverageQuery.trim().toLowerCase()
+    if (!q) return documentableProcesses
+    return documentableProcesses.filter((p) =>
+      p.name.toLowerCase().includes(q) ||
+      (p.management || '').toLowerCase().includes(q) ||
+      (p.coordination || '').toLowerCase().includes(q))
+  }, [documentableProcesses, coverageQuery])
+  const coverageVisible = (coverageExpanded || coverageQuery.trim()) ? coverageFiltered : coverageFiltered.slice(0, 10)
+
   // El nivel más bajo es, por definición, el número de niveles declarado.
   const coverageLabel = getLevelName(processLevelCount)
   const processIds = useMemo(() => new Set(processes.map((p) => p.id)), [processes])
@@ -430,7 +444,16 @@ export default function Dashboard() {
 
       {/* ═══ Row 5: Coverage Matrix ═══ */}
       <div>
-        <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider mb-3">Cobertura por Proceso</h2>
+        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+          <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider">Cobertura por Proceso</h2>
+          <div className="flex items-center gap-1.5 bg-white/[0.03] rounded-lg border border-white/10 px-2.5 py-1.5 w-full max-w-[260px]">
+            <Search size={13} className="text-white/25 shrink-0" />
+            <input type="text" value={coverageQuery} onChange={(e) => setCoverageQuery(e.target.value)}
+              placeholder={`Buscar ${coverageLabel.toLowerCase()}…`}
+              className="bg-transparent text-xs text-white placeholder-white/25 outline-none flex-1 min-w-0" />
+            {coverageQuery && <button onClick={() => setCoverageQuery('')} className="text-white/25 hover:text-white/60 shrink-0"><X size={12} /></button>}
+          </div>
+        </div>
         {/* `overflow-x-auto`, no `overflow-hidden`: son 8 columnas de datos y antes se
             aplastaban dentro de un contenedor que ademas impedia desplazarlas. */}
         <div className="bg-white/[0.03] rounded-2xl border border-white/5 overflow-x-auto">
@@ -446,7 +469,8 @@ export default function Dashboard() {
             <div className="bg-[#0a0f1a] px-3 py-2 text-center">Mejoras</div>
             <div className="bg-[#0a0f1a] px-3 py-2 text-center">Madurez</div>
           </div>
-          {documentableProcesses.slice(0, 10).map((p) => {
+          <div className={coverageExpanded || coverageQuery.trim() ? 'max-h-[480px] overflow-y-auto' : ''}>
+          {coverageVisible.map((p) => {
             const hasBpmn = !!p.bpmn_xml
             const hasProcedure = allProcedures.some(pr => pr.process_id === p.id)
             const kpiCount = allIndicators.filter(i => i.process_id === p.id).length
@@ -503,10 +527,19 @@ export default function Dashboard() {
               </Fila>
             )
           })}
-          {documentableProcesses.length > 10 && (
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center text-[10px] text-white/20">
-              +{documentableProcesses.length - 10} procesos mas...
+          {coverageQuery.trim() && coverageFiltered.length === 0 && (
+            <div className="bg-[#0a0f1a] px-3 py-4 text-center text-[11px] text-white/30">
+              Ningún {coverageLabel.toLowerCase()} coincide con «{coverageQuery.trim()}».
             </div>
+          )}
+          </div>
+          {!coverageQuery.trim() && documentableProcesses.length > 10 && (
+            <button onClick={() => setCoverageExpanded((v) => !v)}
+              className="w-full bg-[#0a0f1a] px-3 py-2 text-center text-[11px] text-cyan-300/80 hover:text-cyan-200 inline-flex items-center justify-center gap-1.5 transition-colors">
+              {coverageExpanded
+                ? (<><ChevronUp size={13} /> Ver menos</>)
+                : (<><ChevronDown size={13} /> Ver todos ({documentableProcesses.length})</>)}
+            </button>
           )}
           </div>
           {/* El estado vacio queda FUERA del `min-w`: no tiene columnas que desplazar */}

@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { X } from 'lucide-react'
 import type { Process } from '@/types/process'
 import {
   CLASSIFICATION_COLORS, computeKPIs, computePareto, scaleToPeriod, formatTime,
@@ -62,6 +63,11 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
     color: p.activity.classification ? CLASSIFICATION_COLORS[p.activity.classification].hex : '#64748b',
   })), [pareto])
 
+  const clsByLabel = useMemo(() => Object.fromEntries(CLS.map((c) => [CLASSIFICATION_COLORS[c].label, c])) as Record<string, ValueClassification>, [])
+  const [clsFilter, setClsFilter] = useState<ValueClassification | ''>('')
+  const shownRows = useMemo(() => clsFilter ? rows.filter((r) => r.activity.classification === clsFilter) : rows, [rows, clsFilter])
+  const clsActiveLabel = clsFilter ? CLASSIFICATION_COLORS[clsFilter].label : ''
+
   return (
     <Dashboard>
       <Grid cols={4}>
@@ -72,7 +78,7 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
       </Grid>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card title="Tiempo por clasificación" sub="Minutos/mes estimados."><Donut data={byClassTime} center={`${Math.round(k.vaEfficiency)}%`} unit="VA" /></Card>
+        <Card title="Tiempo por clasificación" sub="Clic para filtrar la tabla."><Donut data={byClassTime} center={`${Math.round(k.vaEfficiency)}%`} unit="VA" onSlice={(l) => setClsFilter(clsActiveLabel === l ? '' : (clsByLabel[l] ?? ''))} active={clsActiveLabel} /></Card>
         <Card title="Actividades que más tiempo consumen" sub="Pareto 80/20 (min/mes)."><HBars data={topTime} /></Card>
         <OrgTopChart title="Desperdicio" sub="Tiempo NVA (min/mes) por nivel." items={wasteItems} org={org} color="#f87171" />
       </div>
@@ -83,7 +89,16 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
         {k.vaEfficiency >= 60 && <Insight tone="ok">Eficiencia de valor del {Math.round(k.vaEfficiency)}%. Buen punto de partida; enfoca la mejora en el {Math.round(k.wastePercentage)}% NVA.</Insight>}
       </div>
 
-      <DataTable columns={columns} rows={rows} minWidth={1300} rowKey={(r, i) => `${r.process.id}-${r.activity.id}-${i}`} />
+      {clsFilter && (
+        <div className="flex items-center gap-2 -mb-1">
+          <span className="text-[11px] text-white/45">Tabla filtrada por clasificación:</span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+            {clsActiveLabel}
+            <button onClick={() => setClsFilter('')} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+          </span>
+        </div>
+      )}
+      <DataTable columns={columns} rows={shownRows} minWidth={1300} rowKey={(r, i) => `${r.process.id}-${r.activity.id}-${i}`} />
     </Dashboard>
   )
 }

@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { X } from 'lucide-react'
 import type { Process } from '@/types/process'
 import type { AuditItem } from '@/lib/procedureAi'
 import {
@@ -51,6 +52,16 @@ export function AuditReport({ processes, allAudits }: { processes: Process[]; al
     management: process.management, coordination: process.coordination, operative: process.operative, process: process.name,
   })), [rows])
 
+  const [barFilter, setBarFilter] = useState<{ dim: 'freq' | 'resp'; value: string } | null>(null)
+  const toggleBar = (dim: 'freq' | 'resp', value: string) =>
+    setBarFilter((prev) => (prev && prev.dim === dim && prev.value === value ? null : { dim, value }))
+  const shownRows = useMemo(() => {
+    if (!barFilter) return rows
+    return rows.filter(({ item }) => barFilter.dim === 'freq'
+      ? (item.frecuencia || 'Sin definir') === barFilter.value
+      : (item.responsable || 'Sin asignar') === barFilter.value)
+  }, [rows, barFilter])
+
   const sinCriterio = rows.filter(({ item }) => !(item.criterio || '').trim()).length
   const sinEvidencia = rows.filter(({ item }) => !(item.evidencia || '').trim()).length
   const sinResp = rows.filter(({ item }) => !(item.responsable || '').trim()).length
@@ -66,8 +77,8 @@ export function AuditReport({ processes, allAudits }: { processes: Process[]; al
       </Grid>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card title="Por frecuencia" sub="Cadencia de auditoría."><Donut data={byFreq} center={String(rows.length)} unit="controles" /></Card>
-        <Card title="Carga por responsable" sub="Top 8 auditores."><HBars data={byResp} /></Card>
+        <Card title="Por frecuencia" sub="Clic para filtrar la tabla."><Donut data={byFreq} center={String(rows.length)} unit="controles" onSlice={(l) => toggleBar('freq', l)} active={barFilter?.dim === 'freq' ? barFilter.value : ''} /></Card>
+        <Card title="Carga por responsable" sub="Clic para filtrar la tabla."><HBars data={byResp} onBar={(l) => toggleBar('resp', l)} active={barFilter?.dim === 'resp' ? barFilter.value : ''} /></Card>
         <OrgTopChart title="Controles" sub="Top 8 por nivel." items={controlItems} org={org} />
       </div>
 
@@ -77,7 +88,16 @@ export function AuditReport({ processes, allAudits }: { processes: Process[]; al
         {sinResp > 0 && <Insight tone="crit">{sinResp} punto(s) sin responsable asignado. Nadie los ejecutará hasta asignarlos.</Insight>}
       </div>
 
-      <DataTable columns={columns} rows={rows} minWidth={1200} rowKey={(r, i) => `${r.process.id}-${i}`} />
+      {barFilter && (
+        <div className="flex items-center gap-2 -mb-1">
+          <span className="text-[11px] text-white/45">Tabla filtrada por {barFilter.dim === 'freq' ? 'frecuencia' : 'responsable'}:</span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+            {barFilter.value}
+            <button onClick={() => setBarFilter(null)} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+          </span>
+        </div>
+      )}
+      <DataTable columns={columns} rows={shownRows} minWidth={1200} rowKey={(r, i) => `${r.process.id}-${i}`} />
     </Dashboard>
   )
 }

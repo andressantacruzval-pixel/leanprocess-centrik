@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { X } from 'lucide-react'
 import type { Process } from '@/types/process'
 import {
   type ImprovementOpportunity, type ImprovementStatus,
@@ -38,7 +39,17 @@ export function ImprovementsReport({
     return allImprovements.filter((o) => byProcess.has(o.processId)).map((o) => ({ o, process: pMap.get(o.processId)! }))
   }, [processes, allImprovements])
   const opps = useMemo(() => rows.map((r) => r.o), [rows])
-  const shownRows = useMemo(() => (fType ? rows.filter((r) => r.o.type === fType) : rows), [rows, fType])
+  const [fStatus, setFStatus] = useState<ImprovementStatus | ''>('')
+  const [fPrio, setFPrio] = useState<'high' | 'mid' | 'low' | ''>('')
+  const statusByLabel = useMemo(() => Object.fromEntries(STATUS_OPTIONS.map((s) => [STATUS_LABELS[s], s])) as Record<string, ImprovementStatus>, [])
+  const prioByLabel: Record<string, 'high' | 'mid' | 'low'> = { 'Quick win': 'high', Media: 'mid', Difícil: 'low' }
+  const shownRows = useMemo(() => rows.filter((r) =>
+    (!fType || r.o.type === fType) &&
+    (!fStatus || r.o.status === fStatus) &&
+    (!fPrio || priorityLabel(priorityScore(r.o)).tone === fPrio)
+  ), [rows, fType, fStatus, fPrio])
+  const statusActiveLabel = fStatus ? STATUS_LABELS[fStatus] : ''
+  const prioActiveLabel = fPrio === 'high' ? 'Quick win' : fPrio === 'mid' ? 'Media' : fPrio === 'low' ? 'Difícil' : ''
 
   const columns = useMemo<Column<ImpRow>[]>(() => [
     { key: 'l0', header: org.l0, accessor: (r) => r.process.management || '' },
@@ -117,8 +128,8 @@ export function ImprovementsReport({
             ))}
           </div>
         </Card>
-        <Card title="Por estado" sub="Embudo de ejecución."><Donut data={byStatus} center={String(opps.length)} unit="mejoras" /></Card>
-        <Card title="Por prioridad" sub="Costo + complejidad + tiempo."><HBars data={byPrio} /></Card>
+        <Card title="Por estado" sub="Clic para filtrar la tabla."><Donut data={byStatus} center={String(opps.length)} unit="mejoras" onSlice={(l) => setFStatus(statusActiveLabel === l ? '' : (statusByLabel[l] ?? ''))} active={statusActiveLabel} /></Card>
+        <Card title="Por prioridad" sub="Clic para filtrar la tabla."><HBars data={byPrio} onBar={(l) => setFPrio(prioActiveLabel === l ? '' : (prioByLabel[l] ?? ''))} active={prioActiveLabel} /></Card>
         <OrgTopChart title="Mejoras" sub="Top 8 por nivel." items={oppItems} org={org} color="#8b5cf6" />
       </div>
 
@@ -128,6 +139,23 @@ export function ImprovementsReport({
         {abiertas.filter((o) => o.status === 'en_progreso' && (o.progressPct || 0) === 0).length > 0 && <Insight tone="warn">{abiertas.filter((o) => o.status === 'en_progreso' && (o.progressPct || 0) === 0).length} mejora(s) marcadas "en progreso" con 0% de avance. Actualiza el estado o el porcentaje.</Insight>}
       </div>
 
+      {(fStatus || fPrio) && (
+        <div className="flex items-center gap-2 flex-wrap -mb-1">
+          <span className="text-[11px] text-white/45">Tabla filtrada:</span>
+          {fStatus && (
+            <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+              Estado: {statusActiveLabel}
+              <button onClick={() => setFStatus('')} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+            </span>
+          )}
+          {fPrio && (
+            <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+              Prioridad: {prioActiveLabel}
+              <button onClick={() => setFPrio('')} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+            </span>
+          )}
+        </div>
+      )}
       <DataTable columns={columns} rows={shownRows} minWidth={1640} rowKey={(r) => r.o.id} />
     </Dashboard>
   )

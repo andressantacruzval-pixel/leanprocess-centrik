@@ -84,7 +84,7 @@ export function HBars({ data, onBar, active }: { data: Datum[]; onBar?: (label: 
 
 // ─── Donut (SVG) ─────────────────────────────────────────────────────────
 
-export function Donut({ data, center, unit }: { data: Datum[]; center?: string; unit?: string }) {
+export function Donut({ data, center, unit, onSlice, active }: { data: Datum[]; center?: string; unit?: string; onSlice?: (label: string) => void; active?: string }) {
   const total = data.reduce((s, d) => s + d.value, 0)
   const R = 52, C = 2 * Math.PI * R
   let offset = 0
@@ -100,16 +100,21 @@ export function Donut({ data, center, unit }: { data: Datum[]; center?: string; 
           return el
         })}
       </svg>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         {center != null && <div className="mb-2"><span className="text-2xl font-black text-white tabular-nums">{center}</span>{unit && <span className="text-[11px] text-white/40 ml-1">{unit}</span>}</div>}
         <div className="space-y-1">
-          {data.map((d) => (
-            <div key={d.label} className="flex items-center gap-2 text-[11px]">
-              <i className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: d.color ?? '#06b6d4' }} />
-              <span className="text-white/70 truncate">{d.label}</span>
-              <span className="ml-auto text-white/50 tabular-nums">{d.value}{total > 0 ? ` · ${Math.round(d.value / total * 100)}%` : ''}</span>
-            </div>
-          ))}
+          {data.map((d) => {
+            const inner = (
+              <>
+                <i className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: d.color ?? '#06b6d4' }} />
+                <span className={`truncate ${active === d.label ? 'text-white' : 'text-white/70'}`}>{d.label}</span>
+                <span className="ml-auto text-white/50 tabular-nums">{d.value}{total > 0 ? ` · ${Math.round(d.value / total * 100)}%` : ''}</span>
+              </>
+            )
+            return onSlice
+              ? <button key={d.label} onClick={() => onSlice(d.label)} className={`w-full flex items-center gap-2 text-[11px] rounded px-1 -mx-1 transition-colors ${active === d.label ? 'bg-white/10' : 'hover:bg-white/5'}`}>{inner}</button>
+              : <div key={d.label} className="flex items-center gap-2 text-[11px]">{inner}</div>
+          })}
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { X } from 'lucide-react'
 import type { Process } from '@/types/process'
 import type { StoredIndicator } from '@/stores/indicatorStore'
 import {
@@ -59,6 +60,9 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
     return { management: p?.management, coordination: p?.coordination, operative: p?.operative, process: p?.name }
   }), [kpis, processMap])
 
+  const [freqFilter, setFreqFilter] = useState('')
+  const shownKpis = useMemo(() => freqFilter ? kpis.filter((i) => (i.frequency || 'Sin definir') === freqFilter) : kpis, [kpis, freqFilter])
+
   const conMeta = kpis.filter((i) => (i.target_value || '').trim()).length
   const conUmbral = kpis.filter(hasThresholds).length
   const conResp = kpis.filter((i) => (i.owner || '').trim() || (i.reporter || '').trim()).length
@@ -79,7 +83,7 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
       </Grid>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card title="Por frecuencia" sub="Cada cuánto se mide."><Donut data={byFreq} center={String(kpis.length)} unit="KPIs" /></Card>
+        <Card title="Por frecuencia" sub="Clic para filtrar la tabla."><Donut data={byFreq} center={String(kpis.length)} unit="KPIs" onSlice={(l) => setFreqFilter(freqFilter === l ? '' : l)} active={freqFilter} /></Card>
         <OrgTopChart title="KPIs" sub="Top 8 por nivel." items={kpiItems} org={org} />
         <Card title="Calidad de la definición" sub={`Sobre ${kpis.length} indicadores.`}><HBars data={calidad} /></Card>
       </div>
@@ -90,7 +94,16 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
         {conUmbral === kpis.length && kpis.length > 0 && <Insight tone="ok">Todos los indicadores tienen semáforo (umbrales) configurado. Listos para tablero de control.</Insight>}
       </div>
 
-      <DataTable columns={columns} rows={kpis} minWidth={1500} rowKey={(i) => i.id} />
+      {freqFilter && (
+        <div className="flex items-center gap-2 -mb-1">
+          <span className="text-[11px] text-white/45">Tabla filtrada por frecuencia:</span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+            {freqFilter}
+            <button onClick={() => setFreqFilter('')} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+          </span>
+        </div>
+      )}
+      <DataTable columns={columns} rows={shownKpis} minWidth={1500} rowKey={(i) => i.id} />
     </Dashboard>
   )
 }
