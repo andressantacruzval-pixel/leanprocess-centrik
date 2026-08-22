@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from 'react'
-import { Map, Sparkles, Save, Check, ClipboardList, Download, Image as ImageIcon, FileText, ChevronDown, Loader2 } from 'lucide-react'
+import { useState, useCallback, useRef, useMemo } from 'react'
+import { Map, Sparkles, Save, Check, ClipboardList, Download } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useProcesses } from '@/hooks/useProcesses'
 import { useCompanyStore } from '@/stores/companyStore'
@@ -10,6 +10,8 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { InventoryWizard } from '@/features/inventory/components/InventoryWizard'
 import { useInventoryData } from '@/features/inventory/useInventoryData'
 import { useInventoryReportRows } from '@/features/inventory/inventoryReportData'
+import { MapExportModal } from './MapExportModal'
+import type { MapData } from '@/utils/mapSvg'
 import type { Macroprocess } from '@/types'
 
 const CATEGORIES = ['estrategico', 'productivo', 'apoyo'] as const
@@ -33,13 +35,16 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
   const company = useCompanyStore((s) => s.company)
   const profile = useAuthStore((s) => s.profile)
 
-  // Exportación del mapa (imagen / PDF-reporte con el inventario)
+  // Exportación del mapa: pantalla propia (SVG vectorial + marca guardada)
   const mapRef = useRef<HTMLDivElement>(null)
   const { companyId, appMacros, doc } = useInventoryData()
   const invMacros = doc?.macros?.length ? doc.macros : appMacros
   const invRows = useInventoryReportRows(companyId, invMacros)
-  const [exportBusy, setExportBusy] = useState<'' | 'png' | 'svg' | 'pdf'>('')
-  const [exportMenu, setExportMenu] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
+  const mapData = useMemo<MapData>(() => {
+    const names = (cat: 'estrategico' | 'productivo' | 'apoyo') => getMacroByCategory(cat).map((m) => m.name)
+    return { org: company?.name ?? 'Organización', E: names('estrategico'), P: names('productivo'), A: names('apoyo') }
+  }, [getMacroByCategory, company])
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false)
@@ -63,29 +68,6 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
     setShowSaved(true)
     setTimeout(() => setShowSaved(false), 2000)
   }, [])
-
-  const handleExportImage = async (format: 'png' | 'svg') => {
-    if (!mapRef.current || exportBusy) return
-    setExportMenu(false); setExportBusy(format)
-    try {
-      const { exportMapImage } = await import('@/utils/processMapExport')
-      await exportMapImage(mapRef.current, format)
-    } catch (e) {
-      console.warn('[ProcessMap] export imagen falló:', e)
-    } finally { setExportBusy('') }
-  }
-
-  const handleExportPdf = async () => {
-    if (!mapRef.current || exportBusy) return
-    setExportMenu(false); setExportBusy('pdf')
-    try {
-      const { exportMapReportPdf } = await import('@/utils/processMapExport')
-      const meta = { company: company?.name ?? 'Empresa', generatedBy: profile?.full_name ?? null }
-      await exportMapReportPdf(mapRef.current, invRows, meta)
-    } catch (e) {
-      console.warn('[ProcessMap] export PDF falló:', e)
-    } finally { setExportBusy('') }
-  }
 
   const handleAddForCategory = (cat: 'estrategico' | 'productivo' | 'apoyo') => {
     setEditMacro(null)
@@ -123,29 +105,16 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
         subtitle={company?.name ?? undefined}
         actions={
           <div className="flex items-center gap-2">
-            {/* Exportar mapa: imagen (PNG/SVG) o PDF con el inventario */}
-            <div className="relative">
-              <button
-                onClick={() => setExportMenu((v) => !v)}
-                disabled={isEmpty || !!exportBusy}
-                title={isEmpty ? 'Crea primero tus macroprocesos' : 'Exportar el mapa'}
-                className="whitespace-nowrap flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-white/70 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {exportBusy ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-                Exportar
-                <ChevronDown size={13} className="opacity-60" />
-              </button>
-              {exportMenu && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setExportMenu(false)} />
-                  <div className="absolute right-0 mt-1.5 z-50 w-60 rounded-xl border border-white/10 bg-[#0d1524] shadow-xl shadow-black/40 p-1">
-                    <MenuItem icon={ImageIcon} title="Imagen PNG" sub="Mapa en alta resolución" onClick={() => handleExportImage('png')} />
-                    <MenuItem icon={ImageIcon} title="Imagen SVG" sub="Vectorial, escalable" onClick={() => handleExportImage('svg')} />
-                    <MenuItem icon={FileText} title="PDF: mapa + inventario" sub="Con los gráficos del reporte" onClick={handleExportPdf} />
-                  </div>
-                </>
-              )}
-            </div>
+            {/* Exportar mapa: pantalla propia con marca (PNG/SVG/PDF), config guardada */}
+            <button
+              onClick={() => setExportOpen(true)}
+              disabled={isEmpty}
+              title={isEmpty ? 'Crea primero tus macroprocesos' : 'Exportar el mapa'}
+              className="whitespace-nowrap flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-white/70 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Download size={14} />
+              Exportar
+            </button>
             <button
               onClick={() => setInventoryOpen(true)}
               disabled={isEmpty}
@@ -255,18 +224,16 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
       />
 
       {inventoryOpen && <InventoryWizard onClose={() => setInventoryOpen(false)} />}
-    </div>
-  )
-}
 
-function MenuItem({ icon: Icon, title, sub, onClick }: { icon: React.ElementType; title: string; sub: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className="w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left hover:bg-white/5 transition-colors">
-      <Icon size={15} className="mt-0.5 shrink-0 text-cyan-300" />
-      <span className="min-w-0">
-        <span className="block text-[12.5px] text-white/85">{title}</span>
-        <span className="block text-[10.5px] text-white/40">{sub}</span>
-      </span>
-    </button>
+      {exportOpen && (
+        <MapExportModal
+          data={mapData}
+          invRows={invRows}
+          author={profile?.full_name ?? ''}
+          country={company?.country ?? ''}
+          onClose={() => setExportOpen(false)}
+        />
+      )}
+    </div>
   )
 }

@@ -1,35 +1,12 @@
-import { toBlob, toSvg, toCanvas } from 'html-to-image'
-import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { useAnalyticsStore } from '@/stores/analyticsStore'
 import type { InvReportRow } from '@/features/inventory/inventoryReportData'
 
-// Exportación del mapa de procesos (imagen PNG/SVG) y de un PDF-reporte que junta
-// el mapa + los gráficos del inventario + la tabla completa del inventario. Usa
-// html-to-image (render por el navegador) porque html2canvas no entiende los
-// colores oklch de Tailwind 4 y saldría en negro. Los controles de edición del
-// mapa (botón "Agregar", flechas) se excluyen con `data-export-hide`.
-
-const BG = '#0b1220'
-// Excluye del render cualquier elemento marcado con data-export-hide (controles
-// de edición que no son parte del mapa).
-const exportFilter = (node: HTMLElement) => !(node instanceof HTMLElement && node.hasAttribute('data-export-hide'))
-const IMG_OPTS = { backgroundColor: BG, pixelRatio: 2, cacheBust: true, filter: exportFilter }
-
-export type MapImageFormat = 'png' | 'svg'
-
-export async function exportMapImage(node: HTMLElement, format: MapImageFormat, name = 'mapa-de-procesos') {
-  if (format === 'png') {
-    const blob = await toBlob(node, IMG_OPTS)
-    if (blob) saveAs(blob, `${name}.png`)
-  } else {
-    const dataUrl = await toSvg(node, { backgroundColor: BG, cacheBust: true, filter: exportFilter })
-    const blob = await (await fetch(dataUrl)).blob()
-    saveAs(blob, `${name}.svg`)
-  }
-  useAnalyticsStore.getState().trackEvent('export', `process-map-${format}`)
-}
+// PDF-reporte del mapa: junta el mapa (ya rasterizado desde el SVG vectorial, así
+// nunca sale cortado) + los gráficos del inventario + la tabla completa del
+// inventario. La imagen PNG/SVG del mapa se genera aparte (mapSvg.ts) desde el
+// SVG con la marca elegida, no por captura de pantalla.
 
 // ─── PDF: mapa + gráficos del inventario + tabla del inventario ─────────────
 
@@ -103,14 +80,13 @@ function drawBars(pdf: jsPDF, x: number, y: number, w: number, title: string, da
   return yy
 }
 
-export async function exportMapReportPdf(mapNode: HTMLElement, invRows: InvReportRow[], meta: PdfMeta) {
+export async function exportMapReportPdf(mapCanvas: HTMLCanvasElement, invRows: InvReportRow[], meta: PdfMeta) {
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
   const date = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' })
   const foot = meta.generatedBy ? `${meta.company} | Generado por: ${meta.generatedBy}` : meta.company
   const pageW = pdf.internal.pageSize.getWidth()
 
-  // 1) Mapa de procesos (imagen, sin los controles de edición)
-  const mapCanvas = await toCanvas(mapNode, IMG_OPTS)
+  // 1) Mapa de procesos (rasterizado desde el SVG vectorial: completo, nítido)
   addCanvasPaged(pdf, mapCanvas, `Mapa de Procesos — ${meta.company}`, date, foot, true)
 
   // 2) Gráficos del inventario (dibujados como barras/valores, no imagen)

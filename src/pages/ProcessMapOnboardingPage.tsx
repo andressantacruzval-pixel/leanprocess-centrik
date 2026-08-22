@@ -19,6 +19,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { useProcessStore } from '@/stores/processStore'
+import { useCompanyStore } from '@/stores/companyStore'
 import { useActiveCompany } from '@/hooks/useActiveCompany'
 import { ConversationalPanel } from '@/components/ai/ConversationalPanel'
 import { useConversationalAgent } from '@/hooks/useConversationalAgent'
@@ -53,6 +54,22 @@ function buildExistingMacroContext(scoped: Macroprocess[]): string {
   return lines.join('\n')
 }
 
+// Inyecta TODO lo que la empresa ya definió para que la IA no lo vuelva a
+// preguntar (giro, país, tamaño, descripción, áreas del organigrama).
+interface CompanyLike { name: string; industry?: string | null; country?: string | null; company_size?: string | null; description?: string | null }
+function buildCompanyContext(company: CompanyLike | null | undefined, orgUnits: { name: string }[]): string {
+  if (!company) return ''
+  const L = ['\n\nDATOS DE LA EMPRESA (YA LOS CONOCES — no los preguntes, úsalos y salta esas preguntas):']
+  L.push(`Nombre: ${company.name}`)
+  if (company.industry) L.push(`Sector / giro: ${company.industry}`)
+  if (company.country) L.push(`País: ${company.country}`)
+  if (company.company_size) L.push(`Tamaño: ${company.company_size}`)
+  if (company.description) L.push(`Descripción: ${company.description}`)
+  const areas = [...new Set(orgUnits.map((u) => u.name).filter(Boolean))]
+  if (areas.length) L.push(`Estructura organizacional (áreas / unidades ya definidas): ${areas.join(', ')}`)
+  return L.join('\n')
+}
+
 function buildContinuationGreeting(companyName: string, scoped: Macroprocess[]): string {
   const total = scoped.length
   const parts: string[] = []
@@ -71,6 +88,7 @@ export default function ProcessMapOnboardingPage() {
   const macroprocesses = useProcessStore((s) => s.macroprocesses)
   const addMacroprocess = useProcessStore((s) => s.addMacroprocess)
   const deleteMacroprocess = useProcessStore((s) => s.deleteMacroprocess)
+  const orgUnits = useCompanyStore((s) => s.orgUnits)
 
   const [justAdded, setJustAdded] = useState<string | null>(null)
 
@@ -103,9 +121,7 @@ export default function ProcessMapOnboardingPage() {
     return out
   }, [scoped])
 
-  const companyCtx = activeCompany
-    ? `\n\nContexto de la empresa: ${activeCompany.name}${activeCompany.industry ? ' — ' + activeCompany.industry : ''}.`
-    : ''
+  const companyCtx = buildCompanyContext(activeCompany, orgUnits)
 
   const agent = useConversationalAgent({
     systemPrompt: PROCESS_MAP_ONBOARDING_PROMPT + companyCtx + buildExistingMacroContext(scoped),
@@ -115,8 +131,8 @@ export default function ProcessMapOnboardingPage() {
     greeting: activeCompany && scoped.length > 0
       ? buildContinuationGreeting(activeCompany.name, scoped)
       : activeCompany
-      ? `Hola! Soy tu consultor de procesos. Vamos a armar el mapa de ${activeCompany.name} super rapido. Cuentame en una frase a que se dedica ${activeCompany.name}.`
-      : 'Hola! Soy tu consultor de procesos. Cuentame en una frase a que se dedica tu empresa.',
+      ? `Hola, soy tu arquitecto de procesos. Ya tengo los datos base de ${activeCompany.name}${activeCompany.industry ? ' (' + activeCompany.industry + ')' : ''}, así que iré directo y saltaré lo que ya sé. Para arrancar el mapa Nivel 0: descríbeme el flujo de punta a punta —desde que aparece un cliente hasta que se le entrega y se cobra— en el orden real de operación.`
+      : 'Hola, soy tu arquitecto de procesos. Para armar el mapa Nivel 0, cuéntame en una frase a qué se dedica tu empresa.',
     augmentSystemPromptForTurn: () => buildExistingMacroContext(
       macroprocesses.filter(m => !m.company_id || !activeCompany || m.company_id === activeCompany.id)
     ),
