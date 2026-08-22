@@ -3,7 +3,7 @@ import { useCompanyStore } from '@/stores/companyStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { useCopilotStore } from '@/stores/copilotStore'
-import { streamChat, type ChatMessage } from '@/lib/conversationalAi'
+import { streamAiProxy, type AiMessage } from '@/lib/aiClient'
 import { buildTurnContext } from './copilotContext'
 import { buildCopilotSystemPrompt } from './copilotPrompt'
 import { extractWidgets, stripForDisplay } from './copilotWidgets'
@@ -49,7 +49,7 @@ export function useCopilot() {
 
     // Historia previa ANTES de agregar el turno nuevo.
     const prior = useCopilotStore.getState().conversations.find((c) => c.id === convId)?.messages ?? []
-    const history: ChatMessage[] = prior
+    const history: AiMessage[] = prior
       .slice(-HISTORY_TURNS)
       .map((m) => ({ role: m.role, content: m.text }))
 
@@ -65,11 +65,15 @@ export function useCopilot() {
 
     let buffer = ''
     try {
-      for await (const chunk of streamChat([...history, { role: 'user', content: q }], {
+      // Mismo camino de streaming probado que el chat de inventario: sin forzar
+      // modelo (el proxy usa gemini-2.5-flash por defecto) y con un feature
+      // conocido para el descuento de créditos.
+      for await (const chunk of streamAiProxy([...history, { role: 'user', content: q }], {
         systemPrompt,
         temperature: 0.3,
+        maxOutputTokens: 4096,
         signal: controller.signal,
-        feature: 'copilot_query',
+        feature: 'ai_consultant',
         companyId: activeCompanyId,
       })) {
         buffer += chunk
@@ -83,8 +87,12 @@ export function useCopilot() {
         updateMessage(convId, assistantId, { text: text || '(consulta detenida)', widgets })
       } else {
         console.warn('[useCopilot] stream error', err)
-        setError('No se pudo completar la consulta. Inténtalo de nuevo.')
-        updateMessage(convId, assistantId, { text: buffer ? stripForDisplay(buffer) : 'Hubo un error al consultar. Inténtalo de nuevo.' })
+        const noCredits = err instanceof Error && err.message === 'INSUFFICIENT_CREDITS'
+        const msg = noCredits
+          ? 'Te has quedado sin créditos de IA. Recárgalos para seguir consultando.'
+          : 'No se pudo completar la consulta. Inténtalo de nuevo.'
+        setError(msg)
+        updateMessage(convId, assistantId, { text: buffer ? stripForDisplay(buffer) : msg })
       }
     } finally {
       abortRef.current = null

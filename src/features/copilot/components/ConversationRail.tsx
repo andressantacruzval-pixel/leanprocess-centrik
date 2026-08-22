@@ -75,7 +75,7 @@ export function ConversationRail({ conversations, activeId, onNew, onSelect, onR
               ) : (
                 <>
                   <span className={`flex-1 min-w-0 truncate text-[12.5px] ${isActive ? 'text-white' : 'text-white/60'}`}>{c.title}</span>
-                  <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="shrink-0 flex items-center gap-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
                     <IconBtn title="Renombrar" onClick={(e) => { e.stopPropagation(); setDraft(c.title); setEditingId(c.id) }}><Pencil size={11} /></IconBtn>
                     <IconBtn title="Eliminar" danger onClick={(e) => { e.stopPropagation(); if (confirm('¿Eliminar esta consulta?')) onDelete(c.id) }}><Trash2 size={11} /></IconBtn>
                   </div>
