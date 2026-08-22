@@ -32,6 +32,7 @@ const ProcedurePage = lazy(() => import('@/features/procedure/pages/ProcedurePag
 const KpiPage = lazy(() => import('@/features/kpi/pages/KpiPage'))
 const BpmnEditorPage = lazy(() => import('@/features/bpmn/pages/BpmnEditorPage'))
 const AiConsultantPage = lazy(() => import('@/features/ai-consultant/pages/AiConsultantPage'))
+const CopilotPage = lazy(() => import('@/features/copilot/pages/CopilotPage'))
 const IndicatorsPage = lazy(() => import('@/features/kpi/pages/IndicatorsPage'))
 const OrgStructurePage = lazy(() => import('@/features/org-structure/pages/OrgStructurePage'))
 const CatalogsPage = lazy(() => import('@/features/catalog/pages/CatalogsPage'))
@@ -213,6 +214,7 @@ function App() {
               <Route path="process/:processId/indicators" element={<KpiPage />} />
               <Route path="bpmn/:processId" element={<BpmnEditorPage />} />
               <Route path="ai-consultant" element={<AiConsultantPage />} />
+              <Route path="copilot" element={<CopilotPage />} />
               <Route path="indicators" element={<IndicatorsPage />} />
               <Route path="indicators/:processId" element={<IndicatorsPage />} />
               <Route path="org-structure" element={<OrgStructurePage />} />

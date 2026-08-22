@@ -20,6 +20,7 @@ import {
   GraduationCap,
   Award,
   Presentation,
+  Bot,
   LogOut,
   X,
   //Code,
@@ -31,6 +32,7 @@ const HUB_URL = `${import.meta.env.VITE_LITE_URL ?? 'https://www.leanprocess.app
 
 const navItems = [
   { path: '/app', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/app/copilot', icon: Bot, label: 'Copiloto' },
   { path: '/app/process-map', icon: Map, label: 'Mapa de Procesos' },
   { path: '/app/process-levels', icon: Layers, label: 'Procesos por Niveles' },
   { path: '/app/heat-map', icon: ShieldAlert, label: 'Mapa de Calor' },
