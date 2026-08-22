@@ -35,9 +35,11 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
   const orgUnits = useCompanyStore((s) => s.orgUnits)
   const healthMap = useProcessHealth()
   const plan = usePlanLimits()
-  const subCount = plan.processes.count
+  // Crear procesos es libre; el plan gobierna DOCUMENTAR. El contador refleja
+  // cuántos procesos has documentado (caracterizado, diagramado, etc.) vs el cupo.
   const subLimit = plan.cap
-  const limitReached = plan.processes.reached
+  const docCount = plan.documented.count
+  const docReached = plan.documented.reached
   const isCommunity = plan.isCommunity
 
   const macro = macroprocesses.find((m) => m.id === macroId)
@@ -114,10 +116,9 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
   const handleAdd = () => {
     const trimmed = newName.trim()
     if (!trimmed) return
-    // Antes esto era `return` a secas: escribías el nombre, pulsabas, y no pasaba
-    // nada. El silencio se lee como una aplicación rota, no como un límite — y era
-    // justo el caso donde hay algo que vender.
-    if (isAtLowestLevel && avisarSiSinCupo(limitReached, plan.level, subLimit, 'crear')) return
+    // Crear la tarjeta del proceso/subproceso es LIBRE: el usuario arma todo su
+    // mapa sin tope. Lo que gobierna el plan es DOCUMENTAR (caracterizar, flujograma,
+    // riesgos, controles…), y eso se controla en la tarjeta, no aquí.
     addProcess(trimmed, macroId, parentProcessId)
     setNewName('')
     setAddingNew(false)
@@ -209,16 +210,19 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
             {currentProcesses.length !== 1 ? 's' : ''}
           </p>
         </div>
-        {isAtLowestLevel && isCommunity && subLimit !== null && (
-          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium border ${
-            limitReached
-              ? 'bg-red-500/15 text-red-400 border-red-500/20'
-              : subCount >= subLimit * 0.8
-              ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
-              : 'bg-white/5 text-white/40 border-white/10'
-          }`}>
-            {subCount} / {subLimit} subprocesos
-          </div>
+        {isCommunity && subLimit !== null && (
+          <button
+            onClick={() => { if (docReached) avisarSiSinCupo(true, plan.level, subLimit) }}
+            title={docReached ? `Documentar uno nuevo requiere ampliar tu ${planName(plan.level)}` : `Has documentado ${docCount} de ${subLimit} procesos que incluye tu ${planName(plan.level)}`}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors ${
+              docReached
+                ? 'bg-red-500/15 text-red-400 border-red-500/20 hover:bg-red-500/25'
+                : docCount >= subLimit * 0.8
+                ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
+                : 'bg-white/5 text-white/40 border-white/10'
+            }`}>
+            {docCount} / {subLimit} documentados{docReached ? ' · ampliar' : ''}
+          </button>
         )}
       </div>
 
@@ -447,35 +451,6 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
               </button>
             </div>
           </div>
-        ) : isAtLowestLevel && limitReached ? (
-          /*
-           * Al topar, esta baldosa NO desaparece ni se apaga: se convierte en la
-           * puerta para ampliar.
-           *
-           * Era un panel ROJO y `cursor-not-allowed`, o sea un callejón sin salida
-           * pintado como un error. Dos cosas mal: el rojo dice «algo falló» cuando lo
-           * que pasa es que el cliente ha llenado su plan —que es un éxito—, y no se
-           * podía pulsar, así que quien quería seguir no tenía a dónde ir.
-           *
-           * Ahora es el mismo hueco de siempre, en el color de la marca, y al pulsarlo
-           * sale el muro con el escalón siguiente y su precio.
-           */
-          <button
-            onClick={() => avisarSiSinCupo(true, plan.level, subLimit, 'crear')}
-            className="min-h-[100px] rounded-xl border-2 border-dashed border-cyan-500/25 bg-cyan-500/[0.04]
-                       flex flex-col items-center justify-center gap-1.5 px-3
-                       hover:border-cyan-500/50 hover:bg-cyan-500/10 transition-colors group"
-          >
-            <Plus size={20} className="text-cyan-400/60 group-hover:text-cyan-400 transition-colors" />
-            <span className="text-xs text-cyan-400/80 text-center font-medium">
-              {plan.hasNextLevel ? 'Amplía tu plan para seguir' : 'Hablemos de tu caso'}
-            </span>
-            <span className="text-[10px] text-white/35 text-center">
-              {/* El nombre sale del NIVEL. Atarlo a `isCommunity` (que es plan_type,
-                  o sea la membresia) llamaba "Community" a quien acababa de pagar. */}
-              Ya tienes los {subLimit} procesos de tu {planName(plan.level)}
-            </span>
-          </button>
         ) : (
           <button
             onClick={() => setAddingNew(true)}

@@ -302,11 +302,7 @@ export default function ProcessLevelsPage() {
              informacion que hace falta para decidir cual sobra. */
           <button
             onClick={() => setDepurando(true)}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors ${
-              plan.processes.reached
-                ? 'bg-amber-500/10 text-amber-400 border-amber-500/25 hover:bg-amber-500/20'
-                : 'bg-white/[0.03] text-white/50 border-white/10 hover:bg-white/[0.07] hover:text-white/80'
-            }`}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors bg-white/[0.03] text-white/50 border-white/10 hover:bg-white/[0.07] hover:text-white/80"
             title="Eliminar varios procesos a la vez"
           >
             <Trash2 size={13} />
