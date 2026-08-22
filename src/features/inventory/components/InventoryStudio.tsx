@@ -149,6 +149,13 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
             {err && <span className="text-[12px] text-red-300 inline-flex items-center gap-1.5"><AlertTriangle size={12} /> {err}</span>}
           </div>
 
+          {/* Qué hace cada modo (para el usuario final) */}
+          <p className="text-[11.5px] text-white/45 leading-snug">
+            <b className="text-white/70">Big Bang (auto):</b> la IA genera de una vez todos los procesos y subprocesos de este macroproceso a partir de la información de tu empresa. Rápido para arrancar; luego ajustas.
+            {'  ·  '}
+            <b className="text-white/70">Incremental (chat):</b> los construyes paso a paso conversando con la IA, guiando y validando cada parte. Ideal para casos complejos o cuando quieres control fino.
+          </p>
+
           {/* Chat incremental acotado a este macro */}
           {mode === 'chat' && <InventoryChat companyId={companyId} doc={doc} focoIndex={sel!} />}
 

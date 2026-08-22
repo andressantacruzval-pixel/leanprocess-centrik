@@ -20,14 +20,23 @@ function cleanJson(text: string | undefined): string {
   return clean.slice(start, end + 1)
 }
 
+// Estructura veloz + de calidad: pasar responseMimeType:'application/json' apaga
+// el "thinking" de Gemini 2.5 (que añade 60-120s) y endurece el parseo del JSON;
+// temperatura baja = salida determinista; maxOutputTokens acota la cola de latencia.
 async function callGemini(
   messages: { role: string; content: string }[],
   systemPrompt?: string,
-  feature?: string
+  feature?: string,
+  opts?: { temperature?: number; maxOutputTokens?: number; responseMimeType?: string }
 ): Promise<{ text: string; tokensUsed: number }> {
-  const text = await callAiProxy(messages as AiMessage[], { systemPrompt, feature })
+  const text = await callAiProxy(messages as AiMessage[], { systemPrompt, feature, ...opts })
   return { text, tokensUsed: 0 }
 }
+
+// Config estándar para generadores que devuelven JSON (rápido + robusto). El
+// responseMimeType apaga el "thinking" y endurece el parseo; sin tope de tokens
+// para no truncar salidas largas (procedimientos, clasificación de valor).
+const JSON_FAST = { responseMimeType: 'application/json', temperature: 0.3 }
 
 // ── Procedure types ───────────────────────────────────────────────────────
 
@@ -185,7 +194,8 @@ Responde SOLO con JSON valido, sin markdown ni explicaciones.`
   const { text } = await callGemini(
     [{ role: 'user', content: prompt }],
     'Eres un consultor senior de BPM e ISO 9001. Generas documentacion de procesos profesional y detallada.',
-    'procedure_from_context'
+    'procedure_from_context',
+    JSON_FAST,
   )
 
   return JSON.parse(cleanJson(text))
@@ -262,7 +272,8 @@ Responde SOLO con JSON valido, sin markdown ni explicaciones.`
   const { text } = await callGemini(
     [{ role: 'user', content: prompt }],
     'Eres un consultor senior de BPM e ISO 9001. Generas documentacion de procesos profesional basada en diagramas de flujo BPMN.',
-    'procedure_from_bpmn'
+    'procedure_from_bpmn',
+    JSON_FAST,
   )
 
   const result = JSON.parse(cleanJson(text))
@@ -295,7 +306,8 @@ export async function generateRisksForProcedure(activities: { nombre: string }[]
   const { text } = await callGemini(
     [{ role: 'user', content: `Analiza estas actividades de proceso: ${JSON.stringify(activities.map(a => a.nombre))}. Identifica 5 riesgos operativos y sus controles especificos. Responde SOLO con JSON array: [{"actividad": "...", "riesgo": "...", "control": "..."}]` }],
     'Eres un experto en gestion de riesgos operativos y controles internos.',
-    'procedure_risks'
+    'procedure_risks',
+    JSON_FAST,
   )
   return JSON.parse(cleanJson(text))
 }
@@ -353,7 +365,8 @@ REGLAS:
 - Sé especifico y practico, no generico.
 - Basa las recomendaciones en las actividades REALES del diagrama.` }],
     'Eres un auditor interno senior certificado CIA/CISA con experiencia en ISO 19011 y gestion de procesos.',
-    'audit_recommendations'
+    'audit_recommendations',
+    JSON_FAST,
   )
 
   try {
@@ -404,7 +417,8 @@ Responde en JSON array:
 
 Solo JSON, sin markdown.` }],
     'Eres un consultor Lean Six Sigma Black Belt especializado en analisis de valor y eliminacion de desperdicios.',
-    'value_classification'
+    'value_classification',
+    { ...JSON_FAST, temperature: 0.2 },
   )
 
   try {
@@ -483,7 +497,8 @@ REGLAS:
 - Basa cada oportunidad en los riesgos y/o el mapeo de valor reales de arriba.
 - La descripción debe estar bien redactada y ser útil para un plan de acción.` }],
     'Eres un consultor senior de mejora continua (Lean Six Sigma Black Belt) especializado en optimización de procesos y planes de acción.',
-    'improvement_opportunities'
+    'improvement_opportunities',
+    { ...JSON_FAST, temperature: 0.4 },
   )
 
   try {
@@ -512,7 +527,8 @@ REGLAS:
 4. Output: un solo parrafo rico y profesional.
 Responde SOLO con el texto mejorado.` }],
     'Eres un redactor tecnico para documentacion ISO 9001.',
-    'improve_text'
+    'improve_text',
+    { temperature: 0.5, maxOutputTokens: 2048 },
   )
   return text
 }

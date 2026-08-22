@@ -17,11 +17,15 @@ async function callGemini(
   messages: { role: string; content: string }[],
   systemPrompt?: string,
   feature?: string,
-  opts?: { temperature?: number; maxOutputTokens?: number; modelId?: string }
+  opts?: { temperature?: number; maxOutputTokens?: number; modelId?: string; responseMimeType?: string }
 ): Promise<{ text: string; tokensUsed: number }> {
   const text = await callAiProxy(messages as AiMessage[], { systemPrompt, feature, ...opts })
   return { text, tokensUsed: 0 }
 }
+
+// Config estándar para generadores JSON: apaga el "thinking" de Gemini 2.5
+// (60-120s menos) y fija salida determinista. Sin tope de tokens para no truncar.
+const JSON_FAST = { responseMimeType: 'application/json', temperature: 0.3 }
 
 export async function generateProcessDescription(processName: string, context?: string) {
   const name = sanitizePromptInput(processName, 150)
@@ -39,7 +43,8 @@ export async function generateSipoc(processName: string, processDescription?: st
   return callGemini(
     [{ role: 'user', content: `Genera un analisis SIPOC completo para el proceso "${name}". ${desc ? `Descripcion: ${desc}` : ''} Responde en formato JSON con la estructura: { "entries": [{ "supplier": "...", "input": "...", "output": "...", "customer": "..." }] }` }],
     'Eres un experto en gestion por procesos. Genera analisis SIPOC detallados y profesionales.',
-    'sipoc'
+    'sipoc',
+    JSON_FAST,
   )
 }
 
@@ -49,7 +54,8 @@ export async function generateBpmnDiagram(processName: string, processDescriptio
   return callGemini(
     [{ role: 'user', content: `Genera un diagrama de flujo BPMN para el proceso "${name}". ${desc ? `Descripcion: ${desc}` : ''} ${sipocEntries ? `SIPOC: ${JSON.stringify(sipocEntries)}` : ''} Responde en formato JSON compatible con React Flow: { "nodes": [...], "edges": [...] }. Cada node debe tener: id, type (startEvent/endEvent/task/exclusiveGateway/parallelGateway), position: {x, y}, data: {label}. Cada edge: id, source, target, type (default/smoothstep).` }],
     'Eres un experto en BPMN 2.0 y modelado de procesos. Genera diagramas de flujo estructurados y profesionales.',
-    'bpmn_generation'
+    'bpmn_generation',
+    JSON_FAST,
   )
 }
 
@@ -133,7 +139,8 @@ export async function generateIndicators(processInfo: {
   const { text } = await callGemini(
     [{ role: 'user', content: userContent }],
     INDICATORS_SYSTEM_PROMPT,
-    'kpi'
+    'kpi',
+    JSON_FAST,
   )
 
   // Strip all markdown fences and extract JSON object robustly
