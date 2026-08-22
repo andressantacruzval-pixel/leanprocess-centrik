@@ -1,6 +1,8 @@
-import { useState } from 'react'
-import { Pencil, Trash2, Plus, Check, X, CheckCheck } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Pencil, Trash2, Plus, Check, X, CheckCheck, Upload, Loader2, MapPin } from 'lucide-react'
 import { useInventoryStore } from '@/stores/inventoryStore'
+import { useProcessStore } from '@/stores/processStore'
+import { volcarSubAlMapa, subEnMapa } from '../volcarAlMapa'
 import type { InvMacro, InvSub } from '../types'
 import { OriginBadge } from './OriginBadge'
 
@@ -84,8 +86,15 @@ function ProcCard({ companyId, mi, pi, nombre, subs, areas }: { companyId: strin
 function SubRow({ companyId, mi, pi, si, sub, areas }: { companyId: string; mi: number; pi: number; si: number; sub: InvSub; areas: string[] }) {
   const editSub = useInventoryStore((s) => s.editSub)
   const removeSub = useInventoryStore((s) => s.removeSub)
+  // Suscribe a processes para recalcular "ya en el mapa" tras volcar uno a uno.
+  const processes = useProcessStore((s) => s.processes)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<InvSub>(sub)
+  const [volcandoUno, setVolcandoUno] = useState(false)
+  // `processes`/`sub` fuerzan el recálculo: subEnMapa lee estado global y el
+  // linter no lo detecta, pero el dato debe reflejar el volcado en vivo.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const enMapa = useMemo(() => subEnMapa(companyId, mi, pi, si), [companyId, mi, pi, si, sub, processes])
 
   if (editing) {
     return (
@@ -125,8 +134,14 @@ function SubRow({ companyId, mi, pi, si, sub, areas }: { companyId: string; mi: 
         {sub.objetivo && <div className="text-[11px] text-white/40 mt-0.5 leading-snug">{sub.objetivo}</div>}
       </div>
       {sub.area && <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{sub.area}</span>}
+      {enMapa && <span title="Ya está en el mapa de procesos" className="shrink-0 inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"><MapPin size={10} /> en el mapa</span>}
       <div className="shrink-0 flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
         {!accepted && <IconBtn title="Aceptar" onClick={() => editSub(companyId, mi, pi, si, { origen: 'confirmado' })}><CheckCheck size={13} /></IconBtn>}
+        {accepted && !enMapa && (
+          <IconBtn title="Volcar este subproceso al mapa" onClick={async () => { if (volcandoUno) return; setVolcandoUno(true); try { await volcarSubAlMapa(companyId, mi, pi, si) } finally { setVolcandoUno(false) } }}>
+            {volcandoUno ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}
+          </IconBtn>
+        )}
         <IconBtn title="Editar" onClick={() => setEditing(true)}><Pencil size={12} /></IconBtn>
         <IconBtn title="Eliminar" danger onClick={() => removeSub(companyId, mi, pi, si)}><Trash2 size={12} /></IconBtn>
       </div>

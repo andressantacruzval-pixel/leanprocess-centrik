@@ -7,7 +7,7 @@ import { TIPO_COLOR } from '../types'
 import { leafAreas } from '../inventoryUtils'
 import { stats, globalStats } from '../inventoryStats'
 import { generateMacro } from '../inventoryAi'
-import { volcarAceptadosAlMapa, pendientesDeVolcar } from '../volcarAlMapa'
+import { volcarAceptadosAlMapa, volcarMacroAlMapa, pendientesDeVolcar } from '../volcarAlMapa'
 import { InventoryMacroEditor } from './InventoryMacroEditor'
 import { InventoryChat } from './InventoryChat'
 
@@ -36,11 +36,11 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
   const porVolcar = pendientesDeVolcar(companyId)
   const [volcando, setVolcando] = useState(false)
 
-  const volcar = async () => {
+  const doVolcar = async (fn: () => Promise<{ procesos: number; subprocesos: number; failed: number }>) => {
     if (volcando) return
     setVolcando(true); setVolcadoMsg('')
     try {
-      const r = await volcarAceptadosAlMapa(companyId)
+      const r = await fn()
       const base = (r.procesos || r.subprocesos)
         ? `Volcado al mapa: +${r.procesos} proceso(s) y +${r.subprocesos} subproceso(s) ✓`
         : 'No había nada nuevo aceptado por volcar.'
@@ -52,6 +52,8 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
       setTimeout(() => setVolcadoMsg(''), 6000)
     }
   }
+  const volcarTodo = () => doVolcar(() => volcarAceptadosAlMapa(companyId))
+  const volcarGrupo = (mi: number) => doVolcar(() => volcarMacroAlMapa(companyId, mi))
 
   const runBigBang = async (mi: number) => {
     setBusy(true); setErr(''); setMode('none')
@@ -135,6 +137,9 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
             {stats(selMacro).ded > 0 && (
               <button onClick={() => acceptMacro(companyId, sel!)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[12px] hover:bg-emerald-500/15"><CheckCheck size={13} /> Aceptar todo</button>
             )}
+            {(() => { const n = pendientesDeVolcar(companyId, sel!); return n > 0 ? (
+              <button onClick={() => volcarGrupo(sel!)} disabled={volcando} title="Carga al mapa solo los subprocesos aceptados de ESTE macroproceso" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[12px] hover:bg-cyan-500/15 disabled:opacity-40">{volcando ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />} Volcar al mapa ({n})</button>
+            ) : null })()}
           </div>
 
           {/* Métodos */}
@@ -177,7 +182,7 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
         </div>
         <div className="flex-1" />
         {volcadoMsg && <span className="text-[12px] text-emerald-300">{volcadoMsg}</span>}
-        <button onClick={volcar} disabled={busy || volcando || !porVolcar} title={porVolcar ? 'Crea en el mapa los procesos/subprocesos aceptados' : 'No hay subprocesos aceptados nuevos'} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[13px] hover:bg-emerald-500/15 disabled:opacity-40">{volcando ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />} Volcar al mapa{porVolcar ? ` (${porVolcar})` : ''}</button>
+        <button onClick={volcarTodo} disabled={busy || volcando || !porVolcar} title={porVolcar ? 'Carga al mapa TODOS los subprocesos aceptados de todos los macroprocesos' : 'No hay subprocesos aceptados nuevos'} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[13px] hover:bg-emerald-500/15 disabled:opacity-40">{volcando ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />} Volcar todo lo aceptado{porVolcar ? ` (${porVolcar})` : ''}</button>
         <button onClick={() => navigate('/app/reports?tab=inventario')} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[13px] hover:bg-cyan-500/15"><BarChart3 size={14} /> Reporte</button>
         <button onClick={() => { if (!busy && confirm('¿Vaciar lo levantado? El mapa y las áreas se conservan.')) { reset(companyId); setSel(null) } }} disabled={busy} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-white/10 text-white/40 text-[13px] hover:text-red-300 disabled:opacity-40"><RotateCcw size={14} /> Reiniciar</button>
         <button onClick={onClose} disabled={busy} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-cyan-500/30 disabled:opacity-40">Cerrar</button>
