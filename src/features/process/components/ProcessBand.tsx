@@ -244,6 +244,7 @@ export function ProcessBand({
               <button
                 onClick={() => scrollCards(-1)}
                 aria-label="Desplazar a la izquierda"
+                data-export-hide
                 className="absolute left-0 top-0 bottom-0 w-8 z-10 flex items-center justify-center
                            bg-gradient-to-r from-black/50 to-transparent hover:from-black/70
                            text-white/60 hover:text-white transition-all"
@@ -255,6 +256,7 @@ export function ProcessBand({
               <button
                 onClick={() => scrollCards(1)}
                 aria-label="Desplazar a la derecha"
+                data-export-hide
                 className="absolute right-0 top-0 bottom-0 w-8 z-10 flex items-center justify-center
                            bg-gradient-to-l from-black/50 to-transparent hover:from-black/70
                            text-white/60 hover:text-white transition-all"
@@ -264,8 +266,10 @@ export function ProcessBand({
             )}
           </div>
 
-          {/* Botón "Agregar" — fuera del scroll, siempre visible */}
-          <div className={`flex-shrink-0 p-3 sm:p-4 flex items-center border-l border-white/[0.04] ${bandBg}`}>
+          {/* Botón "Agregar" — fuera del scroll, siempre visible. `data-export-hide`
+              lo excluye de las exportaciones (imagen/PDF): es un control de edición,
+              no parte del mapa. */}
+          <div data-export-hide className={`flex-shrink-0 p-3 sm:p-4 flex items-center border-l border-white/[0.04] ${bandBg}`}>
             <button
               onClick={onAddMacro}
               className="w-16 sm:w-20 min-h-[80px] rounded-lg border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-1.5

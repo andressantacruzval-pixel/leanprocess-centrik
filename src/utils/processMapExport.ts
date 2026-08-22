@@ -1,15 +1,21 @@
 import { toBlob, toSvg, toCanvas } from 'html-to-image'
 import { saveAs } from 'file-saver'
 import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import { useAnalyticsStore } from '@/stores/analyticsStore'
+import type { InvReportRow } from '@/features/inventory/inventoryReportData'
 
-// Exportación del mapa de procesos (imagen PNG/SVG) y de un PDF que junta el
-// mapa con el reporte de inventario y sus gráficos. Usa html-to-image (render
-// por el navegador) porque html2canvas no entiende los colores oklch de
-// Tailwind 4 y saldría en negro.
+// Exportación del mapa de procesos (imagen PNG/SVG) y de un PDF-reporte que junta
+// el mapa + los gráficos del inventario + la tabla completa del inventario. Usa
+// html-to-image (render por el navegador) porque html2canvas no entiende los
+// colores oklch de Tailwind 4 y saldría en negro. Los controles de edición del
+// mapa (botón "Agregar", flechas) se excluyen con `data-export-hide`.
 
 const BG = '#0b1220'
-const IMG_OPTS = { backgroundColor: BG, pixelRatio: 2, cacheBust: true }
+// Excluye del render cualquier elemento marcado con data-export-hide (controles
+// de edición que no son parte del mapa).
+const exportFilter = (node: HTMLElement) => !(node instanceof HTMLElement && node.hasAttribute('data-export-hide'))
+const IMG_OPTS = { backgroundColor: BG, pixelRatio: 2, cacheBust: true, filter: exportFilter }
 
 export type MapImageFormat = 'png' | 'svg'
 
@@ -18,15 +24,14 @@ export async function exportMapImage(node: HTMLElement, format: MapImageFormat, 
     const blob = await toBlob(node, IMG_OPTS)
     if (blob) saveAs(blob, `${name}.png`)
   } else {
-    // toSvg devuelve un data URL; lo convertimos a Blob para guardarlo como .svg
-    const dataUrl = await toSvg(node, { backgroundColor: BG, cacheBust: true })
+    const dataUrl = await toSvg(node, { backgroundColor: BG, cacheBust: true, filter: exportFilter })
     const blob = await (await fetch(dataUrl)).blob()
     saveAs(blob, `${name}.svg`)
   }
   useAnalyticsStore.getState().trackEvent('export', `process-map-${format}`)
 }
 
-// ─── PDF: mapa + inventario ────────────────────────────────────────────────
+// ─── PDF: mapa + gráficos del inventario + tabla del inventario ─────────────
 
 interface PdfMeta { company: string; generatedBy?: string | null }
 
@@ -71,19 +76,90 @@ function addCanvasPaged(pdf: jsPDF, canvas: HTMLCanvasElement, title: string, su
   }
 }
 
-export async function exportMapAndInventoryPdf(mapNode: HTMLElement, inventoryNode: HTMLElement | null, meta: PdfMeta) {
+const norm = (v: string | null | undefined) => (v || '').trim()
+function countBy(rows: InvReportRow[], key: 'area' | 'macro'): { label: string; value: number }[] {
+  const m = new Map<string, number>()
+  for (const r of rows) { const k = norm(r[key]) || '(sin asignar)'; m.set(k, (m.get(k) || 0) + 1) }
+  return [...m.entries()].map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value)
+}
+
+// Lista de barras horizontales dibujada con primitivas de jsPDF (crisp, no imagen).
+function drawBars(pdf: jsPDF, x: number, y: number, w: number, title: string, data: { label: string; value: number }[], rgb: [number, number, number]) {
+  pdf.setTextColor(30, 41, 59); pdf.setFontSize(9); pdf.setFont('helvetica', 'bold')
+  pdf.text(title, x, y)
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7)
+  const max = Math.max(1, ...data.map((d) => d.value))
+  const labelW = Math.min(48, w * 0.42)
+  const barMax = w - labelW - 12
+  let yy = y + 5
+  for (const d of data) {
+    pdf.setTextColor(71, 85, 105)
+    pdf.text(d.label.length > 26 ? d.label.slice(0, 25) + '…' : d.label, x + labelW, yy + 2.6, { align: 'right' })
+    const bw = Math.max(1.5, (d.value / max) * barMax)
+    pdf.setFillColor(rgb[0], rgb[1], rgb[2]); pdf.rect(x + labelW + 2, yy, bw, 3.4, 'F')
+    pdf.setTextColor(30, 41, 59); pdf.text(String(d.value), x + labelW + 4 + bw, yy + 2.6)
+    yy += 5.4
+  }
+  return yy
+}
+
+export async function exportMapReportPdf(mapNode: HTMLElement, invRows: InvReportRow[], meta: PdfMeta) {
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
   const date = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' })
   const foot = meta.generatedBy ? `${meta.company} | Generado por: ${meta.generatedBy}` : meta.company
+  const pageW = pdf.internal.pageSize.getWidth()
 
+  // 1) Mapa de procesos (imagen, sin los controles de edición)
   const mapCanvas = await toCanvas(mapNode, IMG_OPTS)
   addCanvasPaged(pdf, mapCanvas, `Mapa de Procesos — ${meta.company}`, date, foot, true)
 
-  if (inventoryNode) {
-    const invCanvas = await toCanvas(inventoryNode, IMG_OPTS)
-    addCanvasPaged(pdf, invCanvas, `Inventario de Procesos — ${meta.company}`, date, foot, false)
-  }
+  // 2) Gráficos del inventario (dibujados como barras/valores, no imagen)
+  pdf.addPage()
+  header(pdf, `Reporte de Inventario — ${meta.company}`, date)
+  const margin = 10
+  const total = invRows.length
+  const procesos = new Set(invRows.map((r) => r.macro + '||' + r.proceso)).size
+  const areasCarga = new Set(invRows.map((r) => norm(r.area)).filter(Boolean)).size
+  const criticos = invRows.filter((r) => r.critico === true).length
+  const confirmados = invRows.filter((r) => r.origen === 'confirmado').length
+  const kpis: [string, string | number][] = [
+    ['Subprocesos', total], ['Procesos', procesos], ['Áreas con carga', areasCarga],
+    ['Críticos', criticos], ['Confirmado', total ? `${Math.round(confirmados / total * 100)}%` : '0%'],
+  ]
+  const gap = 4, boxW = (pageW - margin * 2 - gap * 4) / 5, boxH = 16
+  let y = 30
+  kpis.forEach(([label, value], i) => {
+    const x = margin + i * (boxW + gap)
+    pdf.setFillColor(238, 244, 252); pdf.rect(x, y, boxW, boxH, 'F')
+    pdf.setTextColor(90, 100, 120); pdf.setFontSize(7); pdf.setFont('helvetica', 'normal')
+    pdf.text(String(label), x + 2, y + 5)
+    pdf.setTextColor(20, 30, 60); pdf.setFontSize(13); pdf.setFont('helvetica', 'bold')
+    pdf.text(String(value), x + 2, y + 13)
+  })
+  pdf.setFont('helvetica', 'normal')
+  y += boxH + 10
+  const colW = (pageW - margin * 2 - 12) / 2
+  drawBars(pdf, margin, y, colW, 'Carga por área', countBy(invRows, 'area').slice(0, 12), [6, 182, 212])
+  drawBars(pdf, margin + colW + 12, y, colW, 'Subprocesos por macroproceso', countBy(invRows, 'macro').slice(0, 12), [57, 135, 229])
+  footer(pdf, foot)
 
-  pdf.save(`Lean_Process_mapa_inventario_${Date.now()}.pdf`)
+  // 3) Tabla completa del inventario: área + jerarquía macro→proceso→subproceso + objetivo
+  const body = invRows.map((r) => [norm(r.area) || '—', norm(r.macro), norm(r.proceso), norm(r.nombre), norm(r.objetivo) || '—'])
+  autoTable(pdf, {
+    head: [['Área', 'Macroproceso', 'Proceso', 'Subproceso', 'Objetivo']],
+    body,
+    startY: 24,
+    margin: { top: 24, bottom: 12, left: 8, right: 8 },
+    styles: { fontSize: 7.5, cellPadding: 1.6, overflow: 'linebreak', textColor: [30, 41, 59] },
+    headStyles: { fillColor: [27, 42, 74], textColor: [255, 255, 255], fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [244, 247, 252] },
+    columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 50 }, 2: { cellWidth: 55 }, 3: { cellWidth: 55 } },
+    didDrawPage: () => {
+      header(pdf, `Inventario de Procesos — ${meta.company}`, `${date} · ${total} subprocesos`)
+      footer(pdf, foot)
+    },
+  })
+
+  pdf.save(`Reporte_mapa_inventario_${Date.now()}.pdf`)
   useAnalyticsStore.getState().trackEvent('export', 'process-map-pdf')
 }

@@ -8,6 +8,8 @@ import { ProcessBand } from './ProcessBand'
 import { NewMacroprocessModal } from './NewMacroprocessModal'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { InventoryWizard } from '@/features/inventory/components/InventoryWizard'
+import { useInventoryData } from '@/features/inventory/useInventoryData'
+import { useInventoryReportRows } from '@/features/inventory/inventoryReportData'
 import type { Macroprocess } from '@/types'
 
 const CATEGORIES = ['estrategico', 'productivo', 'apoyo'] as const
@@ -31,8 +33,11 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
   const company = useCompanyStore((s) => s.company)
   const profile = useAuthStore((s) => s.profile)
 
-  // Exportación del mapa (imagen / PDF con el inventario)
+  // Exportación del mapa (imagen / PDF-reporte con el inventario)
   const mapRef = useRef<HTMLDivElement>(null)
+  const { companyId, appMacros, doc } = useInventoryData()
+  const invMacros = doc?.macros?.length ? doc.macros : appMacros
+  const invRows = useInventoryReportRows(companyId, invMacros)
   const [exportBusy, setExportBusy] = useState<'' | 'png' | 'svg' | 'pdf'>('')
   const [exportMenu, setExportMenu] = useState(false)
 
@@ -74,14 +79,9 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
     if (!mapRef.current || exportBusy) return
     setExportMenu(false); setExportBusy('pdf')
     try {
-      const [{ exportMapAndInventoryPdf }, { withOffscreenNode }, { InventoryReport }] = await Promise.all([
-        import('@/utils/processMapExport'),
-        import('@/utils/offscreenRender'),
-        import('@/features/inventory/components/InventoryReport'),
-      ])
+      const { exportMapReportPdf } = await import('@/utils/processMapExport')
       const meta = { company: company?.name ?? 'Empresa', generatedBy: profile?.full_name ?? null }
-      await withOffscreenNode(<InventoryReport />, 1600, (invNode) =>
-        exportMapAndInventoryPdf(mapRef.current!, invNode, meta))
+      await exportMapReportPdf(mapRef.current, invRows, meta)
     } catch (e) {
       console.warn('[ProcessMap] export PDF falló:', e)
     } finally { setExportBusy('') }
