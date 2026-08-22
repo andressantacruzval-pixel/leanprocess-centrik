@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, FileUp, MessageSquare, Sparkles, Type } from 'lucide-react'
+import { ArrowLeft, Check, FileUp, MessageSquare, Mic, Sparkles, Type } from 'lucide-react'
 import { BpmnModeler } from '@/features/bpmn/components/BpmnModeler'
 import { useProcesses } from '@/hooks/useProcesses'
 import { useTokenBudget } from '@/hooks/useTokenBudget'
+import { useSpeechDictation } from '@/hooks/useSpeechDictation'
 import { generateBpmnDirect, generateBpmnFromFile, validateBpmnFile, fileToBase64 } from '@/lib/bpmnAi'
 import { FlowchartChatMode } from '@/pages/FlowchartChatMode'
 import { IS_PHASE_1 } from '@/lib/phaseFlags'
@@ -85,6 +86,16 @@ export default function FlowchartOnboardingPage() {
       setIsSaving(false)
     }
   }, [process, updateProcess, navigate, bpmnBudget])
+
+  // Dictado por voz → anexa cada fragmento final al texto, respetando espacios.
+  // Así, al parar y reanudar, sigue sobre lo ya dictado (y sobre lo editado a mano).
+  const appendTranscript = useCallback((chunk: string) => {
+    setDirectText((prev) => {
+      const sep = prev && !/\s$/.test(prev) ? ' ' : ''
+      return prev + sep + chunk
+    })
+  }, [])
+  const dictado = useSpeechDictation({ onFinal: appendTranscript })
 
   // Direct text mode
   const handleGenerateDirect = useCallback(async () => {
@@ -221,19 +232,50 @@ export default function FlowchartOnboardingPage() {
 
             {selectedMode === 'direct' && (
               <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-                <p className="text-white/70 text-sm">
-                  Describe el proceso en texto libre y la IA generará el diagrama BPMN completo.
-                </p>
-                <textarea
-                  value={directText}
-                  onChange={(e) => setDirectText(e.target.value)}
-                  placeholder="Describe el proceso paso a paso: quién hace qué, cuándo, y qué decisiones se toman..."
-                  rows={6}
-                  className="w-full resize-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-cyan-500/50"
-                />
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-white/70 text-sm">
+                    Describe el proceso en texto libre —escríbelo o díctalo con el micrófono— y la IA generará el diagrama BPMN completo.
+                  </p>
+                  {dictado.supported && (
+                    <button
+                      type="button"
+                      onClick={dictado.toggle}
+                      title={dictado.listening ? 'Detener dictado' : 'Dictar por voz'}
+                      className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                        dictado.listening
+                          ? 'bg-red-500/15 text-red-300 border-red-500/30 hover:bg-red-500/25'
+                          : 'bg-white/5 text-cyan-300 border-cyan-500/25 hover:bg-cyan-500/10'
+                      }`}
+                    >
+                      {dictado.listening
+                        ? (<><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" /></span> Grabando… detener</>)
+                        : (<><Mic size={14} /> Dictar por voz</>)}
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <textarea
+                    value={directText}
+                    onChange={(e) => setDirectText(e.target.value)}
+                    placeholder="Describe el proceso paso a paso: quién hace qué, cuándo, y qué decisiones se toman... o pulsa «Dictar por voz» y habla."
+                    rows={6}
+                    className="w-full resize-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-cyan-500/50"
+                  />
+                  {dictado.listening && (
+                    <div className="mt-2 flex items-start gap-2 rounded-lg bg-cyan-500/[0.06] border border-cyan-500/20 px-3 py-2">
+                      <Mic size={13} className="mt-0.5 shrink-0 text-cyan-300 animate-pulse" />
+                      <p className="text-[12px] leading-snug text-white/60">
+                        {dictado.interim
+                          ? <><span className="text-white/40">Escuchando: </span><span className="italic text-cyan-200/90">{dictado.interim}</span></>
+                          : 'Escuchando… habla con naturalidad. El texto se irá agregando arriba; puedes pausar y retomar cuando quieras.'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {dictado.error && <p className="text-red-400 text-xs">{dictado.error}</p>}
                 {error && <p className="text-red-400 text-xs">{error}</p>}
                 <button
-                  onClick={() => { setSelectedMode('direct'); handleGenerateDirect() }}
+                  onClick={() => { dictado.stop(); setSelectedMode('direct'); handleGenerateDirect() }}
                   disabled={!directText.trim()}
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
