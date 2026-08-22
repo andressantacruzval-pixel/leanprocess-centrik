@@ -10,7 +10,6 @@ export interface CargoMetrics { procesos: number; actividades: number; vaMin: nu
 
 interface Props {
   companyName: string
-  areas: string
   profile: CargoProfile
   metrics: CargoMetrics
   editable?: boolean
@@ -19,9 +18,7 @@ interface Props {
 
 const ACCENT = '#0e7490'
 
-export function CargoProfileView({ companyName, areas, profile: p, metrics: m, editable, onPatch }: Props) {
-  const total = Math.max(1, m.vaMin + m.nvaMin + m.nvabnMin)
-  const pct = (n: number) => Math.round(n / total * 100)
+export function CargoProfileView({ companyName, profile: p, metrics: m, editable, onPatch }: Props) {
   const patchReq = (k: keyof CargoProfile['requisitos'], v: string | string[]) => onPatch?.({ requisitos: { ...p.requisitos, [k]: v } })
 
   return (
@@ -32,7 +29,6 @@ export function CargoProfileView({ companyName, areas, profile: p, metrics: m, e
           <div className="min-w-0">
             <div className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: ACCENT }}>Manual de Cargo</div>
             <Ed editable={editable} tag="h1" className="text-[26px] font-black text-slate-800 leading-tight mt-0.5" value={p.cargo} onCommit={(v) => onPatch?.({ cargo: v })} />
-            <div className="text-[12px] text-slate-500 mt-1">{companyName}{areas ? ` · ${areas}` : ''}</div>
           </div>
           <div className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center text-white" style={{ background: ACCENT }}>
             <Briefcase size={26} />
@@ -40,11 +36,9 @@ export function CargoProfileView({ companyName, areas, profile: p, metrics: m, e
         </header>
 
         {/* Métricas factuales */}
-        <div className="grid grid-cols-4 gap-3 mt-4">
+        <div className="grid grid-cols-2 gap-3 mt-4">
           <Metric label="Procesos" value={m.procesos} />
           <Metric label="Actividades" value={m.actividades} />
-          <Metric label="Carga" value={`${Math.round(total)}′`} sub="min/mes" />
-          <Metric label="Valor (VA)" value={`${pct(m.vaMin)}%`} sub="del tiempo" />
         </div>
 
         <Section icon={Target} title="Objetivo de la posición">
@@ -56,20 +50,6 @@ export function CargoProfileView({ companyName, areas, profile: p, metrics: m, e
 
         <Section icon={ListChecks} title="Responsabilidades principales">
           <EdList editable={editable} items={p.responsabilidades} onChange={(v) => onPatch?.({ responsabilidades: v })} ordered />
-        </Section>
-
-        {/* Distribución de la carga */}
-        <Section icon={GaugeCircle} title="Distribución de la carga">
-          <div className="flex h-4 rounded-full overflow-hidden bg-slate-100">
-            <span style={{ width: `${pct(m.vaMin)}%`, background: '#059669' }} />
-            <span style={{ width: `${pct(m.nvabnMin)}%`, background: '#d97706' }} />
-            <span style={{ width: `${pct(m.nvaMin)}%`, background: '#dc2626' }} />
-          </div>
-          <div className="flex flex-wrap gap-4 mt-2 text-[11px] text-slate-600">
-            <Legend color="#059669" label={`Agrega valor · ${pct(m.vaMin)}%`} />
-            <Legend color="#d97706" label={`Necesario sin valor · ${pct(m.nvabnMin)}%`} />
-            <Legend color="#dc2626" label={`Sin valor · ${pct(m.nvaMin)}%`} />
-          </div>
         </Section>
 
         <Footer companyName={companyName} n={1} generatedAt={p.generatedAt} />
@@ -149,10 +129,6 @@ function Metric({ label, value, sub }: { label: string; value: number | string; 
       {sub && <div className="text-[9px] text-slate-400">{sub}</div>}
     </div>
   )
-}
-
-function Legend({ color, label }: { color: string; label: string }) {
-  return <span className="inline-flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-sm" style={{ background: color }} /> {label}</span>
 }
 
 function Footer({ companyName, n, generatedAt }: { companyName: string; n: number; generatedAt: string }) {

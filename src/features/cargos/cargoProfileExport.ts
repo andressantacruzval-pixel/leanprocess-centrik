@@ -30,7 +30,7 @@ const p = (text: string) => new Paragraph({ children: [new TextRun(text || '—'
 const bullets = (items: string[]) => (items.length ? items : ['—']).map((t) => new Paragraph({ text: t, bullet: { level: 0 } }))
 const kv = (k: string, v: string) => new Paragraph({ children: [new TextRun({ text: `${k}: `, bold: true }), new TextRun(v || '—')], spacing: { after: 60 } })
 
-export async function exportCargoProfileDocx(profile: CargoProfile, companyName: string, areas: string, fileName: string) {
+export async function exportCargoProfileDocx(profile: CargoProfile, companyName: string, fileName: string) {
   const r = profile.requisitos
   const doc = new Document({
     creator: companyName || 'LeanProcess',
@@ -38,8 +38,7 @@ export async function exportCargoProfileDocx(profile: CargoProfile, companyName:
     sections: [{
       children: [
         new Paragraph({ text: 'MANUAL DE CARGO', alignment: AlignmentType.CENTER, spacing: { after: 40 } }),
-        new Paragraph({ text: profile.cargo, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
-        new Paragraph({ text: `${companyName}${areas ? ` · ${areas}` : ''}`, alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
+        new Paragraph({ text: profile.cargo, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
 
         h('Objetivo de la posición'), p(profile.objetivo),
         kv('Reporta a', profile.reportaA),

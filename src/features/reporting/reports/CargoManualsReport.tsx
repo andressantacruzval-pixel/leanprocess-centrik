@@ -35,11 +35,6 @@ export function CargoManualsReport() {
   const profile = sel ? getProfile(companyId, sel.cargo) : undefined
   void profilesMap // fuerza re-render al cambiar perfiles
 
-  const areasOf = (agg: CargoAgg) => {
-    const byId = new Map(processes.map((p) => [p.id, p]))
-    return [...new Set([...agg.processes].map((id) => byId.get(id)?.management).filter(Boolean))].join(', ')
-  }
-
   const generate = async (agg: CargoAgg) => {
     if (busy) return
     setBusy(true)
@@ -65,7 +60,7 @@ export function CargoManualsReport() {
   const exportDocx = async () => {
     if (!profile || !sel) return
     const { exportCargoProfileDocx } = await import('@/features/cargos/cargoProfileExport')
-    await exportCargoProfileDocx(profile, company?.name ?? 'Empresa', areasOf(sel), `Manual_de_Cargo_${sel.cargo.replace(/\s+/g, '_')}.docx`)
+    await exportCargoProfileDocx(profile, company?.name ?? 'Empresa', `Manual_de_Cargo_${sel.cargo.replace(/\s+/g, '_')}.docx`)
   }
 
   if (!conActividad.length) {
@@ -146,7 +141,7 @@ export function CargoManualsReport() {
             {profile && metrics ? (
               <div className="overflow-x-auto rounded-2xl bg-slate-200/5 p-4">
                 <div ref={pagesRef}>
-                  <CargoProfileView companyName={company?.name ?? 'Empresa'} areas={areasOf(sel)} profile={profile} metrics={metrics} editable={edit} onPatch={onPatch} />
+                  <CargoProfileView companyName={company?.name ?? 'Empresa'} profile={profile} metrics={metrics} editable={edit} onPatch={onPatch} />
                 </div>
               </div>
             ) : (
