@@ -1,14 +1,20 @@
 import { useMemo, useState } from 'react'
-import { Map, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
+import { Map, AlertTriangle, CheckCircle2, XCircle, FileSpreadsheet } from 'lucide-react'
 import { useInventoryData } from '../useInventoryData'
 import { useInventoryStore } from '@/stores/inventoryStore'
+import { useCompanyStore } from '@/stores/companyStore'
 import { countBy, leafAreas } from '../inventoryUtils'
 import { findings, type FindingLevel } from '../inventoryStats'
 import { useInventoryReportRows, EMPTY_FILTERS, BANDERAS, type RepFilters, type InvReportRow } from '../inventoryReportData'
+import { exportInventoryExcel } from '../inventoryExcel'
 import { TIPO_COLOR, type InvTipo } from '../types'
 import { OriginBadge } from './OriginBadge'
 import { InventoryReportSidebar } from './InventoryReportSidebar'
+import { DataTable, type Column } from '@/features/reporting/components/DataTable'
 import { useOrgLabels, useOrgUnitNamesByLevel } from '@/hooks/useOrgLabels'
+
+const boolTxt = (v: boolean | null): string => (v == null ? '' : v ? 'Sí' : 'No')
+const banderasTxt = (s: InvReportRow): string => BANDERAS.filter((b) => s[b.key] === true).map((b) => b.label).join(', ')
 
 // Reporte unificado del Inventario: barra lateral (navegación + filtros) + KPIs
 // + gráficos + tabla con TODA la caracterización (crítico, efectivo, nivel,
@@ -17,6 +23,7 @@ import { useOrgLabels, useOrgUnitNamesByLevel } from '@/hooks/useOrgLabels'
 export function InventoryReport() {
   const org = useOrgLabels()
   const orgNames = useOrgUnitNamesByLevel()
+  const companyName = useCompanyStore((s) => s.company?.name) ?? 'Empresa'
   const { companyId, appMacros, appAreas, doc } = useInventoryData()
   const editSub = useInventoryStore((s) => s.editSub)
   const macros = doc?.macros?.length ? doc.macros : appMacros
@@ -51,6 +58,42 @@ export function InventoryReport() {
     (!f.bandera || s[f.bandera as keyof InvReportRow] === true)
   ), [all, f])
 
+  const columns = useMemo<Column<InvReportRow>[]>(() => [
+    { key: 'area', header: 'Área', width: 120, accessor: (s) => s.area || '', cell: (s) => <div className="truncate text-white/70">{s.area || '—'}</div> },
+    { key: 'macro', header: 'Macroproceso', width: 160, accessor: (s) => s.macro || '', cell: (s) => <span className="inline-flex items-center gap-1.5 text-white/85 max-w-full"><i className="w-2 h-2 rounded-full shrink-0" style={{ background: TIPO_COLOR[(s.tipo as InvTipo)] ?? '#3987e5' }} /><span className="truncate">{s.macro}</span></span> },
+    { key: 'proceso', header: 'Proceso', width: 150, accessor: (s) => s.proceso || '', cell: (s) => <div className="truncate text-cyan-300">{s.proceso}</div> },
+    { key: 'nombre', header: 'Subproceso', width: 180, accessor: (s) => s.nombre || '', cell: (s) => <div className="truncate text-white font-medium" title={s.nombre}>{s.nombre}</div> },
+    { key: 'objetivo', header: 'Objetivo', width: 220, accessor: (s) => s.objetivo || '', cell: (s) => <div className="truncate text-white/50" title={s.objetivo}>{s.objetivo || '—'}</div> },
+    { key: 'responsable', header: 'Responsable', width: 140, accessor: (s) => s.responsable || '', cell: (s) => <div className="truncate">{s.responsable || '—'}</div> },
+    { key: 'critico', header: 'Crítico', width: 80, accessor: (s) => boolTxt(s.critico), cell: (s) => <Bool v={s.critico} yes="Sí" danger /> },
+    { key: 'efectivo', header: 'Mov. efectivo', width: 100, accessor: (s) => boolTxt(s.efectivo), cell: (s) => <Bool v={s.efectivo} yes="Sí" /> },
+    { key: 'nivel', header: 'Nivel ejec.', width: 120, accessor: (s) => s.nivelEjecucion || '', cell: (s) => <div className="truncate">{s.nivelEjecucion || '—'}</div> },
+    { key: 'gerencia', header: org.l0, width: 140, accessor: (s) => s.gerencia || '', cell: (s) => <div className="truncate">{s.gerencia || '—'}</div> },
+    { key: 'frecuencia', header: 'Frecuencia', width: 120, accessor: (s) => s.frecuencia || '', cell: (s) => <div className="truncate">{s.frecuencia || '—'}</div> },
+    { key: 'tipoProceso', header: 'Tipo proceso', width: 130, accessor: (s) => s.tipoProceso || '', cell: (s) => <div className="truncate">{s.tipoProceso || '—'}</div> },
+    { key: 'tipoEjec', header: 'Tipo ejec.', width: 130, accessor: (s) => s.tipoEjecucion || '', cell: (s) => <div className="truncate">{s.tipoEjecucion || '—'}</div> },
+    { key: 'medio', header: 'Medio entrega', width: 130, accessor: (s) => s.medioEntrega || '', cell: (s) => <div className="truncate">{s.medioEntrega || '—'}</div> },
+    { key: 'supervision', header: 'Supervisión', width: 120, accessor: (s) => s.supervision || '', cell: (s) => <div className="truncate">{s.supervision || '—'}</div> },
+    { key: 'banderas', header: 'Banderas', width: 170, accessor: (s) => banderasTxt(s), cell: (s) => <Banderas row={s} /> },
+    { key: 'proveedores', header: 'Proveedores', width: 180, accessor: (s) => s.proveedores || '', cell: (s) => <div className="truncate text-white/55" title={s.proveedores}>{s.proveedores || '—'}</div> },
+    { key: 'entradas', header: 'Entradas', width: 180, accessor: (s) => s.entradas || '', cell: (s) => <div className="truncate text-white/55" title={s.entradas}>{s.entradas || '—'}</div> },
+    { key: 'salidas', header: 'Salidas', width: 180, accessor: (s) => s.salidas || '', cell: (s) => <div className="truncate text-white/55" title={s.salidas}>{s.salidas || '—'}</div> },
+    { key: 'clientes', header: 'Clientes', width: 180, accessor: (s) => s.clientes || '', cell: (s) => <div className="truncate text-white/55" title={s.clientes}>{s.clientes || '—'}</div> },
+    {
+      key: 'estado', header: 'Estado', width: 120, accessor: (s) => (s.origen === 'confirmado' ? 'Aceptado' : 'Deducido'),
+      cell: (s) => (
+        <button
+          title={s.origen === 'confirmado' ? 'Aceptado — clic para volver a deducido' : 'Deducido por IA — clic para aceptar'}
+          onClick={() => editSub(companyId, s.mi, s.pi, s.si, { origen: s.origen === 'confirmado' ? 'deducido' : 'confirmado' })}
+          className="inline-flex items-center gap-1.5 hover:opacity-80"
+        >
+          <OriginBadge origen={s.origen} />
+          <span className="text-[11px] text-white/50">{s.origen === 'confirmado' ? 'Aceptado' : 'Deducido'}</span>
+        </button>
+      ),
+    },
+  ], [org, companyId, editSub])
+
   if (!all.length) {
     return (
       <div className="p-10 text-center">
@@ -78,6 +121,13 @@ export function InventoryReport() {
         f={f} set={set} clear={() => setF(EMPTY_FILTERS)} shown={subs.length} total={all.length} />
 
       <div className="min-w-0 flex-1 space-y-5">
+        <div className="flex justify-end">
+          <button onClick={() => exportInventoryExcel(subs, companyName, org.l0)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/15 transition-colors">
+            <FileSpreadsheet size={13} /> Exportar Excel (todas las columnas)
+          </button>
+        </div>
+
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <Kpi label="Subprocesos" value={subs.length} sub="el trabajo real" accent />
@@ -105,57 +155,8 @@ export function InventoryReport() {
         </div>
 
         {/* Tabla */}
-        <Card title="Inventario detallado" sub="Caracterización completa y SIPOC por subproceso. Desliza para ver todas las columnas.">
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12px] border-collapse">
-              <thead>
-                <tr className="text-left text-white/45 border-b border-white/10">
-                  <Th>Área</Th><Th>Macroproceso</Th><Th>Proceso</Th><Th>Subproceso</Th><Th>Objetivo</Th>
-                  <Th>Responsable</Th><Th>Crítico</Th><Th>Efectivo</Th><Th>Nivel ejec.</Th><Th>{org.l0}</Th>
-                  <Th>Frecuencia</Th><Th>Tipo proceso</Th><Th>Tipo ejec.</Th><Th>Medio entrega</Th><Th>Supervisión</Th>
-                  <Th>Banderas</Th>
-                  <Th>Proveedores</Th><Th>Entradas</Th><Th>Salidas</Th><Th>Clientes</Th>
-                  <Th>Estado</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {subs.map((s, i) => (
-                  <tr key={i} className="border-b border-white/5 hover:bg-white/[0.03]">
-                    <Td className="text-white/70">{s.area || <span className="text-white/25">—</span>}</Td>
-                    <Td className="text-white/85"><span className="inline-flex items-center gap-1.5"><i className="w-2 h-2 rounded-full shrink-0" style={{ background: TIPO_COLOR[(s.tipo as InvTipo)] ?? '#3987e5' }} />{s.macro}</span></Td>
-                    <Td className="text-cyan-300">{s.proceso}</Td>
-                    <Td className="text-white font-medium">{s.nombre}</Td>
-                    <Td className="text-white/50 max-w-[220px]"><div className="truncate" title={s.objetivo}>{s.objetivo || <span className="text-white/20">—</span>}</div></Td>
-                    <Td className="text-white/60 max-w-[130px]"><div className="truncate">{s.responsable || <span className="text-white/20">—</span>}</div></Td>
-                    <Td><Bool v={s.critico} yes="Sí" danger /></Td>
-                    <Td><Bool v={s.efectivo} yes="Sí" /></Td>
-                    <Td className="text-white/60">{s.nivelEjecucion || <span className="text-white/20">—</span>}</Td>
-                    <Td className="text-white/60">{s.gerencia || <span className="text-white/20">—</span>}</Td>
-                    <Td className="text-white/60">{s.frecuencia || <span className="text-white/20">—</span>}</Td>
-                    <Td className="text-white/60">{s.tipoProceso || <span className="text-white/20">—</span>}</Td>
-                    <Td className="text-white/60">{s.tipoEjecucion || <span className="text-white/20">—</span>}</Td>
-                    <Td className="text-white/60">{s.medioEntrega || <span className="text-white/20">—</span>}</Td>
-                    <Td className="text-white/60">{s.supervision || <span className="text-white/20">—</span>}</Td>
-                    <Td><Banderas row={s} /></Td>
-                    <Td className="text-white/55 max-w-[200px]">{s.proveedores || <span className="text-white/20">—</span>}</Td>
-                    <Td className="text-white/55 max-w-[200px]">{s.entradas || <span className="text-white/20">—</span>}</Td>
-                    <Td className="text-white/55 max-w-[200px]">{s.salidas || <span className="text-white/20">—</span>}</Td>
-                    <Td className="text-white/55 max-w-[200px]">{s.clientes || <span className="text-white/20">—</span>}</Td>
-                    <Td>
-                      <button
-                        title={s.origen === 'confirmado' ? 'Aceptado — clic para volver a deducido' : 'Deducido por IA — clic para aceptar'}
-                        onClick={() => editSub(companyId, s.mi, s.pi, s.si, { origen: s.origen === 'confirmado' ? 'deducido' : 'confirmado' })}
-                        className="inline-flex items-center gap-1.5 hover:opacity-80"
-                      >
-                        <OriginBadge origen={s.origen} />
-                        <span className="text-[11px] text-white/50">{s.origen === 'confirmado' ? 'Aceptado' : 'Deducido'}</span>
-                      </button>
-                    </Td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <Card title="Inventario detallado" sub="Caracterización completa y SIPOC por subproceso. Ordena y filtra por columna; arrastra el borde de la cabecera para ajustar el ancho.">
+          <DataTable columns={columns} rows={subs} minWidth={1200} rowKey={(s) => `${s.mi}-${s.pi}-${s.si}`} />
         </Card>
 
         {/* Hallazgos */}
@@ -224,8 +225,6 @@ function BarRow({ label, value, max, color, onClick }: { label: string; value: n
   )
 }
 
-function Th({ children }: { children: React.ReactNode }) { return <th className="py-2 px-2 font-medium uppercase tracking-wide text-[10px] whitespace-nowrap">{children}</th> }
-function Td({ children, className = '' }: { children: React.ReactNode; className?: string }) { return <td className={`py-2 px-2 align-top ${className}`}>{children}</td> }
 
 const F_ICON: Record<FindingLevel, { icon: typeof XCircle; color: string }> = {
   crit: { icon: XCircle, color: '#d03b3b' },

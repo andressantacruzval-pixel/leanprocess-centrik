@@ -135,12 +135,16 @@ export default function ReportsPage() {
         subtitle="Analiza, filtra y exporta la informacion de tus procesos"
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            {/* El Inventario y los Manuales de Cargo tienen su propia exportación
+                completa dentro del reporte; el export genérico solo aplica al resto. */}
+            {activeTab !== 'inventario' && activeTab !== 'manuales' && (<>
             <button onClick={() => handleExport('excel')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors ring-1 ring-emerald-500/20">
               <Download size={13} /> Excel
             </button>
             <button onClick={() => handleExport('pdf')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors ring-1 ring-red-500/20">
               <Download size={13} /> PDF
             </button>
+            </>)}
           </div>
         }
       />

@@ -26,7 +26,7 @@ interface Props {
 export function InventoryReportSidebar({ macros, hojas, niveles, gerencias, gerenciaLabel, frecuencias, tiposProceso, f, set, clear, shown, total }: Props) {
   const hasF = Object.values(f).some(Boolean)
   return (
-    <aside className="lg:w-64 shrink-0 lg:sticky lg:top-3 self-start space-y-4">
+    <aside className="lg:w-64 shrink-0 lg:sticky lg:top-3 self-start space-y-4 lg:max-h-[calc(100vh-1.5rem)] lg:overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
       <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-white/50">Navegación</span>
