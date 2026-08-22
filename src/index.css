@@ -219,10 +219,13 @@ html[data-theme="light"]{ background-color:#e9eff8; }
 
 /* ── Texto: escala negro-azulado sólida (profunda arriba, legible) ────── */
 :root[data-theme="light"] .text-white{color:#0b1220 !important}
+:root[data-theme="light"] .text-white\/95{color:#141c30 !important}
 :root[data-theme="light"] .text-white\/90{color:#1a2540 !important}
 :root[data-theme="light"] .text-white\/85{color:#1a2540 !important}
 :root[data-theme="light"] .text-white\/80{color:#22304c !important}
+:root[data-theme="light"] .text-white\/75{color:#2b3852 !important}
 :root[data-theme="light"] .text-white\/70{color:#33415e !important}
+:root[data-theme="light"] .text-white\/65{color:#3d4b68 !important}
 :root[data-theme="light"] .text-white\/60{color:#475572 !important}
 :root[data-theme="light"] .text-white\/55{color:#4f5d7a !important}
 :root[data-theme="light"] .text-white\/50{color:#5c6a86 !important}

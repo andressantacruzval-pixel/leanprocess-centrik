@@ -14,7 +14,7 @@ import { useAnalyticsStore } from '@/stores/analyticsStore'
 import { useBillingStore } from '@/stores/billingStore'
 
 export function useAchievementTracker() {
-  const { processes, risks, indicators, procedures, audits, analyses } = useCompanyScopedData()
+  const { processes, risks, indicators, procedures, audits, analyses, improvements } = useCompanyScopedData()
   const milestones = useOnboardingStore((s) => s.milestones)
   const streak = useStreakStore((s) => s.currentStreak)
   const events = useAnalyticsStore((s) => s.events)
@@ -112,6 +112,14 @@ export function useAchievementTracker() {
     const allMilestonesComplete = milestones.every((m) => m.completed)
     if (allMilestonesComplete && !isUnlocked('lean-master')) unlock('lean-master')
 
+    // Improvement achievements (identificadas vs cerradas/implementadas)
+    const improvementCount = improvements.length
+    if (improvementCount >= 1 && !isUnlocked('first-improvement')) unlock('first-improvement')
+    if (improvementCount >= 5 && !isUnlocked('five-improvements')) unlock('five-improvements')
+    const closedImprovements = improvements.filter((o) => o.status === 'cerrada').length
+    if (closedImprovements >= 1 && !isUnlocked('first-improvement-closed')) unlock('first-improvement-closed')
+    if (closedImprovements >= 5 && !isUnlocked('five-improvements-closed')) unlock('five-improvements-closed')
+
     // Community shares
     const { communityPosts } = useAchievementStore.getState()
     if (communityPosts.length >= 1 && !isUnlocked('first-share')) unlock('first-share')
@@ -120,5 +128,5 @@ export function useAchievementTracker() {
     // dependencias largas son intencionales: aunque .length captura mucho,
     // el body inspecciona items individuales (procedures, indicators, risks).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processes.length, risks.length, indicators.length, procedures.length, auditKeyCount, analysisKeyCount, milestones, streak, events.length, achievementsLoaded])
+  }, [processes.length, risks.length, indicators.length, procedures.length, improvements.length, auditKeyCount, analysisKeyCount, milestones, streak, events.length, achievementsLoaded])
 }

@@ -31,6 +31,8 @@ import {
   Award,
   Share2,
   Users,
+  Lightbulb,
+  Rocket,
   type LucideProps,
 } from 'lucide-react'
 import { useAchievementStore } from '@/features/gamification/achievementStore'
@@ -43,6 +45,7 @@ const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
   BookOpen, BookMarked, TrendingUp, BarChart3,
   Activity, ClipboardCheck, FileText, Flame,
   Sparkles, Trophy, Star, Award, Share2, Users,
+  Lightbulb, Rocket,
 }
 
 // ── Tier border colors ───────────────────────────────────────────────────

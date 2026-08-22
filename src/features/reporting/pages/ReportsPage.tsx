@@ -50,9 +50,11 @@ const uniqNames = (a: string[], b: (string | null | undefined)[]): string[] =>
   [...new Set([...a, ...b.filter((v): v is string => !!v)])].sort((x, y) => x.localeCompare(y, 'es'))
 
 export default function ReportsPage() {
-  const [searchParams] = useSearchParams()
-  const initialTab = isTab(searchParams.get('tab')) ? (searchParams.get('tab') as ReportTab) : 'inventario'
-  const [activeTab, setActiveTab] = useState<ReportTab>(initialTab)
+  // La pestaña activa vive en la URL (?tab=) para que el superbuscador y los
+  // enlaces directos aterricen en la pestaña correcta y puedan cambiarla en vivo.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab: ReportTab = isTab(searchParams.get('tab')) ? (searchParams.get('tab') as ReportTab) : 'inventario'
+  const setActiveTab = (t: ReportTab) => setSearchParams((prev) => { prev.set('tab', t); return prev }, { replace: true })
   const [search, setSearch] = useState('')
   const [filterManagement, setFilterManagement] = useState<string>('')
   const [filterArea, setFilterArea] = useState<string>('')
