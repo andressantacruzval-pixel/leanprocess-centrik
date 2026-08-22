@@ -1,6 +1,7 @@
 import type { CopilotWidget } from '@/stores/copilotStore'
 import { CitationCard } from './CitationCard'
 import { RiskAlertCard } from './RiskAlertCard'
+import { RiskListCard } from './RiskListCard'
 import { CopilotChart } from './CopilotChart'
 import { ProcessCard } from './ProcessCard'
 
@@ -25,6 +26,7 @@ export function WidgetList({ widgets }: { widgets: CopilotWidget[] }) {
 function WidgetBlock({ widget }: { widget: CopilotWidget }) {
   switch (widget.name) {
     case 'RISK': return <RiskAlertCard params={widget.params} />
+    case 'RISKS': return <RiskListCard params={widget.params} />
     case 'CHART': return <CopilotChart params={widget.params} />
     case 'PROCESS': return <ProcessCard params={widget.params} />
     default: return null

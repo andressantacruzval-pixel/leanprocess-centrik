@@ -57,6 +57,7 @@ export function macroOf(p: Process | undefined, macros: Map<string, string>): st
  */
 export function executorMap(data: ScopedData): Map<string, string> {
   const map = new Map<string, string>()
+  // 1) Lanes del BPMN.
   for (const p of data.processes) {
     if (!p.bpmn_xml) continue
     try {
@@ -66,6 +67,13 @@ export function executorMap(data: ScopedData): Map<string, string> {
       }
     } catch {
       // XML corrupto: se ignora ese proceso, sin romper el resto.
+    }
+  }
+  // 2) Ejecutor explícito por actividad del PROCEDIMIENTO (fuente más fiable del
+  //    rol). Sobrescribe al lane porque aquí el rol está declarado a mano.
+  for (const pr of data.procedures) {
+    for (const act of pr.data?.actividades ?? []) {
+      if (act.ejecutor && act.nombre) map.set(norm(act.nombre), act.ejecutor)
     }
   }
   return map
@@ -195,6 +203,25 @@ export function findProcessByName(data: ScopedData, name: string): Process | und
     data.processes.find((p) => norm(p.name) === target) ??
     data.processes.find((p) => norm(p.name).includes(target) || target.includes(norm(p.name)))
   )
+}
+
+// Lista de riesgos REALES para el widget <<RISKS>> (evita que el modelo invente
+// títulos). Filtra por proceso, estado de control, nivel y/o categoría.
+export interface RiskWidgetFilter {
+  process?: string
+  control?: ControlFilter
+  level?: string
+  category?: string
+}
+
+export function risksForWidget(data: ScopedData, f: RiskWidgetFilter): ResolvedRisk[] {
+  let rows = resolveRisks(data)
+  if (f.process) { const t = norm(f.process); rows = rows.filter((r) => norm(r.processName).includes(t)) }
+  if (f.control === 'inadequate') rows = rows.filter((r) => !r.adequate)
+  else if (f.control === 'none') rows = rows.filter((r) => r.risk.controls.length === 0)
+  if (f.category) rows = rows.filter((r) => norm(r.risk.category) === norm(f.category!))
+  if (f.level) { const t = norm(f.level); rows = rows.filter((r) => norm(r.level) === t) }
+  return rows.sort((a, b) => riskInherentScore(b.risk) - riskInherentScore(a.risk))
 }
 
 export function findRisk(data: ScopedData, processName: string, title: string): ResolvedRisk | undefined {

@@ -5,6 +5,7 @@ import {
   risksWithoutAdequateControl,
   computeChart,
   findProcessByName,
+  risksForWidget,
 } from './copilotData'
 import type { RiskItem, ControlItem } from '@/types/risk'
 import type { Process } from '@/types/process'
@@ -75,6 +76,15 @@ describe('copilotData — carril determinista', () => {
     const byLabel = Object.fromEntries(data.map((d) => [d.label, d.value]))
     expect(byLabel['Comercial']).toBe(1)
     expect(byLabel['Operaciones']).toBe(1) // solo r3 (r4 es Cumplimiento)
+  })
+
+  it('risksForWidget filtra por control/categoría y ordena por severidad', () => {
+    const out = risksForWidget(makeData(), { control: 'inadequate', category: 'Operacional' })
+    expect(out.map((r) => r.risk.id).sort()).toEqual(['r1', 'r3'])
+  })
+
+  it('risksForWidget sin filtros devuelve todos los riesgos', () => {
+    expect(risksForWidget(makeData(), {}).length).toBe(4)
   })
 
   it('findProcessByName tolera coincidencia parcial', () => {

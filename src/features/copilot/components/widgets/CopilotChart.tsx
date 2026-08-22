@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { BarChart3 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { computeChart, type ChartSpec, type ChartEntity, type ChartGroupBy, type ControlFilter } from '../../copilotData'
 
@@ -45,7 +45,9 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
   }
 
   const total = datums.reduce((s, d) => s + d.value, 0)
-  const height = Math.max(120, datums.length * 34 + 24)
+  const isPie = params.chartType === 'pie'
+  const height = isPie ? 240 : Math.max(120, datums.length * 34 + 24)
+  const colorAt = (d: { hex?: string }, i: number) => d.hex || PALETTE[i % PALETTE.length]
 
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
@@ -54,20 +56,28 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
         <span className="text-[11px] text-white/35 tabular-nums">Total: {total}</span>
       </div>
       <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={datums} layout="vertical" margin={{ left: 8, right: 24, top: 2, bottom: 2 }}>
-          <XAxis type="number" hide />
-          <YAxis type="category" dataKey="label" width={130} tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 11 }} axisLine={false} tickLine={false} />
-          <Tooltip
-            cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-            contentStyle={{ background: '#0d1420', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
-            labelStyle={{ color: 'rgba(255,255,255,0.7)' }}
-          />
-          <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-            {datums.map((d, i) => (
-              <Cell key={d.label} fill={d.hex || PALETTE[i % PALETTE.length]} />
-            ))}
-          </Bar>
-        </BarChart>
+        {isPie ? (
+          <PieChart>
+            <Pie data={datums} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={80} innerRadius={42} paddingAngle={2}>
+              {datums.map((d, i) => <Cell key={d.label} fill={colorAt(d, i)} />)}
+            </Pie>
+            <Legend wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }} />
+            <Tooltip contentStyle={{ background: '#0d1420', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }} />
+          </PieChart>
+        ) : (
+          <BarChart data={datums} layout="vertical" margin={{ left: 8, right: 24, top: 2, bottom: 2 }}>
+            <XAxis type="number" hide />
+            <YAxis type="category" dataKey="label" width={130} tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <Tooltip
+              cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+              contentStyle={{ background: '#0d1420', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
+              labelStyle={{ color: 'rgba(255,255,255,0.7)' }}
+            />
+            <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+              {datums.map((d, i) => <Cell key={d.label} fill={colorAt(d, i)} />)}
+            </Bar>
+          </BarChart>
+        )}
       </ResponsiveContainer>
     </div>
   )

@@ -82,7 +82,24 @@ function processBlock(data: ScopedData, processId: string): string {
     L.push('Sin flujograma documentado.')
   }
 
-  L.push(hasProc ? 'Tiene procedimiento documentado.' : 'Sin procedimiento documentado.')
+  // Procedimiento: pasos y responsables (lo que responde "quién hace qué paso a paso").
+  const procedure = data.procedures.find((pr) => pr.process_id === processId)
+  const actividades = procedure?.data?.actividades ?? []
+  if (actividades.length) {
+    if (procedure?.data?.alcance) L.push(`Alcance: ${procedure.data.alcance}`)
+    L.push('Procedimiento — pasos y responsables:')
+    actividades.slice(0, 20).forEach((a, i) => {
+      const rol = a.ejecutor || 'sin rol'
+      const desc = a.descripcion ? `: ${a.descripcion}` : ''
+      const dec = a.esDecision && a.decisiones ? ` (decisión: ${a.decisiones})` : ''
+      L.push(`${i + 1}. [${rol}] ${a.nombre}${desc}${dec}`)
+    })
+  } else {
+    L.push(hasProc ? 'Tiene procedimiento documentado (sin pasos detallados cargados).' : 'Sin procedimiento documentado.')
+  }
+
+  const auditItems = data.audits[processId] ?? []
+  if (auditItems.length) L.push(`Programa de auditoría: ${auditItems.length} puntos de control.`)
 
   if (kpis.length) {
     L.push('Indicadores: ' + kpis.map((k) => `${k.name}${k.target_value ? ` (meta ${k.target_value})` : ' (SIN meta)'}`).join('; '))
