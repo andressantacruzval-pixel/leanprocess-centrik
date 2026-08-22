@@ -90,3 +90,7 @@ jobs:
 # trigger migración oportunidades d453b1f
 
 # trigger migración milestones aea4a03
+
+# trigger migración drop_plan_cap_create (20260822000002): crear procesos es libre;
+# el cupo del plan gobierna DOCUMENTAR. Sin esta migración, el trigger de tope de
+# creación seguía rechazando los subprocesos (nivel más bajo) al volcar el inventario.
