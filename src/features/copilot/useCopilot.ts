@@ -8,6 +8,7 @@ import { buildTurnContext } from './copilotContext'
 import { buildCopilotSystemPrompt } from './copilotPrompt'
 import { buildDeepDossier, buildDeepResearchPrompt } from './copilotDeepResearch'
 import { extractWidgets, stripForDisplay } from './copilotWidgets'
+import { groundWidgets } from './copilotGrounding'
 
 // Orquesta un turno: arma contexto (con memoria de turnos recientes), hace
 // streaming, limpia marcadores en vivo y extrae widgets al cerrar. Soporta un
@@ -63,11 +64,11 @@ export function useCopilot() {
         updateMessage(convId, assistantId, { text: stripForDisplay(buffer) })
       }
       const { text, widgets } = extractWidgets(buffer)
-      updateMessage(convId, assistantId, { text: text || 'No pude encontrar información sobre eso en tu documentación.', widgets })
+      updateMessage(convId, assistantId, { text: text || 'No pude encontrar información sobre eso en tu documentación.', widgets: groundWidgets(data, widgets) })
     } catch (err) {
       if (controller.signal.aborted) {
         const { text, widgets } = extractWidgets(buffer)
-        updateMessage(convId, assistantId, { text: text || '(consulta detenida)', widgets })
+        updateMessage(convId, assistantId, { text: text || '(consulta detenida)', widgets: groundWidgets(data, widgets) })
       } else {
         console.warn('[useCopilot] stream error', err)
         const noCredits = err instanceof Error && err.message === 'INSUFFICIENT_CREDITS'
@@ -82,7 +83,7 @@ export function useCopilot() {
       setIsStreaming(false)
       setIsDeep(false)
     }
-  }, [activeCompanyId, updateMessage])
+  }, [activeCompanyId, updateMessage, data])
 
   const ensureConversation = useCallback((): string => {
     let convId = activeId

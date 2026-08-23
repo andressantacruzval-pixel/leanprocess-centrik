@@ -8,6 +8,7 @@
 
 import { parseBpmnXml, bpmnToTextSummary } from '@/utils/bpmnParser'
 import { norm } from '@/features/inventory/inventoryUtils'
+import { keywords, expandSynonyms, scoreText } from './copilotSearch'
 import {
   type ScopedData,
   processById,
@@ -17,16 +18,6 @@ import {
   resolveRisks,
   risksWithoutAdequateControl,
 } from './copilotData'
-
-const STOPWORDS = new Set([
-  'como','cómo','para','que','qué','cual','cuál','cuales','cuáles','donde','dónde','quien','quién',
-  'los','las','del','una','uno','con','por','sin','sobre','entre','este','esta','estos','estas',
-  'tiene','tienen','hace','hacen','proceso','procesos','the','and','and/or','mis','sus','tengo',
-])
-
-function keywords(q: string): string[] {
-  return [...new Set(norm(q).split(/\s+/).filter((w) => w.length >= 4 && !STOPWORDS.has(w)))]
-}
 
 // ── Panorama de la empresa (carril de datos, agregado) ─────────────────────
 
@@ -140,11 +131,10 @@ function searchableText(data: ScopedData, processId: string): string {
 export function selectRelevantProcessIds(data: ScopedData, query: string, max = 5): string[] {
   const kws = keywords(query)
   if (!kws.length) return data.processes.slice(0, max).map((p) => p.id)
-  const scored = data.processes.map((p) => {
-    const text = searchableText(data, p.id)
-    const score = kws.reduce((s, kw) => s + (text.includes(kw) ? 1 : 0), 0)
-    return { id: p.id, score }
-  })
+  // Híbrido: sinónimos del dominio + coincidencia fuzzy (tolera typos como
+  // "peronal" → "personal" y sinónimos como "reclutamiento" → "contratación").
+  const terms = expandSynonyms(kws)
+  const scored = data.processes.map((p) => ({ id: p.id, score: scoreText(searchableText(data, p.id), terms) }))
   const hits = scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score)
   return (hits.length ? hits : scored).slice(0, max).map((s) => s.id)
 }
