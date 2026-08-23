@@ -151,8 +151,10 @@ export function selectRelevantProcessIds(data: ScopedData, query: string, max = 
 
 // ── Contexto completo del turno ────────────────────────────────────────────
 
-export function buildTurnContext(data: ScopedData, query: string): string {
-  const relevant = selectRelevantProcessIds(data, query)
+export function buildTurnContext(data: ScopedData, query: string, memoryHint = ''): string {
+  // El hint (turnos recientes) permite resolver referencias como "y sus riesgos?"
+  // trayendo el proceso del que se venía hablando aunque no se nombre ahora.
+  const relevant = selectRelevantProcessIds(data, `${memoryHint} ${query}`)
   const blocks = relevant.map((id) => processBlock(data, id)).filter(Boolean)
   return [
     '## PANORAMA DE LA EMPRESA',

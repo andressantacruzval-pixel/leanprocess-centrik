@@ -39,6 +39,7 @@ interface CopilotState {
   setActive: (id: string | null) => void
   addMessage: (conversationId: string, msg: Omit<CopilotMessage, 'id' | 'createdAt'>) => string
   updateMessage: (conversationId: string, messageId: string, patch: Partial<Pick<CopilotMessage, 'text' | 'widgets'>>) => void
+  removeMessage: (conversationId: string, messageId: string) => void
   renameConversation: (id: string, title: string) => void
   deleteConversation: (id: string) => void
   clearCompany: (companyId: string) => void
@@ -98,6 +99,13 @@ export const useCopilotStore = create<CopilotState>()(
                   updatedAt: Date.now(),
                   messages: c.messages.map((m) => (m.id === messageId ? { ...m, ...patch } : m)),
                 }
+          ),
+        })),
+
+      removeMessage: (conversationId, messageId) =>
+        set((s) => ({
+          conversations: s.conversations.map((c) =>
+            c.id !== conversationId ? c : { ...c, messages: c.messages.filter((m) => m.id !== messageId), updatedAt: Date.now() }
           ),
         })),
 

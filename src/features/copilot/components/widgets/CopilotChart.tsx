@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { BarChart3 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
-import { computeChart, type ChartSpec, type ChartEntity, type ChartGroupBy, type ControlFilter } from '../../copilotData'
+import { computeChart, chartInsight, type ChartSpec, type ChartEntity, type ChartGroupBy, type ControlFilter } from '../../copilotData'
 
 // Paleta por defecto cuando el corte no trae color propio (p. ej. no es "level").
 const PALETTE = ['#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#14b8a6']
@@ -48,9 +48,10 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
   const isPie = params.chartType === 'pie'
   const height = isPie ? 240 : Math.max(120, datums.length * 34 + 24)
   const colorAt = (d: { hex?: string }, i: number) => d.hex || PALETTE[i % PALETTE.length]
+  const insight = chartInsight(datums)
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 copilot-fade">
       <div className="flex items-center justify-between mb-2">
         <span className="text-[12px] font-semibold text-white/80 inline-flex items-center gap-1.5"><BarChart3 size={13} className="text-cyan-400" /> {title}</span>
         <span className="text-[11px] text-white/35 tabular-nums">Total: {total}</span>
@@ -58,7 +59,7 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
       <ResponsiveContainer width="100%" height={height}>
         {isPie ? (
           <PieChart>
-            <Pie data={datums} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={80} innerRadius={42} paddingAngle={2}>
+            <Pie data={datums} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={80} innerRadius={42} paddingAngle={2} animationDuration={700} animationEasing="ease-out">
               {datums.map((d, i) => <Cell key={d.label} fill={colorAt(d, i)} />)}
             </Pie>
             <Legend wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }} />
@@ -73,12 +74,13 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
               contentStyle={{ background: '#0d1420', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 12 }}
               labelStyle={{ color: 'rgba(255,255,255,0.7)' }}
             />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} animationDuration={700} animationEasing="ease-out">
               {datums.map((d, i) => <Cell key={d.label} fill={colorAt(d, i)} />)}
             </Bar>
           </BarChart>
         )}
       </ResponsiveContainer>
+      {insight && <p className="text-[11.5px] text-white/50 mt-1.5 pl-0.5">💡 {insight}</p>}
     </div>
   )
 }

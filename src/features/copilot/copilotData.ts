@@ -194,6 +194,38 @@ export function computeChart(data: ScopedData, spec: ChartSpec): ChartDatum[] {
   return tally(keyed)
 }
 
+// ── Matriz de calor 5×5 (probabilidad × impacto) ──────────────────────────
+export interface HeatmapCell { probability: number; impact: number; count: number }
+
+export function heatmapMatrix(data: ScopedData, f: { process?: string; category?: string } = {}): { cells: HeatmapCell[]; total: number } {
+  let rows = resolveRisks(data)
+  if (f.process) { const t = norm(f.process); rows = rows.filter((r) => norm(r.processName).includes(t)) }
+  if (f.category) rows = rows.filter((r) => norm(r.risk.category) === norm(f.category!))
+  const counts = new Map<string, number>()
+  for (const r of rows) {
+    const key = `${r.risk.inherentProbability}-${r.risk.inherentImpact}`
+    counts.set(key, (counts.get(key) ?? 0) + 1)
+  }
+  const cells: HeatmapCell[] = []
+  for (let impact = 5; impact >= 1; impact--) {
+    for (let probability = 1; probability <= 5; probability++) {
+      cells.push({ probability, impact, count: counts.get(`${probability}-${impact}`) ?? 0 })
+    }
+  }
+  return { cells, total: rows.length }
+}
+
+// ── Lectura automática de un gráfico (carril determinista) ─────────────────
+export function chartInsight(datums: ChartDatum[]): string {
+  if (!datums.length) return ''
+  const total = datums.reduce((s, d) => s + d.value, 0)
+  if (total === 0) return ''
+  const top = datums[0]
+  const pct = Math.round((top.value / total) * 100)
+  if (datums.length === 1) return `Todo (${total}) se concentra en «${top.label}».`
+  return `«${top.label}» concentra el ${pct}% (${top.value} de ${total}).`
+}
+
 // ── Resolución de un proceso por nombre (para citas/fichas) ────────────────
 
 export function findProcessByName(data: ScopedData, name: string): Process | undefined {

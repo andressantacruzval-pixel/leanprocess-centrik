@@ -7,6 +7,18 @@ html {
   background-color: #070b14;
 }
 
+/* Copiloto: entrada suave de burbujas y widgets (aparecer + subir levemente). */
+@keyframes copilot-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.copilot-fade {
+  animation: copilot-fade-up 0.28s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .copilot-fade { animation: none; }
+}
+
 /* Floating word cloud animation */
 @keyframes float {
   0%, 100% {

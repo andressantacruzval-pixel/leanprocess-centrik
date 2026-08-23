@@ -21,7 +21,7 @@ export default function CopilotPage() {
     [allConversations, activeCompanyId]
   )
 
-  const { activeConversation, isStreaming, error, ask, stop } = useCopilot()
+  const { activeConversation, isStreaming, error, ask, regenerate, stop } = useCopilot()
 
   return (
     <div className="h-[calc(100vh-7rem)] flex flex-col">
@@ -73,6 +73,7 @@ export default function CopilotPage() {
           error={error}
           onSend={ask}
           onStop={stop}
+          onRegenerate={regenerate}
         />
       </div>
     </div>

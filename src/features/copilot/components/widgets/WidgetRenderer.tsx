@@ -3,6 +3,7 @@ import { CitationCard } from './CitationCard'
 import { RiskAlertCard } from './RiskAlertCard'
 import { RiskListCard } from './RiskListCard'
 import { CopilotChart } from './CopilotChart'
+import { RiskHeatmap } from './RiskHeatmap'
 import { ProcessCard } from './ProcessCard'
 
 // CITE se agrupa en fila (chips de enlace); el resto va en bloque.
@@ -28,6 +29,7 @@ function WidgetBlock({ widget }: { widget: CopilotWidget }) {
     case 'RISK': return <RiskAlertCard params={widget.params} />
     case 'RISKS': return <RiskListCard params={widget.params} />
     case 'CHART': return <CopilotChart params={widget.params} />
+    case 'HEATMAP': return <RiskHeatmap params={widget.params} />
     case 'PROCESS': return <ProcessCard params={widget.params} />
     default: return null
   }

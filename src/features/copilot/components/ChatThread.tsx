@@ -1,15 +1,16 @@
-import { useEffect, useRef } from 'react'
-import { Sparkles } from 'lucide-react'
+import { useEffect, useMemo, useRef } from 'react'
+import { Sparkles, Bot } from 'lucide-react'
 import type { CopilotConversation } from '@/stores/copilotStore'
+import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { MessageBubble } from './MessageBubble'
 import { Composer } from './Composer'
 
 const SUGGESTIONS = [
-  '¿Cómo se crea un nuevo cliente?',
+  '¿Cómo opera el proceso, quién hace qué paso a paso?',
   'Lista los riesgos sin control adecuado',
-  'Gráfico: riesgos operativos sin control por área',
+  'Muéstrame el mapa de calor de riesgos',
+  'Gráfico de pastel de riesgos por nivel',
   '¿Qué procesos no tienen indicadores?',
-  '¿Qué implicaría cambiar el proceso de compras?',
 ]
 
 interface Props {
@@ -18,12 +19,24 @@ interface Props {
   error: string | null
   onSend: (text: string) => void
   onStop: () => void
+  onRegenerate: () => void
 }
 
-export function ChatThread({ conversation, isStreaming, error, onSend, onStop }: Props) {
+export function ChatThread({ conversation, isStreaming, error, onSend, onStop, onRegenerate }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const messages = conversation?.messages ?? []
+  const data = useCompanyScopedData()
+  const messages = useMemo(() => conversation?.messages ?? [], [conversation])
   const lastText = messages[messages.length - 1]?.text ?? ''
+  const lastMsg = messages[messages.length - 1]
+
+  // "Pensando" con sustancia: transmite que trabaja sobre TU data real.
+  const thinkingLabel = useMemo(
+    () => `Revisando ${data.processes.length} procesos, ${data.risks.length} riesgos y ${data.indicators.length} indicadores…`,
+    [data.processes.length, data.risks.length, data.indicators.length]
+  )
+  const showThinking = isStreaming && lastMsg?.role === 'assistant' && lastMsg.text.length === 0
+
+  const lastAssistantId = useMemo(() => [...messages].reverse().find((m) => m.role === 'assistant')?.id, [messages])
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -57,9 +70,35 @@ export function ChatThread({ conversation, isStreaming, error, onSend, onStop }:
           </div>
         ) : (
           <div className="max-w-3xl mx-auto space-y-4">
-            {messages.map((m, i) => (
-              <MessageBubble key={m.id} message={m} streaming={isStreaming && i === messages.length - 1 && m.role === 'assistant'} />
-            ))}
+            {messages.map((m, i) => {
+              const streamingThis = isStreaming && i === messages.length - 1 && m.role === 'assistant'
+              if (streamingThis && showThinking) {
+                return (
+                  <div key={m.id} className="flex gap-2.5 copilot-fade">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500/25 to-blue-500/20 ring-1 ring-cyan-500/30 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.25)]">
+                      <Bot size={14} className="text-cyan-400" />
+                    </div>
+                    <div className="rounded-2xl rounded-tl-sm bg-white/[0.04] border border-white/5 px-3.5 py-2.5 inline-flex items-center gap-2">
+                      <span className="flex gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/70 animate-bounce [animation-delay:-0.3s]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/70 animate-bounce [animation-delay:-0.15s]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/70 animate-bounce" />
+                      </span>
+                      <span className="text-[12px] text-white/45">{thinkingLabel}</span>
+                    </div>
+                  </div>
+                )
+              }
+              return (
+                <MessageBubble
+                  key={m.id}
+                  message={m}
+                  streaming={streamingThis}
+                  isLastAssistant={!isStreaming && m.role === 'assistant' && m.id === lastAssistantId}
+                  onRegenerate={onRegenerate}
+                />
+              )
+            })}
             {error && <p className="text-[12px] text-red-400 text-center">{error}</p>}
           </div>
         )}

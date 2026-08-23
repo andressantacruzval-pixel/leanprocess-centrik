@@ -4,7 +4,7 @@
 import { parseInlineToolCalls } from '@/lib/conversationalAi'
 import type { CopilotWidget } from '@/stores/copilotStore'
 
-export const KNOWN_WIDGETS = new Set(['CITE', 'RISK', 'RISKS', 'PROCESS', 'CHART'])
+export const KNOWN_WIDGETS = new Set(['CITE', 'RISK', 'RISKS', 'PROCESS', 'CHART', 'HEATMAP'])
 
 /**
  * Limpieza ligera para el texto EN VIVO durante el streaming: quita marcadores
