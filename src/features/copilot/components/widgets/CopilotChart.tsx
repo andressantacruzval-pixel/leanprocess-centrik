@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { BarChart3 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend, LabelList } from 'recharts'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { computeChart, chartInsight, type ChartSpec, type ChartEntity, type ChartGroupBy, type ControlFilter } from '../../copilotData'
 
@@ -63,7 +63,8 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
       <ResponsiveContainer width="100%" height={height}>
         {isPie ? (
           <PieChart>
-            <Pie data={datums} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={80} innerRadius={42} paddingAngle={2} animationDuration={700} animationEasing="ease-out">
+            <Pie data={datums} dataKey="value" nameKey="label" cx="50%" cy="50%" outerRadius={80} innerRadius={42} paddingAngle={2} animationDuration={700} animationEasing="ease-out"
+              label={(p: { value?: number }) => `${p.value ?? ''}`}>
               {datums.map((d, i) => <Cell key={d.label} fill={colorAt(d, i)} />)}
             </Pie>
             <Legend wrapperStyle={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }} />
@@ -80,6 +81,7 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
             />
             <Bar dataKey="value" radius={[0, 4, 4, 0]} animationDuration={700} animationEasing="ease-out">
               {datums.map((d, i) => <Cell key={d.label} fill={colorAt(d, i)} />)}
+              <LabelList dataKey="value" position="right" fill="rgba(255,255,255,0.85)" fontSize={11} />
             </Bar>
           </BarChart>
         )}

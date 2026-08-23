@@ -141,6 +141,39 @@ export function selectRelevantProcessIds(data: ScopedData, query: string, max = 
 
 // ── Contexto completo del turno ────────────────────────────────────────────
 
+// Índice global compacto: permite responder "todos los X y de qué proceso" sin
+// depender de que el proceso esté entre los 5 relevantes. Acotado para no inflar.
+export function buildGlobalIndex(data: ScopedData): string {
+  const macros = macroNameById(data)
+  const procs = processById(data)
+  const L: string[] = ['## ÍNDICE GLOBAL (para listados y totales)']
+  const more = (total: number, shown: number) => { if (total > shown) L.push(`- …y ${total - shown} más`) }
+
+  if (data.indicators.length) {
+    L.push(`Indicadores (${data.indicators.length}) — nombre · proceso · meta:`)
+    data.indicators.slice(0, 80).forEach((i) => {
+      const p = procs.get(i.process_id)
+      L.push(`- ${i.name} · ${p?.name ?? '(proceso?)'}${i.target_value ? ` · meta ${i.target_value}` : ' · SIN meta'}`)
+    })
+    more(data.indicators.length, 80)
+  }
+
+  const risks = resolveRisks(data)
+  if (risks.length) {
+    L.push(`Riesgos (${risks.length}) — título · proceso · nivel · categoría · control:`)
+    risks.slice(0, 80).forEach((r) => {
+      L.push(`- ${r.risk.title} · ${r.processName} · ${r.level} · ${r.risk.category} · ${r.adequate ? 'con control' : 'SIN control'}`)
+    })
+    more(risks.length, 80)
+  }
+
+  L.push(`Procesos (${data.processes.length}) — nombre · macroproceso · área:`)
+  data.processes.slice(0, 60).forEach((p) => L.push(`- ${p.name} · ${macroOf(p, macros)} · ${areaOf(p)}`))
+  more(data.processes.length, 60)
+
+  return L.join('\n')
+}
+
 export function buildTurnContext(data: ScopedData, query: string, memoryHint = ''): string {
   // El hint (turnos recientes) permite resolver referencias como "y sus riesgos?"
   // trayendo el proceso del que se venía hablando aunque no se nombre ahora.
@@ -150,7 +183,9 @@ export function buildTurnContext(data: ScopedData, query: string, memoryHint = '
     '## PANORAMA DE LA EMPRESA',
     buildOrgSnapshot(data),
     '',
+    buildGlobalIndex(data),
+    '',
     '## PROCESOS RELEVANTES A LA CONSULTA',
-    blocks.length ? blocks.join('\n\n') : 'Ninguno coincide directamente; usa el panorama.',
+    blocks.length ? blocks.join('\n\n') : 'Ninguno coincide directamente; usa el panorama y el índice global.',
   ].join('\n')
 }

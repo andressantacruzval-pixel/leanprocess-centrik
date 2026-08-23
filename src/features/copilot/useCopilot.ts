@@ -9,6 +9,8 @@ import { buildCopilotSystemPrompt } from './copilotPrompt'
 import { buildDeepDossier, buildDeepResearchPrompt } from './copilotDeepResearch'
 import { extractWidgets, stripForDisplay } from './copilotWidgets'
 import { groundWidgets } from './copilotGrounding'
+import { detectVisual } from './copilotCharts'
+import type { CopilotWidget } from '@/stores/copilotStore'
 
 // Orquesta un turno: arma contexto (con memoria de turnos recientes), hace
 // streaming, limpia marcadores en vivo y extrae widgets al cerrar. Soporta un
@@ -44,11 +46,22 @@ export function useCopilot() {
   // Núcleo de streaming: dado un systemPrompt ya armado, transmite y persiste.
   const runStream = useCallback(async (
     convId: string, question: string, history: AiMessage[], assistantId: string,
-    systemPrompt: string, maxOutputTokens: number,
+    systemPrompt: string, maxOutputTokens: number, deep: boolean,
   ) => {
     const controller = new AbortController()
     abortRef.current = controller
     setIsStreaming(true)
+
+    // En modo normal, el gráfico/heatmap lo decide el sistema (determinista) a
+    // partir de la pregunta, no el modelo — evita marcadores mal formados y
+    // agrupaciones erróneas. En investigación profunda el informe trae los suyos.
+    const finalizeWidgets = (raw: CopilotWidget[]): CopilotWidget[] => {
+      const grounded = groundWidgets(data, raw)
+      if (deep) return grounded
+      const noModelCharts = grounded.filter((w) => w.name !== 'CHART' && w.name !== 'HEATMAP')
+      const visual = detectVisual(question, data)
+      return visual ? [...noModelCharts, visual] : noModelCharts
+    }
 
     let buffer = ''
     try {
@@ -64,11 +77,11 @@ export function useCopilot() {
         updateMessage(convId, assistantId, { text: stripForDisplay(buffer) })
       }
       const { text, widgets } = extractWidgets(buffer)
-      updateMessage(convId, assistantId, { text: text || 'No pude encontrar información sobre eso en tu documentación.', widgets: groundWidgets(data, widgets) })
+      updateMessage(convId, assistantId, { text: text || 'No pude encontrar información sobre eso en tu documentación.', widgets: finalizeWidgets(widgets) })
     } catch (err) {
       if (controller.signal.aborted) {
         const { text, widgets } = extractWidgets(buffer)
-        updateMessage(convId, assistantId, { text: text || '(consulta detenida)', widgets: groundWidgets(data, widgets) })
+        updateMessage(convId, assistantId, { text: text || '(consulta detenida)', widgets: finalizeWidgets(widgets) })
       } else {
         console.warn('[useCopilot] stream error', err)
         const noCredits = err instanceof Error && err.message === 'INSUFFICIENT_CREDITS'
@@ -104,7 +117,7 @@ export function useCopilot() {
     addMessage(convId, { role: 'user', text: q })
     const assistantId = addMessage(convId, { role: 'assistant', text: '' })
     const systemPrompt = buildCopilotSystemPrompt(companyName, buildTurnContext(data, q, memoryHint))
-    await runStream(convId, q, history, assistantId, systemPrompt, 4096)
+    await runStream(convId, q, history, assistantId, systemPrompt, 4096, false)
   }, [isStreaming, ensureConversation, addMessage, companyName, data, runStream])
 
   // Investigación profunda: recorre toda la empresa y entrega un informe.
@@ -117,7 +130,7 @@ export function useCopilot() {
     addMessage(convId, { role: 'user', text: `🔬 ${q}` })
     const assistantId = addMessage(convId, { role: 'assistant', text: '' })
     const systemPrompt = buildDeepResearchPrompt(companyName, buildDeepDossier(data))
-    await runStream(convId, q, [], assistantId, systemPrompt, 8192)
+    await runStream(convId, q, [], assistantId, systemPrompt, 8192, true)
   }, [isStreaming, ensureConversation, addMessage, companyName, data, runStream])
 
   const regenerate = useCallback(async () => {
@@ -134,7 +147,7 @@ export function useCopilot() {
     setError(null)
     const assistantId = addMessage(conv.id, { role: 'assistant', text: '' })
     const systemPrompt = buildCopilotSystemPrompt(companyName, buildTurnContext(data, question))
-    await runStream(conv.id, question, history, assistantId, systemPrompt, 4096)
+    await runStream(conv.id, question, history, assistantId, systemPrompt, 4096, false)
   }, [isStreaming, activeId, addMessage, removeMessage, companyName, data, runStream])
 
   return { activeConversation, isStreaming, isDeep, error, ask, deepResearch, regenerate, stop }
