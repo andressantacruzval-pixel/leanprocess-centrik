@@ -45,6 +45,23 @@ function normalizeStr(s: string): string {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 }
 
+// Un control es SIEMPRE una actividad (nodo tipo tarea) del flujograma, NUNCA una
+// decisión/compuerta (rombo). Antes la lista de candidatos incluía las decisiones,
+// así que la IA proponía preguntas Si/No como controles. Aquí se ofrece a la IA
+// solo actividades y se construye el índice solo con ellas: cualquier nombre que no
+// sea una actividad real no resuelve y se descarta (guardarraíl determinista).
+export function buildControlContext(bpmnXml: string): { index: Map<string, string>; block: string } {
+  const parsed = parseBpmnXml(bpmnXml)
+  const activities = parsed.activities.filter((a) => a.name && a.name !== 'Tarea sin nombre')
+  const index = new Map<string, string>()
+  for (const a of activities) index.set(normalizeStr(a.name), a.id)
+  const block = activities.length > 0
+    ? `\nACTIVIDADES DEL PROCESO (los controles SOLO pueden ser una de estas actividades tipo tarea; NUNCA una decisión/compuerta/rombo):\n` +
+      activities.map((a) => `- "${a.name}"`).join('\n') + '\n'
+    : ''
+  return { index, block }
+}
+
 // ── Identify risks from BPMN XML ──────────────────────────────────────
 
 export async function identifyRisksFromBpmn(
@@ -58,23 +75,9 @@ export async function identifyRisksFromBpmn(
   const safeBpmn = sanitizeLargeContent(bpmnXml, 50_000)
   const safeTitles = existingRiskTitles ? sanitizeStringArray(existingRiskTitles, 50, 150) : []
 
-  // Parsear el BPMN original (no safeBpmn) para no perder actividades por truncación
-  const parsedBpmn = parseBpmnXml(bpmnXml)
-  const allElements: { id: string; name: string }[] = [
-    ...parsedBpmn.activities.filter(a => a.name && a.name !== 'Tarea sin nombre'),
-    ...parsedBpmn.decisions.filter(d => !!d.name),
-  ]
-
-  // Índice: nombre normalizado → bpmnElementId
-  const elementIndex = new Map<string, string>()
-  for (const el of allElements) {
-    elementIndex.set(normalizeStr(el.name), el.id)
-  }
-
-  const activitiesBlock = allElements.length > 0
-    ? `\nACTIVIDADES Y DECISIONES DEL PROCESO (usa SOLO estos nombres para los controles):\n` +
-      allElements.map(el => `- "${el.name}"`).join('\n') + '\n'
-    : ''
+  // Parsear el BPMN original (no safeBpmn) para no perder actividades por truncación.
+  // Los controles SOLO pueden ser actividades (tareas), nunca decisiones.
+  const { index: elementIndex, block: activitiesBlock } = buildControlContext(bpmnXml)
 
   const existingBlock = safeTitles.length > 0
     ? `\nRIESGOS YA IDENTIFICADOS (NO repetir ni generar riesgos similares a estos):\n${safeTitles.map((t) => `- ${t}`).join('\n')}\n`
@@ -96,7 +99,7 @@ TAREA:
    - Ejemplo: "Por un error humano o la falla en la plataforma CORE se podria generar una transaccion erronea, lo que generaria impacto financiero, regulatorio y reputacional."
 4. Clasifica cada riesgo en una categoria.
 5. Asigna probabilidad (1-5) e impacto (1-5) inherente.
-6. Para cada riesgo identifica entre 1 y 3 elementos de la lista "ACTIVIDADES Y DECISIONES DEL PROCESO" que sirvan como controles de mitigacion (validaciones, aprobaciones, verificaciones, revisiones, compuertas de decision Si/No). Usa el nombre EXACTO como aparece en la lista. Si ningun elemento de la lista aplica como control para ese riesgo, deja el array vacio. NO inventes controles que no esten en la lista.
+6. Para cada riesgo identifica entre 1 y 3 ACTIVIDADES de la lista "ACTIVIDADES DEL PROCESO" que sirvan como controles de mitigacion (validaciones, aprobaciones, verificaciones, revisiones, conciliaciones, arqueos). Usa el nombre EXACTO como aparece en la lista. Un control SIEMPRE es una actividad tipo tarea; NUNCA es una pregunta ni un nodo de decision/compuerta/rombo (p. ej. "¿Segmento objetivo?" NO es un control). Si ninguna actividad de la lista aplica como control para ese riesgo, deja el array vacio. NO inventes controles que no esten en la lista.
 
 FORMATO DE RESPUESTA:
 Responde UNICAMENTE un JSON array con esta estructura:
@@ -108,14 +111,14 @@ Responde UNICAMENTE un JSON array con esta estructura:
     "category": "Operacional" | "Seguridad Info" | "Cumplimiento" | "Fisico",
     "inherentProbability": 1-5,
     "inherentImpact": 1-5,
-    "extractedControls": ["Nombre exacto de actividad/decision 1", "Nombre exacto 2"]
+    "extractedControls": ["Nombre exacto de actividad 1", "Nombre exacto de actividad 2"]
   }
 ]
 
 REGLAS:
 - Responde EXCLUSIVAMENTE en espanol.
 - La declaracion (description) SIEMPRE debe ser un parrafo continuo con la taxonomia causa(s) → evento → efecto(s). NO separes en campos individuales.
-- extractedControls debe contener entre 0 y 3 nombres EXACTOS de la lista de actividades/decisiones. Si ningun elemento aplica como control, deja el array vacio.
+- extractedControls debe contener entre 0 y 3 nombres EXACTOS de la lista de ACTIVIDADES. NUNCA decisiones, compuertas ni preguntas. Si ninguna actividad aplica como control, deja el array vacio.
 - No inventes actividades del proceso que no esten en el XML.
 - Probabilidad: 1=Raro, 2=Improbable, 3=Posible, 4=Probable, 5=Frecuente
 - Impacto: 1=Insignificante, 2=Menor, 3=Moderado, 4=Mayor, 5=Catastrofico
@@ -183,18 +186,8 @@ export async function suggestOneRisk(
   const safeBpmn = sanitizeLargeContent(bpmnXml, 50_000)
   const safeTitles = existingRiskTitles ? sanitizeStringArray(existingRiskTitles, 50, 150) : []
 
-  const parsedBpmn = parseBpmnXml(bpmnXml)
-  const allElements: { id: string; name: string }[] = [
-    ...parsedBpmn.activities.filter(a => a.name && a.name !== 'Tarea sin nombre'),
-    ...parsedBpmn.decisions.filter(d => !!d.name),
-  ]
-  const elementIndex = new Map<string, string>()
-  for (const el of allElements) elementIndex.set(normalizeStr(el.name), el.id)
-
-  const activitiesBlock = allElements.length > 0
-    ? `\nACTIVIDADES Y DECISIONES DEL PROCESO (usa SOLO estos nombres para los controles):\n` +
-      allElements.map(el => `- "${el.name}"`).join('\n') + '\n'
-    : ''
+  // Los controles SOLO pueden ser actividades (tareas), nunca decisiones.
+  const { index: elementIndex, block: activitiesBlock } = buildControlContext(bpmnXml)
 
   const existingBlock = safeTitles.length > 0
     ? `\nRIESGOS YA IDENTIFICADOS (NO repetir ni generar uno similar a estos):\n${safeTitles.map(t => `- ${t}`).join('\n')}\n`
@@ -214,7 +207,7 @@ TAREA:
    - Formato: "Por [causa1] o [causa2] se podria [evento de riesgo], lo que generaria [efecto1], [efecto2] y [efecto3]."
 4. Clasifica el riesgo en una categoria.
 5. Asigna probabilidad (1-5) e impacto (1-5) inherente.
-6. Identifica entre 0 y 3 elementos de la lista "ACTIVIDADES Y DECISIONES DEL PROCESO" que sirvan como controles. Usa el nombre EXACTO. Si ninguno aplica, deja el array vacio.
+6. Identifica entre 0 y 3 ACTIVIDADES de la lista "ACTIVIDADES DEL PROCESO" que sirvan como controles. Usa el nombre EXACTO. Un control SIEMPRE es una actividad tipo tarea; NUNCA una pregunta ni un nodo de decision/compuerta/rombo. Si ninguna actividad aplica, deja el array vacio.
 
 FORMATO DE RESPUESTA:
 Responde UNICAMENTE un JSON con esta estructura (objeto, NO array):
@@ -225,13 +218,13 @@ Responde UNICAMENTE un JSON con esta estructura (objeto, NO array):
   "category": "Operacional" | "Seguridad Info" | "Cumplimiento" | "Fisico",
   "inherentProbability": 1-5,
   "inherentImpact": 1-5,
-  "extractedControls": ["Nombre exacto de actividad/decision 1"]
+  "extractedControls": ["Nombre exacto de actividad 1"]
 }
 
 REGLAS:
 - Responde EXCLUSIVAMENTE en espanol.
 - La declaracion SIEMPRE debe ser un parrafo continuo con la taxonomia causa(s) → evento → efecto(s).
-- extractedControls: entre 0 y 3 nombres EXACTOS de la lista. Si ninguno aplica, array vacio.
+- extractedControls: entre 0 y 3 nombres EXACTOS de la lista de ACTIVIDADES. NUNCA decisiones, compuertas ni preguntas. Si ninguna actividad aplica, array vacio.
 - Probabilidad: 1=Raro, 2=Improbable, 3=Posible, 4=Probable, 5=Frecuente
 - Impacto: 1=Insignificante, 2=Menor, 3=Moderado, 4=Mayor, 5=Catastrofico
 
