@@ -23,6 +23,7 @@ import {
 import { ACCIONES_AL_PASAR } from '@/lib/constants'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { exportProcedureToDocx } from '@/utils/procedureDocxExporter'
+import { mergeLegacySipoc } from '@/utils/sipoc'
 import type {
   ProcedureData,
   ProcedureActivity,
@@ -74,6 +75,12 @@ export function ProcedureTab({
 
   const stored = getProcedureByProcess(processId)
   const data = stored?.data
+
+  // SIPOC unificado a 4 columnas: el catálogo si existe, si no las dos listas de
+  // la IA fusionadas. Misma fuente para la pantalla y para el Word (paridad).
+  const sipocRows = sipocEntries && sipocEntries.length
+    ? sipocEntries
+    : mergeLegacySipoc(data?.sipocEntradas, data?.sipocSalidas)
 
   // Hay UNA sola version y es la del proceso: la sube «Aprobar y publicar».
   const processVersion =
@@ -165,7 +172,7 @@ export function ProcedureTab({
         processRisks,
         auditItems,
         indicators: processIndicators,
-        sipocEntries,
+        sipocEntries: sipocRows,
         objetivoGeneral: processDescription || data.objetivoGeneral,
       }
     )
@@ -463,19 +470,19 @@ export function ProcedureTab({
 
           {/* ══ 4. SIPOC ══ */}
           <DocSection number="4" title="SIPOC del Procedimiento">
-            {sipocEntries && sipocEntries.length > 0 ? (
+            {sipocRows.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[520px] border-collapse">
                 <thead>
                   <tr>
-                    <th className="bg-[#DC2626] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Proveedor</th>
-                    <th className="bg-[#6B7280] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Entrada</th>
-                    <th className="bg-[#0D9488] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Salida</th>
-                    <th className="bg-[#2563EB] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Cliente</th>
+                    <th className="bg-[#DC2626] text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Proveedores</th>
+                    <th className="bg-[#1F2937] text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Entradas</th>
+                    <th className="bg-[#0D9488] text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Salidas</th>
+                    <th className="bg-[#2563EB] text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Clientes</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sipocEntries.map((entry, i) => (
+                  {sipocRows.map((entry, i) => (
                     <tr key={i}>
                       <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 bg-red-50/30">{entry.supplier_name || '-'}</td>
                       <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700">{entry.input_description || '-'}</td>

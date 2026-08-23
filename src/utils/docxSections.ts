@@ -6,6 +6,7 @@ import type { ProcedureActivity, ProcedureData } from '@/lib/claude'
 import type { RiskItem } from '@/types/risk'
 import type { AuditItem } from '@/lib/procedureAi'
 import type { StoredIndicator } from '@/stores/indicatorStore'
+import type { SipocRelationalRow } from './sipoc'
 import { getRiskLevel, computeControlScore } from '@/types/risk'
 import {
   BLUE, RED, RED_LIGHT, AMBER_LIGHT, GRAY_LIGHT, WHITE, BLACK, FONT,
@@ -25,12 +26,7 @@ const GREEN_LIGHT = 'ECFDF5'
 // El SIPOC relacional es el MISMO dato que pinta la herramienta: cuatro columnas
 // con la fila proveedor→entrada / salida→cliente enlazada. No el desglose en dos
 // tablas que generaba la IA (proveedores por un lado, clientes por otro).
-export interface SipocEntryRow {
-  supplier_name: string
-  input_description: string
-  output_description: string
-  customer_name: string
-}
+export type SipocEntryRow = SipocRelationalRow
 
 // ── Title page builder ──────────────────────────────────────────────────────
 
@@ -87,32 +83,6 @@ export function buildTitlePage(
     }),
     new Paragraph({ children: [new PageBreak()] }),
   ]
-}
-
-// ── SIPOC tables ────────────────────────────────────────────────────────────
-
-export function buildSipocEntradas(entradas: ProcedureData['sipocEntradas']): Table {
-  return tabla([
-      fila([headerCell('Proveedor', BLUE, 50), headerCell('Entrada', BLUE, 50)], { header: true }),
-      ...entradas.map((e, i) =>
-        fila([
-            textCell(e.proveedor, { bgColor: i % 2 === 0 ? WHITE : GRAY_LIGHT, widthPct: 50 }),
-            textCell(e.entrada, { bgColor: i % 2 === 0 ? WHITE : GRAY_LIGHT, widthPct: 50 }),
-          ])
-      ),
-    ], [50, 50])
-}
-
-export function buildSipocSalidas(salidas: ProcedureData['sipocSalidas']): Table {
-  return tabla([
-      fila([headerCell('Salida', BLUE, 50), headerCell('Cliente', BLUE, 50)], { header: true }),
-      ...salidas.map((s, i) =>
-        fila([
-            textCell(s.salida, { bgColor: i % 2 === 0 ? WHITE : GRAY_LIGHT, widthPct: 50 }),
-            textCell(s.cliente, { bgColor: i % 2 === 0 ? WHITE : GRAY_LIGHT, widthPct: 50 }),
-          ])
-      ),
-    ], [50, 50])
 }
 
 // ── SIPOC relacional (4 columnas, como en la herramienta) ────────────────────

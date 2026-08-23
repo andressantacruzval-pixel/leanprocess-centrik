@@ -10,8 +10,6 @@ import type { StoredIndicator } from '@/stores/indicatorStore'
 import { BLUE, FONT, A4_ANCHO, A4_ALTO, MARGEN_LATERAL, MARGEN_VERTICAL } from './docxPrimitives'
 import {
   buildTitlePage,
-  buildSipocEntradas,
-  buildSipocSalidas,
   buildSipocRelacional,
   buildActividadesTexto,
   buildGlosarioTable,
@@ -22,6 +20,7 @@ import {
   buildObjectivosEspecificos,
   type SipocEntryRow,
 } from './docxSections'
+import { mergeLegacySipoc } from './sipoc'
 import { sectionHeading, bodyParagraph, divider } from './docxPrimitives'
 
 // Los datos que la HERRAMIENTA muestra en pantalla, para exportar exactamente lo
@@ -33,14 +32,6 @@ export interface ProcedureStoreData {
   indicators?: StoredIndicator[]
   sipocEntries?: SipocEntryRow[]
   objetivoGeneral?: string
-}
-
-// Subtítulo en gris para las secciones legacy de SIPOC (fallback sin catálogo).
-function subLabel(text: string): Paragraph {
-  return new Paragraph({
-    spacing: { before: 200, after: 100 },
-    children: [new TextRun({ text, bold: true, font: FONT, size: 24, color: '374151' })],
-  })
 }
 
 // ── Main export function ────────────────────────────────────────────────────
@@ -119,18 +110,15 @@ export function buildProcedureDocument(
           bodyParagraph(data.alcance),
           divider(),
 
-          // SIPOC de 4 columnas relacional (el mismo del catálogo que ve el usuario).
-          // Fallback al desglose legacy en dos tablas solo si no hay datos de catálogo.
+          // SIPOC SIEMPRE en UNA tabla de 4 columnas relacional. Si hay catálogo se
+          // usa; si no, se fusionan las dos listas legacy de la IA en 4 columnas.
+          // Nunca el desglose antiguo en dos apartados.
           sectionHeading('SIPOC', '4'),
-          ...(storeData?.sipocEntries?.length
-            ? [buildSipocRelacional(storeData.sipocEntries)]
-            : [
-                subLabel('Entradas (Proveedores)'),
-                buildSipocEntradas(data.sipocEntradas),
-                new Paragraph({ spacing: { before: 300, after: 100 }, children: [] }),
-                subLabel('Salidas (Clientes)'),
-                buildSipocSalidas(data.sipocSalidas),
-              ]),
+          buildSipocRelacional(
+            storeData?.sipocEntries?.length
+              ? storeData.sipocEntries
+              : mergeLegacySipoc(data.sipocEntradas, data.sipocSalidas)
+          ),
           divider(),
 
           sectionHeading('Glosario', '5'),

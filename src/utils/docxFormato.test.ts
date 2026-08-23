@@ -144,6 +144,18 @@ describe('el procedimiento que descarga el cliente', () => {
     expect(tablas).toBeGreaterThan(0)
     expect(rejillas).toBe(tablas)
   })
+
+  it('sin catálogo, el SIPOC del jsonb se fusiona en UNA tabla de 4 columnas', async () => {
+    // Sin storeData: la fuente es data.sipocEntradas/sipocSalidas (lo que generó la IA).
+    const xml = await xmlDe(buildProcedureDocument(PROCEDIMIENTO, { companyName: 'T', processName: 'X' }))
+    for (const h of ['Proveedores', 'Entradas', 'Salidas', 'Clientes']) expect(xml).toContain(h)
+    const sipocTbl = (xml.match(/<w:tbl>[\s\S]*?<\/w:tbl>/g) ?? []).find((t) => t.includes('Proveedores'))
+    expect(sipocTbl).toBeTruthy()
+    expect((sipocTbl!.match(/<w:gridCol/g) ?? []).length).toBe(4)
+    // NUNCA el desglose antiguo en dos apartados.
+    expect(xml).not.toContain('Entradas (Proveedores)')
+    expect(xml).not.toContain('Salidas (Clientes)')
+  })
 })
 
 // ── Paridad con la herramienta: SIPOC 4 col, actividades en texto, KPIs, objetivo ─
