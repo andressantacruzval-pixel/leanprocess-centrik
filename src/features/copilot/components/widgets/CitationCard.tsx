@@ -1,12 +1,16 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ExternalLink } from 'lucide-react'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { findProcessByName } from '../../copilotData'
+import { citationPreview } from '../../copilotPreview'
 import { DOC_DEFS, isDocKind, type DocKind } from './docLinks'
 
-// Cita con enlace directo al documento del proceso (procedimiento, flujograma…).
+// Cita con enlace directo al documento del proceso + vista previa al hover
+// (un extracto real del documento, verificable antes de abrir).
 export function CitationCard({ params }: { params: Record<string, string> }) {
   const data = useCompanyScopedData()
+  const [open, setOpen] = useState(false)
   const process = findProcessByName(data, params.process ?? '')
   const kind: DocKind = isDocKind(params.doc ?? '') ? (params.doc as DocKind) : 'characterization'
   const def = DOC_DEFS[kind]
@@ -21,14 +25,27 @@ export function CitationCard({ params }: { params: Record<string, string> }) {
     )
   }
 
+  const preview = open ? citationPreview(data, process.name, kind) : null
+
   return (
-    <Link
-      to={def.path(process.id)}
-      className="inline-flex items-center gap-1.5 text-[12px] font-medium text-cyan-300 bg-cyan-500/10 border border-cyan-500/25 rounded-lg px-2.5 py-1.5 hover:bg-cyan-500/20 transition-colors"
-    >
-      <Icon size={13} />
-      {label}
-      <ExternalLink size={11} className="opacity-60" />
-    </Link>
+    <span className="relative inline-block" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <Link
+        to={def.path(process.id)}
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-cyan-300 bg-cyan-500/10 border border-cyan-500/25 rounded-lg px-2.5 py-1.5 hover:bg-cyan-500/20 transition-colors"
+      >
+        <Icon size={13} />
+        {label}
+        <ExternalLink size={11} className="opacity-60" />
+      </Link>
+      {preview && (
+        <span className="absolute z-20 bottom-full left-0 mb-1.5 w-64 rounded-xl border border-white/10 bg-[#0d1420] shadow-xl shadow-black/40 p-3 copilot-fade block">
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-cyan-300 mb-1.5"><Icon size={12} /> {preview.title}</span>
+          <span className="block space-y-0.5">
+            {preview.lines.map((l, i) => <span key={i} className="block text-[11.5px] text-white/55 leading-snug truncate">{l}</span>)}
+          </span>
+          <span className="block text-[10px] text-white/30 mt-1.5">Clic para abrir →</span>
+        </span>
+      )}
+    </span>
   )
 }

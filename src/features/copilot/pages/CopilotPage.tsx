@@ -21,7 +21,7 @@ export default function CopilotPage() {
     [allConversations, activeCompanyId]
   )
 
-  const { activeConversation, isStreaming, error, ask, regenerate, stop } = useCopilot()
+  const { activeConversation, isStreaming, isDeep, error, ask, deepResearch, regenerate, stop } = useCopilot()
 
   return (
     <div className="h-[calc(100vh-7rem)] flex flex-col">
@@ -70,10 +70,12 @@ export default function CopilotPage() {
         <ChatThread
           conversation={activeConversation}
           isStreaming={isStreaming}
+          isDeep={isDeep}
           error={error}
           onSend={ask}
           onStop={stop}
           onRegenerate={regenerate}
+          onDeepResearch={deepResearch}
         />
       </div>
     </div>

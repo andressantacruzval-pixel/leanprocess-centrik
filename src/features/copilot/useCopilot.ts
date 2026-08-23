@@ -6,13 +6,14 @@ import { useCopilotStore } from '@/stores/copilotStore'
 import { streamAiProxy, type AiMessage } from '@/lib/aiClient'
 import { buildTurnContext } from './copilotContext'
 import { buildCopilotSystemPrompt } from './copilotPrompt'
+import { buildDeepDossier, buildDeepResearchPrompt } from './copilotDeepResearch'
 import { extractWidgets, stripForDisplay } from './copilotWidgets'
 
-// Orquesta un turno de consulta: arma contexto de ESTE turno (con memoria de los
-// turnos recientes para resolver referencias), hace streaming, limpia marcadores
-// en vivo y, al cerrar, extrae los widgets y persiste.
+// Orquesta un turno: arma contexto (con memoria de turnos recientes), hace
+// streaming, limpia marcadores en vivo y extrae widgets al cerrar. Soporta un
+// modo de INVESTIGACIÓN PROFUNDA que recorre toda la empresa.
 
-const HISTORY_TURNS = 8 // mensajes previos que se pasan como contexto conversacional
+const HISTORY_TURNS = 8
 
 export function useCopilot() {
   const data = useCompanyScopedData()
@@ -27,6 +28,7 @@ export function useCopilot() {
   const removeMessage = useCopilotStore((s) => s.removeMessage)
 
   const [isStreaming, setIsStreaming] = useState(false)
+  const [isDeep, setIsDeep] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
@@ -38,25 +40,21 @@ export function useCopilot() {
     setIsStreaming(false)
   }, [])
 
-  // Genera la respuesta del asistente para una pregunta ya presente como último
-  // turno de usuario. `history` son los mensajes previos (sin el turno actual).
-  const generate = useCallback(async (convId: string, question: string, history: AiMessage[], assistantId: string) => {
-    // Pista de memoria: últimos turnos de usuario para resolver "y sus riesgos?".
-    const memoryHint = history.filter((m) => m.role === 'user').slice(-2).map((m) => m.content).join(' ')
-    const context = buildTurnContext(data, question, memoryHint)
-    const systemPrompt = buildCopilotSystemPrompt(companyName, context)
-
+  // Núcleo de streaming: dado un systemPrompt ya armado, transmite y persiste.
+  const runStream = useCallback(async (
+    convId: string, question: string, history: AiMessage[], assistantId: string,
+    systemPrompt: string, maxOutputTokens: number,
+  ) => {
     const controller = new AbortController()
     abortRef.current = controller
     setIsStreaming(true)
 
     let buffer = ''
     try {
-      // Mismo camino de streaming probado que el chat de inventario.
       for await (const chunk of streamAiProxy([...history, { role: 'user', content: question }], {
         systemPrompt,
         temperature: 0.3,
-        maxOutputTokens: 4096,
+        maxOutputTokens,
         signal: controller.signal,
         feature: 'ai_consultant',
         companyId: activeCompanyId,
@@ -82,29 +80,45 @@ export function useCopilot() {
     } finally {
       abortRef.current = null
       setIsStreaming(false)
+      setIsDeep(false)
     }
-  }, [data, companyName, activeCompanyId, updateMessage])
+  }, [activeCompanyId, updateMessage])
+
+  const ensureConversation = useCallback((): string => {
+    let convId = activeId
+    if (!convId || !conversations.some((c) => c.id === convId)) convId = newConversation(activeCompanyId)
+    return convId
+  }, [activeId, conversations, newConversation, activeCompanyId])
 
   const ask = useCallback(async (question: string) => {
     const q = question.trim()
     if (!q || isStreaming) return
     setError(null)
-
-    let convId = activeId
-    if (!convId || !conversations.some((c) => c.id === convId)) {
-      convId = newConversation(activeCompanyId)
-    }
+    const convId = ensureConversation()
 
     const prior = useCopilotStore.getState().conversations.find((c) => c.id === convId)?.messages ?? []
     const history: AiMessage[] = prior.slice(-HISTORY_TURNS).map((m) => ({ role: m.role, content: m.text }))
+    const memoryHint = history.filter((m) => m.role === 'user').slice(-2).map((m) => m.content).join(' ')
 
     addMessage(convId, { role: 'user', text: q })
     const assistantId = addMessage(convId, { role: 'assistant', text: '' })
-    await generate(convId, q, history, assistantId)
-  }, [isStreaming, activeId, conversations, newConversation, activeCompanyId, addMessage, generate])
+    const systemPrompt = buildCopilotSystemPrompt(companyName, buildTurnContext(data, q, memoryHint))
+    await runStream(convId, q, history, assistantId, systemPrompt, 4096)
+  }, [isStreaming, ensureConversation, addMessage, companyName, data, runStream])
 
-  // Regenera la última respuesta: reusa la última pregunta del usuario sin
-  // duplicarla, borra la respuesta anterior y vuelve a generar.
+  // Investigación profunda: recorre toda la empresa y entrega un informe.
+  const deepResearch = useCallback(async (question: string) => {
+    const q = (question || 'Diagnóstico integral de la gestión por procesos de la empresa.').trim()
+    if (isStreaming) return
+    setError(null)
+    setIsDeep(true)
+    const convId = ensureConversation()
+    addMessage(convId, { role: 'user', text: `🔬 ${q}` })
+    const assistantId = addMessage(convId, { role: 'assistant', text: '' })
+    const systemPrompt = buildDeepResearchPrompt(companyName, buildDeepDossier(data))
+    await runStream(convId, q, [], assistantId, systemPrompt, 8192)
+  }, [isStreaming, ensureConversation, addMessage, companyName, data, runStream])
+
   const regenerate = useCallback(async () => {
     if (isStreaming) return
     const conv = useCopilotStore.getState().conversations.find((c) => c.id === activeId)
@@ -113,16 +127,14 @@ export function useCopilot() {
     const lastUserIdx = [...msgs].reverse().findIndex((m) => m.role === 'user')
     if (lastUserIdx === -1) return
     const userIdx = msgs.length - 1 - lastUserIdx
-    const question = msgs[userIdx].text
-
-    // Borra todo lo posterior a esa pregunta (la respuesta anterior).
+    const question = msgs[userIdx].text.replace(/^🔬\s*/, '')
     for (const m of msgs.slice(userIdx + 1)) removeMessage(conv.id, m.id)
-
     const history: AiMessage[] = msgs.slice(0, userIdx).slice(-HISTORY_TURNS).map((m) => ({ role: m.role, content: m.text }))
     setError(null)
     const assistantId = addMessage(conv.id, { role: 'assistant', text: '' })
-    await generate(conv.id, question, history, assistantId)
-  }, [isStreaming, activeId, addMessage, removeMessage, generate])
+    const systemPrompt = buildCopilotSystemPrompt(companyName, buildTurnContext(data, question))
+    await runStream(conv.id, question, history, assistantId, systemPrompt, 4096)
+  }, [isStreaming, activeId, addMessage, removeMessage, companyName, data, runStream])
 
-  return { activeConversation, isStreaming, error, ask, regenerate, stop }
+  return { activeConversation, isStreaming, isDeep, error, ask, deepResearch, regenerate, stop }
 }

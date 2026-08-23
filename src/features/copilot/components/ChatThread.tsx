@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { Sparkles, Bot } from 'lucide-react'
+import { Sparkles, Bot, Microscope } from 'lucide-react'
 import type { CopilotConversation } from '@/stores/copilotStore'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { MessageBubble } from './MessageBubble'
@@ -16,13 +16,15 @@ const SUGGESTIONS = [
 interface Props {
   conversation: CopilotConversation | null
   isStreaming: boolean
+  isDeep: boolean
   error: string | null
   onSend: (text: string) => void
   onStop: () => void
   onRegenerate: () => void
+  onDeepResearch: (text: string) => void
 }
 
-export function ChatThread({ conversation, isStreaming, error, onSend, onStop, onRegenerate }: Props) {
+export function ChatThread({ conversation, isStreaming, isDeep, error, onSend, onStop, onRegenerate, onDeepResearch }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const data = useCompanyScopedData()
   const messages = useMemo(() => conversation?.messages ?? [], [conversation])
@@ -31,8 +33,10 @@ export function ChatThread({ conversation, isStreaming, error, onSend, onStop, o
 
   // "Pensando" con sustancia: transmite que trabaja sobre TU data real.
   const thinkingLabel = useMemo(
-    () => `Revisando ${data.processes.length} procesos, ${data.risks.length} riesgos y ${data.indicators.length} indicadores…`,
-    [data.processes.length, data.risks.length, data.indicators.length]
+    () => isDeep
+      ? `Investigación profunda: recorriendo ${data.processes.length} procesos · cobertura · riesgos · KPIs · valor · mejoras…`
+      : `Revisando ${data.processes.length} procesos, ${data.risks.length} riesgos y ${data.indicators.length} indicadores…`,
+    [isDeep, data.processes.length, data.risks.length, data.indicators.length]
   )
   const showThinking = isStreaming && lastMsg?.role === 'assistant' && lastMsg.text.length === 0
 
@@ -57,6 +61,12 @@ export function ChatThread({ conversation, isStreaming, error, onSend, onStop, o
               Pregúntale lo que sea sobre tu empresa. Conoce tus procesos, quién hace qué, tus riesgos, controles e indicadores — y te lleva al documento.
             </p>
             <div className="flex flex-col gap-2 mt-6 w-full">
+              <button
+                onClick={() => onDeepResearch('')}
+                className="text-left text-[13px] font-medium text-violet-200 bg-violet-500/10 border border-violet-500/25 rounded-xl px-3.5 py-2.5 hover:bg-violet-500/15 transition-colors inline-flex items-center gap-2"
+              >
+                <Microscope size={15} className="text-violet-300 shrink-0" /> Investigación profunda: diagnóstico integral de la empresa
+              </button>
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
@@ -104,7 +114,7 @@ export function ChatThread({ conversation, isStreaming, error, onSend, onStop, o
         )}
       </div>
       <div className="max-w-3xl mx-auto w-full">
-        <Composer isStreaming={isStreaming} onSend={onSend} onStop={onStop} />
+        <Composer isStreaming={isStreaming} onSend={onSend} onStop={onStop} onDeepResearch={onDeepResearch} />
       </div>
     </div>
   )
