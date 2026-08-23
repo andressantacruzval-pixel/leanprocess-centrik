@@ -1,10 +1,11 @@
 import {
   Paragraph, TextRun, Table, TableCell,
-  WidthType, AlignmentType, PageBreak,
+  WidthType, AlignmentType, PageBreak, BorderStyle, ShadingType,
 } from 'docx'
 import type { ProcedureActivity, ProcedureData } from '@/lib/claude'
 import type { RiskItem } from '@/types/risk'
 import type { AuditItem } from '@/lib/procedureAi'
+import type { StoredIndicator } from '@/stores/indicatorStore'
 import { getRiskLevel, computeControlScore } from '@/types/risk'
 import {
   BLUE, RED, RED_LIGHT, AMBER_LIGHT, GRAY_LIGHT, WHITE, BLACK, FONT,
@@ -13,6 +14,21 @@ import {
 
 const VIOLET = '7C3AED'
 const VIOLET_LIGHT = 'F5F3FF'
+const TEAL = '0D9488'
+const GRAY_HEADER = '6B7280'
+const AMBER = 'F59E0B'
+const GREEN = '059669'
+const GREEN_LIGHT = 'ECFDF5'
+
+// El SIPOC relacional es el MISMO dato que pinta la herramienta: cuatro columnas
+// con la fila proveedor→entrada / salida→cliente enlazada. No el desglose en dos
+// tablas que generaba la IA (proveedores por un lado, clientes por otro).
+export interface SipocEntryRow {
+  supplier_name: string
+  input_description: string
+  output_description: string
+  customer_name: string
+}
 
 // ── Title page builder ──────────────────────────────────────────────────────
 
@@ -97,28 +113,90 @@ export function buildSipocSalidas(salidas: ProcedureData['sipocSalidas']): Table
     ], [50, 50])
 }
 
-// ── Activities table ────────────────────────────────────────────────────────
+// ── SIPOC relacional (4 columnas, como en la herramienta) ────────────────────
 
-export function buildActividadesTable(actividades: ProcedureActivity[]): Table {
+export function buildSipocRelacional(entries: SipocEntryRow[]): Table {
+  const headerRow = fila([
+      headerCell('Proveedor', RED, 25),
+      headerCell('Entrada', GRAY_HEADER, 25),
+      headerCell('Salida', TEAL, 25),
+      headerCell('Cliente', BLUE, 25),
+    ], { header: true })
+  if (entries.length === 0) {
+    return tabla([headerRow, fila([textCell('Sin datos SIPOC', { span: 4 })])], [25, 25, 25, 25])
+  }
   return tabla([
-      fila([
-          headerCell('No.', BLUE, 8),
-          headerCell('Actividad', BLUE, 20),
-          headerCell('Ejecutor', BLUE, 15),
-          headerCell('Descripcion', BLUE, 37),
-          headerCell('Decisiones', BLUE, 20),
-        ], { header: true }),
-      ...actividades.map((a, i) => {
-        const rowBg = a.esDecision ? AMBER_LIGHT : i % 2 === 0 ? WHITE : GRAY_LIGHT
+      headerRow,
+      ...entries.map((e, i) => {
+        const bg = i % 2 === 0 ? WHITE : GRAY_LIGHT
         return fila([
-            textCell(String(i + 1), { bgColor: rowBg, widthPct: 8, alignment: AlignmentType.CENTER }),
-            textCell(a.nombre, { bgColor: rowBg, bold: a.esDecision, widthPct: 20 }),
-            textCell(a.ejecutor, { bgColor: rowBg, widthPct: 15 }),
-            textCell(a.descripcion, { bgColor: rowBg, widthPct: 37 }),
-            textCell(a.decisiones, { bgColor: rowBg, widthPct: 20 }),
+            textCell(e.supplier_name || '-', { bgColor: bg, widthPct: 25 }),
+            textCell(e.input_description || '-', { bgColor: bg, widthPct: 25 }),
+            textCell(e.output_description || '-', { bgColor: bg, widthPct: 25 }),
+            textCell(e.customer_name || '-', { bgColor: bg, widthPct: 25 }),
           ])
       }),
-    ], [8, 20, 15, 37, 20])
+    ], [25, 25, 25, 25])
+}
+
+// ── Actividades en TEXTO (no tabla) ──────────────────────────────────────────
+// Replica la ficha de la herramienta: número + nombre, «Responsable:», la
+// descripción como párrafo, y para las decisiones el bloque «Lógica de Decisión».
+// Una barra de color a la izquierda (azul actividad, ámbar decisión) recrea el
+// borde de la tarjeta. Antes esto salía como tabla de 5 columnas, que no se
+// parecía a la herramienta y aplastaba las descripciones largas.
+
+function accentBorder(color: string) {
+  return { left: { style: BorderStyle.SINGLE, size: 18, color, space: 10 } }
+}
+
+export function buildActividadesTexto(actividades: ProcedureActivity[]): Paragraph[] {
+  if (actividades.length === 0) {
+    return [new Paragraph({ children: [new TextRun({ text: 'Sin actividades registradas', italics: true, font: FONT, size: 20, color: '9CA3AF' })] })]
+  }
+  const bloques: Paragraph[] = []
+  actividades.forEach((a, i) => {
+    const accent = a.esDecision ? AMBER : BLUE
+    const border = accentBorder(accent)
+    bloques.push(new Paragraph({
+      spacing: { before: 220, after: 40 },
+      border,
+      keepNext: true,
+      children: [
+        new TextRun({ text: `${i + 1}. `, bold: true, font: FONT, size: 22, color: accent }),
+        new TextRun({ text: a.nombre, bold: true, font: FONT, size: 22, color: BLACK }),
+        ...(a.esDecision ? [new TextRun({ text: '   (Decisión)', bold: true, font: FONT, size: 16, color: 'B45309' })] : []),
+      ],
+    }))
+    bloques.push(new Paragraph({
+      spacing: { before: 20, after: 40 },
+      border,
+      keepNext: true,
+      children: [
+        new TextRun({ text: 'Responsable: ', bold: true, font: FONT, size: 16, color: GRAY_HEADER }),
+        new TextRun({ text: a.ejecutor || '—', font: FONT, size: 20, color: '374151' }),
+      ],
+    }))
+    if (a.descripcion) {
+      bloques.push(new Paragraph({
+        spacing: { before: 20, after: a.esDecision ? 40 : 160 },
+        border,
+        children: [new TextRun({ text: a.descripcion, font: FONT, size: 20, color: '4B5563' })],
+      }))
+    }
+    if (a.esDecision && a.decisiones) {
+      bloques.push(new Paragraph({
+        spacing: { before: 20, after: 160 },
+        border,
+        shading: { type: ShadingType.CLEAR, fill: AMBER_LIGHT, color: AMBER_LIGHT },
+        children: [
+          new TextRun({ text: 'Lógica de Decisión: ', bold: true, font: FONT, size: 16, color: 'B45309' }),
+          new TextRun({ text: a.decisiones, font: FONT, size: 20, color: '92400E' }),
+        ],
+      }))
+    }
+  })
+  return bloques
 }
 
 // ── Glosario table ──────────────────────────────────────────────────────────
@@ -242,6 +320,37 @@ export function buildAuditTable(items: AuditItem[]): Table {
           ])
       }),
     ], [20, 25, 25, 15, 15])
+}
+
+// ── Indicadores (KPI) table ─────────────────────────────────────────────────
+
+export function buildIndicadoresTable(indicators: StoredIndicator[]): Table {
+  const headerRow = fila([
+      headerCell('Indicador', GREEN, 26),
+      headerCell('Formula', GREEN, 24),
+      headerCell('Meta', GREEN, 14),
+      headerCell('Frecuencia', GREEN, 16),
+      headerCell('Responsable', GREEN, 20),
+    ], { header: true })
+
+  if (indicators.length === 0) {
+    return tabla([headerRow, fila([textCell('Sin indicadores definidos', { span: 5 })])], [26, 24, 14, 16, 20])
+  }
+
+  return tabla([
+      headerRow,
+      ...indicators.map((ind, i) => {
+        const bg = i % 2 === 0 ? WHITE : GREEN_LIGHT
+        const meta = [ind.target_value, ind.unit].filter(Boolean).join(' ')
+        return fila([
+            textCell(ind.name || '-', { bold: true, bgColor: bg, widthPct: 26 }),
+            textCell(ind.formula || '-', { bgColor: bg, widthPct: 24 }),
+            textCell(meta || '-', { bgColor: bg, widthPct: 14, alignment: AlignmentType.CENTER }),
+            textCell(ind.frequency || '-', { bgColor: bg, widthPct: 16, alignment: AlignmentType.CENTER }),
+            textCell(ind.owner || '-', { bgColor: bg, widthPct: 20 }),
+          ])
+      }),
+    ], [26, 24, 14, 16, 20])
 }
 
 // ── Objectives subsection ───────────────────────────────────────────────────

@@ -13,6 +13,7 @@ import {
 import { useProcedureStore } from '@/stores/procedureStore'
 import { useRiskStore } from '@/stores/riskStore'
 import { useProcessStore } from '@/stores/processStore'
+import { useIndicatorStore } from '@/stores/indicatorStore'
 import { useAuditStore } from '@/stores/auditStore'
 import {
   generateProcedureFromContext,
@@ -77,12 +78,20 @@ export function ProcedureTab({
   // Hay UNA sola version y es la del proceso: la sube «Aprobar y publicar».
   const processVersion =
     useProcessStore((s) => s.processes.find((p) => p.id === processId)?.version) ?? '1.0'
+  // El objetivo general del procedimiento ES el de la caracterización
+  // (process.description): fuente única, integrada bidireccionalmente. Editarlo
+  // aquí lo escribe en el proceso, y viceversa.
+  const processDescription =
+    useProcessStore((s) => s.processes.find((p) => p.id === processId)?.description) ?? ''
+  const updateProcess = useProcessStore((s) => s.updateProcess)
 
   const { loading: generating, run: runAsync } = useAsync()
   const contextBudget = useTokenBudget({ operationKey: 'procedure_from_context' })
   const bpmnBudget = useTokenBudget({ operationKey: 'procedure_from_bpmn' })
   const allRisks = useRiskStore((s) => s.risks)
   const processRisks = allRisks.filter((r) => r.process_id === processId)
+  const allIndicators = useIndicatorStore((s) => s.indicators)
+  const processIndicators = allIndicators.filter((i) => i.process_id === processId)
   const allAudits = useAuditStore((s) => s.audits)
   const auditItems = allAudits[processId] || []
   const [improvingField, setImprovingField] = useState<string | null>(null)
@@ -146,20 +155,37 @@ export function ProcedureTab({
 
   const handleExportWord = () => {
     if (!data) return
-    // La version que va impresa es la del proceso, no la del jsonb del procedimiento.
-    exportProcedureToDocx({ ...data, version: processVersion }, { companyName, processName }, { processRisks, auditItems })
+    // Se exporta EXACTAMENTE lo que se ve en pantalla: mismos riesgos, auditoría,
+    // indicadores y SIPOC (del catálogo, 4 columnas), y el objetivo general de la
+    // caracterización. La versión impresa es la del proceso, no la del jsonb.
+    exportProcedureToDocx(
+      { ...data, version: processVersion },
+      { companyName, processName },
+      {
+        processRisks,
+        auditItems,
+        indicators: processIndicators,
+        sipocEntries,
+        objetivoGeneral: processDescription || data.objetivoGeneral,
+      }
+    )
   }
 
   // ─── Improve Text ─────────────────────────────────────────────────
 
   const handleImproveText = async (field: keyof ProcedureData, sectionLabel: string) => {
     if (!data) return
-    const current = data[field] as string
+    // El objetivo general se muestra desde la caracterización: mejorar ESE texto.
+    const current = field === 'objetivoGeneral'
+      ? (processDescription || data.objetivoGeneral)
+      : (data[field] as string)
     if (!current?.trim()) return
     setImprovingField(field)
     try {
       const improved = await improveText(sectionLabel, current)
       update({ [field]: improved })
+      // El objetivo general vive en la caracterización: espejar el cambio.
+      if (field === 'objetivoGeneral') updateProcess(processId, { description: improved })
     } catch (err) {
       console.error('Error improving text:', err)
     } finally {
@@ -383,13 +409,18 @@ export function ProcedureTab({
           {/* ══ 2. OBJETIVO ══ */}
           <DocSection number="2" title="Objetivo" field="objetivoGeneral" improvingField={improvingField} onImprove={() => handleImproveText('objetivoGeneral', 'Objetivo General')}>
             <div className="mb-4">
-              <p className="text-gray-500 text-[10px] uppercase tracking-wider font-semibold mb-1">Objetivo General</p>
+              <p className="text-gray-500 text-[10px] uppercase tracking-wider font-semibold mb-1">
+                Objetivo General
+                <span className="ml-1.5 text-[9px] normal-case tracking-normal text-blue-500/70" title="Es el mismo objetivo de la caracterización; editarlo aquí lo actualiza allá y viceversa.">· vinculado a la caracterización</span>
+              </p>
+              {/* Fuente única: process.description. Editar aquí escribe en el proceso
+                  (bidireccional) y refleja el jsonb para el export. */}
               <EditableText
-                value={data.objetivoGeneral}
-                onChange={v => update({ objetivoGeneral: v })}
+                value={processDescription || data.objetivoGeneral}
+                onChange={v => { updateProcess(processId, { description: v }); update({ objetivoGeneral: v }) }}
                 className="text-gray-700 text-[13px] leading-relaxed"
                 multiline
-                placeholder="Objetivo general del procedimiento..."
+                placeholder="Objetivo general (heredado de la caracterización)..."
               />
             </div>
 
@@ -506,8 +537,40 @@ export function ProcedureTab({
             />
           </DocSection>
 
-          {/* ══ 7. RIESGOS Y CONTROLES ══ */}
-          <DocSection number="7" title="Riesgos y Controles">
+          {/* ══ 7. INDICADORES (KPI) ══ */}
+          <DocSection number="7" title="Indicadores (KPI)">
+            {processIndicators.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[560px] border-collapse">
+                <thead>
+                  <tr>
+                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Indicador</th>
+                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Formula</th>
+                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Meta</th>
+                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Frecuencia</th>
+                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Responsable</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {processIndicators.map((ind, i) => (
+                    <tr key={ind.id} className={i % 2 === 0 ? 'bg-emerald-50/30' : ''}>
+                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 font-medium">{ind.name || '-'}</td>
+                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700">{ind.formula || '-'}</td>
+                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 text-center">{[ind.target_value, ind.unit].filter(Boolean).join(' ') || '-'}</td>
+                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 text-center">{ind.frequency || '-'}</td>
+                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700">{ind.owner || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-400 text-[12px] italic">No hay indicadores definidos. Usa el panel de KPI en el diagramador para crearlos.</p>
+            )}
+          </DocSection>
+
+          {/* ══ 8. RIESGOS Y CONTROLES ══ */}
+          <DocSection number="8" title="Riesgos y Controles">
             {processRisks.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[520px] border-collapse">
@@ -560,8 +623,8 @@ export function ProcedureTab({
             )}
           </DocSection>
 
-          {/* ══ 8. PROGRAMA DE AUDITORIA ══ */}
-          <DocSection number="8" title="Programa de Auditoria">
+          {/* ══ 9. PROGRAMA DE AUDITORIA ══ */}
+          <DocSection number="9" title="Programa de Auditoria">
             {auditItems.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px] border-collapse">

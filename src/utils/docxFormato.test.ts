@@ -145,3 +145,53 @@ describe('el procedimiento que descarga el cliente', () => {
     expect(rejillas).toBe(tablas)
   })
 })
+
+// ── Paridad con la herramienta: SIPOC 4 col, actividades en texto, KPIs, objetivo ─
+
+describe('el procedimiento exporta lo mismo que la herramienta', () => {
+  const storeData = {
+    processRisks: [],
+    auditItems: [],
+    objetivoGeneral: 'Objetivo tomado de la caracterizacion',
+    indicators: [
+      { id: 'k1', process_id: 'p', name: 'Tiempo de ciclo', formula: 'fin - inicio', unit: 'dias', frequency: 'Mensual', target_value: '5', owner: 'Jefe de Planta' },
+    ] as never,
+    sipocEntries: [
+      { supplier_name: 'Bodega', input_description: 'Materia prima', output_description: 'Lote empacado', customer_name: 'Distribuidor' },
+    ],
+  }
+
+  it('el SIPOC sale en UNA tabla de 4 columnas (proveedor-entrada-salida-cliente)', async () => {
+    const xml = await xmlDe(buildProcedureDocument(PROCEDIMIENTO, { companyName: 'T', processName: 'X' }, storeData))
+    // Las 4 cabeceras y la fila relacional conviven en el mismo bloque.
+    for (const h of ['Proveedor', 'Entrada', 'Salida', 'Cliente']) expect(xml).toContain(h)
+    for (const v of ['Bodega', 'Materia prima', 'Lote empacado', 'Distribuidor']) expect(xml).toContain(v)
+    // Sin catálogo NO debe salir el desglose legacy en dos tablas.
+    expect(xml).not.toContain('Entradas (Proveedores)')
+    expect(xml).not.toContain('Salidas (Clientes)')
+  })
+
+  it('las actividades NO van en tabla: su descripcion es texto de párrafo', async () => {
+    const xml = await xmlDe(buildProcedureDocument(PROCEDIMIENTO, { companyName: 'T', processName: 'X' }, storeData))
+    // La actividad y su responsable aparecen como texto.
+    expect(xml).toContain('Definir Incoterms')
+    expect(xml).toContain('Responsable:')
+    // Con catálogo SIPOC: tablas = SIPOC(1)+Glosario(1)+KPI(1)+Riesgos(1)+Auditoria(1)=5.
+    // Si las actividades siguieran en tabla, serían 6.
+    const tablas = (xml.match(/<w:tbl>/g) ?? []).length
+    expect(tablas).toBe(5)
+  })
+
+  it('incluye la seccion de Indicadores (KPI) con los datos del store', async () => {
+    const xml = await xmlDe(buildProcedureDocument(PROCEDIMIENTO, { companyName: 'T', processName: 'X' }, storeData))
+    expect(xml).toContain('Indicadores (KPI)')
+    expect(xml).toContain('Tiempo de ciclo')
+    expect(xml).toContain('fin - inicio')
+  })
+
+  it('el objetivo general es el de la caracterizacion, no el del jsonb', async () => {
+    const xml = await xmlDe(buildProcedureDocument(PROCEDIMIENTO, { companyName: 'T', processName: 'X' }, storeData))
+    expect(xml).toContain('Objetivo tomado de la caracterizacion')
+    expect(xml).not.toContain('>Objetivo<') // el objetivoGeneral del jsonb fixture era 'Objetivo'
+  })
+})
