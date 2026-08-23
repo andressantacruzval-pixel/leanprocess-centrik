@@ -204,6 +204,36 @@ export function parseBpmnXml(xml: string): ParsedBpmn {
   }
 }
 
+// Tipos de nodo que cuentan como "contenido" de un flujograma. Una tarea o una
+// compuerta significa que hay proceso dibujado; un lienzo con solo start/end (o
+// solo carriles) está vacío para efectos de documentación.
+const CONTENT_NODE_TYPES = [
+  'task', 'userTask', 'serviceTask', 'sendTask', 'receiveTask',
+  'manualTask', 'scriptTask', 'businessRuleTask', 'subProcess', 'callActivity',
+  'exclusiveGateway', 'parallelGateway', 'inclusiveGateway', 'eventBasedGateway',
+] as const
+
+/**
+ * Cuenta los nodos de CONTENIDO (tareas y compuertas) de un XML BPMN sin hacer
+ * el BFS completo de parseBpmnXml. Es la salvaguarda anti-borrado del auto-save:
+ * bpmn-js RE-SERIALIZA el XML al importarlo (otro espaciado/orden de atributos),
+ * así que un lienzo vacío recién cargado ya NO es byte-idéntico a BLANK_BPMN y
+ * burlaba la comparación exacta. Contar el contenido es a prueba de reformateo.
+ * Ante un XML ilegible devuelve 0 (se tratará como vacío → jamás pisa a uno lleno).
+ */
+export function countBpmnContentNodes(xml: string): number {
+  if (!xml) return 0
+  try {
+    const doc = new DOMParser().parseFromString(xml, 'application/xml')
+    if (doc.getElementsByTagName('parsererror').length > 0) return 0
+    let count = 0
+    for (const type of CONTENT_NODE_TYPES) count += getElements(doc, type).length
+    return count
+  } catch {
+    return 0
+  }
+}
+
 /**
  * Converts parsed BPMN data to a human-readable summary for AI consumption
  */

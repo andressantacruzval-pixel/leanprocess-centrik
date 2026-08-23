@@ -23,19 +23,43 @@ export interface WidgetSpec {
 
 const JSON_BLOCK = /```json\s*([\s\S]*?)```/gi
 
-/** Extrae el ÚLTIMO bloque ```json``` como spec de widget y lo quita del texto. */
+// Localiza el objeto JSON balanceado que contiene "widget" (por si el modelo lo
+// emite SIN las comillas de código). Devuelve el fragmento crudo y su posición.
+function findBareWidgetObject(s: string): { raw: string; index: number } | null {
+  const kw = s.lastIndexOf('"widget"')
+  if (kw === -1) return null
+  const start = s.lastIndexOf('{', kw)
+  if (start === -1) return null
+  let depth = 0
+  for (let i = start; i < s.length; i++) {
+    if (s[i] === '{') depth++
+    else if (s[i] === '}') { depth--; if (depth === 0) return { raw: s.slice(start, i + 1), index: start } }
+  }
+  return null // objeto aún incompleto (streaming)
+}
+
+function parseSpec(json: string): WidgetSpec | null {
+  try {
+    const parsed = JSON.parse(json) as { widget?: WidgetSpec } | WidgetSpec
+    return (parsed as { widget?: WidgetSpec }).widget ?? (parsed as WidgetSpec)
+  } catch { return null }
+}
+
+/** Extrae el spec de widget (bloque ```json``` o objeto {"widget"...} suelto) y lo quita del texto. */
 export function extractPlan(buffer: string): { text: string; spec: WidgetSpec | null } {
   const matches = [...buffer.matchAll(JSON_BLOCK)]
-  if (!matches.length) return { text: buffer.trim(), spec: null }
-  const last = matches[matches.length - 1]
-  let spec: WidgetSpec | null = null
-  try {
-    const parsed = JSON.parse(last[1]) as { widget?: WidgetSpec } | WidgetSpec
-    spec = (parsed as { widget?: WidgetSpec }).widget ?? (parsed as WidgetSpec)
-  } catch { /* bloque incompleto o mal formado: se ignora */ }
-  const idx = last.index ?? 0
-  const text = (buffer.slice(0, idx) + buffer.slice(idx + last[0].length)).replace(/```json[\s\S]*$/i, '').trim()
-  return { text, spec }
+  if (matches.length) {
+    const last = matches[matches.length - 1]
+    const idx = last.index ?? 0
+    const text = (buffer.slice(0, idx) + buffer.slice(idx + last[0].length)).trim()
+    return { text, spec: parseSpec(last[1]) }
+  }
+  const bare = findBareWidgetObject(buffer)
+  if (bare) {
+    const text = (buffer.slice(0, bare.index) + buffer.slice(bare.index + bare.raw.length)).trim()
+    return { text, spec: parseSpec(bare.raw) }
+  }
+  return { text: buffer.trim(), spec: null }
 }
 
 const CHART_ENTITIES = new Set(['risks', 'processes', 'indicators', 'value', 'improvements'])

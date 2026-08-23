@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { dbWrite } from '@/lib/dbWrite'
+import { countBpmnContentNodes } from '@/utils/bpmnParser'
 
 interface UseBpmnAutoSaveOptions {
   processId: string | undefined
@@ -30,6 +31,25 @@ export function useBpmnAutoSave({
     if (!processId || !bpmnXml || bpmnXml === blankBpmn) return
     const stored = processes.find((p) => p.id === processId)
     if (!stored || bpmnXml === stored.bpmn_xml) return
+
+    // ── Salvaguarda anti-borrado ────────────────────────────────────────────
+    // CAUSA RAÍZ del flujograma que "se borró de la nada": bpmn-js re-serializa
+    // el XML al importarlo (otro espaciado/orden de atributos), así que un lienzo
+    // vacío recién cargado —o un import que falló y dejó el canvas en blanco— ya
+    // NO es byte-idéntico a blankBpmn y burlaba la comparación exacta de arriba;
+    // el auto-save entonces pisaba el diagrama real en bpmn_diagrams con uno sin
+    // nodos. Las actividades del análisis de valor sobrevivían por estar en otra
+    // tabla, de ahí que solo desapareciera el dibujo.
+    //
+    // Regla dura: el auto-save JAMÁS persiste un diagrama sin contenido (0 tareas
+    // y 0 compuertas). No hay flujo legítimo que quiera guardar un lienzo vacío;
+    // vaciarlo solo ocurre por reset_company (otra vía). Así, un diagrama con
+    // contenido nunca puede ser sobrescrito por uno vacío, bajo ninguna
+    // circunstancia.
+    if (countBpmnContentNodes(bpmnXml) === 0) {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+      return
+    }
 
     setAutoSaveStatus('pending')
 
