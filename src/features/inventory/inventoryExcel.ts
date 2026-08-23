@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import type { InvReportRow } from './inventoryReportData'
+import type { OrgLabelsLike } from '@/lib/reportHierarchy'
 
 // Exporta el inventario COMPLETO a Excel: todas las columnas que se ven en la
 // tabla del reporte (caracterización + banderas desplegadas + SIPOC + estado),
@@ -9,22 +10,25 @@ import type { InvReportRow } from './inventoryReportData'
 
 const boolText = (v: boolean | null | undefined): string => (v == null ? '' : v ? 'Sí' : 'No')
 
-export async function exportInventoryExcel(rows: InvReportRow[], companyName: string, gerenciaLabel: string) {
+export async function exportInventoryExcel(rows: InvReportRow[], companyName: string, org: OrgLabelsLike) {
   const wb = new ExcelJS.Workbook()
   wb.creator = companyName || 'LeanProcess'
   const ws = wb.addWorksheet('Inventario')
 
+  // Orden canónico: jerarquía organizacional → jerarquía de procesos → resto.
   const columns: { header: string; get: (r: InvReportRow) => string }[] = [
-    { header: 'Área', get: (r) => r.area || '' },
+    { header: org.l0, get: (r) => r.gerencia || '' },
+    { header: org.l1, get: (r) => r.coordinacion || '' },
+    ...(org.hasL2 ? [{ header: org.l2, get: (r: InvReportRow) => r.operativo || '' }] : []),
     { header: 'Macroproceso', get: (r) => r.macro || '' },
     { header: 'Proceso', get: (r) => r.proceso || '' },
     { header: 'Subproceso', get: (r) => r.nombre || '' },
+    { header: 'Área', get: (r) => r.area || '' },
     { header: 'Objetivo', get: (r) => r.objetivo || '' },
     { header: 'Responsable', get: (r) => r.responsable || '' },
     { header: 'Crítico', get: (r) => boolText(r.critico) },
     { header: 'Mov. efectivo', get: (r) => boolText(r.efectivo) },
     { header: 'Nivel de ejecución', get: (r) => r.nivelEjecucion || '' },
-    { header: gerenciaLabel, get: (r) => r.gerencia || '' },
     { header: 'Frecuencia', get: (r) => r.frecuencia || '' },
     { header: 'Tipo de proceso', get: (r) => r.tipoProceso || '' },
     { header: 'Tipo de ejecución', get: (r) => r.tipoEjecucion || '' },

@@ -216,11 +216,11 @@ export default function ReportsPage() {
             </div>
           ) : (
             <div className="bg-white/[0.02] rounded-2xl border border-white/5">
-              {activeTab === 'riesgos' && <RisksReport processes={filteredProcesses} allRisks={allRisks} />}
-              {activeTab === 'kpis' && <KpisReport processes={filteredProcesses} allIndicators={allIndicators} />}
-              {activeTab === 'valor' && <ValueReport processes={filteredProcesses} allAnalyses={allAnalyses} />}
-              {activeTab === 'auditoria' && <AuditReport processes={filteredProcesses} allAudits={allAudits} />}
-              {activeTab === 'mejoras' && mejorasView === 'tabla' && <ImprovementsReport processes={filteredProcesses} allImprovements={allImprovements} onUpdate={updateOpportunity} />}
+              {activeTab === 'riesgos' && <RisksReport processes={filteredProcesses} allRisks={allRisks} macroMap={macroMap} processMap={processMap} />}
+              {activeTab === 'kpis' && <KpisReport processes={filteredProcesses} allIndicators={allIndicators} macroMap={macroMap} processMap={processMap} />}
+              {activeTab === 'valor' && <ValueReport processes={filteredProcesses} allAnalyses={allAnalyses} macroMap={macroMap} processMap={processMap} />}
+              {activeTab === 'auditoria' && <AuditReport processes={filteredProcesses} allAudits={allAudits} macroMap={macroMap} processMap={processMap} />}
+              {activeTab === 'mejoras' && mejorasView === 'tabla' && <ImprovementsReport processes={filteredProcesses} allImprovements={allImprovements} onUpdate={updateOpportunity} macroMap={macroMap} processMap={processMap} />}
               {activeTab === 'mejoras' && mejorasView === 'kanban' && (
                 <div className="p-3">
                   <ImprovementsKanban opportunities={filteredImprovements} processNameById={processNameById} onUpdate={updateOpportunity} onDelete={deleteOpportunity} />

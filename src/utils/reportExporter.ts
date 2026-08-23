@@ -15,6 +15,18 @@ import {
   type ImprovementOpportunity, priorityScore, priorityLabel, STATUS_LABELS, IMPROVEMENT_TYPE_LABELS,
 } from '@/types/improvement'
 import { computeCargos, scaleDaily } from '@/features/cargos/cargoData'
+import { hierarchyHeaders, hierarchyCells, resolveProcessHierarchy, type OrgLabelsLike } from '@/lib/reportHierarchy'
+
+// Jerarquía canónica (organizacional + procesos) para anteponer en TODA tabla:
+// [l0, l1, (l2), Macroproceso, Proceso, Subproceso]. `W` = nº de esas columnas
+// (5 o 6), para recalcular los índices de coloreado que van después.
+function hierParts(d: ReportData) {
+  const org: OrgLabelsLike = d.orgLabels ?? { l0: 'Gerencia', l1: 'Area', l2: 'Nivel 3', hasL2: false }
+  const headers = hierarchyHeaders(org)
+  const cells = (p: Process | undefined) =>
+    hierarchyCells({ management: p?.management, coordination: p?.coordination, operative: p?.operative, ...resolveProcessHierarchy(p, d.macroMap, d.processMap) }, org)
+  return { headers, W: headers.length, cells }
+}
 
 // Filas de detalle por actividad de cada cargo, con su jerarquía (macro →
 // proceso → subproceso) resuelta desde el mapa de procesos. Base para la
@@ -53,10 +65,6 @@ export interface ReportData {
   cargoCatalog?: string[]
   orgLabels?: { l0: string; l1: string; l2: string; hasL2: boolean }
 }
-
-// Etiquetas de nivel organizacional según lo parametrizó el usuario.
-const gL = (d: ReportData) => d.orgLabels?.l0 ?? 'Gerencia'
-const aL = (d: ReportData) => d.orgLabels?.l1 ?? 'Area'
 
 // Efectividad promedio de los controles de un riesgo (0–40) → etiqueta.
 function controlEffLabel(r: RiskItem): string {
@@ -169,34 +177,33 @@ function colorCell(cell: ExcelJS.Cell, textArgb: string, bgArgb: string) {
 
 function excelInventory(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Inventario de Procesos')
-  const H = [gL(data), aL(data), 'Macroproceso', 'Subproceso', 'Responsable', 'Tipo', 'Frecuencia', 'Critico', 'BPMN', 'Procedimiento']
-  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 3 ? 22 : 14 }))
+  const { headers: HH, W, cells } = hierParts(data)
+  const H = [...HH, 'Responsable', 'Tipo', 'Frecuencia', 'Critico', 'BPMN', 'Procedimiento']
+  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i < W ? 22 : 14 }))
   const procSet = new Set(data.allProcedures.map(p => p.process_id))
-  const rows: (string | number)[][] = data.processes.map(p => {
-    const macro = data.macroMap.get(p.macroprocess_id)
-    return [p.management || '-', p.coordination || '-', macro?.name || '-', p.name, p.responsible || '-', p.process_type || '-', p.execution_frequency || '-', p.is_critical ? 'Si' : 'No', p.bpmn_xml ? 'Si' : 'No', procSet.has(p.id) ? 'Si' : 'No']
-  })
+  const rows: (string | number)[][] = data.processes.map(p =>
+    [...cells(p), p.responsible || '-', p.process_type || '-', p.execution_frequency || '-', p.is_critical ? 'Si' : 'No', p.bpmn_xml ? 'Si' : 'No', procSet.has(p.id) ? 'Si' : 'No']
+  )
   rows.forEach(r => ws.addRow(r))
   styleHeaders(ws, H.length, 1)
   addTitle(ws, `Inventario de Procesos — ${company}`, `${company} | ${date}`, H.length, company, data.generatedBy || '')
   styleData(ws, 4, H.length, rows.length)
-  // Color critical, bpmn, procedure cells
+  // Color critical (W+4), bpmn (W+5), procedure (W+6) — índices 1-based tras la jerarquía.
+  const cCrit = W + 4, cBpmn = W + 5, cProc = W + 6
   for (let r = 4; r < 4 + rows.length; r++) {
-    const critico = ws.getRow(r).getCell(8).value
-    if (critico === 'Si') colorCell(ws.getRow(r).getCell(8), `FF${INVENTORY_COLORS.criticalText}`, `FF${INVENTORY_COLORS.criticalBg}`)
-    const bpmn = ws.getRow(r).getCell(9).value
-    if (bpmn === 'Si') colorCell(ws.getRow(r).getCell(9), `FF${INVENTORY_COLORS.yesText}`, `FF${INVENTORY_COLORS.yesBg}`)
-    else colorCell(ws.getRow(r).getCell(9), `FF${INVENTORY_COLORS.noText}`, `FF${INVENTORY_COLORS.noBg}`)
-    const proc = ws.getRow(r).getCell(10).value
-    if (proc === 'Si') colorCell(ws.getRow(r).getCell(10), `FF${INVENTORY_COLORS.yesText}`, `FF${INVENTORY_COLORS.yesBg}`)
-    else colorCell(ws.getRow(r).getCell(10), `FF${INVENTORY_COLORS.noText}`, `FF${INVENTORY_COLORS.noBg}`)
+    if (ws.getRow(r).getCell(cCrit).value === 'Si') colorCell(ws.getRow(r).getCell(cCrit), `FF${INVENTORY_COLORS.criticalText}`, `FF${INVENTORY_COLORS.criticalBg}`)
+    const bpmn = ws.getRow(r).getCell(cBpmn).value
+    colorCell(ws.getRow(r).getCell(cBpmn), bpmn === 'Si' ? `FF${INVENTORY_COLORS.yesText}` : `FF${INVENTORY_COLORS.noText}`, bpmn === 'Si' ? `FF${INVENTORY_COLORS.yesBg}` : `FF${INVENTORY_COLORS.noBg}`)
+    const proc = ws.getRow(r).getCell(cProc).value
+    colorCell(ws.getRow(r).getCell(cProc), proc === 'Si' ? `FF${INVENTORY_COLORS.yesText}` : `FF${INVENTORY_COLORS.noText}`, proc === 'Si' ? `FF${INVENTORY_COLORS.yesBg}` : `FF${INVENTORY_COLORS.noBg}`)
   }
 }
 
 function excelRisks(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Riesgos y Controles')
-  const H = [gL(data), aL(data), 'Proceso', 'Riesgo', 'Descripcion', 'Causa', 'Evento', 'Efecto', 'Categoria', 'Actividad', 'P.I', 'I.I', 'Nivel Inh.', 'Controles', 'Efectividad', 'P.R', 'I.R', 'Nivel Res.']
-  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 3 ? 22 : i === 4 ? 32 : (i >= 5 && i <= 7) ? 24 : 12 }))
+  const { headers: HH, W, cells } = hierParts(data)
+  const H = [...HH, 'Riesgo', 'Descripcion', 'Causa', 'Evento', 'Efecto', 'Categoria', 'Actividad', 'P.I', 'I.I', 'Nivel Inh.', 'Controles', 'Efectividad', 'P.R', 'I.R', 'Nivel Res.']
+  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i < W ? 22 : i === W ? 32 : (i >= W + 2 && i <= W + 4) ? 24 : 12 }))
   const pIds = new Set(data.processes.map(p => p.id))
   const pMap = new Map(data.processes.map(p => [p.id, p]))
   const risks = data.allRisks.filter(r => pIds.has(r.process_id))
@@ -204,15 +211,15 @@ function excelRisks(wb: ExcelJS.Workbook, data: ReportData, company: string, dat
     const proc = pMap.get(r.process_id)
     const inh = getRiskLevel(r.inherentProbability, r.inherentImpact)
     const res = getRiskLevel(r.residualProbability, r.residualImpact)
-    return [proc?.management || '-', proc?.coordination || '-', proc?.name || '-', r.title, r.description || '-', r.riskCause || '-', r.riskEvent || '-', r.riskEffect || '-', r.category, r.processStep || '-', r.inherentProbability, r.inherentImpact, inh.label, r.controls.length, controlEffLabel(r), r.residualProbability, r.residualImpact, res.label]
+    return [...cells(proc), r.title, r.description || '-', r.riskCause || '-', r.riskEvent || '-', r.riskEffect || '-', r.category, r.processStep || '-', r.inherentProbability, r.inherentImpact, inh.label, r.controls.length, controlEffLabel(r), r.residualProbability, r.residualImpact, res.label]
   })
   rows.forEach(r => ws.addRow(r))
   styleHeaders(ws, H.length, 1)
   addTitle(ws, `Riesgos y Controles — ${company}`, `${company} | ${date}`, H.length, company, data.generatedBy || '')
   styleData(ws, 4, H.length, rows.length)
-  // Color risk level cells (Nivel Inh. = 13, Nivel Res. = 18)
+  // Color nivel cells: Nivel Inh. = W+10, Nivel Res. = W+15 (1-based tras la jerarquía).
   for (let r = 4; r < 4 + rows.length; r++) {
-    for (const col of [13, 18]) {
+    for (const col of [W + 10, W + 15]) {
       const val = String(ws.getRow(r).getCell(col).value || '')
       const level = RISK_LEVEL_COLORS[val]
       if (level) colorCell(ws.getRow(r).getCell(col), `FF${level.text}`, `FF${level.bg}`)
@@ -222,26 +229,27 @@ function excelRisks(wb: ExcelJS.Workbook, data: ReportData, company: string, dat
 
 function excelKpis(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Indicadores KPI')
-  const H = [gL(data), aL(data), 'Proceso', 'Indicador', 'Objetivo', 'Formula', 'Fuente', 'Unidad', 'Frecuencia', 'Meta', 'Verde', 'Amarillo', 'Rojo', 'Resp. Reporte', 'Resp. Monitoreo']
-  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 4 ? 22 : (i >= 10 && i <= 12) ? 11 : 14 }))
+  const { headers: HH, W, cells } = hierParts(data)
+  const H = [...HH, 'Indicador', 'Objetivo', 'Formula', 'Fuente', 'Unidad', 'Frecuencia', 'Meta', 'Verde', 'Amarillo', 'Rojo', 'Resp. Reporte', 'Resp. Monitoreo']
+  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i < W ? 22 : (i >= W + 7 && i <= W + 9) ? 11 : 14 }))
   const pIds = new Set(data.processes.map(p => p.id))
   const pMap = new Map(data.processes.map(p => [p.id, p]))
   const items = data.allIndicators.filter(i => pIds.has(i.process_id))
   const rows = items.map(i => {
     const proc = pMap.get(i.process_id)
-    return [proc?.management || '-', proc?.coordination || '-', proc?.name || '-', i.name, i.description, i.formula, i.data_source || '-', i.unit, i.frequency, i.target_value, thresholdRange(i.threshold_green_min, i.threshold_green_max), thresholdRange(i.threshold_yellow_min, i.threshold_yellow_max), thresholdRange(i.threshold_red_min, i.threshold_red_max), i.owner, i.reporter || '-']
+    return [...cells(proc), i.name, i.description, i.formula, i.data_source || '-', i.unit, i.frequency, i.target_value, thresholdRange(i.threshold_green_min, i.threshold_green_max), thresholdRange(i.threshold_yellow_min, i.threshold_yellow_max), thresholdRange(i.threshold_red_min, i.threshold_red_max), i.owner, i.reporter || '-']
   })
   rows.forEach(r => ws.addRow(r))
   styleHeaders(ws, H.length, 1)
   addTitle(ws, `Indicadores KPI — ${company}`, `${company} | ${date}`, H.length, company, data.generatedBy || '')
   styleData(ws, 4, H.length, rows.length)
-  // Color umbral cells: Verde=11, Amarillo=12, Rojo=13
+  // Color umbrales: Verde=W+8, Amarillo=W+9, Rojo=W+10 (1-based tras la jerarquía).
   for (let r = 4; r < 4 + rows.length; r++) {
     const paint = (col: number, key: keyof typeof THRESHOLD_COLORS) => {
       const v = String(ws.getRow(r).getCell(col).value || '')
       if (v && v !== '-') colorCell(ws.getRow(r).getCell(col), `FF${THRESHOLD_COLORS[key].text}`, `FF${THRESHOLD_COLORS[key].bg}`)
     }
-    paint(11, 'green'); paint(12, 'yellow'); paint(13, 'red')
+    paint(W + 8, 'green'); paint(W + 9, 'yellow'); paint(W + 10, 'red')
   }
 }
 
@@ -280,15 +288,16 @@ function excelCargos(wb: ExcelJS.Workbook, data: ReportData, company: string, da
 
 function excelMejoras(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Plan de Mejoras')
-  const H = [gL(data), 'Proceso', 'Oportunidad', 'Tipo', 'Descripcion', 'Prioridad', 'Costo', 'Complejidad', 'Tiempo', 'Responsable', 'Inicio', 'Fin', 'Estado', 'Avance %', 'Cierre']
-  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i === 2 || i === 4 ? 30 : i <= 1 ? 20 : 14 }))
+  const { headers: HH, W, cells } = hierParts(data)
+  const H = [...HH, 'Oportunidad', 'Tipo', 'Descripcion', 'Prioridad', 'Costo', 'Complejidad', 'Tiempo', 'Responsable', 'Inicio', 'Fin', 'Estado', 'Avance %', 'Cierre']
+  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i === W || i === W + 2 ? 30 : i < W ? 20 : 14 }))
   const pIds = new Set(data.processes.map(p => p.id))
   const pMap = new Map(data.processes.map(p => [p.id, p]))
   const items = (data.allImprovements || []).filter(o => pIds.has(o.processId))
   const rows = items.map(o => {
     const proc = pMap.get(o.processId)
     const total = priorityScore(o)
-    return [proc?.management || '-', proc?.name || '-', o.name, IMPROVEMENT_TYPE_LABELS[o.type], o.description || '-', `${total}/15 ${priorityLabel(total).label}`, o.costScore, o.complexityScore, o.timeScore, o.responsible || '-', o.startDate || '-', o.endDate || '-', STATUS_LABELS[o.status], o.progressPct ?? 0, o.closeDate || '-']
+    return [...cells(proc), o.name, IMPROVEMENT_TYPE_LABELS[o.type], o.description || '-', `${total}/15 ${priorityLabel(total).label}`, o.costScore, o.complexityScore, o.timeScore, o.responsible || '-', o.startDate || '-', o.endDate || '-', STATUS_LABELS[o.status], o.progressPct ?? 0, o.closeDate || '-']
   })
   rows.forEach(r => ws.addRow(r))
   styleHeaders(ws, H.length, 1)
@@ -298,34 +307,37 @@ function excelMejoras(wb: ExcelJS.Workbook, data: ReportData, company: string, d
 
 function excelValue(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Analisis de Valor')
-  const H = [gL(data), aL(data), 'Proceso', 'Actividad', 'Responsable', 'Clasificacion', 'Frecuencia', 'Min', 'Ocurr.', 'Min/Dia', 'Min/Mes', 'Hrs/Ano']
-  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 3 ? 22 : 12 }))
+  const { headers: HH, W, cells } = hierParts(data)
+  const H = [...HH, 'Actividad', 'Responsable', 'Clasificacion', 'Frecuencia', 'Min', 'Ocurr.', 'Min/Dia', 'Min/Mes', 'Hrs/Ano']
+  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i < W ? 22 : 12 }))
   const rows: (string | number)[][] = []
   for (const p of data.processes) {
     for (const a of (data.allAnalyses[p.id] || [])) {
-      rows.push([p.management || '-', p.coordination || '-', p.name, a.name, a.laneName || '-', a.classification || '-', a.frequency || '-', a.timePerOccurrence || 0, a.occurrences || 0, a.dailyMinutes ? Math.round(a.dailyMinutes * 10) / 10 : 0, a.dailyMinutes ? Math.round(scaleToPeriod(a.dailyMinutes, 'mes')) : 0, a.dailyMinutes ? Math.round(scaleToPeriod(a.dailyMinutes, 'año') / 60 * 10) / 10 : 0])
+      rows.push([...cells(p), a.name, a.laneName || '-', a.classification || '-', a.frequency || '-', a.timePerOccurrence || 0, a.occurrences || 0, a.dailyMinutes ? Math.round(a.dailyMinutes * 10) / 10 : 0, a.dailyMinutes ? Math.round(scaleToPeriod(a.dailyMinutes, 'mes')) : 0, a.dailyMinutes ? Math.round(scaleToPeriod(a.dailyMinutes, 'año') / 60 * 10) / 10 : 0])
     }
   }
   rows.forEach(r => ws.addRow(r))
   styleHeaders(ws, H.length, 1)
   addTitle(ws, `Analisis de Valor — ${company}`, `${company} | ${date}`, H.length, company, data.generatedBy || '')
   styleData(ws, 4, H.length, rows.length)
-  // Color VA/NVA/NVABN cells
+  // Color Clasificacion (W+3, 1-based tras la jerarquía).
+  const cCls = W + 3
   for (let r = 4; r < 4 + rows.length; r++) {
-    const val = String(ws.getRow(r).getCell(6).value || '')
+    const val = String(ws.getRow(r).getCell(cCls).value || '')
     const vaColor = VA_COLORS[val]
-    if (vaColor) colorCell(ws.getRow(r).getCell(6), `FF${vaColor.text}`, `FF${vaColor.bg}`)
+    if (vaColor) colorCell(ws.getRow(r).getCell(cCls), `FF${vaColor.text}`, `FF${vaColor.bg}`)
   }
 }
 
 function excelAudit(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Programa de Auditoria')
-  const H = [gL(data), aL(data), 'Proceso', 'Actividad', 'Que Auditar', 'Criterio', 'Evidencia', 'Frecuencia', 'Responsable']
-  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i <= 4 ? 24 : 16 }))
+  const { headers: HH, W, cells } = hierParts(data)
+  const H = [...HH, 'Actividad', 'Que Auditar', 'Criterio', 'Evidencia', 'Frecuencia', 'Responsable']
+  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i < W + 2 ? 24 : 16 }))
   const rows: string[][] = []
   for (const p of data.processes) {
     for (const item of (data.allAudits[p.id] || [])) {
-      rows.push([p.management || '-', p.coordination || '-', p.name, item.actividad, item.queAuditar, item.criterio, item.evidencia, item.frecuencia, item.responsable])
+      rows.push([...cells(p), item.actividad, item.queAuditar, item.criterio, item.evidencia, item.frecuencia, item.responsable])
     }
   }
   rows.forEach(r => ws.addRow(r))
@@ -371,70 +383,70 @@ export function exportReportToPdf(data: ReportData) {
   let body: string[][] = []
   const pIds = new Set(data.processes.map(p => p.id))
   const pMap = new Map(data.processes.map(p => [p.id, p]))
+  const { headers: HH, W, cells } = hierParts(data)
 
-  // Column indices that need coloring: [colIndex, colorMap]
+  // Column indices that need coloring (0-based, tras la jerarquía de ancho W).
   let colorCols: { col: number; map: Record<string, PdfColorPair> }[] = []
 
   switch (data.tab) {
     case 'inventario': {
       const procSet = new Set(data.allProcedures.map(p => p.process_id))
-      head = [[gL(data), aL(data), 'Macro', 'Subproceso', 'Responsable', 'Tipo', 'Critico', 'BPMN', 'Proced.']]
-      body = data.processes.map(p => {
-        const macro = data.macroMap.get(p.macroprocess_id)
-        return [p.management || '-', p.coordination || '-', macro?.name || '-', p.name, p.responsible || '-', p.process_type || '-', p.is_critical ? 'SI' : 'No', p.bpmn_xml ? 'SI' : 'No', procSet.has(p.id) ? 'SI' : 'No']
-      })
+      head = [[...HH, 'Responsable', 'Tipo', 'Critico', 'BPMN', 'Proced.']]
+      body = data.processes.map(p =>
+        [...cells(p), p.responsible || '-', p.process_type || '-', p.is_critical ? 'SI' : 'No', p.bpmn_xml ? 'SI' : 'No', procSet.has(p.id) ? 'SI' : 'No']
+      )
       break
     }
     case 'riesgos': {
-      head = [[gL(data), aL(data), 'Proceso', 'Riesgo', 'Descripcion', 'Categ.', 'P.I', 'I.I', 'Nivel I.', 'Ctrl', 'Efect.', 'P.R', 'I.R', 'Nivel R.']]
+      head = [[...HH, 'Riesgo', 'Descripcion', 'Categ.', 'P.I', 'I.I', 'Nivel I.', 'Ctrl', 'Efect.', 'P.R', 'I.R', 'Nivel R.']]
       const risks = data.allRisks.filter(r => pIds.has(r.process_id))
       body = risks.map(r => {
         const proc = pMap.get(r.process_id)
         const inh = getRiskLevel(r.inherentProbability, r.inherentImpact)
         const res = getRiskLevel(r.residualProbability, r.residualImpact)
-        return [proc?.management || '-', proc?.coordination || '-', proc?.name || '-', r.title, r.description || '-', r.category, String(r.inherentProbability), String(r.inherentImpact), inh.label, String(r.controls.length), controlEffLabel(r), String(r.residualProbability), String(r.residualImpact), res.label]
+        return [...cells(proc), r.title, r.description || '-', r.category, String(r.inherentProbability), String(r.inherentImpact), inh.label, String(r.controls.length), controlEffLabel(r), String(r.residualProbability), String(r.residualImpact), res.label]
       })
-      colorCols = [{ col: 8, map: RISK_COLORS }, { col: 13, map: RISK_COLORS }]
+      colorCols = [{ col: W + 5, map: RISK_COLORS }, { col: W + 10, map: RISK_COLORS }]
       break
     }
     case 'kpis': {
-      head = [[gL(data), aL(data), 'Proceso', 'Indicador', 'Objetivo', 'Formula', 'Fuente', 'Unidad', 'Frecuencia', 'Meta', 'Umbrales V/A/R']]
+      head = [[...HH, 'Indicador', 'Objetivo', 'Formula', 'Fuente', 'Unidad', 'Frecuencia', 'Meta', 'Umbrales V/A/R']]
       const items = data.allIndicators.filter(i => pIds.has(i.process_id))
       body = items.map(i => {
         const proc = pMap.get(i.process_id)
         const umbral = `${thresholdRange(i.threshold_green_min, i.threshold_green_max)} / ${thresholdRange(i.threshold_yellow_min, i.threshold_yellow_max)} / ${thresholdRange(i.threshold_red_min, i.threshold_red_max)}`
-        return [proc?.management || '-', proc?.coordination || '-', proc?.name || '-', i.name, i.description, i.formula, i.data_source || '-', i.unit, i.frequency, i.target_value, umbral]
+        return [...cells(proc), i.name, i.description, i.formula, i.data_source || '-', i.unit, i.frequency, i.target_value, umbral]
       })
       break
     }
     case 'valor': {
-      head = [[gL(data), aL(data), 'Proceso', 'Actividad', 'Resp.', 'Clasif.', 'Freq.', 'Min', 'Ocurr.', 'Min/Dia', 'Min/Mes', 'Hrs/Ano']]
+      head = [[...HH, 'Actividad', 'Resp.', 'Clasif.', 'Freq.', 'Min', 'Ocurr.', 'Min/Dia', 'Min/Mes', 'Hrs/Ano']]
       body = []
       for (const p of data.processes) {
         for (const a of (data.allAnalyses[p.id] || [])) {
-          body.push([p.management || '-', p.coordination || '-', p.name, a.name, a.laneName || '-', a.classification || '-', a.frequency || '-', String(a.timePerOccurrence || 0), String(a.occurrences || 0), String(a.dailyMinutes ? Math.round(a.dailyMinutes * 10) / 10 : 0), String(a.dailyMinutes ? Math.round(scaleToPeriod(a.dailyMinutes, 'mes')) : 0), String(a.dailyMinutes ? Math.round(scaleToPeriod(a.dailyMinutes, 'año') / 60 * 10) / 10 : 0)])
+          body.push([...cells(p), a.name, a.laneName || '-', a.classification || '-', a.frequency || '-', String(a.timePerOccurrence || 0), String(a.occurrences || 0), String(a.dailyMinutes ? Math.round(a.dailyMinutes * 10) / 10 : 0), String(a.dailyMinutes ? Math.round(scaleToPeriod(a.dailyMinutes, 'mes')) : 0), String(a.dailyMinutes ? Math.round(scaleToPeriod(a.dailyMinutes, 'año') / 60 * 10) / 10 : 0)])
         }
       }
-      colorCols = [{ col: 5, map: VA_COLORS_PDF }]
+      colorCols = [{ col: W + 2, map: VA_COLORS_PDF }]
       break
     }
     case 'auditoria': {
-      head = [[gL(data), aL(data), 'Proceso', 'Actividad', 'Que Auditar', 'Criterio', 'Evidencia', 'Frecuencia', 'Responsable']]
+      head = [[...HH, 'Actividad', 'Que Auditar', 'Criterio', 'Evidencia', 'Frecuencia', 'Responsable']]
       body = []
       for (const p of data.processes) {
         for (const item of (data.allAudits[p.id] || [])) {
-          body.push([p.management || '-', p.coordination || '-', p.name, item.actividad, item.queAuditar, item.criterio, item.evidencia, item.frecuencia, item.responsable])
+          body.push([...cells(p), item.actividad, item.queAuditar, item.criterio, item.evidencia, item.frecuencia, item.responsable])
         }
       }
       break
     }
     case 'mejoras': {
-      head = [[gL(data), 'Proceso', 'Oportunidad', 'Tipo', 'Prioridad', 'Responsable', 'Estado', 'Avance', 'Cierre']]
+      head = [[...HH, 'Oportunidad', 'Tipo', 'Prioridad', 'Responsable', 'Estado', 'Avance', 'Cierre']]
       const items = (data.allImprovements || []).filter(o => pIds.has(o.processId))
       body = items.map(o => {
         const proc = pMap.get(o.processId)
         const total = priorityScore(o)
-        return [proc?.management || '-', proc?.name || '-', o.name, IMPROVEMENT_TYPE_LABELS[o.type], `${total}/15 ${priorityLabel(total).label}`, o.responsible || '-', STATUS_LABELS[o.status], `${o.progressPct ?? 0}%`, o.closeDate || '-']
+        return [...cells(proc), o.name, IMPROVEMENT_TYPE_LABELS[o.type], `${total}/15 ${priorityLabel(total).label}`, o.responsible || '-', STATUS_LABELS[o.status], `${o.progressPct ?? 0}%`, o.closeDate || '-']
       })
       break
     }

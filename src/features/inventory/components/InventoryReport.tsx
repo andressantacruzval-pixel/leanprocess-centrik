@@ -7,10 +7,11 @@ import { countBy, leafAreas } from '../inventoryUtils'
 import { findings, type FindingLevel } from '../inventoryStats'
 import { useInventoryReportRows, EMPTY_FILTERS, BANDERAS, type RepFilters, type InvReportRow } from '../inventoryReportData'
 import { exportInventoryExcel } from '../inventoryExcel'
-import { TIPO_COLOR, type InvTipo } from '../types'
+import { TIPO_COLOR } from '../types'
 import { OriginBadge } from './OriginBadge'
 import { InventoryReportSidebar } from './InventoryReportSidebar'
 import { DataTable, type Column } from '@/features/reporting/components/DataTable'
+import { hierarchyColumns } from '@/features/reporting/components/hierarchyColumns'
 import { useOrgLabels, useOrgUnitNamesByLevel } from '@/hooks/useOrgLabels'
 import { usePlanLimits } from '@/hooks/useActiveCompany'
 import { planName } from '@/lib/plans'
@@ -64,16 +65,16 @@ export function InventoryReport() {
   ), [all, f])
 
   const columns = useMemo<Column<InvReportRow>[]>(() => [
+    ...hierarchyColumns<InvReportRow>(org, (s) => ({
+      management: s.gerencia, coordination: s.coordinacion, operative: s.operativo,
+      macro: s.macro, proceso: s.proceso, subproceso: s.nombre,
+    })),
     { key: 'area', header: 'Área', width: 120, accessor: (s) => s.area || '', cell: (s) => <div className="truncate text-white/70">{s.area || '—'}</div> },
-    { key: 'macro', header: 'Macroproceso', width: 160, accessor: (s) => s.macro || '', cell: (s) => <span className="inline-flex items-center gap-1.5 text-white/85 max-w-full"><i className="w-2 h-2 rounded-full shrink-0" style={{ background: TIPO_COLOR[(s.tipo as InvTipo)] ?? '#3987e5' }} /><span className="truncate">{s.macro}</span></span> },
-    { key: 'proceso', header: 'Proceso', width: 150, accessor: (s) => s.proceso || '', cell: (s) => <div className="truncate text-cyan-300">{s.proceso}</div> },
-    { key: 'nombre', header: 'Subproceso', width: 180, accessor: (s) => s.nombre || '', cell: (s) => <div className="truncate text-white font-medium" title={s.nombre}>{s.nombre}</div> },
     { key: 'objetivo', header: 'Objetivo', width: 220, accessor: (s) => s.objetivo || '', cell: (s) => <div className="truncate text-white/50" title={s.objetivo}>{s.objetivo || '—'}</div> },
     { key: 'responsable', header: 'Responsable', width: 140, accessor: (s) => s.responsable || '', cell: (s) => <div className="truncate">{s.responsable || '—'}</div> },
     { key: 'critico', header: 'Crítico', width: 80, accessor: (s) => boolTxt(s.critico), cell: (s) => <Bool v={s.critico} yes="Sí" danger /> },
     { key: 'efectivo', header: 'Mov. efectivo', width: 100, accessor: (s) => boolTxt(s.efectivo), cell: (s) => <Bool v={s.efectivo} yes="Sí" /> },
     { key: 'nivel', header: 'Nivel ejec.', width: 120, accessor: (s) => s.nivelEjecucion || '', cell: (s) => <div className="truncate">{s.nivelEjecucion || '—'}</div> },
-    { key: 'gerencia', header: org.l0, width: 140, accessor: (s) => s.gerencia || '', cell: (s) => <div className="truncate">{s.gerencia || '—'}</div> },
     { key: 'frecuencia', header: 'Frecuencia', width: 120, accessor: (s) => s.frecuencia || '', cell: (s) => <div className="truncate">{s.frecuencia || '—'}</div> },
     { key: 'tipoProceso', header: 'Tipo proceso', width: 130, accessor: (s) => s.tipoProceso || '', cell: (s) => <div className="truncate">{s.tipoProceso || '—'}</div> },
     { key: 'tipoEjec', header: 'Tipo ejec.', width: 130, accessor: (s) => s.tipoEjecucion || '', cell: (s) => <div className="truncate">{s.tipoEjecucion || '—'}</div> },
@@ -127,7 +128,7 @@ export function InventoryReport() {
 
       <div className="min-w-0 flex-1 space-y-5">
         <div className="flex justify-end">
-          <button onClick={() => exportInventoryExcel(subs, companyName, org.l0)}
+          <button onClick={() => exportInventoryExcel(subs, companyName, org)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/15 transition-colors">
             <FileSpreadsheet size={13} /> Exportar Excel (todas las columnas)
           </button>

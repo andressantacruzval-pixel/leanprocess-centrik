@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { X } from 'lucide-react'
-import type { Process } from '@/types/process'
+import type { Process, Macroprocess } from '@/types/process'
 import type { StoredIndicator } from '@/stores/indicatorStore'
 import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { hierarchyColumns } from '../components/hierarchyColumns'
+import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
 import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
@@ -24,17 +26,16 @@ function range(min: number | null, max: number | null): string {
 const hasThresholds = (i: StoredIndicator) =>
   [i.threshold_green_min, i.threshold_green_max, i.threshold_yellow_min, i.threshold_yellow_max, i.threshold_red_min, i.threshold_red_max].some((v) => v != null)
 
-export function KpisReport({ processes, allIndicators }: { processes: Process[]; allIndicators: StoredIndicator[] }) {
+export function KpisReport({ processes, allIndicators, macroMap, processMap }: { processes: Process[]; allIndicators: StoredIndicator[]; macroMap: Map<string, Macroprocess>; processMap: Map<string, Process> }) {
   const org = useOrgLabels()
-  const processMap = useMemo(() => new Map(processes.map((p) => [p.id, p])), [processes])
   const ids = useMemo(() => new Set(processes.map((p) => p.id)), [processes])
   const kpis = useMemo(() => allIndicators.filter((i) => ids.has(i.process_id)), [allIndicators, ids])
 
   const columns = useMemo<Column<StoredIndicator>[]>(() => [
-    { key: 'l0', header: org.l0, accessor: (i) => processMap.get(i.process_id)?.management || '' },
-    { key: 'l1', header: org.l1, accessor: (i) => processMap.get(i.process_id)?.coordination || '' },
-    { key: 'l2', header: org.l2, hidden: !org.hasL2, accessor: (i) => processMap.get(i.process_id)?.operative || '' },
-    { key: 'proc', header: 'Proceso', accessor: (i) => processMap.get(i.process_id)?.name || '', className: 'max-w-[150px]', cell: (i) => <div className="truncate">{processMap.get(i.process_id)?.name || '-'}</div> },
+    ...hierarchyColumns<StoredIndicator>(org, (i) => {
+      const p = processMap.get(i.process_id)
+      return { management: p?.management, coordination: p?.coordination, operative: p?.operative, ...resolveProcessHierarchy(p, macroMap, processMap) }
+    }),
     { key: 'ind', header: 'Indicador', accessor: (i) => i.name || '', className: 'text-white font-medium max-w-[160px]', cell: (i) => <div className="truncate" title={i.name}>{i.name}</div> },
     { key: 'obj', header: 'Objetivo', accessor: (i) => i.description || '', className: 'max-w-[200px]', cell: (i) => <div className="truncate" title={i.description}>{i.description || '-'}</div> },
     { key: 'form', header: 'Fórmula', accessor: (i) => i.formula || '', className: 'max-w-[160px]', cell: (i) => <div className="truncate" title={i.formula}>{i.formula || '-'}</div> },
@@ -47,7 +48,7 @@ export function KpisReport({ processes, allIndicators }: { processes: Process[];
     { key: 'red', header: 'Rojo', accessor: (i) => range(i.threshold_red_min, i.threshold_red_max), cell: (i) => <span className="text-red-400">{range(i.threshold_red_min, i.threshold_red_max)}</span> },
     { key: 'owner', header: 'Resp. reporte', accessor: (i) => i.owner || '', className: 'max-w-[120px]', cell: (i) => <div className="truncate">{i.owner || '-'}</div> },
     { key: 'reporter', header: 'Resp. monitoreo', accessor: (i) => i.reporter || '', className: 'max-w-[120px]', cell: (i) => <div className="truncate">{i.reporter || '-'}</div> },
-  ], [org, processMap])
+  ], [org, processMap, macroMap])
 
   const withKpi = useMemo(() => new Set(kpis.map((i) => i.process_id)).size, [kpis])
   const byFreq = useMemo<Datum[]>(() => {

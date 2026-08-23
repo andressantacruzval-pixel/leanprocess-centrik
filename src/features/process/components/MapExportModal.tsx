@@ -3,6 +3,7 @@ import { X, Download, Image as ImageIcon, FileCode, FileText, Loader2 } from 'lu
 import { buildMapSvg, svgToPngCanvas, type MapData, type MapBrand, type MapMeta } from '@/utils/mapSvg'
 import { useMapExportStore, MAP_PRESETS } from '@/stores/mapExportStore'
 import { useAnalyticsStore } from '@/stores/analyticsStore'
+import { useOrgLabels } from '@/hooks/useOrgLabels'
 import type { InvReportRow } from '@/features/inventory/inventoryReportData'
 
 // Pantalla de exportación del mapa: vista previa en vivo (SVG vectorial, nunca
@@ -19,6 +20,7 @@ export function MapExportModal({ data, invRows, author, country, onClose }: {
   onClose: () => void
 }) {
   const st = useMapExportStore()
+  const orgLabels = useOrgLabels()
   const [busy, setBusy] = useState<'' | 'png' | 'svg' | 'pdf'>('')
   const track = useAnalyticsStore((s) => s.trackEvent)
 
@@ -58,7 +60,7 @@ export function MapExportModal({ data, invRows, author, country, onClose }: {
     try {
       const cv = await svgToPngCanvas(built.svg, built.w, built.h, brand.theme)
       const { exportMapReportPdf } = await import('@/utils/processMapExport')
-      await exportMapReportPdf(cv, invRows, { company: data.org, generatedBy: author || null })
+      await exportMapReportPdf(cv, invRows, { company: data.org, generatedBy: author || null, org: orgLabels })
     } finally { setBusy('') }
   }
 

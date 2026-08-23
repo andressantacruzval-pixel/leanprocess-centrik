@@ -35,6 +35,8 @@ export interface InvReportRow extends FlatSub {
   efectivo: boolean | null
   nivelEjecucion: string
   gerencia: string
+  coordinacion: string
+  operativo: string
   // Caracterización adicional (del proceso real ya volcado)
   objetivo: string
   responsable: string
@@ -99,6 +101,8 @@ export function useInventoryReportRows(companyId: string, macros: InvMacro[]): I
         efectivo: match ? match.involves_cash_movement : null,
         nivelEjecucion: match?.execution_level ?? '',
         gerencia: match?.management ?? '',
+        coordinacion: match?.coordination ?? '',
+        operativo: match?.operative ?? '',
         objetivo: match?.description ?? s.objetivo ?? '',
         responsable: match?.responsible ?? '',
         frecuencia: match?.execution_frequency ?? '',

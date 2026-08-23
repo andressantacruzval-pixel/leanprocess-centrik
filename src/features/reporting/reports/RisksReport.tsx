@@ -4,11 +4,13 @@ import {
   getRiskLevel, heatMapCellColor, PROBABILITY_LABELS, IMPACT_LABELS, RISK_CATEGORIES,
   type RiskItem, type RiskLevel, type RiskCategory,
 } from '@/types/risk'
-import type { Process } from '@/types/process'
+import type { Process, Macroprocess } from '@/types/process'
 import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { hierarchyColumns } from '../components/hierarchyColumns'
+import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
 import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
@@ -80,9 +82,8 @@ function HeatMap({ risks, mode, onCell, selected }: {
   )
 }
 
-export function RisksReport({ processes, allRisks }: { processes: Process[]; allRisks: RiskItem[] }) {
+export function RisksReport({ processes, allRisks, macroMap, processMap }: { processes: Process[]; allRisks: RiskItem[]; macroMap: Map<string, Macroprocess>; processMap: Map<string, Process> }) {
   const org = useOrgLabels()
-  const processMap = useMemo(() => new Map(processes.map((p) => [p.id, p])), [processes])
   const ids = useMemo(() => new Set(processes.map((p) => p.id)), [processes])
   const risks = useMemo(() => allRisks.filter((r) => ids.has(r.process_id)), [allRisks, ids])
   const [fLevel, setFLevel] = useState('')
@@ -109,10 +110,10 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
   }, [heatRisks, heatCell, fLevel])
 
   const columns = useMemo<Column<RiskItem>[]>(() => [
-    { key: 'l0', header: org.l0, accessor: (r) => processMap.get(r.process_id)?.management || '' },
-    { key: 'l1', header: org.l1, accessor: (r) => processMap.get(r.process_id)?.coordination || '' },
-    { key: 'l2', header: org.l2, hidden: !org.hasL2, accessor: (r) => processMap.get(r.process_id)?.operative || '' },
-    { key: 'proc', header: 'Proceso', accessor: (r) => processMap.get(r.process_id)?.name || '', className: 'max-w-[150px]', cell: (r) => <div className="truncate">{processMap.get(r.process_id)?.name || '-'}</div> },
+    ...hierarchyColumns<RiskItem>(org, (r) => {
+      const p = processMap.get(r.process_id)
+      return { management: p?.management, coordination: p?.coordination, operative: p?.operative, ...resolveProcessHierarchy(p, macroMap, processMap) }
+    }),
     { key: 'title', header: 'Riesgo', accessor: (r) => r.title || '', className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.title}>{r.title}</div> },
     { key: 'desc', header: 'Descripción', accessor: (r) => r.description || '', className: 'max-w-[260px]', cell: (r) => <div className="truncate" title={r.description}>{r.description || '-'}</div> },
     { key: 'cause', header: 'Causa', accessor: (r) => r.riskCause || '', className: 'max-w-[160px]', cell: (r) => <div className="truncate" title={r.riskCause}>{r.riskCause || '-'}</div> },
@@ -130,7 +131,7 @@ export function RisksReport({ processes, allRisks }: { processes: Process[]; all
     { key: 'pr', header: 'P.R', accessor: (r) => r.residualProbability },
     { key: 'ir', header: 'I.R', accessor: (r) => r.residualImpact },
     { key: 'lvlRes', header: 'Nivel Res.', accessor: (r) => getRiskLevel(r.residualProbability, r.residualImpact).label, cell: (r) => { const res = getRiskLevel(r.residualProbability, r.residualImpact); return <Badge label={res.label} hex={res.hex} /> } },
-  ], [org, processMap])
+  ], [org, processMap, macroMap])
 
   const byInh = useMemo<Datum[]>(() => LEVELS.map((l) => ({
     label: l, color: LEVEL_HEX[l],

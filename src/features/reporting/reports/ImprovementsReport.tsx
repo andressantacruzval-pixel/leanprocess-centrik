@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { X } from 'lucide-react'
-import type { Process } from '@/types/process'
+import type { Process, Macroprocess } from '@/types/process'
 import {
   type ImprovementOpportunity, type ImprovementStatus,
   STATUS_LABELS, STATUS_OPTIONS, priorityScore, priorityLabel,
@@ -10,6 +10,8 @@ import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { hierarchyColumns } from '../components/hierarchyColumns'
+import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
 import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
@@ -25,11 +27,13 @@ const PRIO_HEX: Record<'high' | 'mid' | 'low', string> = { high: '#10b981', mid:
 const inputCls = 'bg-white/5 border border-white/10 rounded px-1.5 py-1 text-[11px] text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/40'
 
 export function ImprovementsReport({
-  processes, allImprovements, onUpdate,
+  processes, allImprovements, onUpdate, macroMap, processMap,
 }: {
   processes: Process[]
   allImprovements: ImprovementOpportunity[]
   onUpdate: (id: string, updates: Partial<ImprovementOpportunity>) => void
+  macroMap: Map<string, Macroprocess>
+  processMap: Map<string, Process>
 }) {
   const org = useOrgLabels()
   const [fType, setFType] = useState('')
@@ -52,8 +56,10 @@ export function ImprovementsReport({
   const prioActiveLabel = fPrio === 'high' ? 'Quick win' : fPrio === 'mid' ? 'Media' : fPrio === 'low' ? 'Difícil' : ''
 
   const columns = useMemo<Column<ImpRow>[]>(() => [
-    { key: 'l0', header: org.l0, accessor: (r) => r.process.management || '' },
-    { key: 'proc', header: 'Proceso', accessor: (r) => r.process.name || '', className: 'max-w-[150px]', cell: (r) => <div className="truncate">{r.process.name}</div> },
+    ...hierarchyColumns<ImpRow>(org, (r) => ({
+      management: r.process.management, coordination: r.process.coordination, operative: r.process.operative,
+      ...resolveProcessHierarchy(r.process, macroMap, processMap),
+    })),
     {
       key: 'opp', header: 'Oportunidad', accessor: (r) => r.o.name || '', className: 'text-white font-medium max-w-[240px]',
       cell: (r) => (<><div className="truncate" title={r.o.name}>{r.o.name}</div><div className="text-white/30 text-[10px] truncate" title={r.o.description}>{r.o.description}</div></>),
@@ -80,7 +86,7 @@ export function ImprovementsReport({
       key: 'close', header: 'Cierre', accessor: (r) => r.o.closeDate || '', filterable: false,
       cell: (r) => <input type="date" value={r.o.closeDate ?? ''} onChange={(e) => onUpdate(r.o.id, { closeDate: e.target.value || null })} className={inputCls} />,
     },
-  ], [org, onUpdate])
+  ], [org, onUpdate, macroMap, processMap])
 
   const byType = useMemo<Datum[]>(() => IMPROVEMENT_TYPE_OPTIONS.map((t) => ({
     label: IMPROVEMENT_TYPE_LABELS[t], color: IMPROVEMENT_TYPE_COLORS[t], value: opps.filter((o) => o.type === t).length,

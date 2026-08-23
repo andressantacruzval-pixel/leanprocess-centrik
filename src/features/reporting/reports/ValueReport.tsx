@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { X } from 'lucide-react'
-import type { Process } from '@/types/process'
+import type { Process, Macroprocess } from '@/types/process'
 import {
   CLASSIFICATION_COLORS, computeKPIs, computePareto, scaleToPeriod, formatTime,
   type ValueActivity, type ValueClassification,
@@ -9,6 +9,8 @@ import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { hierarchyColumns } from '../components/hierarchyColumns'
+import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
 import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
@@ -20,7 +22,7 @@ type ValueRow = { process: Process; activity: ValueActivity }
 
 const CLS: ValueClassification[] = ['VA', 'NVA', 'NVABN']
 
-export function ValueReport({ processes, allAnalyses }: { processes: Process[]; allAnalyses: Record<string, ValueActivity[]> }) {
+export function ValueReport({ processes, allAnalyses, macroMap, processMap }: { processes: Process[]; allAnalyses: Record<string, ValueActivity[]>; macroMap: Map<string, Macroprocess>; processMap: Map<string, Process> }) {
   const rows = useMemo(() => {
     const out: ValueRow[] = []
     for (const p of processes) for (const a of (allAnalyses[p.id] || [])) out.push({ process: p, activity: a })
@@ -32,10 +34,10 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
   const pareto = useMemo(() => computePareto(activities, 'mes').slice(0, 8), [activities])
 
   const columns = useMemo<Column<ValueRow>[]>(() => [
-    { key: 'l0', header: org.l0, accessor: (r) => r.process.management || '' },
-    { key: 'l1', header: org.l1, accessor: (r) => r.process.coordination || '' },
-    { key: 'l2', header: org.l2, hidden: !org.hasL2, accessor: (r) => r.process.operative || '' },
-    { key: 'proc', header: 'Proceso', accessor: (r) => r.process.name || '', className: 'max-w-[150px]', cell: (r) => <div className="truncate">{r.process.name}</div> },
+    ...hierarchyColumns<ValueRow>(org, (r) => ({
+      management: r.process.management, coordination: r.process.coordination, operative: r.process.operative,
+      ...resolveProcessHierarchy(r.process, macroMap, processMap),
+    })),
     { key: 'act', header: 'Actividad', accessor: (r) => r.activity.name || '', className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.activity.name}>{r.activity.name}</div> },
     { key: 'resp', header: 'Responsable', accessor: (r) => r.activity.laneName || '', className: 'max-w-[120px]', cell: (r) => <div className="truncate">{r.activity.laneName || '-'}</div> },
     {
@@ -48,7 +50,7 @@ export function ValueReport({ processes, allAnalyses }: { processes: Process[]; 
     { key: 'dia', header: 'Min/día', accessor: (r) => r.activity.dailyMinutes || 0, cell: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(dm * 10) / 10 : '-' } },
     { key: 'mes', header: 'Min/mes', accessor: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(scaleToPeriod(dm, 'mes')) : 0 }, cell: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(scaleToPeriod(dm, 'mes')) : '-' } },
     { key: 'anio', header: 'Hrs/año', accessor: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(scaleToPeriod(dm, 'año') / 60 * 10) / 10 : 0 }, cell: (r) => { const dm = r.activity.dailyMinutes; return dm ? Math.round(scaleToPeriod(dm, 'año') / 60 * 10) / 10 : '-' } },
-  ], [org])
+  ], [org, macroMap, processMap])
 
   const byClassTime = useMemo<Datum[]>(() => CLS.map((c) => ({
     label: CLASSIFICATION_COLORS[c].label, color: CLASSIFICATION_COLORS[c].hex,

@@ -2,6 +2,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { useAnalyticsStore } from '@/stores/analyticsStore'
 import type { InvReportRow } from '@/features/inventory/inventoryReportData'
+import { hierarchyHeaders, hierarchyCells, type OrgLabelsLike } from '@/lib/reportHierarchy'
 
 // PDF-reporte del mapa: junta el mapa (ya rasterizado desde el SVG vectorial, así
 // nunca sale cortado) + los gráficos del inventario + la tabla completa del
@@ -10,7 +11,7 @@ import type { InvReportRow } from '@/features/inventory/inventoryReportData'
 
 // ─── PDF: mapa + gráficos del inventario + tabla del inventario ─────────────
 
-interface PdfMeta { company: string; generatedBy?: string | null }
+interface PdfMeta { company: string; generatedBy?: string | null; org?: OrgLabelsLike }
 
 function header(pdf: jsPDF, title: string, sub: string) {
   const w = pdf.internal.pageSize.getWidth()
@@ -119,17 +120,21 @@ export async function exportMapReportPdf(mapCanvas: HTMLCanvasElement, invRows: 
   drawBars(pdf, margin + colW + 12, y, colW, 'Subprocesos por macroproceso', countBy(invRows, 'macro').slice(0, 12), [57, 135, 229])
   footer(pdf, foot)
 
-  // 3) Tabla completa del inventario: área + jerarquía macro→proceso→subproceso + objetivo
-  const body = invRows.map((r) => [norm(r.area) || '—', norm(r.macro), norm(r.proceso), norm(r.nombre), norm(r.objetivo) || '—'])
+  // 3) Tabla completa del inventario: jerarquía organizacional → jerarquía de
+  //    procesos (macro→proceso→subproceso) → área + objetivo.
+  const org: OrgLabelsLike = meta.org ?? { l0: 'Gerencia', l1: 'Área', l2: 'Nivel 3', hasL2: false }
+  const body = invRows.map((r) => [
+    ...hierarchyCells({ management: r.gerencia, coordination: r.coordinacion, operative: r.operativo, macro: r.macro, proceso: r.proceso, subproceso: r.nombre }, org),
+    norm(r.area) || '—', norm(r.objetivo) || '—',
+  ])
   autoTable(pdf, {
-    head: [['Área', 'Macroproceso', 'Proceso', 'Subproceso', 'Objetivo']],
+    head: [[...hierarchyHeaders(org), 'Área', 'Objetivo']],
     body,
     startY: 24,
     margin: { top: 24, bottom: 12, left: 8, right: 8 },
     styles: { fontSize: 7.5, cellPadding: 1.6, overflow: 'linebreak', textColor: [30, 41, 59] },
     headStyles: { fillColor: [27, 42, 74], textColor: [255, 255, 255], fontStyle: 'bold' },
     alternateRowStyles: { fillColor: [244, 247, 252] },
-    columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 50 }, 2: { cellWidth: 55 }, 3: { cellWidth: 55 } },
     didDrawPage: () => {
       header(pdf, `Inventario de Procesos — ${meta.company}`, `${date} · ${total} subprocesos`)
       footer(pdf, foot)

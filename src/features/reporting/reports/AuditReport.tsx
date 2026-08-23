@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { X } from 'lucide-react'
-import type { Process } from '@/types/process'
+import type { Process, Macroprocess } from '@/types/process'
 import type { AuditItem } from '@/lib/procedureAi'
 import {
   Dashboard, Grid, Card, Stat, Donut, HBars, Insight, type Datum,
 } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { hierarchyColumns } from '../components/hierarchyColumns'
+import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
 import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
@@ -16,7 +18,7 @@ type AuditRow = { process: Process; item: AuditItem }
 
 const FREQ_COLORS = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#ec4899']
 
-export function AuditReport({ processes, allAudits }: { processes: Process[]; allAudits: Record<string, AuditItem[]> }) {
+export function AuditReport({ processes, allAudits, macroMap, processMap }: { processes: Process[]; allAudits: Record<string, AuditItem[]>; macroMap: Map<string, Macroprocess>; processMap: Map<string, Process> }) {
   const org = useOrgLabels()
   const rows = useMemo(() => {
     const out: AuditRow[] = []
@@ -25,17 +27,17 @@ export function AuditReport({ processes, allAudits }: { processes: Process[]; al
   }, [processes, allAudits])
 
   const columns = useMemo<Column<AuditRow>[]>(() => [
-    { key: 'l0', header: org.l0, accessor: (r) => r.process.management || '' },
-    { key: 'l1', header: org.l1, accessor: (r) => r.process.coordination || '' },
-    { key: 'l2', header: org.l2, hidden: !org.hasL2, accessor: (r) => r.process.operative || '' },
-    { key: 'proc', header: 'Proceso', accessor: (r) => r.process.name || '', className: 'max-w-[150px]', cell: (r) => <div className="truncate">{r.process.name || '-'}</div> },
+    ...hierarchyColumns<AuditRow>(org, (r) => ({
+      management: r.process.management, coordination: r.process.coordination, operative: r.process.operative,
+      ...resolveProcessHierarchy(r.process, macroMap, processMap),
+    })),
     { key: 'act', header: 'Actividad', accessor: (r) => r.item.actividad || '', className: 'max-w-[200px]', cell: (r) => <div className="truncate" title={r.item.actividad}>{r.item.actividad || '-'}</div> },
     { key: 'que', header: 'Qué auditar', accessor: (r) => r.item.queAuditar || '', className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.item.queAuditar}>{r.item.queAuditar || '-'}</div> },
     { key: 'crit', header: 'Criterio', accessor: (r) => r.item.criterio || '', className: 'max-w-[180px]', cell: (r) => <div className="truncate" title={r.item.criterio}>{r.item.criterio || '-'}</div> },
     { key: 'evi', header: 'Evidencia', accessor: (r) => r.item.evidencia || '', className: 'max-w-[160px]', cell: (r) => <div className="truncate" title={r.item.evidencia}>{r.item.evidencia || '-'}</div> },
     { key: 'freq', header: 'Frecuencia', accessor: (r) => r.item.frecuencia || '' },
     { key: 'resp', header: 'Responsable', accessor: (r) => r.item.responsable || '', className: 'max-w-[130px]', cell: (r) => <div className="truncate">{r.item.responsable || '-'}</div> },
-  ], [org])
+  ], [org, macroMap, processMap])
 
   const covered = useMemo(() => processes.filter((p) => (allAudits[p.id] || []).length > 0).length, [processes, allAudits])
   const byFreq = useMemo<Datum[]>(() => {
