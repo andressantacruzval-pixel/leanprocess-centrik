@@ -25,6 +25,7 @@ function toSpec(params: Record<string, string>): ChartSpec | null {
     area: params.area || undefined,
     status: params.status || undefined,
     metric: params.metric === 'minutes' ? 'minutes' : undefined,
+    basis: params.basis === 'residual' ? 'residual' : undefined,
     title: params.title || undefined,
   }
 }

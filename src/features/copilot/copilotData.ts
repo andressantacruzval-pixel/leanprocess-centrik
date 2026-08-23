@@ -133,6 +133,7 @@ export interface ChartSpec {
   area?: string // filtra por área
   status?: string // solo mejoras (cerrada, aprobada, …)
   metric?: 'count' | 'minutes' // solo valor
+  basis?: RiskBasis // solo riesgos: nivel inherente (def.) o residual
   title?: string
 }
 
@@ -180,10 +181,13 @@ export function computeChart(data: ScopedData, spec: ChartSpec): ChartDatum[] {
       else if (spec.control === 'none') rows = rows.filter((r) => r.risk.controls.length === 0)
       if (spec.category) rows = rows.filter((r) => norm(r.risk.category) === norm(spec.category!))
       if (spec.area) rows = rows.filter((r) => norm(r.area) === norm(spec.area!))
+      const levelOf = (r: ResolvedRisk) => spec.basis === 'residual'
+        ? getRiskLevel(r.risk.residualProbability, r.risk.residualImpact).label
+        : r.level
       return tally(rows.map((r) => {
         switch (spec.groupBy) {
           case 'category': return { key: r.risk.category }
-          case 'level': return { key: r.level, hex: LEVEL_HEX[r.level] }
+          case 'level': { const lvl = levelOf(r); return { key: lvl, hex: LEVEL_HEX[lvl] } }
           case 'process': return { key: r.processName }
           case 'executor': return { key: r.executor }
           case 'macro': return { key: macroOf(procs.get(r.risk.process_id), macros) }
@@ -260,14 +264,18 @@ export function computeChart(data: ScopedData, spec: ChartSpec): ChartDatum[] {
 // ── Matriz de calor 5×5 (probabilidad × impacto) ──────────────────────────
 export interface HeatmapCell { probability: number; impact: number; count: number }
 
-export function heatmapMatrix(data: ScopedData, f: { process?: string; category?: string } = {}): { cells: HeatmapCell[]; total: number } {
+export type RiskBasis = 'inherent' | 'residual'
+
+export function heatmapMatrix(data: ScopedData, f: { process?: string; category?: string; basis?: RiskBasis } = {}): { cells: HeatmapCell[]; total: number } {
   let rows = resolveRisks(data)
   if (f.process) { const t = norm(f.process); rows = rows.filter((r) => norm(r.processName).includes(t)) }
   if (f.category) rows = rows.filter((r) => norm(r.risk.category) === norm(f.category!))
+  const residual = f.basis === 'residual'
   const counts = new Map<string, number>()
   for (const r of rows) {
-    const key = `${r.risk.inherentProbability}-${r.risk.inherentImpact}`
-    counts.set(key, (counts.get(key) ?? 0) + 1)
+    const p = residual ? r.risk.residualProbability : r.risk.inherentProbability
+    const i = residual ? r.risk.residualImpact : r.risk.inherentImpact
+    counts.set(`${p}-${i}`, (counts.get(`${p}-${i}`) ?? 0) + 1)
   }
   const cells: HeatmapCell[] = []
   for (let impact = 5; impact >= 1; impact--) {

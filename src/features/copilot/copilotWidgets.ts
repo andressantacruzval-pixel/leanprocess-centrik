@@ -13,6 +13,8 @@ export const KNOWN_WIDGETS = new Set(['CITE', 'RISK', 'RISKS', 'PROCESS', 'CHART
  */
 export function stripForDisplay(buffer: string): string {
   return buffer
+    .replace(/```json[\s\S]*?```/gi, '') // bloque de spec de widget completo
+    .replace(/```json[\s\S]*$/i, '')     // bloque parcial (aún llegando)
     .replace(/<<[^<>]*>>/g, '')
     .replace(/<<[^<>]*$/g, '')
     .replace(/[ \t]{2,}/g, ' ')

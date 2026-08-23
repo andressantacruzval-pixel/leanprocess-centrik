@@ -2,17 +2,18 @@ import { useMemo } from 'react'
 import { Grid3x3 } from 'lucide-react'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { heatMapCellColor, PROBABILITY_LABELS, IMPACT_LABELS } from '@/types/risk'
-import { heatmapMatrix } from '../../copilotData'
+import { heatmapMatrix, type RiskBasis } from '../../copilotData'
 
 // Matriz de calor 5×5 (probabilidad × impacto) con el conteo real de riesgos.
 // Visual "de consultoría" premium; los datos salen del carril determinista.
 export function RiskHeatmap({ params }: { params: Record<string, string> }) {
   const data = useCompanyScopedData()
+  const basis: RiskBasis = params.basis === 'residual' ? 'residual' : 'inherent'
   const { cells, total } = useMemo(
-    () => heatmapMatrix(data, { process: params.process || undefined, category: params.category || undefined }),
-    [data, params.process, params.category]
+    () => heatmapMatrix(data, { process: params.process || undefined, category: params.category || undefined, basis }),
+    [data, params.process, params.category, basis]
   )
-  const title = params.title || 'Mapa de calor de riesgos'
+  const title = params.title || `Mapa de calor de riesgos${basis === 'residual' ? ' (residual)' : ''}`
 
   if (total === 0) {
     return (

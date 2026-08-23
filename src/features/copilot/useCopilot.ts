@@ -10,6 +10,7 @@ import { buildDeepDossier, buildDeepResearchPrompt } from './copilotDeepResearch
 import { extractWidgets, stripForDisplay } from './copilotWidgets'
 import { groundWidgets } from './copilotGrounding'
 import { detectVisual } from './copilotCharts'
+import { extractPlan, specToWidget } from './copilotPlan'
 import type { CopilotWidget } from '@/stores/copilotStore'
 
 // Orquesta un turno: arma contexto (con memoria de turnos recientes), hace
@@ -52,15 +53,21 @@ export function useCopilot() {
     abortRef.current = controller
     setIsStreaming(true)
 
-    // En modo normal, el gráfico/heatmap lo decide el sistema (determinista) a
-    // partir de la pregunta, no el modelo — evita marcadores mal formados y
-    // agrupaciones erróneas. En investigación profunda el informe trae los suyos.
-    const finalizeWidgets = (raw: CopilotWidget[]): CopilotWidget[] => {
-      const grounded = groundWidgets(data, raw)
-      if (deep) return grounded
-      const noModelCharts = grounded.filter((w) => w.name !== 'CHART' && w.name !== 'HEATMAP')
-      const visual = detectVisual(question, data)
-      return visual ? [...noModelCharts, visual] : noModelCharts
+    // El visual lo decide una CAPA ESTRUCTURADA: el modelo emite un bloque JSON
+    // {widget:...} (robusto) que el sistema ejecuta de forma determinista
+    // (agrupación, filtros, inherente/residual, empresa/proceso, números exactos).
+    // Respaldo por palabras clave si el modelo omite el bloque. En investigación
+    // profunda el informe trae sus propios gráficos inline.
+    const finalizeWidgets = (raw: CopilotWidget[], spec: ReturnType<typeof extractPlan>['spec']): CopilotWidget[] => {
+      if (deep) return groundWidgets(data, raw)
+      const grounded = groundWidgets(data, raw.filter((w) => w.name !== 'CHART' && w.name !== 'HEATMAP'))
+      const visual = specToWidget(spec, data) ?? detectVisual(question, data)
+      return visual ? [...grounded, visual] : grounded
+    }
+    const finalize = (buf: string, fallbackText: string) => {
+      const { text: stripped, spec } = extractPlan(buf)
+      const { text, widgets } = extractWidgets(stripped)
+      updateMessage(convId, assistantId, { text: text || fallbackText, widgets: finalizeWidgets(widgets, spec) })
     }
 
     let buffer = ''
@@ -76,12 +83,10 @@ export function useCopilot() {
         buffer += chunk
         updateMessage(convId, assistantId, { text: stripForDisplay(buffer) })
       }
-      const { text, widgets } = extractWidgets(buffer)
-      updateMessage(convId, assistantId, { text: text || 'No pude encontrar información sobre eso en tu documentación.', widgets: finalizeWidgets(widgets) })
+      finalize(buffer, 'No pude encontrar información sobre eso en tu documentación.')
     } catch (err) {
       if (controller.signal.aborted) {
-        const { text, widgets } = extractWidgets(buffer)
-        updateMessage(convId, assistantId, { text: text || '(consulta detenida)', widgets: finalizeWidgets(widgets) })
+        finalize(buffer, '(consulta detenida)')
       } else {
         console.warn('[useCopilot] stream error', err)
         const noCredits = err instanceof Error && err.message === 'INSUFFICIENT_CREDITS'
