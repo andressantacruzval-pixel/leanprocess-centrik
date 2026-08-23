@@ -59,6 +59,13 @@ interface ProcessState {
    * que actualizar en cascada o quedan valores obsoletos en los filtros.
    */
   renameOrgReference: (field: 'management' | 'coordination' | 'operative', oldName: string, newName: string) => void
+  /**
+   * Limpia el nombre de una unidad organizacional eliminada de los procesos que
+   * la referenciaban. Sin esto, el nombre borrado del organigrama sobrevive en
+   * `management`/`coordination`/`operative` y sigue apareciendo en los catálogos
+   * y filtros (que unen las unidades vivas con los valores de los procesos).
+   */
+  clearOrgReference: (field: 'management' | 'coordination' | 'operative', names: string[]) => void
   /** `silent` evita el toast por proceso: lo usa el borrado múltiple, que da un único resumen. */
   deleteProcess: (id: string, opts?: { silent?: boolean }) => void
   reorderProcesses: (parentId: string | null, macroId: string, orderedIds: string[]) => void
@@ -369,6 +376,33 @@ export const useProcessStore = create<ProcessState>()(
             .eq(field, oldName)
           if (cid) q = q.eq('company_id', cid)
           await dbWrite('process:renameOrgReference', q, {
+            silent: true,
+            rollback: () => set({ processes: prev }),
+          })
+        })()
+      },
+
+      clearOrgReference: (field, names) => {
+        const targets = new Set(names.map((n) => n?.trim()).filter(Boolean))
+        if (!targets.size) return
+        const affected = get().processes.filter((p) => targets.has((p[field] as string | undefined) ?? ''))
+        if (!affected.length) return
+        const prev = get().processes
+        set((s) => ({
+          processes: s.processes.map((p) =>
+            targets.has((p[field] as string | undefined) ?? '')
+              ? { ...p, [field]: null, updated_at: new Date().toISOString() }
+              : p
+          ),
+        }))
+        void (async () => {
+          const cid = currentCompanyId()
+          let q = supabase
+            .from('processes')
+            .update({ [field]: null, updated_at: new Date().toISOString() } as never)
+            .in(field, [...targets])
+          if (cid) q = q.eq('company_id', cid)
+          await dbWrite('process:clearOrgReference', q, {
             silent: true,
             rollback: () => set({ processes: prev }),
           })

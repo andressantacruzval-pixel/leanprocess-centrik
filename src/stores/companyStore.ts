@@ -296,6 +296,24 @@ export const useCompanyStore = create<CompanyState>()(
         const idsToDelete = [id, ...descendantIds]
         const toDelete = new Set(idsToDelete)
         const prev = orgUnits
+
+        // Cascada de borrado: el nombre de la unidad vive también en
+        // processes.management/coordination/operative (según su profundidad) y
+        // alimenta los catálogos/filtros. Hay que limpiarlo o "reaparece" borrado.
+        // Se calcula ANTES de filtrar, con el árbol previo, para poder leer la profundidad.
+        const byField: Record<'management' | 'coordination' | 'operative', string[]> = { management: [], coordination: [], operative: [] }
+        for (const uid of idsToDelete) {
+          const unit = prev.find((u) => u.id === uid)
+          if (!unit?.name) continue
+          const depth = getNodeDepth(uid, prev)
+          const field = depth === 0 ? 'management' : depth === 1 ? 'coordination' : depth === 2 ? 'operative' : null
+          if (field) byField[field].push(unit.name)
+        }
+        const clearOrgReference = useProcessStore.getState().clearOrgReference
+        ;(['management', 'coordination', 'operative'] as const).forEach((f) => {
+          if (byField[f].length) clearOrgReference(f, byField[f])
+        })
+
         set({ orgUnits: orgUnits.filter((u) => !toDelete.has(u.id)) })
         void dbWrite(
           'company:deleteOrgUnits',
