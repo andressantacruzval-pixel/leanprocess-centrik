@@ -163,9 +163,15 @@ describe('el procedimiento exporta lo mismo que la herramienta', () => {
 
   it('el SIPOC sale en UNA tabla de 4 columnas (proveedor-entrada-salida-cliente)', async () => {
     const xml = await xmlDe(buildProcedureDocument(PROCEDIMIENTO, { companyName: 'T', processName: 'X' }, storeData))
-    // Las 4 cabeceras y la fila relacional conviven en el mismo bloque.
-    for (const h of ['Proveedor', 'Entrada', 'Salida', 'Cliente']) expect(xml).toContain(h)
+    // Cabeceras en plural, como la herramienta.
+    for (const h of ['Proveedores', 'Entradas', 'Salidas', 'Clientes']) expect(xml).toContain(h)
     for (const v of ['Bodega', 'Materia prima', 'Lote empacado', 'Distribuidor']) expect(xml).toContain(v)
+    // Colores de cabecera exactos: rojo, gris-800, teal, azul.
+    for (const fill of ['DC2626', '1F2937', '0D9488', '2563EB']) expect(xml).toContain(`w:fill="${fill}"`)
+    // Una sola rejilla de 4 columnas en la tabla del SIPOC (no dos tablas).
+    const sipocTbl = (xml.match(/<w:tbl>[\s\S]*?<\/w:tbl>/g) ?? []).find((t) => t.includes('Proveedores'))
+    expect(sipocTbl).toBeTruthy()
+    expect((sipocTbl!.match(/<w:gridCol/g) ?? []).length).toBe(4)
     // Sin catálogo NO debe salir el desglose legacy en dos tablas.
     expect(xml).not.toContain('Entradas (Proveedores)')
     expect(xml).not.toContain('Salidas (Clientes)')

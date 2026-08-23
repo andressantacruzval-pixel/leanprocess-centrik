@@ -16,6 +16,8 @@ const VIOLET = '7C3AED'
 const VIOLET_LIGHT = 'F5F3FF'
 const TEAL = '0D9488'
 const GRAY_HEADER = '6B7280'
+// Cabecera «Entradas» del SIPOC: gris muy oscuro, como bg-gray-800 en la herramienta.
+const SLATE_800 = '1F2937'
 const AMBER = 'F59E0B'
 const GREEN = '059669'
 const GREEN_LIGHT = 'ECFDF5'
@@ -116,11 +118,12 @@ export function buildSipocSalidas(salidas: ProcedureData['sipocSalidas']): Table
 // ── SIPOC relacional (4 columnas, como en la herramienta) ────────────────────
 
 export function buildSipocRelacional(entries: SipocEntryRow[]): Table {
+  // Etiquetas en plural y «Entradas» en gris oscuro, exactamente como la herramienta.
   const headerRow = fila([
-      headerCell('Proveedor', RED, 25),
-      headerCell('Entrada', GRAY_HEADER, 25),
-      headerCell('Salida', TEAL, 25),
-      headerCell('Cliente', BLUE, 25),
+      headerCell('Proveedores', RED, 25),
+      headerCell('Entradas', SLATE_800, 25),
+      headerCell('Salidas', TEAL, 25),
+      headerCell('Clientes', BLUE, 25),
     ], { header: true })
   if (entries.length === 0) {
     return tabla([headerRow, fila([textCell('Sin datos SIPOC', { span: 4 })])], [25, 25, 25, 25])
