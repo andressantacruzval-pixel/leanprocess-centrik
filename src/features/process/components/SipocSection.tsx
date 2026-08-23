@@ -1,10 +1,15 @@
-import { useState } from 'react'
-import { Plus, Trash2, Pencil } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Plus, Trash2, Pencil, Sparkles } from 'lucide-react'
 import { useCatalogStore, type SipocEntry } from '@/features/catalog/catalogStore'
+import { useProcessStore } from '@/stores/processStore'
+import { useCompanyStore } from '@/stores/companyStore'
 import { usePlanLimits } from '@/hooks/useActiveCompany'
 import { planName } from '@/lib/plans'
 import { avisarSiSinCupo } from '@/lib/planGateMessage'
 import { ACCIONES_AL_PASAR } from '@/lib/constants'
+import { parseBpmnXml } from '@/utils/bpmnParser'
+import type { SipocAiContext, SipocTurn } from '@/lib/sipocAi'
+import { SipocAiAssistant } from '@/features/process/components/SipocAiAssistant'
 import {
   SipocLeftModal,
   SipocRightModal,
@@ -48,6 +53,79 @@ export default function SipocSection({ processId }: { processId: string }) {
   const [editingInputEntry, setEditingInputEntry] = useState<SipocEntry | null>(null)
   const [editingOutputEntry, setEditingOutputEntry] = useState<SipocEntry | null>(null)
 
+  // ─── Asistente IA ─────────────────────────────────────────────────────────
+  const [aiOpen, setAiOpen] = useState(false)
+  // Filas recién añadidas por la IA, para resaltarlas un instante al aparecer.
+  const [recentIds, setRecentIds] = useState<Set<string>>(new Set())
+
+  const process = useProcessStore((s) => s.processes.find((p) => p.id === processId))
+  const macroprocesses = useProcessStore((s) => s.macroprocesses)
+  const allProcesses = useProcessStore((s) => s.processes)
+  const company = useCompanyStore((s) => s.company)
+
+  // La IA entiende el proceso Y su entorno: hermanos de la empresa (posibles
+  // proveedores/clientes internos) y actividades del diagrama. Se lee FRESCO en
+  // cada turno para no repetir lo ya registrado.
+  const getContext = useCallback((): SipocAiContext => {
+    const macro = macroprocesses.find((m) => m.id === process?.macroprocess_id)
+    const parent = process?.parent_process_id ? allProcesses.find((p) => p.id === process.parent_process_id) : undefined
+    const siblings = allProcesses
+      .filter((p) => p.company_id === process?.company_id && p.id !== processId)
+      .map((p) => p.name)
+    let activities: string[] = []
+    try {
+      if (process?.bpmn_xml) activities = parseBpmnXml(process.bpmn_xml).activities.map((a) => a.name).filter(Boolean)
+    } catch { /* diagrama ilegible: seguimos sin actividades */ }
+    const current = useCatalogStore.getState().sipocEntries.filter((e) => e.process_id === processId)
+    return {
+      companyName: company?.name || '',
+      industry: company?.industry || undefined,
+      macroName: macro?.name,
+      parentName: parent?.name,
+      processName: process?.name || '',
+      description: process?.description || undefined,
+      siblings,
+      activities,
+      existing: {
+        inputs: current.filter((e) => e.supplier_name || e.input_description).map((e) => ({ supplier: e.supplier_name, input: e.input_description })),
+        outputs: current.filter((e) => e.output_description || e.customer_name).map((e) => ({ output: e.output_description, customer: e.customer_name })),
+      },
+    }
+  }, [process, macroprocesses, allProcesses, company, processId])
+
+  // Añade a la tabla los pares NUEVOS que propone la IA (deduplica) y los resalta.
+  const norm = (s: string) => s.trim().toLowerCase()
+  const handleAiAdd = useCallback((add: SipocTurn['add']): number => {
+    if (!add) return 0
+    const existing = useCatalogStore.getState().sipocEntries.filter((e) => e.process_id === processId)
+    const seenIn = new Set(existing.map((e) => `${norm(e.supplier_name)}|${norm(e.input_description)}`))
+    const seenOut = new Set(existing.map((e) => `${norm(e.output_description)}|${norm(e.customer_name)}`))
+    const created: string[] = []
+    for (const p of add.inputs ?? []) {
+      const key = `${norm(p.supplier)}|${norm(p.input)}`
+      if (!p.input.trim() || seenIn.has(key)) continue
+      seenIn.add(key)
+      const e = addSipocEntry(processId, '', p.supplier, p.input, '', '', '')
+      if (e) created.push(e.id)
+    }
+    for (const p of add.outputs ?? []) {
+      const key = `${norm(p.output)}|${norm(p.customer)}`
+      if (!p.output.trim() || seenOut.has(key)) continue
+      seenOut.add(key)
+      const e = addSipocEntry(processId, '', '', '', p.output, '', p.customer)
+      if (e) created.push(e.id)
+    }
+    if (created.length) {
+      setRecentIds((prev) => new Set([...prev, ...created]))
+      setTimeout(() => setRecentIds((prev) => {
+        const n = new Set(prev)
+        created.forEach((id) => n.delete(id))
+        return n
+      }), 2600)
+    }
+    return created.length
+  }, [processId, addSipocEntry])
+
   const handleDeleteInput = (e: SipocEntry) => {
     if (e.output_description || e.customer_id) {
       updateSipocEntry(e.id, { supplier_id: '', supplier_name: '', input_description: '' })
@@ -82,6 +160,16 @@ export default function SipocSection({ processId }: { processId: string }) {
           <button
             onClick={() => {
               if (avisarSiSinCupo(sinCupo, plan.level, plan.cap)) return
+              setAiOpen((v) => !v)
+            }}
+            title={sinCupo ? motivo : 'Construir el SIPOC con ayuda de la IA'}
+            className={sinCupo ? CLASE_BLOQUEADA : `flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium border transition-colors ${aiOpen ? 'bg-purple-500/25 text-purple-100 border-purple-500/40' : 'bg-purple-500/10 text-purple-300 border-purple-500/25 hover:bg-purple-500/20'}`}
+          >
+            <Sparkles size={12} /> Construir con IA
+          </button>
+          <button
+            onClick={() => {
+              if (avisarSiSinCupo(sinCupo, plan.level, plan.cap)) return
               setSipocLeftModal(true)
             }}
             title={sinCupo ? motivo : 'Agregar proveedor y entrada'}
@@ -102,6 +190,11 @@ export default function SipocSection({ processId }: { processId: string }) {
         </div>
       </div>
 
+      {/* Asistente IA inline: la tabla queda visible debajo y se puebla en vivo. */}
+      {aiOpen && (
+        <SipocAiAssistant getContext={getContext} onAdd={handleAiAdd} onClose={() => setAiOpen(false)} />
+      )}
+
       {/* `overflow-x-auto` + `min-w`: son 4 columnas de texto libre y estaban dentro de
           un `overflow-hidden`, asi que se aplastaban sin escape posible. */}
       <div className="rounded-lg border border-white/10 overflow-x-auto text-xs">
@@ -117,7 +210,7 @@ export default function SipocSection({ processId }: { processId: string }) {
           <div className="text-center py-8 text-white/30 text-xs">No hay entradas SIPOC. Agrega proveedores/entradas y salidas/clientes.</div>
         ) : (
           processSipoc.map((entry) => (
-            <div key={entry.id} className="grid grid-cols-4 border-t border-white/5 group hover:bg-white/[0.02]">
+            <div key={entry.id} className={`grid grid-cols-4 border-t border-white/5 group hover:bg-white/[0.02] transition-colors duration-500 ${recentIds.has(entry.id) ? 'bg-purple-500/[0.10] ring-1 ring-inset ring-purple-400/40' : ''}`}>
               <div className="px-3 py-2 text-white/70 bg-red-500/5">{entry.supplier_name}</div>
 
               {/* `pr-16` reserva el sitio de los botones: sin el, el texto pasaba por
