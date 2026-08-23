@@ -7,20 +7,24 @@ import { computeChart, chartInsight, type ChartSpec, type ChartEntity, type Char
 // Paleta por defecto cuando el corte no trae color propio (p. ej. no es "level").
 const PALETTE = ['#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#14b8a6']
 
-const ENTITIES = new Set<ChartEntity>(['risks', 'processes'])
-const GROUPS = new Set<ChartGroupBy>(['area', 'category', 'level', 'macro', 'process', 'executor'])
+const ENTITIES = new Set<ChartEntity>(['risks', 'processes', 'indicators', 'value', 'improvements'])
+const DEFAULT_GROUP: Record<ChartEntity, ChartGroupBy> = {
+  risks: 'area', processes: 'macro', indicators: 'process', value: 'classification', improvements: 'status',
+}
 
 function toSpec(params: Record<string, string>): ChartSpec | null {
   const entity = params.entity as ChartEntity
-  const groupBy = params.groupBy as ChartGroupBy
-  if (!ENTITIES.has(entity) || !GROUPS.has(groupBy)) return null
+  if (!ENTITIES.has(entity)) return null
   const control = params.control as ControlFilter | undefined
+  const groupBy = (params.groupBy as ChartGroupBy) || DEFAULT_GROUP[entity]
   return {
     entity,
     groupBy,
     control: control === 'inadequate' || control === 'none' || control === 'any' ? control : undefined,
     category: params.category || undefined,
     area: params.area || undefined,
+    status: params.status || undefined,
+    metric: params.metric === 'minutes' ? 'minutes' : undefined,
     title: params.title || undefined,
   }
 }

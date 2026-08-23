@@ -13,6 +13,8 @@ import type { RiskItem } from '@/types/risk'
 import { getRiskLevel } from '@/types/risk'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { norm } from '@/features/inventory/inventoryUtils'
+import { CLASSIFICATION_COLORS } from '@/utils/valueAnalysis'
+import { STATUS_LABELS, IMPROVEMENT_TYPE_LABELS, priorityScore, priorityLabel } from '@/types/improvement'
 
 export type ScopedData = ReturnType<typeof useCompanyScopedData>
 
@@ -117,8 +119,10 @@ export function risksWithoutAdequateControl(data: ScopedData): ResolvedRisk[] {
 
 // ── Motor de gráficos (agregación determinista) ───────────────────────────
 
-export type ChartEntity = 'risks' | 'processes'
-export type ChartGroupBy = 'area' | 'category' | 'level' | 'macro' | 'process' | 'executor'
+export type ChartEntity = 'risks' | 'processes' | 'indicators' | 'value' | 'improvements'
+export type ChartGroupBy =
+  | 'area' | 'category' | 'level' | 'macro' | 'process' | 'executor'
+  | 'classification' | 'status' | 'type' | 'priority' | 'meta' | 'frequency'
 export type ControlFilter = 'inadequate' | 'none' | 'any'
 
 export interface ChartSpec {
@@ -127,7 +131,16 @@ export interface ChartSpec {
   control?: ControlFilter // solo riesgos
   category?: string // solo riesgos (Operacional, etc.)
   area?: string // filtra por área
+  status?: string // solo mejoras (cerrada, aprobada, …)
+  metric?: 'count' | 'minutes' // solo valor
   title?: string
+}
+
+const STATUS_HEX: Record<string, string> = {
+  propuesta: '#94a3b8', aprobada: '#3b82f6', en_progreso: '#f59e0b', cerrada: '#10b981', descartada: '#ef4444',
+}
+const VALUE_HEX: Record<string, string> = {
+  VA: CLASSIFICATION_COLORS.VA.hex, NVA: CLASSIFICATION_COLORS.NVA.hex, NVABN: CLASSIFICATION_COLORS.NVABN.hex,
 }
 
 export interface ChartDatum {
@@ -156,42 +169,92 @@ function tally(rows: { key: string; hex?: string }[]): ChartDatum[] {
 }
 
 export function computeChart(data: ScopedData, spec: ChartSpec): ChartDatum[] {
-  if (spec.entity === 'risks') {
-    let rows = resolveRisks(data)
-    if (spec.control === 'inadequate') rows = rows.filter((r) => !r.adequate)
-    else if (spec.control === 'none') rows = rows.filter((r) => r.risk.controls.length === 0)
-    if (spec.category) rows = rows.filter((r) => norm(r.risk.category) === norm(spec.category!))
-    if (spec.area) rows = rows.filter((r) => norm(r.area) === norm(spec.area!))
-    const keyed = rows.map((r) => {
-      switch (spec.groupBy) {
-        case 'category': return { key: r.risk.category }
-        case 'level': return { key: r.level, hex: LEVEL_HEX[r.level] }
-        case 'process': return { key: r.processName }
-        case 'executor': return { key: r.executor }
-        case 'macro': {
-          const macros = macroNameById(data)
-          const p = processById(data).get(r.risk.process_id)
-          return { key: macroOf(p, macros) }
-        }
-        case 'area':
-        default: return { key: r.area }
-      }
-    })
-    return tally(keyed)
-  }
-
-  // entity === 'processes'
   const macros = macroNameById(data)
-  let procs = data.processes
-  if (spec.area) procs = procs.filter((p) => norm(areaOf(p)) === norm(spec.area!))
-  const keyed = procs.map((p) => {
-    switch (spec.groupBy) {
-      case 'macro': return { key: macroOf(p, macros) }
-      case 'area':
-      default: return { key: areaOf(p) }
+  const procs = processById(data)
+  const procName = (id: string) => procs.get(id)?.name ?? '(proceso)'
+
+  switch (spec.entity) {
+    case 'risks': {
+      let rows = resolveRisks(data)
+      if (spec.control === 'inadequate') rows = rows.filter((r) => !r.adequate)
+      else if (spec.control === 'none') rows = rows.filter((r) => r.risk.controls.length === 0)
+      if (spec.category) rows = rows.filter((r) => norm(r.risk.category) === norm(spec.category!))
+      if (spec.area) rows = rows.filter((r) => norm(r.area) === norm(spec.area!))
+      return tally(rows.map((r) => {
+        switch (spec.groupBy) {
+          case 'category': return { key: r.risk.category }
+          case 'level': return { key: r.level, hex: LEVEL_HEX[r.level] }
+          case 'process': return { key: r.processName }
+          case 'executor': return { key: r.executor }
+          case 'macro': return { key: macroOf(procs.get(r.risk.process_id), macros) }
+          default: return { key: r.area }
+        }
+      }))
     }
-  })
-  return tally(keyed)
+
+    case 'processes': {
+      let list = data.processes
+      if (spec.area) list = list.filter((p) => norm(areaOf(p)) === norm(spec.area!))
+      return tally(list.map((p) => {
+        switch (spec.groupBy) {
+          case 'macro': return { key: macroOf(p, macros) }
+          case 'category': return { key: macros.get(p.macroprocess_id) ? macroOf(p, macros) : '(sin macro)' }
+          default: return { key: areaOf(p) }
+        }
+      }))
+    }
+
+    case 'indicators': {
+      let rows = data.indicators
+      if (spec.area) rows = rows.filter((i) => norm(areaOf(procs.get(i.process_id))) === norm(spec.area!))
+      return tally(rows.map((i) => {
+        switch (spec.groupBy) {
+          case 'meta': return i.target_value
+            ? { key: 'Con meta', hex: '#10b981' }
+            : { key: 'Sin meta', hex: '#f59e0b' }
+          case 'frequency': return { key: i.frequency || '(sin frecuencia)' }
+          default: return { key: procName(i.process_id) }
+        }
+      }))
+    }
+
+    case 'value': {
+      const minutes = spec.metric === 'minutes'
+      const entries = Object.entries(data.analyses)
+      if (spec.groupBy === 'process') {
+        return entries
+          .map(([pid, acts]) => ({
+            label: procName(pid),
+            value: minutes ? Math.round(acts.reduce((s, a) => s + a.dailyMinutes, 0)) : acts.length,
+          }))
+          .filter((d) => d.value > 0)
+          .sort((a, b) => b.value - a.value)
+      }
+      // Por defecto: distribución VA / NVA / NVABN.
+      const acc: Record<string, number> = { VA: 0, NVA: 0, NVABN: 0 }
+      for (const [, acts] of entries) {
+        for (const a of acts) {
+          if (a.classification) acc[a.classification] += minutes ? a.dailyMinutes : 1
+        }
+      }
+      return (['VA', 'NVA', 'NVABN'] as const)
+        .map((k) => ({ label: CLASSIFICATION_COLORS[k].label, value: minutes ? Math.round(acc[k]) : acc[k], hex: VALUE_HEX[k] }))
+        .filter((d) => d.value > 0)
+    }
+
+    case 'improvements': {
+      let rows = data.improvements
+      if (spec.status) rows = rows.filter((o) => o.status === spec.status)
+      return tally(rows.map((o) => {
+        switch (spec.groupBy) {
+          case 'type': return { key: IMPROVEMENT_TYPE_LABELS[o.type] ?? o.type }
+          case 'process': return { key: procName(o.processId) }
+          case 'priority': return { key: priorityLabel(priorityScore(o)).label }
+          default: return { key: STATUS_LABELS[o.status] ?? o.status, hex: STATUS_HEX[o.status] }
+        }
+      }))
+    }
+  }
 }
 
 // ── Matriz de calor 5×5 (probabilidad × impacto) ──────────────────────────

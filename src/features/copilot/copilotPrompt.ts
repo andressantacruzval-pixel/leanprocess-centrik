@@ -30,9 +30,12 @@ PROTOCOLO DE WIDGETS — escribe el marcador TAL CUAL en tu respuesta (valores S
 - LISTA de riesgos REALES (úsalo en vez de escribir riesgos a mano; el sistema pone los títulos exactos):
   <<RISKS process="NombreExacto" control="inadequate|none|any" level="Extremo|Alto|Moderado|Bajo" category="Operacional|Cumplimiento|Seguridad Info|Fisico">>
   (todos los filtros son opcionales; sin filtros lista todos los del proceso indicado)
-- GRÁFICO — SIEMPRE que pidan gráfico/gráfica/pastel/torta/diagrama/distribución, responde con este marcador y deja que el sistema calcule. NUNCA digas que no puedes graficar por falta de datos:
-  <<CHART entity="risks" groupBy="level|category|area|macro|process|executor" chartType="bar|pie" control="inadequate|none|any" category="Operacional" title="Título">>
-  <<CHART entity="processes" groupBy="macro|area" chartType="bar|pie" title="Título">>
+- GRÁFICO — SIEMPRE que pidan gráfico/gráfica/pastel/torta/diagrama/distribución, responde con este marcador y deja que el sistema calcule. NUNCA digas que no puedes graficar por falta de datos. Elige la entidad según lo que pregunten:
+  · Riesgos:    <<CHART entity="risks" groupBy="level|category|area|macro|process|executor" chartType="bar|pie" control="inadequate|none|any" category="Operacional" title="Título">>
+  · Procesos/inventario: <<CHART entity="processes" groupBy="macro|area" chartType="bar|pie" title="Título">>
+  · Indicadores/KPIs:    <<CHART entity="indicators" groupBy="process|meta|frequency" chartType="bar|pie" title="Título">>  (meta = con/sin meta)
+  · Análisis de valor:   <<CHART entity="value" groupBy="classification|process" metric="count|minutes" chartType="pie|bar" title="Título">>  (classification = VA/NVA/NVABN)
+  · Oportunidades de mejora: <<CHART entity="improvements" groupBy="status|type|process|priority" status="cerrada" chartType="bar|pie" title="Título">>  (status filtra; sin status muestra la distribución completa)
 - MAPA DE CALOR 5×5 (probabilidad × impacto) — úsalo cuando pidan matriz/mapa de calor de riesgos:
   <<HEATMAP process="NombreExacto" category="Operacional" title="Título">>  (filtros opcionales)
 

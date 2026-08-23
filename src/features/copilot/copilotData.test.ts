@@ -92,3 +92,50 @@ describe('copilotData — carril determinista', () => {
     expect(findProcessByName(makeData(), 'Compras')?.id).toBe('p2')
   })
 })
+
+describe('computeChart — nuevas entidades (KPIs, valor, mejoras)', () => {
+  function rich(): ScopedData {
+    const base = makeData() as unknown as Record<string, unknown>
+    return {
+      ...base,
+      indicators: [
+        { id: 'i1', process_id: 'p1', target_value: '95%' },
+        { id: 'i2', process_id: 'p1', target_value: '' },
+        { id: 'i3', process_id: 'p2', target_value: '10' },
+      ],
+      analyses: {
+        p1: [
+          { classification: 'VA', dailyMinutes: 30 },
+          { classification: 'NVA', dailyMinutes: 10 },
+          { classification: 'VA', dailyMinutes: 20 },
+        ],
+      },
+      improvements: [
+        { id: 'o1', processId: 'p1', status: 'cerrada', type: 'eficiencia', costScore: 5, complexityScore: 5, timeScore: 5 },
+        { id: 'o2', processId: 'p1', status: 'cerrada', type: 'calidad', costScore: 3, complexityScore: 3, timeScore: 3 },
+        { id: 'o3', processId: 'p2', status: 'aprobada', type: 'riesgos', costScore: 1, complexityScore: 1, timeScore: 1 },
+      ],
+    } as unknown as ScopedData
+  }
+
+  it('KPIs por meta (con/sin meta)', () => {
+    const out = computeChart(rich(), { entity: 'indicators', groupBy: 'meta' })
+    const by = Object.fromEntries(out.map((d) => [d.label, d.value]))
+    expect(by['Con meta']).toBe(2)
+    expect(by['Sin meta']).toBe(1)
+  })
+
+  it('Valor por clasificación (conteo)', () => {
+    const out = computeChart(rich(), { entity: 'value', groupBy: 'classification' })
+    const by = Object.fromEntries(out.map((d) => [d.label, d.value]))
+    expect(by['Valor Agregado']).toBe(2)
+    expect(by['Sin Valor Agregado']).toBe(1)
+  })
+
+  it('Mejoras por estado + filtro cerrada', () => {
+    const all = computeChart(rich(), { entity: 'improvements', groupBy: 'status' })
+    expect(Object.fromEntries(all.map((d) => [d.label, d.value]))['Cerrada']).toBe(2)
+    const cerradas = computeChart(rich(), { entity: 'improvements', groupBy: 'process', status: 'cerrada' })
+    expect(cerradas.reduce((s, d) => s + d.value, 0)).toBe(2)
+  })
+})
