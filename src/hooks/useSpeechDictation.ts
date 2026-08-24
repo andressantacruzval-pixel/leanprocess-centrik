@@ -49,8 +49,24 @@ export function useSpeechDictation({ lang, onFinal }: Options = {}) {
   // Intención del usuario de seguir grabando: distingue un corte por silencio
   // (reanudar) de un stop deliberado (terminar).
   const wantOnRef = useRef(false)
+  // Reintentos de reconexión desde el último progreso. El servicio de voz del
+  // navegador (Google) a veces devuelve `network` de forma transitoria; se
+  // reintenta un par de veces y, si no hay progreso, se corta en vez de girar
+  // en un bucle de error (el síntoma: «Escuchando…» y el error a la vez).
+  const retriesRef = useRef(0)
+  const MAX_RETRIES = 2
   const onFinalRef = useRef(onFinal)
   useEffect(() => { onFinalRef.current = onFinal }, [onFinal])
+
+  // Termina el reconocimiento y deja la UI coherente (sin «Escuchando…» colgado).
+  const finish = useCallback((msg?: string) => {
+    wantOnRef.current = false
+    retriesRef.current = 0
+    try { recRef.current?.abort() } catch { /* no-op */ }
+    if (msg) setError(msg)
+    setListening(false)
+    setInterim('')
+  }, [])
 
   const resolvedLang = lang
     || (typeof navigator !== 'undefined' && navigator.language?.startsWith('es') ? navigator.language : 'es-ES')
@@ -75,6 +91,8 @@ export function useSpeechDictation({ lang, onFinal }: Options = {}) {
         if (res.isFinal) finalStr += txt
         else interimStr += txt
       }
+      // Hubo progreso real: reinicia el contador de reintentos.
+      if (finalStr.trim() || interimStr.trim()) retriesRef.current = 0
       if (finalStr.trim()) {
         onFinalRef.current?.(finalStr.trim())
         setInterim('')
@@ -84,39 +102,54 @@ export function useSpeechDictation({ lang, onFinal }: Options = {}) {
     }
 
     rec.onerror = (e) => {
+      // Traza el código real para soporte (el mensaje al usuario es amigable).
+      console.warn('[useSpeechDictation] error:', e.error)
       // Silencio o abortos son normales en modo continuo: los ignora.
       if (e.error === 'no-speech' || e.error === 'aborted') return
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-        setError('No se pudo acceder al micrófono. Revisa los permisos del navegador.')
-        wantOnRef.current = false
-        setListening(false)
+        finish('No se pudo acceder al micrófono. Autoriza el permiso en el navegador (icono del candado junto a la URL) y vuelve a intentar.')
       } else if (e.error === 'audio-capture') {
-        setError('No se detectó micrófono. Conecta uno y vuelve a intentar.')
-        wantOnRef.current = false
-        setListening(false)
-      } else {
-        setError('Error de dictado de voz. Inténtalo de nuevo.')
+        finish('No se detectó micrófono. Conecta uno y vuelve a intentar.')
+      } else if (e.error === 'language-not-supported') {
+        finish('El idioma de dictado no está disponible en este navegador. Escribe el texto manualmente.')
+      } else if (e.error === 'network') {
+        // Transitorio: deja que onend reintente hasta el tope; si no, corta con aviso.
+        if (retriesRef.current >= MAX_RETRIES) {
+          finish('El reconocimiento de voz del navegador no está disponible ahora (sin conexión al servicio). Usa Chrome o Edge con internet, o escribe el texto.')
+        }
+      } else if (retriesRef.current >= MAX_RETRIES) {
+        finish('No se pudo dictar por voz. Escribe el texto o inténtalo más tarde.')
       }
     }
 
     rec.onend = () => {
-      // El navegador corta tras un silencio; reanuda si el usuario sigue grabando.
-      if (wantOnRef.current) {
+      // El navegador corta tras un silencio; reanuda si el usuario sigue grabando,
+      // pero solo hasta MAX_RETRIES sin progreso para no girar en un bucle de error.
+      if (wantOnRef.current && retriesRef.current < MAX_RETRIES) {
+        retriesRef.current += 1
         try { rec.start() } catch { /* ya arrancando */ }
+      } else if (wantOnRef.current) {
+        finish('El reconocimiento de voz se detuvo. Vuelve a pulsar el micrófono para reintentar.')
       } else {
         setListening(false)
         setInterim('')
       }
     }
     return rec
-  }, [resolvedLang])
+  }, [resolvedLang, finish])
 
   const start = useCallback(() => {
     if (!supported) {
-      setError('Tu navegador no soporta dictado por voz. Prueba con Chrome o Edge.')
+      setError('Tu navegador no soporta dictado por voz. Prueba con Chrome o Edge de escritorio.')
+      return
+    }
+    // La Web Speech API exige contexto seguro (HTTPS o localhost).
+    if (typeof window !== 'undefined' && window.isSecureContext === false) {
+      setError('El dictado por voz requiere HTTPS. Abre la app en su dirección segura.')
       return
     }
     setError(null)
+    retriesRef.current = 0
     wantOnRef.current = true
     if (!recRef.current) recRef.current = build()
     try {
@@ -129,6 +162,7 @@ export function useSpeechDictation({ lang, onFinal }: Options = {}) {
 
   const stop = useCallback(() => {
     wantOnRef.current = false
+    retriesRef.current = 0
     try { recRef.current?.stop() } catch { /* no-op */ }
     setListening(false)
     setInterim('')
