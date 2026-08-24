@@ -10,6 +10,25 @@ function norm(s: string): string {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 }
 
+// Elimina un nodo del diagrama (y sus conexiones) al borrar el activo anclado.
+export function removeNode(modeler: BpmnModelerInstance, elementId: string): boolean {
+  try {
+    const registry = modeler.get('elementRegistry') as BpmnElementRegistry
+    const modeling = modeler.get('modeling') as unknown as {
+      removeElements?: (els: BpmnElement[]) => void
+      removeShape?: (el: BpmnElement) => void
+    }
+    const el = registry.get(elementId)
+    if (!el) return false
+    if (modeling.removeElements) modeling.removeElements([el])
+    else if (modeling.removeShape) modeling.removeShape(el)
+    return true
+  } catch (err) {
+    console.warn('[removeNode] no se pudo eliminar el nodo', err)
+    return false
+  }
+}
+
 // Renombra un nodo del diagrama (para sincronizar el nombre del activo con su
 // nodo Almacén de datos). Devuelve true si cambió algo.
 export function renameNode(modeler: BpmnModelerInstance, elementId: string, name: string): boolean {

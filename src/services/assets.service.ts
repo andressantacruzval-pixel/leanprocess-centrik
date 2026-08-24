@@ -88,6 +88,18 @@ export async function getOperationsByCompany(companyId: string): ServiceResult<A
   }
 }
 
+// Borra TODAS las operaciones de un activo (ciclo de vida + trazabilidad). Se
+// llama antes de borrar el activo por si el FK no estuviera en cascada.
+export async function deleteOperationsForAsset(assetId: string): ServiceResult<void> {
+  try {
+    const { error } = await supabase.from('asset_operations').delete().eq('asset_id', assetId)
+    if (error) return { data: null, error: new Error(error.message) }
+    return { data: null, error: null }
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
+  }
+}
+
 export async function createOperation(data: Partial<AssetOperationRow>): ServiceResult<AssetOperationRow> {
   try {
     const { data: row, error } = await supabase

@@ -8,7 +8,7 @@ import type { InformationAsset } from '@/types/asset'
 import { assetCriticality, assetLabel } from '@/types/asset'
 import { createAsset, updateAsset, deleteAsset, getAssetsByCompany,
   createOperation, replaceOperationForAssetProcess, replaceJourneyLinks, getOperationsByCompany,
-  type AssetOperationRow } from '@/services/assets.service'
+  deleteOperationsForAsset, type AssetOperationRow } from '@/services/assets.service'
 
 function currentCompanyId(): string | null {
   return useWorkspaceStore.getState().activeCompanyId
@@ -156,12 +156,18 @@ export const useAssetStore = create<AssetState>()(
       },
 
       deleteAsset: (id) => {
-        const prev = get().assets
-        set({ assets: prev.filter((a) => a.id !== id) })
-        void dbWrite('asset:delete', deleteAsset(id), {
-          silent: true,
-          rollback: () => set({ assets: prev }),
-        })
+        const prevAssets = get().assets
+        const prevOps = get().operations
+        // Optimista: quita el activo y sus operaciones del estado.
+        set({ assets: prevAssets.filter((a) => a.id !== id), operations: prevOps.filter((o) => o.asset_id !== id) })
+        void (async () => {
+          // Primero las operaciones (por si el FK no está en cascada), luego el activo.
+          await deleteOperationsForAsset(id)
+          await dbWrite('asset:delete', deleteAsset(id), {
+            silent: true,
+            rollback: () => set({ assets: prevAssets, operations: prevOps }),
+          })
+        })()
       },
 
       clearCompanyData: (companyId) =>

@@ -4,6 +4,7 @@ import type { BpmnModelerInstance, BpmnEventBus, BpmnElement, BpmnEvent } from '
 import { useAssetStore } from '@/stores/assetStore'
 import { getRiskLevel } from '@/types/risk'
 import { type InformationAsset } from '@/types/asset'
+import { removeNode } from '../placeAssetNode'
 import { AssetFormModal } from './AssetFormModal'
 
 // Panel flotante de Activos de Información. Aparece al seleccionar un nodo de
@@ -108,7 +109,7 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
                   {!readOnly && (
                     <div className="flex flex-col gap-0.5 shrink-0">
                       <button onClick={() => { setEditing(a); setShowForm(true) }} title="Editar" className="p-1.5 rounded text-white/30 hover:text-cyan-400 hover:bg-white/5"><Pencil size={12} /></button>
-                      <button onClick={() => { if (confirm(`¿Eliminar el activo «${a.name}»?`)) deleteAsset(a.id) }} title="Eliminar" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={12} /></button>
+                      <button onClick={() => { if (confirm(`¿Eliminar el activo «${a.name}»?`)) { if (modeler && a.bpmn_element_id) removeNode(modeler, a.bpmn_element_id); deleteAsset(a.id) } }} title="Eliminar" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={12} /></button>
                     </div>
                   )}
                 </div>

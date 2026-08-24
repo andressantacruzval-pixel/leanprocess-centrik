@@ -13,7 +13,7 @@ import { identifyAssetsFromProcess } from '@/lib/assetAi'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { toast } from '@/stores/toastStore'
 import type { BpmnModelerInstance } from '@/types/bpmn'
-import { placeDataStoreNear } from '../placeAssetNode'
+import { placeDataStoreNear, removeNode } from '../placeAssetNode'
 import { AssetFormModal } from './AssetFormModal'
 
 // Panel de Activos de Información del proceso (rail derecho / ventana emergente).
@@ -45,6 +45,13 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
   const [litId, setLitId] = useState<string | null>(null)
 
   const list = assets.filter((a) => a.process_id === processId)
+
+  // Borra el activo y, si tiene nodo en el diagrama, también lo elimina de ahí.
+  const removeAsset = (a: InformationAsset) => {
+    if (!confirm(`¿Eliminar el activo «${a.name}»?`)) return
+    if (modeler && a.bpmn_element_id) removeNode(modeler, a.bpmn_element_id)
+    deleteAsset(a.id)
+  }
 
   // «Encender la luz» del nodo del activo en el diagrama al pulsar su fila.
   const canvasOf = () => modeler?.get('canvas') as unknown as { addMarker: (id: string, m: string) => void; removeMarker: (id: string, m: string) => void } | undefined
@@ -167,7 +174,7 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
                 </div>
                 <div className="flex flex-col gap-0.5 shrink-0">
                   <button onClick={() => { setEditing(a); setShowForm(true) }} title="Editar / ampliar" className="p-1.5 rounded text-white/30 hover:text-cyan-400 hover:bg-white/5"><Pencil size={13} /></button>
-                  <button onClick={() => { if (confirm(`¿Eliminar el activo «${a.name}»?`)) deleteAsset(a.id) }} title="Eliminar" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button>
+                  <button onClick={() => removeAsset(a)} title="Eliminar" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button>
                 </div>
               </div>
             </div>
