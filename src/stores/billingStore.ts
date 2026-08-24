@@ -85,6 +85,7 @@ const STATIC_OPERATION_COSTS: Record<string, number> = {
   activity_detail:            5, // Detallar una actividad del procedimiento con IA
   sipoc:                      5, // Asistente SIPOC: 5 por cada intercambio
   inventory:                 20, // Inventario de procesos con IA: por macroproceso
+  transcription:              3, // Voz→texto por servidor (dictado fiable)
 }
 
 export const useBillingStore = create<BillingState>()(() => ({

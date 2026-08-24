@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, FileUp, MessageSquare, Mic, Sparkles, Type } from 'lucide-react'
+import { ArrowLeft, Check, FileUp, MessageSquare, Mic, Sparkles, Type, Loader2 } from 'lucide-react'
 import { BpmnModeler } from '@/features/bpmn/components/BpmnModeler'
 import { useProcesses } from '@/hooks/useProcesses'
 import { useTokenBudget } from '@/hooks/useTokenBudget'
-import { useSpeechDictation } from '@/hooks/useSpeechDictation'
+import { useVoiceToText } from '@/hooks/useVoiceToText'
+import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 import { generateBpmnDirect, generateBpmnFromFile, validateBpmnFile, fileToBase64 } from '@/lib/bpmnAi'
 import { FlowchartChatMode } from '@/pages/FlowchartChatMode'
 import { IS_PHASE_1 } from '@/lib/phaseFlags'
@@ -95,7 +96,7 @@ export default function FlowchartOnboardingPage() {
       return prev + sep + chunk
     })
   }, [])
-  const dictado = useSpeechDictation({ onFinal: appendTranscript })
+  const dictado = useVoiceToText({ onText: appendTranscript })
 
   // Direct text mode
   const handleGenerateDirect = useCallback(async () => {
@@ -240,16 +241,19 @@ export default function FlowchartOnboardingPage() {
                     <button
                       type="button"
                       onClick={dictado.toggle}
-                      title={dictado.listening ? 'Detener dictado' : 'Dictar por voz'}
-                      className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
-                        dictado.listening
+                      disabled={dictado.transcribing}
+                      title={dictado.recording ? 'Detener y transcribir' : 'Dictar por voz'}
+                      className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors disabled:opacity-60 ${
+                        dictado.recording
                           ? 'bg-red-500/15 text-red-300 border-red-500/30 hover:bg-red-500/25'
                           : 'bg-white/5 text-cyan-300 border-cyan-500/25 hover:bg-cyan-500/10'
                       }`}
                     >
-                      {dictado.listening
-                        ? (<><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" /></span> Grabando… detener</>)
-                        : (<><Mic size={14} /> Dictar por voz</>)}
+                      {dictado.transcribing
+                        ? (<><Loader2 size={14} className="animate-spin" /> Transcribiendo…</>)
+                        : dictado.recording
+                        ? (<><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" /></span> Detener y transcribir</>)
+                        : (<><Mic size={14} /> Dictar por voz <TokenCostBadge operationKey="transcription" /></>)}
                     </button>
                   )}
                 </div>
@@ -261,13 +265,15 @@ export default function FlowchartOnboardingPage() {
                     rows={6}
                     className="w-full resize-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-cyan-500/50"
                   />
-                  {dictado.listening && (
+                  {(dictado.recording || dictado.transcribing) && (
                     <div className="mt-2 flex items-start gap-2 rounded-lg bg-cyan-500/[0.06] border border-cyan-500/20 px-3 py-2">
-                      <Mic size={13} className="mt-0.5 shrink-0 text-cyan-300 animate-pulse" />
+                      {dictado.transcribing
+                        ? <Loader2 size={13} className="mt-0.5 shrink-0 text-cyan-300 animate-spin" />
+                        : <Mic size={13} className="mt-0.5 shrink-0 text-cyan-300 animate-pulse" />}
                       <p className="text-[12px] leading-snug text-white/60">
-                        {dictado.interim
-                          ? <><span className="text-white/40">Escuchando: </span><span className="italic text-cyan-200/90">{dictado.interim}</span></>
-                          : 'Escuchando… habla con naturalidad. El texto se irá agregando arriba; puedes pausar y retomar cuando quieras.'}
+                        {dictado.transcribing
+                          ? 'Transcribiendo tu voz…'
+                          : 'Grabando… habla con naturalidad y pulsa «Detener y transcribir» cuando termines. El texto aparecerá arriba.'}
                       </p>
                     </div>
                   )}

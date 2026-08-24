@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { Send, Mic, Square, Loader2, Microscope } from 'lucide-react'
-import { useSpeechDictation } from '@/hooks/useSpeechDictation'
+import { useVoiceToText } from '@/hooks/useVoiceToText'
 import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 
 // Caja de entrada: texto + dictado por voz + investigación profunda + enviar/detener.
@@ -19,7 +19,7 @@ export function Composer({ isStreaming, onSend, onStop, onDeepResearch }: {
       return prev + sep + chunk
     })
   }, [])
-  const dictado = useSpeechDictation({ onFinal: appendVoice })
+  const dictado = useVoiceToText({ onText: appendVoice })
 
   const submit = useCallback(() => {
     const t = value.trim()
@@ -32,10 +32,15 @@ export function Composer({ isStreaming, onSend, onStop, onDeepResearch }: {
 
   return (
     <div className="border-t border-white/5 bg-[#0b111c] p-3">
-      {dictado.listening && (
+      {dictado.transcribing && (
+        <div className="mb-2 flex items-center gap-2 text-[11.5px] text-cyan-300">
+          <Loader2 size={13} className="animate-spin" /> Transcribiendo tu voz…
+        </div>
+      )}
+      {dictado.recording && (
         <div className="mb-2 flex items-center gap-2 text-[11.5px] text-cyan-300">
           <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" /></span>
-          {dictado.interim ? <span className="italic text-cyan-200/80 truncate">{dictado.interim}</span> : 'Escuchando… habla con naturalidad.'}
+          Grabando… pulsa el micrófono para transcribir.
         </div>
       )}
       <div className="flex items-center gap-2 mb-2">
@@ -65,12 +70,13 @@ export function Composer({ isStreaming, onSend, onStop, onDeepResearch }: {
         {dictado.supported && (
           <button
             onClick={dictado.toggle}
-            title={dictado.listening ? 'Detener dictado' : 'Dictar por voz'}
-            className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-xl border transition-colors ${
-              dictado.listening ? 'bg-red-500/15 text-red-300 border-red-500/30' : 'bg-white/5 text-white/50 border-white/10 hover:text-cyan-300 hover:border-cyan-500/30'
+            disabled={dictado.transcribing}
+            title={dictado.recording ? 'Detener y transcribir' : 'Dictar por voz'}
+            className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-xl border transition-colors disabled:opacity-60 ${
+              dictado.recording ? 'bg-red-500/15 text-red-300 border-red-500/30' : 'bg-white/5 text-white/50 border-white/10 hover:text-cyan-300 hover:border-cyan-500/30'
             }`}
           >
-            <Mic size={17} />
+            {dictado.transcribing ? <Loader2 size={16} className="animate-spin" /> : <Mic size={17} />}
           </button>
         )}
         {isStreaming ? (
