@@ -6,8 +6,10 @@ import { useProcessStore } from '@/stores/processStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
 import { CreatableSelect } from '@/components/ui/CreatableSelect'
 import { ArrowRight, ArrowLeft } from 'lucide-react'
+import type { BpmnModelerInstance } from '@/types/bpmn'
+import { renameNode } from '../placeAssetNode'
 import {
-  ASSET_FORMATS, ASSET_STATUSES, CIA_IMPACT_SCALE,
+  ASSET_STATUSES, CIA_IMPACT_SCALE,
   type InformationAsset, type CiaDimension,
 } from '@/types/asset'
 
@@ -15,12 +17,13 @@ interface Props {
   processId: string
   bpmnElementId?: string | null
   asset?: InformationAsset | null
+  modeler?: BpmnModelerInstance | null
   onClose: () => void
 }
 
 const CIA_ORDER: CiaDimension[] = ['C', 'I', 'A']
 
-export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Props) {
+export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClose }: Props) {
   const addAsset = useAssetStore((s) => s.addAsset)
   const updateAsset = useAssetStore((s) => s.updateAsset)
   const setOperation = useAssetStore((s) => s.setOperation)
@@ -73,6 +76,9 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
     else { const created = addAsset(payload); id = created?.id }
     if (id && f.operation) setOperation(id, processId, f.operation)
     if (id) { setJourney(id, processId, 'to', targets); setJourney(id, processId, 'from', sources) }
+    // Sincroniza el nombre con el nodo del diagrama (bidireccional).
+    const nodeId = payload.bpmn_element_id ?? asset?.bpmn_element_id
+    if (modeler && nodeId) renameNode(modeler, nodeId, f.name.trim())
     onClose()
   }
 
@@ -97,7 +103,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
             <div className="sm:col-span-2"><label className={lbl}>Nombre *</label><input className={inp} value={f.name} onChange={(e) => set('name', e.target.value)} placeholder="Ej. Base de datos de clientes" /></div>
             <div><label className={lbl}>Código</label><input className={inp} value={f.code} onChange={(e) => set('code', e.target.value)} placeholder="ACT-INF-001" /></div>
             <div><label className={lbl}>Tipo</label><CreatableSelect options={opts('asset_type')} value={f.asset_type} onChange={(v) => set('asset_type', v)} onCreateOption={(v) => addCatalogItem('asset_type', v)} placeholder="Tipo de activo…" /></div>
-            <div><label className={lbl}>Formato / Soporte</label><select className={inp} value={f.format} onChange={(e) => set('format', e.target.value)}><option value="">—</option>{ASSET_FORMATS.map((t) => <option key={t} value={t}>{t}</option>)}</select></div>
+            <div><label className={lbl}>Formato / Soporte</label><CreatableSelect options={opts('asset_format')} value={f.format} onChange={(v) => set('format', v)} onCreateOption={(v) => addCatalogItem('asset_format', v)} placeholder="Digital, Físico…" /></div>
             <div><label className={lbl}>Operación en este proceso</label><CreatableSelect options={opts('asset_operation')} value={f.operation} onChange={(v) => set('operation', v)} onCreateOption={(v) => addCatalogItem('asset_operation', v)} placeholder="Operación…" /></div>
             <div className="sm:col-span-2"><label className={lbl}>Descripción</label><textarea rows={2} className={`${inp} resize-none`} value={f.description} onChange={(e) => set('description', e.target.value)} /></div>
           </div>

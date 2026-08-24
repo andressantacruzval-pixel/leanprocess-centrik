@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, ShieldCheck, Database, Sparkles, Loader2 } from 'lucide-react'
 import { useAssetStore } from '@/stores/assetStore'
 import { useProcessStore } from '@/stores/processStore'
@@ -42,8 +42,32 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
 
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<InformationAsset | null>(null)
+  const [litId, setLitId] = useState<string | null>(null)
 
   const list = assets.filter((a) => a.process_id === processId)
+
+  // «Encender la luz» del nodo del activo en el diagrama al pulsar su fila.
+  const canvasOf = () => modeler?.get('canvas') as unknown as { addMarker: (id: string, m: string) => void; removeMarker: (id: string, m: string) => void } | undefined
+  const highlight = (asset: InformationAsset) => {
+    const canvas = canvasOf()
+    if (!canvas || !asset.bpmn_element_id) { setLitId(asset.id); return }
+    if (litId) { const prev = list.find((a) => a.id === litId); if (prev?.bpmn_element_id) try { canvas.removeMarker(prev.bpmn_element_id, 'asset-lit') } catch { /* no-op */ } }
+    try { canvas.addMarker(asset.bpmn_element_id, 'asset-lit') } catch { /* no-op */ }
+    setLitId(asset.id)
+  }
+  // Al seleccionar cualquier nodo del diagrama, se apaga el resaltado del activo.
+  useEffect(() => {
+    if (!modeler) return
+    const bus = modeler.get('eventBus')
+    const off = () => {
+      const canvas = canvasOf()
+      list.forEach((a) => { if (a.bpmn_element_id && canvas) try { canvas.removeMarker(a.bpmn_element_id, 'asset-lit') } catch { /* no-op */ } })
+      setLitId(null)
+    }
+    bus.on('selection.changed', off)
+    return () => { bus.off('selection.changed', off) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modeler])
 
   const handleIdentify = async () => {
     if (identifying) return
@@ -64,7 +88,7 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
       for (const s of suggestions) {
         const crit = assetCriticality(s.confidentiality, s.integrity, s.availability)
         // Para los críticos (C·I·D ≥ 4) se crea un nodo Almacén de datos en el flujo.
-        const nodeId = crit >= 4 && modeler ? placeDataStoreNear(modeler, s.relatedActivity) : null
+        const nodeId = crit >= 4 && modeler ? placeDataStoreNear(modeler, s.relatedActivity, s.name) : null
         const created = addAsset({
           process_id: processId,
           bpmn_element_id: nodeId,
@@ -127,9 +151,9 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
           const lvl = crit ? getRiskLevel(crit, crit) : null
           const op = getOperation(a.id, processId)?.operation
           return (
-            <div key={a.id} className="group rounded-lg border border-white/8 bg-white/[0.03] p-3">
+            <div key={a.id} className={`group rounded-lg border p-3 transition-colors ${litId === a.id ? 'border-amber-400/50 bg-amber-500/[0.06]' : 'border-white/8 bg-white/[0.03]'}`}>
               <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 cursor-pointer" onClick={() => highlight(a)} title={a.bpmn_element_id ? 'Ver dónde está en el diagrama' : 'Sin nodo en el diagrama'}>
                   <p className="text-[13px] font-medium text-white flex items-center gap-1.5"><ShieldCheck size={12} className="text-indigo-300 shrink-0" />{a.name}</p>
                   {a.description && <p className="text-[11px] text-white/40 mt-0.5 line-clamp-2">{a.description}</p>}
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
@@ -156,6 +180,7 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
           processId={processId}
           bpmnElementId={editing?.bpmn_element_id ?? null}
           asset={editing}
+          modeler={modeler}
           onClose={() => { setShowForm(false); setEditing(null) }}
         />
       )}

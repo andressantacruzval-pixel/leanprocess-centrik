@@ -23,6 +23,7 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
   const assets = useAssetStore((s) => s.assets)
   const getOperation = useAssetStore((s) => s.getOperation)
   const deleteAsset = useAssetStore((s) => s.deleteAsset)
+  const updateAsset = useAssetStore((s) => s.updateAsset)
 
   const [node, setNode] = useState<SelNode | null>(null)
   const [showForm, setShowForm] = useState(false)
@@ -43,6 +44,24 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
     bus.on('selection.changed', onSel)
     return () => { bus.off('selection.changed', onSel) }
   }, [modeler])
+
+  // Sincronización nodo → activo: si el usuario renombra el nodo Almacén de datos
+  // en el diagrama, se actualiza el nombre del activo anclado (bidireccional con
+  // el formulario, que hace el sentido inverso).
+  useEffect(() => {
+    if (!modeler) return
+    const bus = modeler.get('eventBus') as BpmnEventBus
+    const onChanged = (e: BpmnEvent) => {
+      const el = e.element
+      if (!el || !DATA_NODE_TYPES.has(el.type)) return
+      const name = (el.businessObject?.name || '').trim()
+      if (!name) return
+      const asset = useAssetStore.getState().assets.find((a) => a.bpmn_element_id === el.id && a.process_id === processId)
+      if (asset && asset.name !== name) updateAsset(asset.id, { name })
+    }
+    bus.on('element.changed', onChanged)
+    return () => { bus.off('element.changed', onChanged) }
+  }, [modeler, processId, updateAsset])
 
   if (!modeler || !node) return null
 
@@ -104,6 +123,7 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
           processId={processId}
           bpmnElementId={node.id}
           asset={editing}
+          modeler={modeler}
           onClose={() => { setShowForm(false); setEditing(null) }}
         />
       )}

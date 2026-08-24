@@ -10,23 +10,38 @@ function norm(s: string): string {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 }
 
+// Renombra un nodo del diagrama (para sincronizar el nombre del activo con su
+// nodo Almacén de datos). Devuelve true si cambió algo.
+export function renameNode(modeler: BpmnModelerInstance, elementId: string, name: string): boolean {
+  try {
+    const registry = modeler.get('elementRegistry') as BpmnElementRegistry
+    const modeling = modeler.get('modeling') as unknown as { updateProperties: (el: BpmnElement, p: Record<string, unknown>) => void }
+    const el = registry.get(elementId)
+    if (!el) return false
+    if ((el.businessObject?.name ?? '') === name) return false
+    modeling.updateProperties(el, { name })
+    return true
+  } catch { return false }
+}
+
 interface Placeable extends BpmnElement { parent?: BpmnElement }
 
-export function placeDataStoreNear(modeler: BpmnModelerInstance, activityName: string): string | null {
+export function placeDataStoreNear(modeler: BpmnModelerInstance, activityName: string, assetName?: string): string | null {
   try {
     const registry = modeler.get('elementRegistry') as BpmnElementRegistry
     const factory = modeler.get('elementFactory') as BpmnElementFactory
-    // modeling.createShape(shape, position, target) — firma real de diagram-js.
+    // Firmas reales de diagram-js que el tipo mínimo no declara.
     const modeling = modeler.get('modeling') as unknown as {
       createShape: (shape: BpmnElement, pos: { x: number; y: number }, parent: BpmnElement) => BpmnElement
+      updateProperties: (el: BpmnElement, props: Record<string, unknown>) => void
+      connect: (a: BpmnElement, b: BpmnElement) => BpmnElement
     }
 
     // Actividad ancla: coincide por nombre; si no, cualquier tarea; si no, el proceso.
     const all = registry.filter(() => true) as Placeable[]
-    const target = activityName
+    const anchor = (activityName
       ? all.find((el) => /Task$/.test(el.type) && norm(el.businessObject?.name || '') === norm(activityName))
-      : undefined
-    const anchor = target
+      : undefined)
       || all.find((el) => /Task$/.test(el.type))
       || all.find((el) => el.type === 'bpmn:Participant')
 
@@ -40,11 +55,15 @@ export function placeDataStoreNear(modeler: BpmnModelerInstance, activityName: s
     const ay = anchor?.y ?? 200
     const aw = anchor?.width ?? 100
     const ah = anchor?.height ?? 80
-    const pos = { x: Math.round(ax + aw / 2), y: Math.round(ay + ah + 90) }
+    const pos = { x: Math.round(ax + aw / 2), y: Math.round(ay + ah + 100) }
 
     const shape = factory.createShape({ type: 'bpmn:DataStoreReference' })
-    const created = modeling.createShape(shape, pos, parent)
-    return created?.id ?? shape?.id ?? null
+    const created = modeling.createShape(shape, pos, parent) || shape
+    // Nombre del activo como título del nodo (bidireccional con el formulario).
+    if (assetName) { try { modeling.updateProperties(created, { name: assetName }) } catch { /* no-op */ } }
+    // Flecha (asociación de datos) del nodo a la actividad donde se usa el activo.
+    if (anchor && /Task$/.test(anchor.type)) { try { modeling.connect(created, anchor) } catch { /* no-op */ } }
+    return created?.id ?? null
   } catch (err) {
     console.warn('[placeDataStoreNear] no se pudo crear el nodo', err)
     return null

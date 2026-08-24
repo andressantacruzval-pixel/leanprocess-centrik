@@ -487,3 +487,12 @@ html[data-theme="light"]{ background-color:#e9eff8; }
 .djs-popup,
 .djs-popup-backdrop,
 .djs-tooltip-container { z-index: 30 !important; }
+
+/* ── Activo de información «encendido»: al pulsar un activo en el panel derecho
+   se resalta su nodo Almacén de datos en el diagrama (canvas.addMarker). ────── */
+.djs-element.asset-lit .djs-visual > :first-child {
+  stroke: #f59e0b !important;
+  stroke-width: 3px !important;
+  fill: rgba(245, 158, 11, 0.14) !important;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8));
+}
