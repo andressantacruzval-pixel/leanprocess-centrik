@@ -3,7 +3,7 @@ import { Database, Plus, Pencil, Trash2, ShieldCheck } from 'lucide-react'
 import type { BpmnModelerInstance, BpmnEventBus, BpmnElement, BpmnEvent } from '@/types/bpmn'
 import { useAssetStore } from '@/stores/assetStore'
 import { getRiskLevel } from '@/types/risk'
-import { ASSET_OPERATIONS, type InformationAsset } from '@/types/asset'
+import { type InformationAsset } from '@/types/asset'
 import { AssetFormModal } from './AssetFormModal'
 
 // Panel flotante de Activos de Información. Aparece al seleccionar un nodo de
@@ -47,7 +47,6 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
   if (!modeler || !node) return null
 
   const nodeAssets = assets.filter((a) => a.bpmn_element_id === node.id && a.process_id === processId)
-  const opLabel = (v?: string) => ASSET_OPERATIONS.find((o) => o.value === v)?.label
 
   return (
     <>
@@ -82,7 +81,7 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
                     <p className="text-[12px] font-medium text-white truncate flex items-center gap-1.5"><ShieldCheck size={11} className="text-indigo-300 shrink-0" />{a.name}</p>
                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
                       {a.asset_type && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{a.asset_type}</span>}
-                      {op && <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300">{opLabel(op)}</span>}
+                      {op && <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300">{op}</span>}
                       {a.label && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{a.label}</span>}
                       {lvl && <span className={`text-[9px] px-1.5 py-0.5 rounded text-white ${lvl.color}`} title="Criticidad C·I·D">C·I·D {crit}</span>}
                     </div>

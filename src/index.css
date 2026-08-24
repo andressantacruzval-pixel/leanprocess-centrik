@@ -476,3 +476,14 @@ html[data-theme="light"]{ background-color:#e9eff8; }
 :root[data-theme="light"] .shadow-emerald-500\/20{box-shadow:0 6px 20px -4px rgba(16,185,129,.34) !important}
 :root[data-theme="light"] .shadow-blue-500\/20{box-shadow:0 6px 20px -4px rgba(37,99,235,.34) !important}
 :root[data-theme="light"] .shadow-amber-500\/20{box-shadow:0 6px 20px -4px rgba(217,119,6,.32) !important}
+
+/* ── bpmn-js: acotar sus UI flotantes por debajo de los modales de la app ──
+   El context pad (z-index 100), la paleta y los popups (z-200) de diagram-js se
+   sobreponían a las ventanas emergentes (que usan z-50..z-1000 y se portan al
+   body). Al acotarlos por debajo, ningún nodo del diagramador vuelve a quedar
+   sobre una pestaña/modal. Siguen por encima del lienzo, que basta para editar. */
+.djs-context-pad,
+.djs-palette,
+.djs-popup,
+.djs-popup-backdrop,
+.djs-tooltip-container { z-index: 30 !important; }

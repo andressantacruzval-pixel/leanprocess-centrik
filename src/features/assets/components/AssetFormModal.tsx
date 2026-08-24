@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ShieldCheck } from 'lucide-react'
 import { useAssetStore } from '@/stores/assetStore'
+import { useCatalogStore } from '@/features/catalog/catalogStore'
+import { CreatableSelect } from '@/components/ui/CreatableSelect'
 import {
-  ASSET_TYPES, ASSET_FORMATS, ASSET_OPERATIONS, ASSET_STATUSES, CIA_IMPACT_SCALE,
-  type InformationAsset, type AssetOperationKind, type CiaDimension,
+  ASSET_FORMATS, ASSET_STATUSES, CIA_IMPACT_SCALE,
+  type InformationAsset, type CiaDimension,
 } from '@/types/asset'
 
 interface Props {
@@ -21,6 +23,9 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
   const updateAsset = useAssetStore((s) => s.updateAsset)
   const setOperation = useAssetStore((s) => s.setOperation)
   const existingOp = useAssetStore((s) => (asset ? s.getOperation(asset.id, processId)?.operation : undefined))
+  const getCatalogByType = useCatalogStore((s) => s.getCatalogByType)
+  const addCatalogItem = useCatalogStore((s) => s.addCatalogItem)
+  const opts = (type: string) => getCatalogByType(type).map((c) => ({ value: c.value, label: c.value }))
 
   const [f, setF] = useState({
     name: asset?.name ?? '', code: asset?.code ?? '', asset_type: asset?.asset_type ?? '',
@@ -35,7 +40,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
     legal_requirements: asset?.legal_requirements ?? '',
     retention_period: asset?.retention_period ?? '', disposal_method: asset?.disposal_method ?? '',
     status: asset?.status ?? 'activo',
-    operation: (existingOp ?? '') as AssetOperationKind | '',
+    operation: existingOp ?? '',
   })
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
 
@@ -80,9 +85,9 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2"><label className={lbl}>Nombre *</label><input className={inp} value={f.name} onChange={(e) => set('name', e.target.value)} placeholder="Ej. Base de datos de clientes" /></div>
             <div><label className={lbl}>Código</label><input className={inp} value={f.code} onChange={(e) => set('code', e.target.value)} placeholder="ACT-INF-001" /></div>
-            <div><label className={lbl}>Tipo</label><select className={inp} value={f.asset_type} onChange={(e) => set('asset_type', e.target.value)}><option value="">—</option>{ASSET_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}</select></div>
+            <div><label className={lbl}>Tipo</label><CreatableSelect options={opts('asset_type')} value={f.asset_type} onChange={(v) => set('asset_type', v)} onCreateOption={(v) => addCatalogItem('asset_type', v)} placeholder="Tipo de activo…" /></div>
             <div><label className={lbl}>Formato / Soporte</label><select className={inp} value={f.format} onChange={(e) => set('format', e.target.value)}><option value="">—</option>{ASSET_FORMATS.map((t) => <option key={t} value={t}>{t}</option>)}</select></div>
-            <div><label className={lbl}>Operación en este proceso</label><select className={inp} value={f.operation} onChange={(e) => set('operation', e.target.value)}><option value="">—</option>{ASSET_OPERATIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
+            <div><label className={lbl}>Operación en este proceso</label><CreatableSelect options={opts('asset_operation')} value={f.operation} onChange={(v) => set('operation', v)} onCreateOption={(v) => addCatalogItem('asset_operation', v)} placeholder="Operación…" /></div>
             <div className="sm:col-span-2"><label className={lbl}>Descripción</label><textarea rows={2} className={`${inp} resize-none`} value={f.description} onChange={(e) => set('description', e.target.value)} /></div>
           </div>
 
@@ -91,7 +96,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
             <div><label className={lbl}>Propietario</label><input className={inp} value={f.owner} onChange={(e) => set('owner', e.target.value)} /></div>
             <div><label className={lbl}>Custodio</label><input className={inp} value={f.custodian} onChange={(e) => set('custodian', e.target.value)} /></div>
             <div><label className={lbl}>Usuarios</label><input className={inp} value={f.users} onChange={(e) => set('users', e.target.value)} /></div>
-            <div><label className={lbl}>Ubicación / Repositorio</label><input className={inp} value={f.location} onChange={(e) => set('location', e.target.value)} /></div>
+            <div><label className={lbl}>Ubicación / Repositorio</label><CreatableSelect options={opts('asset_location')} value={f.location} onChange={(v) => set('location', v)} onCreateOption={(v) => addCatalogItem('asset_location', v)} placeholder="Sistema, servidor, ubicación…" /></div>
           </div>
 
           {/* Clasificación C·I·D */}
@@ -114,10 +119,10 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
           {/* Legal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="flex items-center gap-2 text-[12px] text-white/70 sm:col-span-2"><input type="checkbox" checked={f.has_personal_data} onChange={(e) => set('has_personal_data', e.target.checked)} className="accent-cyan-500" /> Contiene datos personales</label>
-            {f.has_personal_data && <div className="sm:col-span-2"><label className={lbl}>Categoría de datos personales</label><input className={inp} value={f.personal_data_category} onChange={(e) => set('personal_data_category', e.target.value)} placeholder="Sensibles, financieros…" /></div>}
+            {f.has_personal_data && <div className="sm:col-span-2"><label className={lbl}>Categoría de datos personales</label><CreatableSelect options={opts('personal_data_category')} value={f.personal_data_category} onChange={(v) => set('personal_data_category', v)} onCreateOption={(v) => addCatalogItem('personal_data_category', v)} placeholder="Sensibles, financieros…" /></div>}
             <div className="sm:col-span-2"><label className={lbl}>Requisitos legales / contractuales</label><input className={inp} value={f.legal_requirements} onChange={(e) => set('legal_requirements', e.target.value)} /></div>
-            <div><label className={lbl}>Periodo de retención</label><input className={inp} value={f.retention_period} onChange={(e) => set('retention_period', e.target.value)} /></div>
-            <div><label className={lbl}>Método de disposición</label><input className={inp} value={f.disposal_method} onChange={(e) => set('disposal_method', e.target.value)} /></div>
+            <div><label className={lbl}>Periodo de retención</label><CreatableSelect options={opts('retention_period')} value={f.retention_period} onChange={(v) => set('retention_period', v)} onCreateOption={(v) => addCatalogItem('retention_period', v)} placeholder="Mensual, Anual…" /></div>
+            <div><label className={lbl}>Método de disposición</label><CreatableSelect options={opts('disposal_method')} value={f.disposal_method} onChange={(v) => set('disposal_method', v)} onCreateOption={(v) => addCatalogItem('disposal_method', v)} placeholder="Eliminación segura…" /></div>
             <div><label className={lbl}>Estado</label><select className={inp} value={f.status} onChange={(e) => set('status', e.target.value)}>{ASSET_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}</select></div>
           </div>
         </div>

@@ -37,6 +37,7 @@ import { RiskPanel } from '@/features/risk/components/RiskPanel'
 import { AuditTab } from '@/features/audit/components/AuditTab'
 import { ValueAnalysisTab } from '@/features/value-analysis/components/ValueAnalysisTab'
 import { ImprovementTab } from '@/features/improvement/components/ImprovementTab'
+import { AssetsTab } from '@/features/assets/components/AssetsTab'
 import type { Process } from '@/types'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { CharacterizationPanel } from '@/features/process/components/CharacterizationPanel'
@@ -712,6 +713,7 @@ export default function ProcessCharacterizationPage() {
                 {rightPanel === 'auditoria'    && 'Programa de Auditoria'}
                 {rightPanel === 'analisis'     && 'Analisis de Valor'}
                 {rightPanel === 'mejoras'      && 'Oportunidades de Mejora'}
+                {rightPanel === 'activos'      && 'Activos de Informacion'}
               </h3>
               <div className="flex items-center gap-1">
                 {rightPanel !== 'info' && (
@@ -807,6 +809,15 @@ export default function ProcessCharacterizationPage() {
                     processId={processId!}
                     processName={process.name}
                     bpmnXml={hasBpmn ? bpmnXml : undefined}
+                    isExpanded={panelExpanded}
+                  />
+                </ErrorBoundary>
+              )}
+              {rightPanel === 'activos' && (
+                <ErrorBoundary>
+                  <AssetsTab
+                    processId={processId!}
+                    processName={process.name}
                     isExpanded={panelExpanded}
                   />
                 </ErrorBoundary>

@@ -9,7 +9,6 @@ import { assetCriticality, assetLabel } from '@/types/asset'
 import { createAsset, updateAsset, deleteAsset, getAssetsByCompany,
   createOperation, replaceOperationForAssetProcess, getOperationsByCompany,
   type AssetOperationRow } from '@/services/assets.service'
-import type { AssetOperationKind } from '@/types/asset'
 
 function currentCompanyId(): string | null {
   return useWorkspaceStore.getState().activeCompanyId
@@ -29,7 +28,7 @@ interface AssetState {
   operations: AssetOperationRow[]
   getByProcess: (processId: string) => InformationAsset[]
   getOperation: (assetId: string, processId: string | null) => AssetOperationRow | undefined
-  setOperation: (assetId: string, processId: string | null, operation: AssetOperationKind) => void
+  setOperation: (assetId: string, processId: string | null, operation: string) => void
   addAsset: (data: Partial<InformationAsset>) => InformationAsset | null
   updateAsset: (id: string, updates: Partial<InformationAsset>) => void
   deleteAsset: (id: string) => void

@@ -11,6 +11,7 @@ import type { Macroprocess, Process } from '@/types/process'
 import type { StoredIndicator } from '@/stores/indicatorStore'
 import type { StoredProcedure } from '@/stores/procedureStore'
 import type { AuditItem } from '@/lib/procedureAi'
+import type { InformationAsset } from '@/types/asset'
 import {
   type ImprovementOpportunity, priorityScore, priorityLabel, STATUS_LABELS, IMPROVEMENT_TYPE_LABELS,
 } from '@/types/improvement'
@@ -64,6 +65,8 @@ export interface ReportData {
   allImprovements?: ImprovementOpportunity[]
   cargoCatalog?: string[]
   orgLabels?: { l0: string; l1: string; l2: string; hasL2: boolean }
+  allAssets?: InformationAsset[]
+  assetOps?: Record<string, string>
 }
 
 // Efectividad promedio de los controles de un riesgo (0–40) → etiqueta.
@@ -110,6 +113,7 @@ export async function exportReportToExcel(data: ReportData) {
     case 'valor': excelValue(wb, data, company, now); break
     case 'auditoria': excelAudit(wb, data, company, now); break
     case 'mejoras': excelMejoras(wb, data, company, now); break
+    case 'activos': excelAssets(wb, data, company, now); break
     case 'cargos': excelCargos(wb, data, company, now); break
   }
 
@@ -329,6 +333,24 @@ function excelValue(wb: ExcelJS.Workbook, data: ReportData, company: string, dat
   }
 }
 
+function excelAssets(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
+  const ws = wb.addWorksheet('Activos de Informacion')
+  const { headers: HH, W, cells } = hierParts(data)
+  const H = [...HH, 'Codigo', 'Activo', 'Tipo', 'Formato', 'Operacion', 'Propietario', 'Custodio', 'Ubicacion', 'C', 'I', 'D', 'Criticidad', 'Clasificacion', 'Datos personales', 'Retencion', 'Disposicion', 'Estado']
+  ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i < W ? 22 : 14 }))
+  const ids = new Set(data.processes.map((p) => p.id))
+  const rows: (string | number)[][] = []
+  for (const a of (data.allAssets || [])) {
+    if (!a.process_id || !ids.has(a.process_id)) continue
+    const p = data.processMap.get(a.process_id)
+    rows.push([...cells(p), a.code || '-', a.name, a.asset_type || '-', a.format || '-', data.assetOps?.[a.id] || '-', a.owner || '-', a.custodian || '-', a.location || '-', a.confidentiality ?? '-', a.integrity ?? '-', a.availability ?? '-', a.criticality ?? '-', a.label || '-', a.has_personal_data ? (a.personal_data_category || 'Si') : 'No', a.retention_period || '-', a.disposal_method || '-', a.status || '-'])
+  }
+  rows.forEach((r) => ws.addRow(r))
+  styleHeaders(ws, H.length, 1)
+  addTitle(ws, `Activos de Informacion — ${company}`, `${company} | ${date}`, H.length, company, data.generatedBy || '')
+  styleData(ws, 4, H.length, rows.length)
+}
+
 function excelAudit(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Programa de Auditoria')
   const { headers: HH, W, cells } = hierParts(data)
@@ -367,7 +389,7 @@ export function exportReportToPdf(data: ReportData) {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
   const company = data.company?.name || 'Empresa'
   const now = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' })
-  const titleMap: Record<string, string> = { inventario: 'Inventario de Procesos', riesgos: 'Riesgos y Controles', kpis: 'Indicadores KPI', valor: 'Analisis de Valor', auditoria: 'Programa de Auditoria', mejoras: 'Plan de Mejoras', cargos: 'Analitica por Cargo' }
+  const titleMap: Record<string, string> = { inventario: 'Inventario de Procesos', riesgos: 'Riesgos y Controles', kpis: 'Indicadores KPI', valor: 'Analisis de Valor', auditoria: 'Programa de Auditoria', mejoras: 'Plan de Mejoras', activos: 'Activos de Informacion', cargos: 'Analitica por Cargo' }
 
   // Header
   doc.setFillColor(27, 42, 74); doc.rect(0, 0, 297, 35, 'F')
@@ -428,6 +450,17 @@ export function exportReportToPdf(data: ReportData) {
         }
       }
       colorCols = [{ col: W + 2, map: VA_COLORS_PDF }]
+      break
+    }
+    case 'activos': {
+      head = [[...HH, 'Codigo', 'Activo', 'Tipo', 'Operacion', 'Propietario', 'Ubicacion', 'C', 'I', 'D', 'Crit.', 'Clasif.', 'D. pers.', 'Retencion', 'Disposicion', 'Estado']]
+      const assetIds = new Set(data.processes.map((p) => p.id))
+      body = (data.allAssets || [])
+        .filter((a) => a.process_id && assetIds.has(a.process_id))
+        .map((a) => {
+          const proc = a.process_id ? pMap.get(a.process_id) : undefined
+          return [...cells(proc), a.code || '-', a.name, a.asset_type || '-', data.assetOps?.[a.id] || '-', a.owner || '-', a.location || '-', String(a.confidentiality ?? '-'), String(a.integrity ?? '-'), String(a.availability ?? '-'), String(a.criticality ?? '-'), a.label || '-', a.has_personal_data ? 'Si' : 'No', a.retention_period || '-', a.disposal_method || '-', a.status || '-']
+        })
       break
     }
     case 'auditoria': {

@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   FileText, ShieldAlert, TrendingUp, Activity, ClipboardCheck,
-  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List, UserCog, IdCard,
+  Download, Search, X, BarChart3, Lightbulb, LayoutGrid, List, UserCog, IdCard, Database,
 } from 'lucide-react'
 import { InventoryReport as InventoryReportUnified } from '@/features/inventory/components/InventoryReport'
 import { CargosReport } from '../reports/CargosReport'
@@ -25,8 +25,10 @@ import { KpisReport } from '../reports/KpisReport'
 import { ValueReport } from '../reports/ValueReport'
 import { AuditReport } from '../reports/AuditReport'
 import { ImprovementsReport } from '../reports/ImprovementsReport'
+import { AssetsReport } from '../reports/AssetsReport'
+import { useAssetStore } from '@/stores/assetStore'
 
-type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras' | 'cargos' | 'manuales'
+type ReportTab = 'inventario' | 'riesgos' | 'kpis' | 'valor' | 'auditoria' | 'mejoras' | 'activos' | 'cargos' | 'manuales'
 
 const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'inventario', label: 'Inventario', icon: FileText },
@@ -35,6 +37,7 @@ const TABS: { key: ReportTab; label: string; icon: React.ElementType }[] = [
   { key: 'valor', label: 'Valor', icon: Activity },
   { key: 'auditoria', label: 'Auditoria', icon: ClipboardCheck },
   { key: 'mejoras', label: 'Mejoras', icon: Lightbulb },
+  { key: 'activos', label: 'Activos de Información', icon: Database },
   { key: 'cargos', label: 'Cargos', icon: UserCog },
   { key: 'manuales', label: 'Manuales de Cargo', icon: IdCard },
 ]
@@ -74,6 +77,13 @@ export default function ReportsPage() {
   } = useCompanyScopedData()
   const updateOpportunity = useImprovementStore((s) => s.updateOpportunity)
   const deleteOpportunity = useImprovementStore((s) => s.deleteOpportunity)
+  const allAssets = useAssetStore((s) => s.assets)
+  const assetOperations = useAssetStore((s) => s.operations)
+  const assetOps = useMemo(() => {
+    const m: Record<string, string> = {}
+    assetOperations.forEach((o) => { if (o.asset_id && o.operation) m[o.asset_id] = o.operation })
+    return m
+  }, [assetOperations])
   const catalogItems = useCatalogStore((s) => s.catalogItems)
   const cargoCatalog = useMemo(() => catalogItems.filter((c) => c.catalog_type === CARGO_CATALOG && c.is_active).map((c) => c.value), [catalogItems])
 
@@ -114,10 +124,11 @@ export default function ReportsPage() {
       tab: activeTab, company, generatedBy: profile?.full_name ?? null,
       processes: filteredProcesses, macroMap, processMap,
       allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog, orgLabels: org,
+      allAssets, assetOps,
     }
     if (format === 'excel') exportReportToExcel(data)
     else exportReportToPdf(data)
-  }, [activeTab, company, profile, filteredProcesses, macroMap, processMap, allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog, org])
+  }, [activeTab, company, profile, filteredProcesses, macroMap, processMap, allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog, org, allAssets, assetOps])
 
   const hasFilters = search || filterManagement || filterArea || filterOperative || filterMacro || filterLevel
 
@@ -220,6 +231,7 @@ export default function ReportsPage() {
               {activeTab === 'kpis' && <KpisReport processes={filteredProcesses} allIndicators={allIndicators} macroMap={macroMap} processMap={processMap} />}
               {activeTab === 'valor' && <ValueReport processes={filteredProcesses} allAnalyses={allAnalyses} macroMap={macroMap} processMap={processMap} />}
               {activeTab === 'auditoria' && <AuditReport processes={filteredProcesses} allAudits={allAudits} macroMap={macroMap} processMap={processMap} />}
+              {activeTab === 'activos' && <AssetsReport processes={filteredProcesses} assets={allAssets} macroMap={macroMap} processMap={processMap} />}
               {activeTab === 'mejoras' && mejorasView === 'tabla' && <ImprovementsReport processes={filteredProcesses} allImprovements={allImprovements} onUpdate={updateOpportunity} macroMap={macroMap} processMap={processMap} />}
               {activeTab === 'mejoras' && mejorasView === 'kanban' && (
                 <div className="p-3">
