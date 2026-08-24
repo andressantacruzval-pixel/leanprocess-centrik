@@ -10,6 +10,7 @@ import { useProcedureStore } from '@/stores/procedureStore'
 import { useAuditStore } from '@/stores/auditStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
 import { useImprovementStore } from '@/stores/improvementStore'
+import { useAssetStore } from '@/stores/assetStore'
 import { useMembershipStore } from '@/stores/membershipStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
 import { generateNotificationsWithContext, useNotificationStore } from '@/features/notifications/notificationStore'
@@ -42,6 +43,7 @@ export function useWorkspaceSync() {
   const loadAudits = useAuditStore((s) => s.loadFromDB)
   const loadValueAnalysis = useValueAnalysisStore((s) => s.loadFromDB)
   const loadImprovements = useImprovementStore((s) => s.loadFromDB)
+  const loadAssets = useAssetStore((s) => s.loadFromDB)
   const loadMemberships = useMembershipStore((s) => s.loadFromDB)
   const loadCatalogs = useCatalogStore((s) => s.loadFromDB)
   const loadOnboardingMilestones = useOnboardingStore((s) => s.loadMilestonesFromDB)
@@ -115,6 +117,7 @@ export function useWorkspaceSync() {
         loadAudits(activeCompanyId),
         loadValueAnalysis(activeCompanyId),
         loadImprovements(activeCompanyId),
+        loadAssets(activeCompanyId),
         // El historial YA NO se carga aqui. Traia 500 filas de toda la empresa al
         // iniciar sesion para acabar mostrando 50 de un solo proceso — y en la
         // empresa con 1.289 entradas perdia 789 sin decirlo. Ahora lo pide
@@ -130,7 +133,7 @@ export function useWorkspaceSync() {
   }, [
     activeCompanyId, user,
     loadOrg, loadProcesses, loadRisks, loadIndicators, loadProcedures,
-    loadAudits, loadValueAnalysis, loadMemberships, loadCatalogs,
+    loadAudits, loadValueAnalysis, loadImprovements, loadAssets, loadMemberships, loadCatalogs,
     loadOnboardingMilestones, loadSnapshots, loadNotifications,
   ])
 }

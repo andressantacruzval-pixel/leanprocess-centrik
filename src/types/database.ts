@@ -14,6 +14,144 @@ export type Database = {
   }
   public: {
     Tables: {
+      information_assets: {
+        Row: {
+          id: string
+          company_id: string
+          process_id: string | null
+          org_unit_id: string | null
+          bpmn_element_id: string | null
+          code: string | null
+          name: string
+          description: string | null
+          asset_type: string | null
+          format: string | null
+          owner: string | null
+          custodian: string | null
+          users: string | null
+          location: string | null
+          confidentiality: number | null
+          integrity: number | null
+          availability: number | null
+          criticality: number | null
+          label: string | null
+          has_personal_data: boolean
+          personal_data_category: string | null
+          legal_requirements: string | null
+          retention_period: string | null
+          disposal_method: string | null
+          status: string
+          review_date: string | null
+          next_review_date: string | null
+          version: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          process_id?: string | null
+          org_unit_id?: string | null
+          bpmn_element_id?: string | null
+          code?: string | null
+          name: string
+          description?: string | null
+          asset_type?: string | null
+          format?: string | null
+          owner?: string | null
+          custodian?: string | null
+          users?: string | null
+          location?: string | null
+          confidentiality?: number | null
+          integrity?: number | null
+          availability?: number | null
+          criticality?: number | null
+          label?: string | null
+          has_personal_data?: boolean
+          personal_data_category?: string | null
+          legal_requirements?: string | null
+          retention_period?: string | null
+          disposal_method?: string | null
+          status?: string
+          review_date?: string | null
+          next_review_date?: string | null
+          version?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          process_id?: string | null
+          org_unit_id?: string | null
+          bpmn_element_id?: string | null
+          code?: string | null
+          name?: string
+          description?: string | null
+          asset_type?: string | null
+          format?: string | null
+          owner?: string | null
+          custodian?: string | null
+          users?: string | null
+          location?: string | null
+          confidentiality?: number | null
+          integrity?: number | null
+          availability?: number | null
+          criticality?: number | null
+          label?: string | null
+          has_personal_data?: boolean
+          personal_data_category?: string | null
+          legal_requirements?: string | null
+          retention_period?: string | null
+          disposal_method?: string | null
+          status?: string
+          review_date?: string | null
+          next_review_date?: string | null
+          version?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      asset_operations: {
+        Row: {
+          id: string
+          company_id: string
+          asset_id: string
+          process_id: string | null
+          operation: string
+          source_process_id: string | null
+          target_process_id: string | null
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          asset_id: string
+          process_id?: string | null
+          operation: string
+          source_process_id?: string | null
+          target_process_id?: string | null
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          asset_id?: string
+          process_id?: string | null
+          operation?: string
+          source_process_id?: string | null
+          target_process_id?: string | null
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           category: string
