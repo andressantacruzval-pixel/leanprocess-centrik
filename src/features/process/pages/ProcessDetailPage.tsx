@@ -10,8 +10,6 @@ import {
   Loader2,
   Save,
   GitBranch,
-  Book,
-  BarChart3,
   Settings2,
   Info,
   BadgeCheck,
@@ -28,6 +26,7 @@ import type { Process } from '@/types'
 import { FieldHelpIcon } from '@/features/process/components/FieldHelpIcon'
 import { CHARACTERIZATION_FIELD_HELP } from '@/features/process/constants/characterizationFieldHelp'
 import SipocSection from '@/features/process/components/SipocSection'
+import { ProcessModulesLauncher } from '@/features/process/components/ProcessModulesLauncher'
 import { isDocumentable } from '@/lib/processLevels'
 import { usePlanLimits } from '@/hooks/useActiveCompany'
 import { planName } from '@/lib/plans'
@@ -297,22 +296,20 @@ export default function ProcessDetailPage() {
         </div>
       )}
 
-      {/* ═══ ACTION BUTTONS: Diagramador, Procedimiento, KPIs ═══ */}
-      {/* Las tres llevan a pantallas que SI tienen `useDocumentableGuard`, asi que sin
-          cupo rebotarian. Rebotar no es aceptable: el usuario pulsa, se carga algo y se
-          le expulsa sin explicacion. Se deshabilitan aqui, con el motivo en el `title`.
-
-          Esta pagina no puede llevar el guardian: `useDocumentableGuard` redirige
-          justo aqui, asi que se quedaria dando vueltas sobre si misma. Por eso el freno
-          es el predicado, no el guardian. */}
-      {!isGrouping && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {/* ═══ IR AL DIAGRAMADOR ═══ */}
+      {/* El diagramador es una PANTALLA COMPLETA (editor BPMN), por eso navega. Lleva
+          `useDocumentableGuard`, asi que sin cupo rebotaria; se deshabilita aqui con el
+          motivo en el `title`. Los demas modulos (procedimiento, KPI, riesgos, etc.) ya
+          NO navegan: se abren como ventanas emergentes en ProcessModulesLauncher, con la
+          misma data. Esta pagina no puede llevar el guardian (redirige aqui mismo). */}
+      {!isGrouping && (
         <button
           onClick={() => {
             if (avisarSiSinCupo(sinCupo, plan.level, plan.cap)) return
             navigate(`/app/process/${processId}/characterization`)
           }}
           title={sinCupo ? motivoSinCupo : 'BPMN, IA, Paleta, Exportar'}
-          className={sinCupo ? CLASE_ACCION_BLOQUEADA : 'group bg-white/[0.03] rounded-xl border border-white/5 p-4 text-left hover:border-cyan-500/30 hover:bg-cyan-500/[0.03] transition-all'}
+          className={sinCupo ? `block w-full ${CLASE_ACCION_BLOQUEADA}` : 'group block w-full bg-white/[0.03] rounded-xl border border-white/5 p-4 text-left hover:border-cyan-500/30 hover:bg-cyan-500/[0.03] transition-all'}
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
@@ -324,45 +321,10 @@ export default function ProcessDetailPage() {
             </div>
           </div>
         </button>
+      )}
 
-        <button
-          onClick={() => {
-            if (avisarSiSinCupo(sinCupo, plan.level, plan.cap)) return
-            navigate(`/app/process/${processId}/procedure`)
-          }}
-          title={sinCupo ? motivoSinCupo : 'SOP generado desde el BPMN'}
-          className={sinCupo ? CLASE_ACCION_BLOQUEADA : 'group bg-white/[0.03] rounded-xl border border-white/5 p-4 text-left hover:border-purple-500/30 hover:bg-purple-500/[0.03] transition-all'}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
-              <Book size={20} className="text-purple-400" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm text-white group-hover:text-purple-400 transition-colors">Ver Procedimiento</h3>
-              <p className="text-[11px] text-white/30">SOP generado desde el BPMN</p>
-            </div>
-          </div>
-        </button>
-
-        <button
-          onClick={() => {
-            if (avisarSiSinCupo(sinCupo, plan.level, plan.cap)) return
-            navigate(`/app/process/${processId}/indicators`)
-          }}
-          title={sinCupo ? motivoSinCupo : 'Metricas y semaforos'}
-          className={sinCupo ? CLASE_ACCION_BLOQUEADA : 'group bg-white/[0.03] rounded-xl border border-white/5 p-4 text-left hover:border-amber-500/30 hover:bg-amber-500/[0.03] transition-all'}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors">
-              <BarChart3 size={20} className="text-amber-400" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm text-white group-hover:text-amber-400 transition-colors">Ver Indicadores KPI</h3>
-              <p className="text-[11px] text-white/30">Metricas y semaforos</p>
-            </div>
-          </div>
-        </button>
-      </div>}
+      {/* ═══ MODULOS (ventanas emergentes): misma info del rail derecho del diagramador ═══ */}
+      {!isGrouping && <ProcessModulesLauncher processId={processId!} />}
 
       {/* ═══ CHARACTERIZATION CARD ═══ */}
       {/* Publicado = solo lectura. Mismo idioma que CharacterizationPanel (:141, :243):
