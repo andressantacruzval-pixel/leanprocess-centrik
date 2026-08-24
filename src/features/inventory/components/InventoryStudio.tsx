@@ -10,6 +10,7 @@ import { generateMacro } from '../inventoryAi'
 import { volcarAceptadosAlMapa, volcarMacroAlMapa, pendientesDeVolcar } from '../volcarAlMapa'
 import { InventoryMacroEditor } from './InventoryMacroEditor'
 import { InventoryChat } from './InventoryChat'
+import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 
 // Paso 2 — Estudio del inventario. Mapa de macroprocesos (gris = sin levantar,
 // color = levantado). Eliges uno y decides Big Bang (auto) o Incremental (chat).
@@ -74,6 +75,9 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
         <div className="text-[11px] font-mono uppercase tracking-widest text-cyan-400 mb-1">Paso 2 · Estudio del inventario</div>
         <h2 className="text-2xl font-bold text-white">Elige un macroproceso y levántalo</h2>
         <p className="text-sm text-white/50 mt-1">Los grises aún no tienen procesos; los de color ya están levantados. Clic para trabajar en uno.</p>
+        <p className="mt-1.5 inline-flex items-center gap-1 text-[12px] text-amber-300/90">
+          <Zap size={12} className="fill-amber-300/80" /> Levantar cada macroproceso con IA consume <TokenCostBadge operationKey="inventory" /> tokens.
+        </p>
         {/* Conteo global de lo levantado */}
         <div className="flex flex-wrap items-center gap-2.5 mt-3">
           <span className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25 px-3 py-1.5 text-[13px] text-cyan-200">
@@ -146,9 +150,11 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
           <div className="flex items-center gap-2 flex-wrap">
             <button onClick={() => runBigBang(sel!)} disabled={busy} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-[13px] font-semibold shadow-lg shadow-cyan-500/30 disabled:opacity-50">
               {busy ? <Loader2 size={15} className="animate-spin" /> : <Zap size={15} />} {selMacro.procesos.length ? 'Regenerar con Big Bang' : 'Big Bang (auto)'}
+              <span className="text-white/90"><TokenCostBadge operationKey="inventory" className="text-white/90" /></span>
             </button>
             <button onClick={() => setMode(mode === 'chat' ? 'none' : 'chat')} disabled={busy} className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-[13px] font-semibold transition-all disabled:opacity-50 ${mode === 'chat' ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300' : 'border-white/15 text-white/70 hover:bg-white/5'}`}>
               <Target size={15} /> Incremental (chat)
+              <TokenCostBadge operationKey="inventory" />
             </button>
             {busy && <span className="text-[12px] text-cyan-300 inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Generando «{selMacro.nombre}»…</span>}
             {err && <span className="text-[12px] text-red-300 inline-flex items-center gap-1.5"><AlertTriangle size={12} /> {err}</span>}
