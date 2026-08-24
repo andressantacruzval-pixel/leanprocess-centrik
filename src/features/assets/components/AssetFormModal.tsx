@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ShieldCheck } from 'lucide-react'
 import { useAssetStore } from '@/stores/assetStore'
+import { useProcessStore } from '@/stores/processStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
 import { CreatableSelect } from '@/components/ui/CreatableSelect'
+import { ArrowRight, ArrowLeft } from 'lucide-react'
 import {
   ASSET_FORMATS, ASSET_STATUSES, CIA_IMPACT_SCALE,
   type InformationAsset, type CiaDimension,
@@ -26,6 +28,14 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
   const getCatalogByType = useCatalogStore((s) => s.getCatalogByType)
   const addCatalogItem = useCatalogStore((s) => s.addCatalogItem)
   const opts = (type: string) => getCatalogByType(type).map((c) => ({ value: c.value, label: c.value }))
+
+  const setJourney = useAssetStore((s) => s.setJourney)
+  const allProcesses = useProcessStore((s) => s.processes)
+  const journeyProcesses = allProcesses.filter((p) => p.id !== processId)
+  const [targets, setTargets] = useState<string[]>(() => asset ? useAssetStore.getState().getTargets(asset.id, processId) : [])
+  const [sources, setSources] = useState<string[]>(() => asset ? useAssetStore.getState().getSources(asset.id, processId) : [])
+  const toggle = (arr: string[], setArr: (v: string[]) => void, id: string) =>
+    setArr(arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id])
 
   const [f, setF] = useState({
     name: asset?.name ?? '', code: asset?.code ?? '', asset_type: asset?.asset_type ?? '',
@@ -62,6 +72,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
     if (asset) updateAsset(asset.id, payload)
     else { const created = addAsset(payload); id = created?.id }
     if (id && f.operation) setOperation(id, processId, f.operation)
+    if (id) { setJourney(id, processId, 'to', targets); setJourney(id, processId, 'from', sources) }
     onClose()
   }
 
@@ -125,6 +136,21 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
             <div><label className={lbl}>Método de disposición</label><CreatableSelect options={opts('disposal_method')} value={f.disposal_method} onChange={(v) => set('disposal_method', v)} onCreateOption={(v) => addCatalogItem('disposal_method', v)} placeholder="Eliminación segura…" /></div>
             <div><label className={lbl}>Estado</label><select className={inp} value={f.status} onChange={(e) => set('status', e.target.value)}>{ASSET_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}</select></div>
           </div>
+
+          {/* Trazabilidad (Data Journey): de qué procesos viene y a cuáles va */}
+          <div>
+            <p className="text-[11px] font-semibold text-white/70 mb-2">Trazabilidad — Data Journey <span className="text-white/35 font-normal">(hacia dónde fluye este activo)</span></p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className={`${lbl} flex items-center gap-1`}><ArrowLeft size={11} /> Viene de los procesos</label>
+                <ProcessPicker processes={journeyProcesses} selected={sources} onToggle={(id) => toggle(sources, setSources, id)} />
+              </div>
+              <div>
+                <label className={`${lbl} flex items-center gap-1`}><ArrowRight size={11} /> Va a los procesos</label>
+                <ProcessPicker processes={journeyProcesses} selected={targets} onToggle={(id) => toggle(targets, setTargets, id)} />
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/5 shrink-0">
@@ -134,5 +160,34 @@ export function AssetFormModal({ processId, bpmnElementId, asset, onClose }: Pro
       </div>
     </>,
     document.body
+  )
+}
+
+// Selector múltiple de procesos (checkbox chips) para la trazabilidad.
+function ProcessPicker({ processes, selected, onToggle }: {
+  processes: { id: string; name: string }[]
+  selected: string[]
+  onToggle: (id: string) => void
+}) {
+  const [q, setQ] = useState('')
+  const shown = q ? processes.filter((p) => p.name.toLowerCase().includes(q.toLowerCase())) : processes
+  return (
+    <div className="border border-white/10 rounded-lg bg-white/[0.02]">
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Buscar proceso…"
+        className="w-full bg-transparent border-b border-white/10 px-2.5 py-1.5 text-[12px] text-white placeholder-white/25 focus:outline-none"
+      />
+      <div className="max-h-32 overflow-y-auto p-1.5 space-y-0.5">
+        {shown.length === 0 && <p className="text-[11px] text-white/30 px-1.5 py-2">Sin procesos.</p>}
+        {shown.map((p) => (
+          <label key={p.id} className="flex items-center gap-2 px-1.5 py-1 rounded hover:bg-white/5 cursor-pointer">
+            <input type="checkbox" checked={selected.includes(p.id)} onChange={() => onToggle(p.id)} className="accent-cyan-500 shrink-0" />
+            <span className="text-[12px] text-white/70 truncate">{p.name}</span>
+          </label>
+        ))}
+      </div>
+    </div>
   )
 }

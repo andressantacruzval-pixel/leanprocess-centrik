@@ -819,6 +819,7 @@ export default function ProcessCharacterizationPage() {
                     processId={processId!}
                     processName={process.name}
                     isExpanded={panelExpanded}
+                    modeler={modelerInstance}
                   />
                 </ErrorBoundary>
               )}

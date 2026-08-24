@@ -7,7 +7,7 @@ import { dbWrite } from '@/lib/dbWrite'
 import type { InformationAsset } from '@/types/asset'
 import { assetCriticality, assetLabel } from '@/types/asset'
 import { createAsset, updateAsset, deleteAsset, getAssetsByCompany,
-  createOperation, replaceOperationForAssetProcess, getOperationsByCompany,
+  createOperation, replaceOperationForAssetProcess, replaceJourneyLinks, getOperationsByCompany,
   type AssetOperationRow } from '@/services/assets.service'
 
 function currentCompanyId(): string | null {
@@ -29,6 +29,9 @@ interface AssetState {
   getByProcess: (processId: string) => InformationAsset[]
   getOperation: (assetId: string, processId: string | null) => AssetOperationRow | undefined
   setOperation: (assetId: string, processId: string | null, operation: string) => void
+  getTargets: (assetId: string, processId: string | null) => string[]
+  getSources: (assetId: string, processId: string | null) => string[]
+  setJourney: (assetId: string, processId: string | null, direction: 'to' | 'from', processIds: string[]) => void
   addAsset: (data: Partial<InformationAsset>) => InformationAsset | null
   updateAsset: (id: string, updates: Partial<InformationAsset>) => void
   deleteAsset: (id: string) => void
@@ -44,8 +47,9 @@ export const useAssetStore = create<AssetState>()(
 
       getByProcess: (processId) => get().assets.filter((a) => a.process_id === processId),
 
+      // Operación de ciclo de vida = fila sin origen/destino.
       getOperation: (assetId, processId) =>
-        get().operations.find((o) => o.asset_id === assetId && o.process_id === (processId ?? null)),
+        get().operations.find((o) => o.asset_id === assetId && o.process_id === (processId ?? null) && !o.source_process_id && !o.target_process_id),
 
       setOperation: (assetId, processId, operation) => {
         const companyId = currentCompanyId()
@@ -57,10 +61,38 @@ export const useAssetStore = create<AssetState>()(
           created_at: now, updated_at: now,
         }
         const prev = get().operations
-        set({ operations: [...prev.filter((o) => !(o.asset_id === assetId && o.process_id === (processId ?? null))), row] })
+        set({ operations: [...prev.filter((o) => !(o.asset_id === assetId && o.process_id === (processId ?? null) && !o.source_process_id && !o.target_process_id)), row] })
         void (async () => {
           await replaceOperationForAssetProcess(assetId, processId ?? null)
           await dbWrite('asset:operation', createOperation(row), { silent: true, rollback: () => set({ operations: prev }) })
+        })()
+      },
+
+      // Trazabilidad (Data Journey): procesos a los que va / de los que viene.
+      getTargets: (assetId, processId) =>
+        get().operations.filter((o) => o.asset_id === assetId && o.process_id === (processId ?? null) && o.target_process_id).map((o) => o.target_process_id as string),
+      getSources: (assetId, processId) =>
+        get().operations.filter((o) => o.asset_id === assetId && o.process_id === (processId ?? null) && o.source_process_id).map((o) => o.source_process_id as string),
+
+      setJourney: (assetId, processId, direction, processIds) => {
+        const companyId = currentCompanyId()
+        if (!companyId) return
+        const now = new Date().toISOString()
+        const key = direction === 'to' ? 'target_process_id' : 'source_process_id'
+        const rows: AssetOperationRow[] = processIds.map((pid) => ({
+          id: generateId(), company_id: companyId, asset_id: assetId, process_id: processId ?? null,
+          operation: direction === 'to' ? 'transfiere' : 'recibe',
+          source_process_id: direction === 'from' ? pid : null,
+          target_process_id: direction === 'to' ? pid : null,
+          sort_order: 0, created_at: now, updated_at: now,
+        }))
+        const prev = get().operations
+        // Quita las filas de esta dirección para este activo+proceso y añade las nuevas.
+        const kept = prev.filter((o) => !(o.asset_id === assetId && o.process_id === (processId ?? null) && o[key as 'target_process_id' | 'source_process_id']))
+        set({ operations: [...kept, ...rows] })
+        void (async () => {
+          await replaceJourneyLinks(assetId, processId ?? null, direction)
+          for (const r of rows) await dbWrite('asset:journey', createOperation(r), { silent: true, rollback: () => set({ operations: prev }) })
         })()
       },
 

@@ -102,10 +102,28 @@ export async function createOperation(data: Partial<AssetOperationRow>): Service
   }
 }
 
-// Reemplaza la operación registrada para un activo en un proceso (una por par).
+// Reemplaza SOLO la operación de ciclo de vida (filas sin origen/destino) de un
+// activo en un proceso. No toca los enlaces de trazabilidad (va a / viene de).
 export async function replaceOperationForAssetProcess(assetId: string, processId: string | null): ServiceResult<void> {
   try {
+    let q = supabase.from('asset_operations').delete()
+      .eq('asset_id', assetId).is('source_process_id', null).is('target_process_id', null)
+    q = processId ? q.eq('process_id', processId) : q.is('process_id', null)
+    const { error } = await q
+    if (error) return { data: null, error: new Error(error.message) }
+    return { data: null, error: null }
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
+  }
+}
+
+// Reemplaza los enlaces de trazabilidad (Data Journey) de un activo en un proceso:
+// 'to' = procesos a los que va (target_process_id), 'from' = de los que viene
+// (source_process_id).
+export async function replaceJourneyLinks(assetId: string, processId: string | null, direction: 'to' | 'from'): ServiceResult<void> {
+  try {
     let q = supabase.from('asset_operations').delete().eq('asset_id', assetId)
+      .not(direction === 'to' ? 'target_process_id' : 'source_process_id', 'is', null)
     q = processId ? q.eq('process_id', processId) : q.is('process_id', null)
     const { error } = await q
     if (error) return { data: null, error: new Error(error.message) }

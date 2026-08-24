@@ -56,6 +56,7 @@ const OPERATION_COSTS: Record<string, number> = {
   activity_detail:           5,
   inventory:                20,
   transcription:             0,
+  asset_identification:     15,
   // Sesiones conversacionales (por turno)
   flowchart_interview_turn:  3,
   advisor_chat_turn:         3,
