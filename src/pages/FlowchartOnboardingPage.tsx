@@ -5,7 +5,6 @@ import { BpmnModeler } from '@/features/bpmn/components/BpmnModeler'
 import { useProcesses } from '@/hooks/useProcesses'
 import { useTokenBudget } from '@/hooks/useTokenBudget'
 import { useVoiceToText } from '@/hooks/useVoiceToText'
-import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 import { generateBpmnDirect, generateBpmnFromFile, validateBpmnFile, fileToBase64 } from '@/lib/bpmnAi'
 import { FlowchartChatMode } from '@/pages/FlowchartChatMode'
 import { IS_PHASE_1 } from '@/lib/phaseFlags'
@@ -253,7 +252,7 @@ export default function FlowchartOnboardingPage() {
                         ? (<><Loader2 size={14} className="animate-spin" /> Transcribiendo…</>)
                         : dictado.recording
                         ? (<><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" /></span> Detener y transcribir</>)
-                        : (<><Mic size={14} /> Dictar por voz <TokenCostBadge operationKey="transcription" /></>)}
+                        : (<><Mic size={14} /> Dictar por voz</>)}
                     </button>
                   )}
                 </div>
