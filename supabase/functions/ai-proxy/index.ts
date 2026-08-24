@@ -30,7 +30,7 @@ const OPERATION_COSTS: Record<string, number> = {
   audit_generation:         10,
   kpi_generation:           10,
   value_classification:      5,
-  ai_consultant:             3,
+  ai_consultant:            10,
   text_improvement:          2,
   // Aliases usados por componentes de la app
   process_objective:         5,
@@ -51,6 +51,10 @@ const OPERATION_COSTS: Record<string, number> = {
   bpmn_file_generation:     15,
   bpmn_refinement:          10,
   process_description:       5,
+  // Features con badge de tokens visible en la UI
+  improvement_opportunities:15,
+  activity_detail:           5,
+  inventory:                20,
   // Sesiones conversacionales (por turno)
   flowchart_interview_turn:  3,
   advisor_chat_turn:         3,

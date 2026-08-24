@@ -7,6 +7,7 @@ import { usePlanLimits } from '@/hooks/useActiveCompany'
 import { planName } from '@/lib/plans'
 import { avisarSiSinCupo } from '@/lib/planGateMessage'
 import { ACCIONES_AL_PASAR } from '@/lib/constants'
+import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import type { SipocAiContext, SipocTurn } from '@/lib/sipocAi'
 import { SipocAiAssistant } from '@/features/process/components/SipocAiAssistant'
@@ -166,6 +167,7 @@ export default function SipocSection({ processId }: { processId: string }) {
             className={sinCupo ? CLASE_BLOQUEADA : `flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium border transition-colors ${aiOpen ? 'bg-purple-500/25 text-purple-100 border-purple-500/40' : 'bg-purple-500/10 text-purple-300 border-purple-500/25 hover:bg-purple-500/20'}`}
           >
             <Sparkles size={12} /> Construir con IA
+            <TokenCostBadge operationKey="sipoc" />
           </button>
           <button
             onClick={() => {

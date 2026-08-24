@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Sparkles, Send, X, Loader2, Check } from 'lucide-react'
 import { interviewSipoc, type SipocAiContext, type SipocTurn } from '@/lib/sipocAi'
+import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 
 interface ChatMsg {
   role: 'user' | 'assistant'
@@ -78,6 +79,7 @@ export function SipocAiAssistant({ getContext, onAdd, onClose }: Props) {
             <Sparkles size={13} className="text-purple-300" />
           </div>
           <span className="text-[13px] font-semibold text-white truncate">Asistente SIPOC</span>
+          <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] text-white/40">· <TokenCostBadge operationKey="sipoc" /> por respuesta</span>
           {addedCount > 0 && (
             <span className="flex items-center gap-1 text-[10px] text-teal-300 bg-teal-500/10 border border-teal-500/20 px-1.5 py-0.5 rounded-full">
               <Check size={10} /> {addedCount} {addedCount === 1 ? 'agregado' : 'agregados'}

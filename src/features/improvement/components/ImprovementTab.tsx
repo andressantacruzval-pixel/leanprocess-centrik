@@ -7,6 +7,7 @@ import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
 import { useCompanyStore } from '@/stores/companyStore'
 import { useTokenBudget } from '@/hooks/useTokenBudget'
 import { InsufficientTokensModal } from '@/components/ui/InsufficientTokensModal'
+import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 import { generateImprovementOpportunities } from '@/lib/procedureAi'
 import {
   clampScore, SCORE_LABELS, STATUS_LABELS, priorityScore, priorityLabel,
@@ -148,6 +149,7 @@ export function ImprovementTab({ processId, processName, bpmnXml, isExpanded }: 
         >
           {busy ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
           {busy ? 'Generando...' : opportunities.length > 0 ? 'Generar más' : 'Generar con IA'}
+          <TokenCostBadge operationKey="improvement_opportunities" />
         </button>
       </div>
 

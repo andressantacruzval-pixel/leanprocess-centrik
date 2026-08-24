@@ -71,7 +71,7 @@ const STATIC_OPERATION_COSTS: Record<string, number> = {
   audit_generation:      10,
   kpi_generation:        10,
   value_classification:   5,
-  ai_consultant:          3,
+  ai_consultant:         10, // Copiloto: 10 tokens por interacción
   text_improvement:       2,
   // Aliases usados por componentes de la app
   process_objective:      5,
@@ -80,6 +80,11 @@ const STATIC_OPERATION_COSTS: Record<string, number> = {
   risks_from_bpmn:       10,
   audit_recommendations: 10,
   indicators:            10,
+  // Features con badge visible (economía de tokens)
+  improvement_opportunities: 15, // Oportunidades de mejora
+  activity_detail:            5, // Detallar una actividad del procedimiento con IA
+  sipoc:                      5, // Asistente SIPOC: 5 por cada intercambio
+  inventory:                 20, // Inventario de procesos con IA: por macroproceso
 }
 
 export const useBillingStore = create<BillingState>()(() => ({

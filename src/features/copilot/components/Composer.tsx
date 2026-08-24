@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Send, Mic, Square, Loader2, Microscope } from 'lucide-react'
 import { useSpeechDictation } from '@/hooks/useSpeechDictation'
+import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 
 // Caja de entrada: texto + dictado por voz + investigación profunda + enviar/detener.
 export function Composer({ isStreaming, onSend, onStop, onDeepResearch }: {
@@ -48,6 +49,9 @@ export function Composer({ isStreaming, onSend, onStop, onDeepResearch }: {
           <Microscope size={13} /> Investigación profunda {deep ? '· activada' : ''}
         </button>
         {deep && <span className="text-[11px] text-white/35">Recorre todos tus procesos y arma un informe con gráficos.</span>}
+        <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-white/35">
+          Cada consulta consume <TokenCostBadge operationKey="ai_consultant" />
+        </span>
       </div>
       <div className="flex items-end gap-2">
         <textarea

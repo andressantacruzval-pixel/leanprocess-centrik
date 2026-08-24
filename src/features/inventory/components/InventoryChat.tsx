@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Send, Loader2, Sparkles, User } from 'lucide-react'
 import { streamAiProxy, type AiMessage } from '@/lib/aiClient'
+import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 import { useInventoryStore } from '@/stores/inventoryStore'
 import type { InvDoc } from '../types'
 import { buildInventoryPrompt } from '../inventoryPrompt'
@@ -76,6 +77,10 @@ export function InventoryChat({ companyId, doc, focoIndex }: Props) {
         {error && <div className="text-[12px] text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">{error}</div>}
       </div>
       <div className="shrink-0 border-t border-white/10 p-2.5">
+        <div className="flex items-center gap-1 mb-2 text-[10.5px] text-white/35">
+          <Sparkles size={11} className="text-cyan-400/60" />
+          Inventario con IA · consume <TokenCostBadge operationKey="inventory" /> por macroproceso
+        </div>
         <div className="flex gap-2 mb-2 flex-wrap">
           {['Sí, confirmo', 'Sigue ▸'].map((q) => (
             <button key={q} onClick={() => send(q)} disabled={busy} className="text-[11px] px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white/90 hover:border-cyan-500/40 disabled:opacity-40">{q}</button>

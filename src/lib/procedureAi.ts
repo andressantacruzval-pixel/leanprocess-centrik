@@ -512,6 +512,37 @@ REGLAS:
 
 // ── Text improvement ──────────────────────────────────────────────────────
 
+// Detalla/amplía UNA actividad del procedimiento a partir de una instrucción del
+// usuario. Consume tokens propios (feature 'activity_detail', 5 tokens) para poder
+// explayarse por encima del borrador que ya generó el procedimiento completo.
+export async function enrichActivityDescription(input: {
+  processName: string
+  activityName: string
+  ejecutor?: string
+  currentDescription?: string
+  instruction: string
+  esDecision?: boolean
+}): Promise<string> {
+  const proc = sanitizePromptInput(input.processName, 150)
+  const act = sanitizePromptInput(input.activityName, 200)
+  const exec = input.ejecutor ? sanitizePromptInput(input.ejecutor, 150) : ''
+  const curr = input.currentDescription ? sanitizePromptInput(input.currentDescription, 2000) : ''
+  const instr = sanitizePromptInput(input.instruction, 1000)
+  const tipo = input.esDecision ? 'una DECISIÓN (compuerta) del flujo' : 'una ACTIVIDAD (tarea) del flujo'
+  const system = `Eres un analista de procesos. Enriqueces la descripción de ${tipo} dentro de un Procedimiento Operativo Estándar. Escribe en español profesional, claro, detallado y accionable. Devuelve SOLO el texto de la descripción, sin títulos, viñetas ni comillas.`
+  const user = `Proceso: ${proc}
+Actividad: ${act}${exec ? `\nResponsable: ${exec}` : ''}
+Descripción actual: ${curr || '(vacía)'}
+Lo que el usuario quiere detallar o agregar: ${instr}
+
+Reescribe y AMPLÍA la descripción integrando la información actual y la instrucción del usuario. Incluye pasos concretos, entradas/salidas, criterios y matices relevantes. Empieza con el verbo de acción. Extensión: 2 a 5 frases.`
+  const text = await callAiProxy(
+    [{ role: 'user', content: user }] as AiMessage[],
+    { systemPrompt: system, feature: 'activity_detail', temperature: 0.4, maxOutputTokens: 1024 },
+  )
+  return text.trim()
+}
+
 export async function improveText(sectionContext: string, currentText: string): Promise<string> {
   const { text } = await callGemini(
     [{ role: 'user', content: `Reescribe el siguiente texto borrador en un parrafo PROFESIONAL y DETALLADO.

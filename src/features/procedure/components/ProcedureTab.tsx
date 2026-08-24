@@ -20,6 +20,7 @@ import {
   generateProcedureFromBpmn,
   improveText,
 } from '@/lib/claude'
+import { enrichActivityDescription } from '@/lib/procedureAi'
 import { ACCIONES_AL_PASAR } from '@/lib/constants'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { exportProcedureToDocx } from '@/utils/procedureDocxExporter'
@@ -95,6 +96,7 @@ export function ProcedureTab({
   const { loading: generating, run: runAsync } = useAsync()
   const contextBudget = useTokenBudget({ operationKey: 'procedure_from_context' })
   const bpmnBudget = useTokenBudget({ operationKey: 'procedure_from_bpmn' })
+  const activityBudget = useTokenBudget({ operationKey: 'activity_detail' })
   const allRisks = useRiskStore((s) => s.risks)
   const processRisks = allRisks.filter((r) => r.process_id === processId)
   const allIndicators = useIndicatorStore((s) => s.indicators)
@@ -233,6 +235,26 @@ export function ProcedureTab({
   const removeActivity = (index: number) => {
     if (!data) return
     update({ actividades: data.actividades.filter((_, i) => i !== index) })
+  }
+
+  // Detalla una actividad con IA (5 tokens). Devuelve true si se aplicó el cambio.
+  const handleEnrichActivity = async (index: number, instruction: string): Promise<boolean> => {
+    if (!data) return false
+    const act = data.actividades[index]
+    if (!act) return false
+    const result = await activityBudget.run(() =>
+      enrichActivityDescription({
+        processName,
+        activityName: act.nombre,
+        ejecutor: act.ejecutor,
+        currentDescription: act.descripcion,
+        instruction,
+        esDecision: act.esDecision,
+      })
+    )
+    if (!result) return false
+    updateActivity(index, { descripcion: result })
+    return true
   }
 
   // ─── Glossary ─────────────────────────────────────────────────────
@@ -541,6 +563,7 @@ export function ProcedureTab({
               updateActivity={updateActivity}
               addActivity={addActivity}
               removeActivity={removeActivity}
+              onEnrich={handleEnrichActivity}
             />
           </DocSection>
 
@@ -674,9 +697,9 @@ export function ProcedureTab({
       {/* Bottom spacer */}
       <div className="h-6" />
       <InsufficientTokensModal
-        open={bpmnBudget.showInsufficientModal || contextBudget.showInsufficientModal}
-        onClose={() => { bpmnBudget.closeInsufficientModal(); contextBudget.closeInsufficientModal() }}
-        operationKey={bpmnBudget.showInsufficientModal ? 'procedure_from_bpmn' : 'procedure_from_context'}
+        open={bpmnBudget.showInsufficientModal || contextBudget.showInsufficientModal || activityBudget.showInsufficientModal}
+        onClose={() => { bpmnBudget.closeInsufficientModal(); contextBudget.closeInsufficientModal(); activityBudget.closeInsufficientModal() }}
+        operationKey={activityBudget.showInsufficientModal ? 'activity_detail' : bpmnBudget.showInsufficientModal ? 'procedure_from_bpmn' : 'procedure_from_context'}
       />
     </div>
   )
