@@ -34,6 +34,8 @@ interface AssetState {
   setJourney: (assetId: string, processId: string | null, direction: 'to' | 'from', processIds: string[]) => void
   addAsset: (data: Partial<InformationAsset>) => InformationAsset | null
   updateAsset: (id: string, updates: Partial<InformationAsset>) => void
+  linkAssetToNode: (assetId: string, bpmnElementId: string) => void
+  unlinkAsset: (assetId: string) => void
   deleteAsset: (id: string) => void
   clearCompanyData: (companyId: string) => void
   loadFromDB: (companyId: string) => Promise<void>
@@ -155,18 +157,23 @@ export const useAssetStore = create<AssetState>()(
         })
       },
 
+      // El activo (panel derecho) y el nodo del diagrama están DESACOPLADOS: son un
+      // catálogo y sus vínculos. Vincular/desvincular solo cambia bpmn_element_id;
+      // borrar un nodo no borra el activo (lo desvincula) y se puede re-vincular.
+      linkAssetToNode: (assetId, bpmnElementId) => get().updateAsset(assetId, { bpmn_element_id: bpmnElementId }),
+      unlinkAsset: (assetId) => get().updateAsset(assetId, { bpmn_element_id: null }),
+
       deleteAsset: (id) => {
         const prevAssets = get().assets
         const prevOps = get().operations
-        // Optimista: quita el activo y sus operaciones del estado.
+        // El borrado es DEFINITIVO en la UI: el estado local persistido es la fuente
+        // de verdad. No se revierte si la nube falla (fila inexistente, RLS o tabla
+        // sin migrar): reponer el activo era justo lo que impedía eliminarlo.
         set({ assets: prevAssets.filter((a) => a.id !== id), operations: prevOps.filter((o) => o.asset_id !== id) })
         void (async () => {
           // Primero las operaciones (por si el FK no está en cascada), luego el activo.
           await deleteOperationsForAsset(id)
-          await dbWrite('asset:delete', deleteAsset(id), {
-            silent: true,
-            rollback: () => set({ assets: prevAssets, operations: prevOps }),
-          })
+          await dbWrite('asset:delete', deleteAsset(id), { silent: true })
         })()
       },
 

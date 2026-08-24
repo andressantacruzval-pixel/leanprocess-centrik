@@ -46,11 +46,13 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
 
   const list = assets.filter((a) => a.process_id === processId)
 
-  // Borra el activo y, si tiene nodo en el diagrama, también lo elimina de ahí.
+  // Borra el activo del catálogo y, si tiene nodo en el diagrama, también lo quita.
+  // Se borra el activo PRIMERO para que el listener de «nodo eliminado» no intente
+  // desvincular un activo que ya no existe (evita una escritura huérfana en la nube).
   const removeAsset = (a: InformationAsset) => {
-    if (!confirm(`¿Eliminar el activo «${a.name}»?`)) return
-    if (modeler && a.bpmn_element_id) removeNode(modeler, a.bpmn_element_id)
+    if (!confirm(`¿Eliminar el activo «${a.name}»? Se quita del catálogo y del diagrama.`)) return
     deleteAsset(a.id)
+    if (modeler && a.bpmn_element_id) removeNode(modeler, a.bpmn_element_id)
   }
 
   // «Encender la luz» del nodo del activo en el diagrama al pulsar su fila.
