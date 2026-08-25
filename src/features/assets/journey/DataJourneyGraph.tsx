@@ -16,6 +16,7 @@ import { JourneyNode } from './JourneyNode'
 import { JourneyBand } from './JourneyBand'
 import { JourneyLinkModal } from './JourneyLinkModal'
 import { JourneyEdgeModal } from './JourneyEdgeModal'
+import { FieldEditModal } from './FieldEditModal'
 import { AssetFormModal } from '../components/AssetFormModal'
 
 const nodeTypes = { journeyNode: JourneyNode, journeyBand: JourneyBand }
@@ -58,15 +59,43 @@ export function DataJourneyGraph() {
   const [pending, setPending] = useState<{ assetId: string; procId: string } | null>(null)
   const [editAsset, setEditAsset] = useState<InformationAsset | null>(null)
   const [edgeLinks, setEdgeLinks] = useState<JourneyEdgeLink[] | null>(null)
+  const [editField, setEditField] = useState<{ kind: 'asset'; assetId: string; idx: number; col: AssetColumn } | { kind: 'link'; opId: string; idx: number; col: AssetColumn } | null>(null)
   const addJourneyLink = useAssetStore((s) => s.addJourneyLink)
   const updateJourneyLink = useAssetStore((s) => s.updateJourneyLink)
+  const updateAsset = useAssetStore((s) => s.updateAsset)
 
-  // Clic en un nodo de activo → abre su ficha completa (bidireccional).
+  // Clic en nodos: activo → ficha; recibido → ficha del activo origen; campo →
+  // edición rápida de la columna (bidireccional con la ficha).
   const onNodeClick = useCallback((_e: MouseEvent, node: Node) => {
-    if (!node.id.startsWith('a:')) return
-    const a = assets.find((x) => x.id === node.id.slice(2))
-    if (a) setEditAsset(a)
-  }, [assets])
+    const id = node.id
+    if (id.includes('::f')) {
+      const idx = Number(id.slice(id.indexOf('::f') + 3))
+      if (id.startsWith('a:')) {
+        const assetId = id.slice(2, id.indexOf('::f'))
+        const a = assets.find((x) => x.id === assetId); const col = a?.columns?.[idx]
+        if (a && col) setEditField({ kind: 'asset', assetId, idx, col })
+      } else if (id.startsWith('r:')) {
+        const opId = id.slice(2, id.indexOf('::f'))
+        const op = operations.find((o) => o.id === opId); const col = op?.columns?.[idx]
+        if (op && col) setEditField({ kind: 'link', opId, idx, col })
+      }
+      return
+    }
+    if (id.startsWith('a:')) { const a = assets.find((x) => x.id === id.slice(2)); if (a) setEditAsset(a) }
+    else if (id.startsWith('r:')) { const op = operations.find((o) => o.id === id.slice(2)); const a = op && assets.find((x) => x.id === op.asset_id); if (a) setEditAsset(a) }
+  }, [assets, operations])
+
+  const saveField = (col: AssetColumn) => {
+    if (!editField) return
+    if (editField.kind === 'asset') {
+      const a = assets.find((x) => x.id === editField.assetId); if (!a) return
+      updateAsset(a.id, { columns: (a.columns ?? []).map((c, i) => (i === editField.idx ? col : c)) })
+    } else {
+      const op = operations.find((o) => o.id === editField.opId); if (!op) return
+      const cols = (op.columns ?? []).map((c, i) => (i === editField.idx ? col : c))
+      updateJourneyLink(op.id, cols, op.justification ?? '', op.dest_operation, op.medium, op.medium_detail)
+    }
+  }
   // Clic en una flecha de transferencia → detalle de activos y columnas.
   const onEdgeClick = useCallback((_e: MouseEvent, edge: Edge) => {
     const links = (edge.data as { links?: JourneyEdgeLink[] } | undefined)?.links
@@ -234,6 +263,10 @@ export function DataJourneyGraph() {
           asset={editAsset}
           onClose={() => setEditAsset(null)}
         />
+      )}
+
+      {editField && (
+        <FieldEditModal column={editField.col} onSave={saveField} onClose={() => setEditField(null)} />
       )}
 
       {edgeLinks && (

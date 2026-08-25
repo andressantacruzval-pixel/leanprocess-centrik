@@ -55,9 +55,12 @@ export function ReceivedAssetsPanel({ processId }: { processId: string }) {
 
             {notArriving.length > 0 && (
               <div className="mt-1.5">
-                <p className="text-[9.5px] text-white/30 uppercase tracking-wide mb-1">Existen pero no llegan ({notArriving.length})</p>
+                <p className="text-[9.5px] text-white/30 uppercase tracking-wide mb-1">Existen pero no llegan ({notArriving.length}) · pulsa para incorporar</p>
                 <div className="flex flex-wrap gap-1">
-                  {notArriving.map((c) => <span key={c.name} className="text-[9.5px] px-1.5 py-0.5 rounded border border-white/10 text-white/35">{c.name}</span>)}
+                  {notArriving.map((c) => (
+                    <button key={c.name} onClick={() => updateJourneyLink(o.id, [...arriving, c], o.justification ?? '', o.dest_operation, o.medium, o.medium_detail)}
+                      title="Incorporar esta columna a lo que llega" className="text-[9.5px] px-1.5 py-0.5 rounded border border-dashed border-white/15 text-white/45 hover:text-cyan-300 hover:border-cyan-500/40">+ {c.name}</button>
+                  ))}
                 </div>
               </div>
             )}

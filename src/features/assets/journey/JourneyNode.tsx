@@ -25,10 +25,12 @@ function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
   // (gris = no se envía).
   if (data.level === 'field') {
     return (
-      <div style={{ width: data.width, height: data.height, borderLeft: `3px solid ${data.fieldColor ?? '#64748b'}` }}
-        className="relative rounded-md border border-white/10 bg-white/[0.03] flex items-center gap-1.5 px-2" title={data.label}>
+      <div style={{ width: data.width, height: data.height, borderLeft: `3px solid ${data.fieldColor ?? '#64748b'}`, cursor: 'pointer' }}
+        className="relative rounded-md border border-white/10 bg-white/[0.03] flex items-center gap-1.5 px-2 hover:border-white/25" title={data.label}>
         <Handle id="in" type="target" position={Position.Top} isConnectable={false} style={HIDDEN} />
+        <Handle id="tin" type="target" position={Position.Left} isConnectable={false} style={HIDDEN} />
         <span className="text-[10.5px] text-white/70 truncate">{data.label}</span>
+        <Handle id="tout" type="source" position={Position.Right} isConnectable={false} style={HIDDEN} />
         <Handle id="out" type="source" position={Position.Bottom} isConnectable={false} style={HIDDEN} />
       </div>
     )

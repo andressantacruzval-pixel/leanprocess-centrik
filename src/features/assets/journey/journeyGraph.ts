@@ -173,12 +173,13 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
   // ── Construcción del bosque (un árbol por macroproceso) ──────────────────
   // Nodo de activo con expansión opcional a sus columnas (nivel «campo»),
   // coloreadas por su tratamiento (gris si esa columna no se envía).
-  const assetNode = (a: InformationAsset, cat: Category, opts?: { received?: boolean; opId?: string; sourceName?: string }): V => {
+  const assetNode = (a: InformationAsset, cat: Category, opts?: { received?: boolean; opId?: string; sourceName?: string; cols?: AssetColumn[] }): V => {
     const nodeId = opts?.received ? `r:${opts.opId}` : `a:${a.id}`
-    const cols = a.columns ?? []
+    // Recibido → solo las columnas que realmente llegaron (op.columns).
+    const cols = opts?.received ? (opts.cols ?? []) : (a.columns ?? [])
     const expanded = expandedAssets.has(nodeId)
     const children: V[] = expanded ? cols.map((c, idx) => {
-      const sent = sentByAsset.get(a.id)?.has(c.name)
+      const sent = opts?.received ? true : sentByAsset.get(a.id)?.has(c.name)
       const fcolor = !sent ? '#64748b' : (c.operation ? (STATE_COLORS[c.operation] ?? '#06b6d4') : '#06b6d4')
       const fid = `${nodeId}::f${idx}`
       return { id: fid, data: dataOf(fid, c.code ? `${c.code} · ${c.name}` : c.name, 'field', cat, false, false, { fieldColor: fcolor }), children: [] }
@@ -192,7 +193,7 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
       if (hasChildProcs(p.id)) (childrenOf.get(p.id) ?? []).forEach((c) => children.push(buildProc(c, cat)))
       else {
         (assetsByProc.get(p.id) ?? []).forEach((a) => children.push(assetNode(a, cat)))
-        ;(receivedByProc.get(p.id) ?? []).forEach(({ op, asset }) => children.push(assetNode(asset, cat, { received: true, opId: op.id, sourceName: procById.get(op.process_id || '')?.name })))
+        ;(receivedByProc.get(p.id) ?? []).forEach(({ op, asset }) => children.push(assetNode(asset, cat, { received: true, opId: op.id, sourceName: procById.get(op.process_id || '')?.name, cols: op.columns ?? [] })))
       }
     }
     return { id: `p:${p.id}`, data: dataOf(`p:${p.id}`, p.name, level, cat, hasChildProcs(p.id) || hasAssets(p.id) || hasReceived(p.id), expandedProcesses.has(p.id)), children }
@@ -210,6 +211,9 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
     return representative(home || '')
   }
   const edgeMap = new Map<string, { from: string; to: string; assets: Set<string>; links: JourneyEdgeLink[] }>()
+  // Aristas a nivel de campo: cuando el activo está expandido, la flecha sale de
+  // cada columna enviada, no del activo, para ver qué columna va a qué proceso.
+  const fieldEdges: { from: string; to: string; color: string; label: string }[] = []
   if (stateFilter.has('transfiere')) {
     for (const op of operations) {
       if ((!op.source_process_id && !op.target_process_id) || !passes(op.asset_id)) continue
@@ -217,9 +221,18 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
       const from = op.target_process_id ? sourceRep(op.asset_id, home) : representative(op.source_process_id || home || '')
       const to = op.target_process_id ? representative(op.target_process_id) : representative(home || '')
       if (!from || !to || from === to) continue
+      const a = assetMap.get(op.asset_id)
+      // Si el activo origen está expandido a campos, una flecha por columna enviada.
+      if (op.target_process_id && from === `a:${op.asset_id}` && expandedAssets.has(from) && a) {
+        (op.columns ?? []).forEach((c) => {
+          const idx = (a.columns ?? []).findIndex((x) => x.name === c.name)
+          if (idx < 0) return
+          fieldEdges.push({ from: `${from}::f${idx}`, to, color: c.operation ? (STATE_COLORS[c.operation] ?? STATE_COLORS.transfiere) : STATE_COLORS.transfiere, label: c.name })
+        })
+        continue
+      }
       const key = `${from}|${to}`; const e = edgeMap.get(key) ?? { from, to, assets: new Set<string>(), links: [] }
       e.assets.add(op.asset_id)
-      const a = assetMap.get(op.asset_id)
       e.links.push({ opId: op.id, assetId: op.asset_id, assetName: a?.name ?? 'Activo', assetColumns: a?.columns ?? [], columns: op.columns ?? [], justification: op.justification ?? '', destOperation: op.dest_operation, medium: op.medium, mediumDetail: op.medium_detail })
       edgeMap.set(key, e)
     }
@@ -289,6 +302,18 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
       style: { stroke: color, strokeWidth: Math.min(2 + count, 8), opacity: assetFilter ? 1 : 0.8, cursor: 'pointer' },
       markerEnd: { type: MarkerType.ArrowClosed, color, width: 16, height: 16 },
       data: { links: e.links },
+    })
+  })
+  // Flechas a nivel de columna (activo expandido): campo → subproceso destino.
+  fieldEdges.forEach((fe, i) => {
+    if (!nodeIds.has(fe.from) || !nodeIds.has(fe.to)) return
+    edges.push({
+      id: `tf:${fe.from}=>${fe.to}:${i}`, source: fe.from, sourceHandle: 'tout', target: fe.to, targetHandle: 'tin',
+      type: 'default', animated: !!assetFilter, label: fe.label, labelBgPadding: [3, 1], labelBgBorderRadius: 3,
+      labelBgStyle: { fill: '#0b1220', fillOpacity: 0.85 }, labelStyle: { fill: '#cbd5e1', fontSize: 8.5 },
+      interactionWidth: 20, zIndex: 6,
+      style: { stroke: fe.color, strokeWidth: 1.6, opacity: 0.85, strokeDasharray: '5 3' },
+      markerEnd: { type: MarkerType.ArrowClosed, color: fe.color, width: 12, height: 12 },
     })
   })
 
