@@ -43,6 +43,8 @@ export interface JourneyNodeData {
   hasElimina: boolean
   width: number
   height: number
+  fields?: number
+  connecting?: boolean
   onToggle?: (id: string) => void
 }
 export interface JourneyBandData { label: string; color: string; width: number; height: number }
@@ -102,16 +104,29 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
     return rep
   }
 
-  // Estadísticas por nodo representante (nº de activos, criticidad, estados).
+  // Estadísticas por nodo: se acumulan sobre TODO el subárbol, así un proceso o
+  // macroproceso muestra la SUMA de los activos de sus subprocesos (aunque esté
+  // colapsado o expandido), no solo los suyos directos.
   const stat = new Map<string, { count: number; crit: number; pd: boolean; crea: boolean; elim: boolean }>()
-  const bump = (id: string | null) => { if (!id) return null; const s = stat.get(id) ?? { count: 0, crit: 0, pd: false, crea: false, elim: false }; stat.set(id, s); return s }
-  for (const a of assets) { if (!passes(a.id) || !a.process_id) continue; const s = bump(representative(a.process_id)); if (!s) continue; s.count++; s.crit = Math.max(s.crit, a.criticality || 0); if (a.has_personal_data) s.pd = true }
+  const ancestorsOf = (pid: string): string[] => {
+    const ids = pathOf(pid).map((p) => `p:${p}`)
+    const m = macroOf(pid); if (m) ids.push(`m:${m}`)
+    return ids
+  }
+  const addTo = (id: string, fn: (s: { count: number; crit: number; pd: boolean; crea: boolean; elim: boolean }) => void) => {
+    const s = stat.get(id) ?? { count: 0, crit: 0, pd: false, crea: false, elim: false }; stat.set(id, s); fn(s)
+  }
+  for (const a of assets) {
+    if (!passes(a.id) || !a.process_id) continue
+    ancestorsOf(a.process_id).forEach((id) => addTo(id, (s) => { s.count++; s.crit = Math.max(s.crit, a.criticality || 0); if (a.has_personal_data) s.pd = true }))
+  }
   for (const op of operations) {
     if (op.source_process_id || op.target_process_id || !op.process_id || !passes(op.asset_id)) continue
-    const s = bump(representative(op.process_id)); if (!s) continue
     const st = (op.operation || '').toLowerCase()
-    if (st.startsWith('crea') && stateFilter.has('crea')) s.crea = true
-    if (st.startsWith('elimina') && stateFilter.has('elimina')) s.elim = true
+    ancestorsOf(op.process_id).forEach((id) => addTo(id, (s) => {
+      if (st.startsWith('crea') && stateFilter.has('crea')) s.crea = true
+      if (st.startsWith('elimina') && stateFilter.has('elimina')) s.elim = true
+    }))
   }
   const dataOf = (id: string, label: string, level: JourneyLevel, cat: Category, hasChildren: boolean, expanded: boolean, extra?: Partial<JourneyNodeData>): JourneyNodeData => {
     const s = stat.get(id)
@@ -124,7 +139,7 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
     const children: V[] = []
     if (expandedProcesses.has(p.id)) {
       if (hasChildProcs(p.id)) (childrenOf.get(p.id) ?? []).forEach((c) => children.push(buildProc(c, cat)))
-      else (assetsByProc.get(p.id) ?? []).forEach((a) => children.push({ id: `a:${a.id}`, data: dataOf(`a:${a.id}`, a.name, 'asset', cat, false, false, { critical: a.criticality || 0, personalData: a.has_personal_data }), children: [] }))
+      else (assetsByProc.get(p.id) ?? []).forEach((a) => children.push({ id: `a:${a.id}`, data: dataOf(`a:${a.id}`, a.name, 'asset', cat, false, false, { critical: a.criticality || 0, personalData: a.has_personal_data, fields: a.columns?.length ?? 0 }), children: [] }))
     }
     return { id: `p:${p.id}`, data: dataOf(`p:${p.id}`, p.name, level, cat, hasChildProcs(p.id) || hasAssets(p.id), expandedProcesses.has(p.id)), children }
   }
@@ -189,7 +204,7 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
     if (!nodeIds.has(e.from) || !nodeIds.has(e.to)) return
     const count = e.assets.size
     edges.push({
-      id: `t:${e.from}=>${e.to}`, source: e.from, sourceHandle: 'tr', target: e.to, targetHandle: 'tl', type: 'default', animated: !!assetFilter,
+      id: `t:${e.from}=>${e.to}`, source: e.from, sourceHandle: 'tout', target: e.to, targetHandle: 'tin', type: 'default', animated: !!assetFilter,
       label: String(count), labelBgPadding: [4, 2], labelBgBorderRadius: 4,
       labelBgStyle: { fill: '#0b1220', fillOpacity: 0.85 }, labelStyle: { fill: '#cbd5e1', fontSize: 10, fontWeight: 600 },
       style: { stroke: color, strokeWidth: Math.min(2 + count, 8), opacity: assetFilter ? 1 : 0.8 },

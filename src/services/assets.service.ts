@@ -71,6 +71,8 @@ export interface AssetOperationRow {
   operation: string
   source_process_id: string | null
   target_process_id: string | null
+  columns?: { name: string; description: string }[]
+  justification?: string
   sort_order: number
   created_at: string
   updated_at: string

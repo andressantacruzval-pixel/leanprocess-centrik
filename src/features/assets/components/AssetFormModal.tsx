@@ -123,7 +123,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
           {/* Columnas / campos del activo */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] font-semibold text-white/70 flex items-center gap-1.5"><Columns3 size={13} className="text-indigo-400" />Columnas / campos del activo <span className="text-white/35 font-normal">(qué contiene)</span></p>
+              <p className="text-[11px] font-semibold text-white/70 flex items-center gap-1.5"><Columns3 size={13} className="text-indigo-400" />Columnas / campos del activo <span className="text-[10px] font-medium text-indigo-300 bg-indigo-500/15 rounded px-1.5 py-0.5">{columns.length}</span></p>
               <button onClick={addColumn} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10.5px] font-medium hover:bg-indigo-500/25"><Plus size={11} /> Columna</button>
             </div>
             {columns.length === 0 ? (

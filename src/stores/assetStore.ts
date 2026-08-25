@@ -4,7 +4,7 @@ import { useWorkspaceStore } from './workspaceStore'
 import { toast } from './toastStore'
 import { generateId } from '@/utils/id'
 import { dbWrite } from '@/lib/dbWrite'
-import type { InformationAsset } from '@/types/asset'
+import type { InformationAsset, AssetColumn } from '@/types/asset'
 import { assetCriticality, assetLabel } from '@/types/asset'
 import type { AssetControl } from '@/types/assetRisk'
 import { computeAssetControlScore, newAssetControlDefaults } from '@/types/assetRisk'
@@ -41,6 +41,7 @@ interface AssetState {
   getTargets: (assetId: string, processId: string | null) => string[]
   getSources: (assetId: string, processId: string | null) => string[]
   setJourney: (assetId: string, processId: string | null, direction: 'to' | 'from', processIds: string[]) => void
+  addJourneyLink: (assetId: string, homeProcessId: string | null, direction: 'to' | 'from', otherProcessId: string, columns: AssetColumn[], justification: string) => void
   addAsset: (data: Partial<InformationAsset>) => InformationAsset | null
   updateAsset: (id: string, updates: Partial<InformationAsset>) => void
   linkAssetToNode: (assetId: string, bpmnElementId: string) => void
@@ -146,6 +147,23 @@ export const useAssetStore = create<AssetState>()(
           await replaceJourneyLinks(assetId, processId ?? null, direction)
           for (const r of rows) await dbWrite('asset:journey', createOperation(r), { silent: true })
         })()
+      },
+
+      // Enlace único creado al conectar un activo con un subproceso en el Data
+      // Journey. Guarda qué columnas viajan (minimización) y la justificación.
+      addJourneyLink: (assetId, homeProcessId, direction, otherProcessId, columns, justification) => {
+        const companyId = currentCompanyId()
+        if (!companyId) return
+        const now = new Date().toISOString()
+        const row: AssetOperationRow = {
+          id: generateId(), company_id: companyId, asset_id: assetId, process_id: homeProcessId ?? null,
+          operation: direction === 'to' ? 'transfiere' : 'recibe',
+          source_process_id: direction === 'from' ? otherProcessId : null,
+          target_process_id: direction === 'to' ? otherProcessId : null,
+          columns, justification, sort_order: 0, created_at: now, updated_at: now,
+        }
+        set((s) => ({ operations: [...s.operations, row] }))
+        void dbWrite('asset:journeyLink', createOperation(row), { silent: true })
       },
 
       addAsset: (data) => {

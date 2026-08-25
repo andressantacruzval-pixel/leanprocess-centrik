@@ -267,6 +267,7 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
                     {op && <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300">{op}</span>}
                     {a.label && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{a.label}</span>}
                     {a.owner && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/45">Prop: {a.owner}</span>}
+                    {a.columns?.length ? <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300">{a.columns.length} campos</span> : null}
                     {lvl && <span className={`text-[9px] px-1.5 py-0.5 rounded text-white ${lvl.color}`} title="Criticidad C·I·D (mayor de las tres)">C·I·D {crit}</span>}
                     {a.has_personal_data && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300">Datos personales</span>}
                     {inhLvl && (

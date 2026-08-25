@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import ReactFlow, {
   Background, BackgroundVariant, Controls, MiniMap,
-  useNodesState, useEdgesState, useReactFlow,
+  useNodesState, useEdgesState, useReactFlow, type Connection,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { Search, X, Maximize2, Minimize2, Route } from 'lucide-react'
 import { useProcessStore } from '@/stores/processStore'
 import { useAssetStore } from '@/stores/assetStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
+import { toast } from '@/stores/toastStore'
+import type { AssetColumn } from '@/types/asset'
 import { buildJourney, STATE_COLORS, STATE_LABELS } from './journeyGraph'
 import { JourneyNode } from './JourneyNode'
 import { JourneyBand } from './JourneyBand'
+import { JourneyLinkModal } from './JourneyLinkModal'
 
 const nodeTypes = { journeyNode: JourneyNode, journeyBand: JourneyBand }
 
@@ -47,6 +50,9 @@ export function DataJourneyGraph() {
   const [stateFilter, setStateFilter] = useState<Set<string>>(new Set(ALL_STATES))
   const [query, setQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
+  const [connecting, setConnecting] = useState(false)
+  const [pending, setPending] = useState<{ assetId: string; procId: string } | null>(null)
+  const addJourneyLink = useAssetStore((s) => s.addJourneyLink)
 
   const onToggle = useCallback((nodeId: string) => {
     const raw = nodeId.slice(2)
@@ -57,8 +63,23 @@ export function DataJourneyGraph() {
   const built = useMemo(() => {
     const filter = assetFilter.size ? assetFilter : null
     const { nodes, edges } = buildJourney({ macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter: filter, stateFilter })
-    return { nodes: nodes.map((n) => (n.type === 'journeyNode' ? { ...n, data: { ...n.data, onToggle } } : n)), edges }
-  }, [macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter, stateFilter, onToggle])
+    return { nodes: nodes.map((n) => (n.type === 'journeyNode' ? { ...n, data: { ...n.data, onToggle, connecting } } : n)), edges }
+  }, [macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter, stateFilter, onToggle, connecting])
+
+  // Conexión activo → subproceso (Data Journey). Solo se permite ese sentido.
+  const isValidConnection = useCallback((c: Connection) => !!c.source?.startsWith('a:') && !!c.target?.startsWith('p:'), [])
+  const onConnect = useCallback((c: Connection) => {
+    if (!c.source?.startsWith('a:') || !c.target?.startsWith('p:')) return
+    setPending({ assetId: c.source.slice(2), procId: c.target.slice(2) })
+  }, [])
+  const pendingAsset = pending ? assets.find((a) => a.id === pending.assetId) : undefined
+  const pendingProc = pending ? processes.find((p) => p.id === pending.procId) : undefined
+  const confirmLink = (direction: 'to' | 'from', cols: AssetColumn[], justification: string) => {
+    if (!pendingAsset || !pending) return
+    addJourneyLink(pendingAsset.id, pendingAsset.process_id, direction, pending.procId, cols, justification)
+    toast.success('Conexión registrada en el Data Journey.')
+    setPending(null)
+  }
 
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
@@ -148,6 +169,10 @@ export function DataJourneyGraph() {
           nodes={nodes} edges={edges}
           onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
+          onConnect={onConnect}
+          onConnectStart={() => setConnecting(true)}
+          onConnectEnd={() => setConnecting(false)}
+          isValidConnection={isValidConnection}
           fitView fitViewOptions={{ padding: 0.2 }}
           minZoom={0.15} maxZoom={2}
           proOptions={{ hideAttribution: true }}
@@ -158,6 +183,16 @@ export function DataJourneyGraph() {
           <MiniMap className="!hidden lg:!block !bg-[#0a0f1a] !border !border-white/10 !rounded-lg" maskColor="rgba(7,11,20,.75)" nodeColor="#334155" nodeStrokeColor="#475569" pannable zoomable />
         </ReactFlow>
       </div>
+
+      {pending && pendingAsset && pendingProc && (
+        <JourneyLinkModal
+          assetName={pendingAsset.name}
+          columns={pendingAsset.columns ?? []}
+          targetName={pendingProc.name}
+          onConfirm={confirmLink}
+          onClose={() => setPending(null)}
+        />
+      )}
     </div>
   )
 }
