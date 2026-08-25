@@ -38,6 +38,7 @@ const OrgStructurePage = lazy(() => import('@/features/org-structure/pages/OrgSt
 const CatalogsPage = lazy(() => import('@/features/catalog/pages/CatalogsPage'))
 const SettingsPage = lazy(() => import('@/features/auth/pages/SettingsPage'))
 const HeatMapPage = lazy(() => import('@/features/risk/pages/HeatMapPage'))
+const DataJourneyPage = lazy(() => import('@/features/assets/pages/DataJourneyPage'))
 const AdminPage = lazy(() => import('@/features/analytics/pages/AdminPage'))
 const ReportsPage = lazy(() => import('@/features/reporting/pages/ReportsPage'))
 const AchievementsPage = lazy(() => import('@/features/gamification/pages/AchievementsPage'))
@@ -220,6 +221,7 @@ function App() {
               <Route path="org-structure" element={<OrgStructurePage />} />
               <Route path="catalogs" element={<CatalogsPage />} />
               <Route path="heat-map" element={<HeatMapPage />} />
+              <Route path="data-journey" element={<DataJourneyPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="achievements" element={<AchievementsPage />} />
               <Route path="presentation" element={<PresentationPage />} />

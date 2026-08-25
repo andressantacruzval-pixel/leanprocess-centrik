@@ -37,6 +37,7 @@ export type Database = {
           probability: number | null
           threat: string | null
           vulnerability: string | null
+          columns: { name: string; description: string }[] | null
           label: string | null
           has_personal_data: boolean
           personal_data_category: string | null
@@ -72,6 +73,7 @@ export type Database = {
           probability?: number | null
           threat?: string | null
           vulnerability?: string | null
+          columns?: { name: string; description: string }[] | null
           label?: string | null
           has_personal_data?: boolean
           personal_data_category?: string | null
@@ -107,6 +109,7 @@ export type Database = {
           probability?: number | null
           threat?: string | null
           vulnerability?: string | null
+          columns?: { name: string; description: string }[] | null
           label?: string | null
           has_personal_data?: boolean
           personal_data_category?: string | null

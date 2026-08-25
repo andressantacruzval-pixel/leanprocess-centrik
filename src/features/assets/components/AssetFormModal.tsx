@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X, ShieldCheck } from 'lucide-react'
+import { X, ShieldCheck, Plus, Trash2, Columns3 } from 'lucide-react'
+import type { AssetColumn } from '@/types/asset'
 import { useAssetStore } from '@/stores/assetStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
@@ -52,6 +53,13 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
   })
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
 
+  // Columnas / campos del activo (estructura de datos con descripción rápida).
+  const [columns, setColumns] = useState<AssetColumn[]>(() => asset?.columns ?? [])
+  const addColumn = () => setColumns((c) => [...c, { name: '', description: '' }])
+  const updateColumn = (i: number, key: keyof AssetColumn, v: string) =>
+    setColumns((c) => c.map((col, idx) => (idx === i ? { ...col, [key]: v } : col)))
+  const removeColumn = (i: number) => setColumns((c) => c.filter((_, idx) => idx !== i))
+
   const save = () => {
     if (!f.name.trim()) return
     const payload: Partial<InformationAsset> = {
@@ -62,6 +70,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
       has_personal_data: f.has_personal_data, personal_data_category: f.personal_data_category,
       legal_requirements: f.legal_requirements, retention_period: f.retention_period,
       disposal_method: f.disposal_method, status: f.status,
+      columns: columns.filter((c) => c.name.trim()),
     }
     let id = asset?.id
     if (asset) updateAsset(asset.id, payload)
@@ -110,6 +119,27 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
 
           {/* La clasificación C·I·D (impacto) se valora en «Riesgo del activo»
               para no evaluar lo mismo dos veces. */}
+
+          {/* Columnas / campos del activo */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] font-semibold text-white/70 flex items-center gap-1.5"><Columns3 size={13} className="text-indigo-400" />Columnas / campos del activo <span className="text-white/35 font-normal">(qué contiene)</span></p>
+              <button onClick={addColumn} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10.5px] font-medium hover:bg-indigo-500/25"><Plus size={11} /> Columna</button>
+            </div>
+            {columns.length === 0 ? (
+              <p className="text-[11px] text-white/30 py-2">Sin columnas. Añade los campos que contiene (ej. nombre, cédula, teléfono) con una descripción rápida.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {columns.map((col, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input className={`${inp} sm:w-44 shrink-0`} value={col.name} onChange={(e) => updateColumn(i, 'name', e.target.value)} placeholder="Campo" />
+                    <input className={inp} value={col.description} onChange={(e) => updateColumn(i, 'description', e.target.value)} placeholder="Descripción rápida" />
+                    <button onClick={() => removeColumn(i)} className="p-1.5 rounded text-white/25 hover:text-red-400 hover:bg-red-500/10 shrink-0" title="Quitar"><Trash2 size={13} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Legal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

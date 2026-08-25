@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Route } from 'lucide-react'
 import type { Process, Macroprocess } from '@/types/process'
 import type { InformationAsset } from '@/types/asset'
 import { useAssetStore } from '@/stores/assetStore'
@@ -29,6 +31,7 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
   processes: Process[]; assets: InformationAsset[]; macroMap: Map<string, Macroprocess>; processMap: Map<string, Process>
 }) {
   const org = useOrgLabels()
+  const navigate = useNavigate()
   const operations = useAssetStore((s) => s.operations)
   const assetControls = useAssetStore((s) => s.assetControls)
   const ids = useMemo(() => new Set(processes.map((p) => p.id)), [processes])
@@ -113,6 +116,15 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
 
   return (
     <Dashboard>
+      <div className="flex justify-end">
+        <button
+          onClick={() => navigate('/app/data-journey')}
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 text-white text-[13px] font-medium hover:from-indigo-500 hover:to-cyan-500 transition-colors shadow-lg shadow-cyan-900/20"
+        >
+          <Route size={15} /> Ver Data Journey (mapa interactivo)
+        </button>
+      </div>
+
       <Grid cols={4}>
         <Stat label="Activos" value={list.length} sub="de información" tone="cyan" />
         <Stat label="Críticos + altos" value={criticos} sub={`${list.length ? Math.round(criticos / list.length * 100) : 0}% del total`} tone="red" />

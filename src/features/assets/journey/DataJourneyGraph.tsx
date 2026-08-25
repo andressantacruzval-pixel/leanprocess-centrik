@@ -1,0 +1,153 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import ReactFlow, {
+  Background, BackgroundVariant, Controls, MiniMap,
+  useNodesState, useEdgesState,
+} from 'reactflow'
+import 'reactflow/dist/style.css'
+import { Search, X, Maximize2, Minimize2, Route } from 'lucide-react'
+import { useProcessStore } from '@/stores/processStore'
+import { useAssetStore } from '@/stores/assetStore'
+import { useWorkspaceStore } from '@/stores/workspaceStore'
+import { buildJourney, STATE_COLORS, STATE_LABELS } from './journeyGraph'
+import { JourneyNode } from './JourneyNode'
+
+const nodeTypes = { journeyNode: JourneyNode }
+const ALL_STATES = ['crea', 'usa', 'almacena', 'transforma', 'transfiere', 'elimina']
+const CHIP_STATES = ['crea', 'transfiere', 'elimina'] // los que cambian el grafo
+
+function flip(set: Set<string>, id: string): Set<string> {
+  const n = new Set(set)
+  if (n.has(id)) n.delete(id); else n.add(id)
+  return n
+}
+
+export function DataJourneyGraph() {
+  const companyId = useWorkspaceStore((s) => s.activeCompanyId)
+  const allMacros = useProcessStore((s) => s.macroprocesses)
+  const allProcesses = useProcessStore((s) => s.processes)
+  const allAssets = useAssetStore((s) => s.assets)
+  const allOps = useAssetStore((s) => s.operations)
+
+  const macros = useMemo(() => allMacros.filter((m) => m.company_id === companyId), [allMacros, companyId])
+  const processes = useMemo(() => allProcesses.filter((p) => p.company_id === companyId), [allProcesses, companyId])
+  const assets = useMemo(() => allAssets.filter((a) => a.company_id === companyId), [allAssets, companyId])
+  const operations = useMemo(() => allOps.filter((o) => o.company_id === companyId), [allOps, companyId])
+
+  const [expandedMacros, setExpandedMacros] = useState<Set<string>>(new Set())
+  const [expandedProcesses, setExpandedProcesses] = useState<Set<string>>(new Set())
+  const [assetFilter, setAssetFilter] = useState<Set<string>>(new Set())
+  const [stateFilter, setStateFilter] = useState<Set<string>>(new Set(ALL_STATES))
+  const [query, setQuery] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
+
+  const onToggle = useCallback((nodeId: string) => {
+    const raw = nodeId.slice(2)
+    if (nodeId.startsWith('m:')) setExpandedMacros((prev) => flip(prev, raw))
+    else setExpandedProcesses((prev) => flip(prev, raw))
+  }, [])
+
+  const built = useMemo(() => {
+    const filter = assetFilter.size ? assetFilter : null
+    const { nodes, edges } = buildJourney({ macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter: filter, stateFilter })
+    return { nodes: nodes.map((n) => ({ ...n, data: { ...n.data, onToggle } })), edges }
+  }, [macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter, stateFilter, onToggle])
+
+  const [nodes, setNodes, onNodesChange] = useNodesState([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState([])
+  useEffect(() => { setNodes(built.nodes); setEdges(built.edges) }, [built, setNodes, setEdges])
+
+  const expandAll = () => {
+    setExpandedMacros(new Set(macros.map((m) => m.id)))
+    setExpandedProcesses(new Set(processes.filter((p) => processes.some((c) => c.parent_process_id === p.id)).map((p) => p.id)))
+  }
+  const collapseAll = () => { setExpandedMacros(new Set()); setExpandedProcesses(new Set()) }
+
+  const toggleState = (st: string) => setStateFilter((prev) => flip(prev, st))
+  const toggleAsset = (id: string) => setAssetFilter((prev) => flip(prev, id))
+
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return assets.slice(0, 8)
+    return assets.filter((a) => a.name.toLowerCase().includes(q)).slice(0, 12)
+  }, [assets, query])
+  const selected = assets.filter((a) => assetFilter.has(a.id))
+
+  return (
+    <div className="flex flex-col h-full w-full">
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-white/8 bg-[#0b1220]">
+        {/* Buscar activo */}
+        <div className="relative">
+          <button onClick={() => setShowSearch((v) => !v)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11px] text-white/70 hover:bg-white/10">
+            <Search size={13} /> Buscar activo
+          </button>
+          {showSearch && (
+            <div className="absolute z-30 mt-1 w-72 rounded-xl border border-white/12 bg-[#0d1420] shadow-2xl p-2">
+              <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Nombre del activo…"
+                className="w-full mb-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50" />
+              <div className="max-h-56 overflow-y-auto space-y-0.5">
+                {matches.length === 0 ? <p className="text-[11px] text-white/30 px-2 py-2">Sin activos.</p> : matches.map((a) => (
+                  <button key={a.id} onClick={() => toggleAsset(a.id)}
+                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-[11.5px] ${assetFilter.has(a.id) ? 'bg-cyan-500/15 text-cyan-200' : 'text-white/70 hover:bg-white/5'}`}>
+                    <span className="truncate flex-1">{a.name}</span>
+                    {a.asset_type && <span className="text-[8.5px] px-1 py-0.5 rounded bg-white/8 text-white/40 shrink-0">{a.asset_type}</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Chips de activos seleccionados */}
+        {selected.map((a) => (
+          <span key={a.id} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-[10.5px] text-cyan-200">
+            {a.name}
+            <button onClick={() => toggleAsset(a.id)} className="text-cyan-300/70 hover:text-white"><X size={11} /></button>
+          </span>
+        ))}
+        {assetFilter.size > 0 && (
+          <button onClick={() => setAssetFilter(new Set())} className="text-[10.5px] text-white/45 hover:text-white/80 underline">Ver todo</button>
+        )}
+
+        <div className="w-px h-5 bg-white/10 mx-1" />
+
+        {/* Estados */}
+        {CHIP_STATES.map((st) => (
+          <button key={st} onClick={() => toggleState(st)}
+            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10.5px] font-medium transition-colors ${stateFilter.has(st) ? 'border-white/20 text-white' : 'border-white/8 text-white/35'}`}>
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: stateFilter.has(st) ? STATE_COLORS[st] : 'transparent', border: `1px solid ${STATE_COLORS[st]}` }} />
+            {STATE_LABELS[st]}
+          </button>
+        ))}
+
+        <div className="ml-auto flex items-center gap-1.5">
+          <button onClick={expandAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10.5px] text-white/60 hover:bg-white/10"><Maximize2 size={12} /> Expandir</button>
+          <button onClick={collapseAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10.5px] text-white/60 hover:bg-white/10"><Minimize2 size={12} /> Colapsar</button>
+        </div>
+      </div>
+
+      {/* Lienzo */}
+      <div className="flex-1 min-h-0 relative">
+        {nodes.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10 pointer-events-none">
+            <Route size={30} className="text-white/10 mb-3" />
+            <p className="text-sm text-white/35">No hay flujos que mostrar</p>
+            <p className="text-[11px] text-white/20 mt-1">Registra activos y sus transferencias («viene de / va a») para dibujar el viaje.</p>
+          </div>
+        )}
+        <ReactFlow
+          nodes={nodes} edges={edges}
+          onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
+          fitView fitViewOptions={{ padding: 0.2 }}
+          minZoom={0.15} maxZoom={2}
+          proOptions={{ hideAttribution: true }}
+        >
+          <Background variant={BackgroundVariant.Dots} gap={18} size={1} color="#1e293b" />
+          <Controls position="bottom-right" showInteractive={false} />
+          <MiniMap className="!hidden lg:!block !bg-[#0a0f1a] !border !border-white/10 !rounded-lg" maskColor="rgba(7,11,20,.75)" nodeColor="#334155" nodeStrokeColor="#475569" pannable zoomable />
+        </ReactFlow>
+      </div>
+    </div>
+  )
+}

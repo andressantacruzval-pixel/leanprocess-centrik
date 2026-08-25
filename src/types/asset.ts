@@ -88,6 +88,14 @@ export function assetCriticality(c?: number | null, i?: number | null, a?: numbe
   return Math.max(c || 0, i || 0, a || 0)
 }
 
+// Columna / campo que contiene el activo (p. ej. una base de datos con
+// nombre, cédula, teléfono). El mismo activo puede viajar a otro proceso con
+// menos campos; aquí se declara su estructura con una descripción rápida.
+export interface AssetColumn {
+  name: string
+  description: string
+}
+
 export interface InformationAsset {
   id: string
   company_id: string
@@ -114,6 +122,8 @@ export interface InformationAsset {
   probability: number | null
   threat: string
   vulnerability: string
+  // Estructura del activo: sus columnas/campos con descripción rápida.
+  columns: AssetColumn[]
   has_personal_data: boolean
   personal_data_category: string
   legal_requirements: string

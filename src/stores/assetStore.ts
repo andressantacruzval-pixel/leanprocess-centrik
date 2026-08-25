@@ -184,6 +184,7 @@ export const useAssetStore = create<AssetState>()(
           probability: data.probability ?? null,
           threat: data.threat ?? '',
           vulnerability: data.vulnerability ?? '',
+          columns: data.columns ?? [],
           has_personal_data: data.has_personal_data ?? false,
           personal_data_category: data.personal_data_category ?? '',
           legal_requirements: data.legal_requirements ?? '',
@@ -260,7 +261,7 @@ export const useAssetStore = create<AssetState>()(
         ])
         set((s) => ({
           assets: assetsRes.data
-            ? [...s.assets.filter((a) => a.company_id !== companyId), ...(assetsRes.data as InformationAsset[])]
+            ? [...s.assets.filter((a) => a.company_id !== companyId), ...(assetsRes.data as InformationAsset[]).map((a) => ({ ...a, columns: a.columns ?? [] }))]
             : s.assets,
           operations: opsRes.data
             ? [...s.operations.filter((o) => o.company_id !== companyId), ...(opsRes.data as AssetOperationRow[])]
