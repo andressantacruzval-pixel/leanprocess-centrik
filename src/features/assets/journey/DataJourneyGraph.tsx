@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import ReactFlow, {
   Background, BackgroundVariant, Controls, MiniMap,
-  useNodesState, useEdgesState,
+  useNodesState, useEdgesState, useReactFlow,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { Search, X, Maximize2, Minimize2, Route } from 'lucide-react'
@@ -10,8 +10,16 @@ import { useAssetStore } from '@/stores/assetStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { buildJourney, STATE_COLORS, STATE_LABELS } from './journeyGraph'
 import { JourneyNode } from './JourneyNode'
+import { JourneyBand } from './JourneyBand'
 
-const nodeTypes = { journeyNode: JourneyNode }
+const nodeTypes = { journeyNode: JourneyNode, journeyBand: JourneyBand }
+
+// Reencuadra el lienzo cuando cambia la estructura (expandir/colapsar niveles).
+function FitOnDrill({ dep }: { dep: string }) {
+  const rf = useReactFlow()
+  useEffect(() => { const t = setTimeout(() => rf.fitView({ padding: 0.2, duration: 300 }), 60); return () => clearTimeout(t) }, [dep, rf])
+  return null
+}
 const ALL_STATES = ['crea', 'usa', 'almacena', 'transforma', 'transfiere', 'elimina']
 const CHIP_STATES = ['crea', 'transfiere', 'elimina'] // los que cambian el grafo
 
@@ -49,12 +57,13 @@ export function DataJourneyGraph() {
   const built = useMemo(() => {
     const filter = assetFilter.size ? assetFilter : null
     const { nodes, edges } = buildJourney({ macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter: filter, stateFilter })
-    return { nodes: nodes.map((n) => ({ ...n, data: { ...n.data, onToggle } })), edges }
+    return { nodes: nodes.map((n) => (n.type === 'journeyNode' ? { ...n, data: { ...n.data, onToggle } } : n)), edges }
   }, [macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter, stateFilter, onToggle])
 
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   useEffect(() => { setNodes(built.nodes); setEdges(built.edges) }, [built, setNodes, setEdges])
+  const drillKey = useMemo(() => `${[...expandedMacros].sort().join(',')}|${[...expandedProcesses].sort().join(',')}`, [expandedMacros, expandedProcesses])
 
   const expandAll = () => {
     setExpandedMacros(new Set(macros.map((m) => m.id)))
@@ -143,6 +152,7 @@ export function DataJourneyGraph() {
           minZoom={0.15} maxZoom={2}
           proOptions={{ hideAttribution: true }}
         >
+          <FitOnDrill dep={drillKey} />
           <Background variant={BackgroundVariant.Dots} gap={18} size={1} color="#1e293b" />
           <Controls position="bottom-right" showInteractive={false} />
           <MiniMap className="!hidden lg:!block !bg-[#0a0f1a] !border !border-white/10 !rounded-lg" maskColor="rgba(7,11,20,.75)" nodeColor="#334155" nodeStrokeColor="#475569" pannable zoomable />
