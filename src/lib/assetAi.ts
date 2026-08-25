@@ -38,7 +38,8 @@ export interface AssetAiContext {
 }
 
 // ── Sugerencia de columnas/campos de un activo ─────────────────────────────
-export interface AiColumnSuggestion { name: string; description: string }
+export interface AiColumnSuggestion { name: string; description: string; operation: string }
+const OPS = ['crea', 'usa', 'almacena', 'transforma', 'transfiere', 'elimina']
 
 export async function suggestAssetColumns(ctx: {
   assetName: string; assetType?: string; description?: string
@@ -65,7 +66,8 @@ CONTEXTO:
 REGLAS:
 - Prioriza y reutiliza EXACTAMENTE los nombres del catálogo existente cuando correspondan.
 - Propón entre 4 y 12 campos concretos y realistas para ESTE activo (no genéricos).
-- Español. Responde ÚNICAMENTE un JSON array: [{"name":"","description":""}]`
+- Para cada campo indica el TRATAMIENTO del dato en este proceso ("operation"), uno de: crea | usa | almacena | transforma | transfiere | elimina (mapeo de flujo de valor del dato).
+- Español. Responde ÚNICAMENTE un JSON array: [{"name":"","description":"","operation":"crea"}]`
 
   const raw = await callAiProxy([{ role: 'user', content: prompt }], {
     modelId: 'gemini-2.5-flash', temperature: 0.3, maxOutputTokens: 2048,
@@ -74,8 +76,10 @@ REGLAS:
   try {
     const parsed = JSON.parse(cleanJson(raw)) as Partial<AiColumnSuggestion>[]
     const seen = new Set((ctx.currentColumns || []).map((c) => c.toLowerCase().trim()))
-    return parsed.filter((c) => c && c.name).map((c) => ({ name: String(c.name).trim(), description: String(c.description || '') }))
-      .filter((c) => { const k = c.name.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true })
+    return parsed.filter((c) => c && c.name).map((c) => {
+      const op = String((c as { operation?: string }).operation || '').toLowerCase()
+      return { name: String(c.name).trim(), description: String(c.description || ''), operation: OPS.includes(op) ? op : 'usa' }
+    }).filter((c) => { const k = c.name.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true })
   } catch {
     console.warn('[assetAi] columns parse failed', raw?.slice(0, 200))
     return []

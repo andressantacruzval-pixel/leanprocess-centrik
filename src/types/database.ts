@@ -37,7 +37,7 @@ export type Database = {
           probability: number | null
           threat: string | null
           vulnerability: string | null
-          columns: { name: string; code?: string; description: string }[] | null
+          columns: { name: string; code?: string; description: string; operation?: string }[] | null
           label: string | null
           has_personal_data: boolean
           personal_data_category: string | null
@@ -73,7 +73,7 @@ export type Database = {
           probability?: number | null
           threat?: string | null
           vulnerability?: string | null
-          columns?: { name: string; code?: string; description: string }[] | null
+          columns?: { name: string; code?: string; description: string; operation?: string }[] | null
           label?: string | null
           has_personal_data?: boolean
           personal_data_category?: string | null
@@ -109,7 +109,7 @@ export type Database = {
           probability?: number | null
           threat?: string | null
           vulnerability?: string | null
-          columns?: { name: string; code?: string; description: string }[] | null
+          columns?: { name: string; code?: string; description: string; operation?: string }[] | null
           label?: string | null
           has_personal_data?: boolean
           personal_data_category?: string | null
@@ -134,7 +134,7 @@ export type Database = {
           operation: string
           source_process_id: string | null
           target_process_id: string | null
-          columns: { name: string; code?: string; description: string }[] | null
+          columns: { name: string; code?: string; description: string; operation?: string }[] | null
           justification: string | null
           sort_order: number
           created_at: string
@@ -148,7 +148,7 @@ export type Database = {
           operation: string
           source_process_id?: string | null
           target_process_id?: string | null
-          columns?: { name: string; code?: string; description: string }[] | null
+          columns?: { name: string; code?: string; description: string; operation?: string }[] | null
           justification?: string | null
           sort_order?: number
           created_at?: string
@@ -162,7 +162,7 @@ export type Database = {
           operation?: string
           source_process_id?: string | null
           target_process_id?: string | null
-          columns?: { name: string; code?: string; description: string }[] | null
+          columns?: { name: string; code?: string; description: string; operation?: string }[] | null
           justification?: string | null
           sort_order?: number
           created_at?: string

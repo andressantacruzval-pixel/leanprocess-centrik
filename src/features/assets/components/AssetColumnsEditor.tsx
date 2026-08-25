@@ -9,6 +9,8 @@ import { InsufficientTokensModal } from '@/components/ui/InsufficientTokensModal
 import { CreatableSelect } from '@/components/ui/CreatableSelect'
 import { toast } from '@/stores/toastStore'
 import { suggestAssetColumns, type AiColumnSuggestion } from '@/lib/assetAi'
+import { ASSET_OPERATIONS } from '@/types/asset'
+import { STATE_COLORS } from '../journey/journeyGraph'
 import { buildColumnCode } from '../assetCodes'
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
@@ -55,7 +57,7 @@ export function AssetColumnsEditor({ columns, setColumns, assetName, assetType, 
     } catch { toast.error('No se pudieron sugerir columnas.') } finally { setSuggesting(false) }
   }
   const acceptSuggestion = (s: AiColumnSuggestion) => {
-    setColumns((cols) => [...cols, { name: s.name, code: buildColumnCode(getCodeBase(), cols.length), description: s.description }])
+    setColumns((cols) => [...cols, { name: s.name, code: buildColumnCode(getCodeBase(), cols.length), description: s.description, operation: s.operation }])
     setSuggestions((prev) => prev.filter((x) => x.name !== s.name))
   }
   const acceptAll = () => { suggestions.forEach(acceptSuggestion); setSuggestions([]) }
@@ -82,6 +84,13 @@ export function AssetColumnsEditor({ columns, setColumns, assetName, assetType, 
                 <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${!col.name.trim() ? 'bg-white/20' : inCat ? 'bg-emerald-400' : 'bg-amber-400'}`} title={!col.name.trim() ? '' : inCat ? 'En catálogo' : 'Campo nuevo (se agrega al catálogo al guardar)'} />
                 <input className={inpCode} value={col.code ?? ''} onChange={(e) => updateColumn(i, 'code', e.target.value)} placeholder="Código" title="Código de la columna" />
                 <div className="flex-1 min-w-[130px]"><CreatableSelect options={opts} value={col.name} onChange={(v) => updateColumn(i, 'name', v)} onCreateOption={() => { /* se persiste al guardar */ }} placeholder="Buscar campo por nombre…" /></div>
+                <div className="relative shrink-0">
+                  <select value={col.operation ?? ''} onChange={(e) => updateColumn(i, 'operation', e.target.value)} className={`${inpBase} w-32 pl-5`} title="Tratamiento del dato (mapeo de flujo de valor)" style={{ appearance: 'none' }}>
+                    <option value="">Tratamiento…</option>
+                    {ASSET_OPERATIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full pointer-events-none" style={{ background: col.operation ? (STATE_COLORS[col.operation] ?? '#64748b') : 'transparent', border: col.operation ? 'none' : '1px solid rgba(255,255,255,.2)' }} />
+                </div>
                 <div className="flex-[1.4] min-w-[150px]"><input className={inp} value={col.description} onChange={(e) => updateColumn(i, 'description', e.target.value)} placeholder="Descripción de la columna" /></div>
                 <button type="button" onClick={() => removeColumn(i)} className="p-1.5 rounded text-white/25 hover:text-red-400 hover:bg-red-500/10 shrink-0" title="Quitar"><Trash2 size={13} /></button>
               </div>
@@ -106,6 +115,7 @@ export function AssetColumnsEditor({ columns, setColumns, assetName, assetType, 
                 <div key={s.name} className="flex items-center gap-2 px-2 py-1.5 rounded bg-white/[0.03] border border-white/8">
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${inCat ? 'bg-emerald-400' : 'bg-amber-400'}`} title={inCat ? 'Ya en catálogo' : 'Campo nuevo'} />
                   <span className="min-w-0 flex-1"><span className="text-[12px] text-white/80">{s.name}</span>{s.description && <span className="block text-[10px] text-white/35 truncate">{s.description}</span>}</span>
+                  {s.operation && <span className="text-[8.5px] px-1.5 py-0.5 rounded shrink-0" style={{ background: `${STATE_COLORS[s.operation] ?? '#64748b'}22`, color: STATE_COLORS[s.operation] ?? '#94a3b8' }}>{s.operation}</span>}
                   <button type="button" onClick={() => acceptSuggestion(s)} title="Agregar" className="p-1 rounded text-emerald-300 hover:bg-emerald-500/15 shrink-0"><Check size={13} /></button>
                   <button type="button" onClick={() => setSuggestions((prev) => prev.filter((x) => x.name !== s.name))} title="Descartar" className="p-1 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10 shrink-0"><X size={13} /></button>
                 </div>

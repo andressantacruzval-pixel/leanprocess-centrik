@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ArrowRight, ShieldCheck } from 'lucide-react'
 import type { AssetColumn } from '@/types/asset'
-import type { JourneyEdgeLink } from './journeyGraph'
+import { STATE_COLORS, type JourneyEdgeLink } from './journeyGraph'
 
 interface Props {
   links: JourneyEdgeLink[]
@@ -65,7 +65,8 @@ export function JourneyEdgeModal({ links, onSave, onOpenAsset, onClose }: Props)
                     {l.assetColumns.map((c) => (
                       <label key={c.name} className="flex items-start gap-2 px-2 py-1 rounded hover:bg-white/5 cursor-pointer">
                         <input type="checkbox" checked={d?.picked.has(c.name) ?? false} onChange={() => toggle(l.opId, c.name)} className="accent-cyan-500 mt-0.5 shrink-0" />
-                        <span className="min-w-0"><span className="text-[11.5px] text-white/80">{c.code ? <span className="text-white/40 font-mono">{c.code} · </span> : ''}{c.name}</span>{c.description && <span className="block text-[9.5px] text-white/35 truncate">{c.description}</span>}</span>
+                        <span className="min-w-0 flex-1"><span className="text-[11.5px] text-white/80">{c.code ? <span className="text-white/40 font-mono">{c.code} · </span> : ''}{c.name}</span>{c.description && <span className="block text-[9.5px] text-white/35 truncate">{c.description}</span>}</span>
+                        {c.operation && <span className="text-[8px] px-1 py-0.5 rounded shrink-0" style={{ background: `${STATE_COLORS[c.operation] ?? '#64748b'}22`, color: STATE_COLORS[c.operation] ?? '#94a3b8' }}>{c.operation}</span>}
                       </label>
                     ))}
                   </div>

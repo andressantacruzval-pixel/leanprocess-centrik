@@ -95,6 +95,9 @@ export interface AssetColumn {
   name: string
   code?: string
   description: string
+  // Tratamiento de la columna en el proceso: crea | usa | almacena | transforma
+  // | transfiere | elimina (mapeo de flujo de valor del dato).
+  operation?: string
 }
 
 export interface InformationAsset {
