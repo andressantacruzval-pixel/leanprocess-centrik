@@ -11,6 +11,7 @@ export interface JourneyEdgeLink {
   assetColumns: AssetColumn[]
   columns: AssetColumn[]
   justification: string
+  destOperation?: string
 }
 
 // ── Constructor del grafo del Data Journey ────────────────────────────────
@@ -21,11 +22,11 @@ export interface JourneyEdgeLink {
 // nivel que esté visible (el nodo más profundo mostrado).
 
 export const STATE_COLORS: Record<string, string> = {
-  crea: '#10b981', usa: '#64748b', almacena: '#8b5cf6',
+  capta: '#14b8a6', crea: '#10b981', usa: '#64748b', almacena: '#8b5cf6',
   transforma: '#f59e0b', transfiere: '#06b6d4', elimina: '#ef4444',
 }
 export const STATE_LABELS: Record<string, string> = {
-  crea: 'Creación', usa: 'Uso', almacena: 'Almacenamiento',
+  capta: 'Obtención', crea: 'Creación', usa: 'Uso', almacena: 'Almacenamiento',
   transforma: 'Transformación', transfiere: 'Transferencia', elimina: 'Eliminación',
 }
 
@@ -170,7 +171,7 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
       const key = `${from}|${to}`; const e = edgeMap.get(key) ?? { from, to, assets: new Set<string>(), links: [] }
       e.assets.add(op.asset_id)
       const a = assetMap.get(op.asset_id)
-      e.links.push({ opId: op.id, assetId: op.asset_id, assetName: a?.name ?? 'Activo', assetColumns: a?.columns ?? [], columns: op.columns ?? [], justification: op.justification ?? '' })
+      e.links.push({ opId: op.id, assetId: op.asset_id, assetName: a?.name ?? 'Activo', assetColumns: a?.columns ?? [], columns: op.columns ?? [], justification: op.justification ?? '', destOperation: op.dest_operation })
       edgeMap.set(key, e)
     }
   }
@@ -233,6 +234,9 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
       id: `t:${e.from}=>${e.to}`, source: e.from, sourceHandle: 'tout', target: e.to, targetHandle: 'tin', type: 'default', animated: !!assetFilter,
       label: `${count} act · ${cols} col`, labelBgPadding: [4, 2], labelBgBorderRadius: 4,
       labelBgStyle: { fill: '#0b1220', fillOpacity: 0.9 }, labelStyle: { fill: '#cbd5e1', fontSize: 10, fontWeight: 600 },
+      // interactionWidth ensancha el área clicable para poder pulsar la línea en
+      // cualquier nivel (macro / proceso / subproceso), no solo la etiqueta.
+      interactionWidth: 26, zIndex: 5,
       style: { stroke: color, strokeWidth: Math.min(2 + count, 8), opacity: assetFilter ? 1 : 0.8, cursor: 'pointer' },
       markerEnd: { type: MarkerType.ArrowClosed, color, width: 16, height: 16 },
       data: { links: e.links },

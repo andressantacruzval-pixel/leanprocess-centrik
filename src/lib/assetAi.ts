@@ -39,7 +39,7 @@ export interface AssetAiContext {
 
 // ── Sugerencia de columnas/campos de un activo ─────────────────────────────
 export interface AiColumnSuggestion { name: string; description: string; operation: string }
-const OPS = ['crea', 'usa', 'almacena', 'transforma', 'transfiere', 'elimina']
+const OPS = ['capta', 'crea', 'usa', 'almacena', 'transforma', 'transfiere', 'elimina']
 
 export async function suggestAssetColumns(ctx: {
   assetName: string; assetType?: string; description?: string
@@ -66,7 +66,7 @@ CONTEXTO:
 REGLAS:
 - Prioriza y reutiliza EXACTAMENTE los nombres del catálogo existente cuando correspondan.
 - Propón entre 4 y 12 campos concretos y realistas para ESTE activo (no genéricos).
-- Para cada campo indica el TRATAMIENTO del dato en este proceso ("operation"), uno de: crea | usa | almacena | transforma | transfiere | elimina (mapeo de flujo de valor del dato).
+- Para cada campo indica el TRATAMIENTO del dato en este proceso ("operation"), uno de: capta | crea | usa | almacena | transforma | transfiere | elimina (mapeo de flujo de valor; usa "capta" cuando el dato se obtiene de un tercero/cliente y "crea" cuando lo genera el proceso).
 - Español. Responde ÚNICAMENTE un JSON array: [{"name":"","description":"","operation":"crea"}]`
 
   const raw = await callAiProxy([{ role: 'user', content: prompt }], {

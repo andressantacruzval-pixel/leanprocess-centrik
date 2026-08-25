@@ -1,24 +1,24 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ArrowRight, ShieldCheck } from 'lucide-react'
-import type { AssetColumn } from '@/types/asset'
+import { ASSET_OPERATIONS, type AssetColumn } from '@/types/asset'
 import { STATE_COLORS, type JourneyEdgeLink } from './journeyGraph'
 
 interface Props {
   links: JourneyEdgeLink[]
-  onSave: (opId: string, columns: AssetColumn[], justification: string) => void
+  onSave: (opId: string, columns: AssetColumn[], justification: string, destOperation: string) => void
   onOpenAsset?: (assetId: string) => void
   onClose: () => void
 }
 
-interface Draft { picked: Set<string>; justification: string }
+interface Draft { picked: Set<string>; justification: string; dest: string }
 
 // Detalle de una flecha del Data Journey: qué activos se transfieren y con qué
 // columnas. Un bloque por activo, editable en el sitio (columnas + justificación).
 export function JourneyEdgeModal({ links, onSave, onOpenAsset, onClose }: Props) {
   const [drafts, setDrafts] = useState<Record<string, Draft>>(() => {
     const m: Record<string, Draft> = {}
-    links.forEach((l) => { m[l.opId] = { picked: new Set(l.columns.map((c) => c.name)), justification: l.justification } })
+    links.forEach((l) => { m[l.opId] = { picked: new Set(l.columns.map((c) => c.name)), justification: l.justification, dest: l.destOperation ?? '' } })
     return m
   })
   const totalCols = links.reduce((s, l) => s + (drafts[l.opId]?.picked.size ?? 0), 0)
@@ -29,11 +29,12 @@ export function JourneyEdgeModal({ links, onSave, onOpenAsset, onClose }: Props)
     return { ...d, [opId]: { ...cur, picked } }
   })
   const setJust = (opId: string, v: string) => setDrafts((d) => ({ ...d, [opId]: { ...d[opId], justification: v } }))
+  const setDest = (opId: string, v: string) => setDrafts((d) => ({ ...d, [opId]: { ...d[opId], dest: v } }))
 
   const saveAll = () => {
     links.forEach((l) => {
       const d = drafts[l.opId]; if (!d) return
-      onSave(l.opId, l.assetColumns.filter((c) => d.picked.has(c.name)), d.justification)
+      onSave(l.opId, l.assetColumns.filter((c) => d.picked.has(c.name)), d.justification, d.dest)
     })
     onClose()
   }
@@ -58,6 +59,7 @@ export function JourneyEdgeModal({ links, onSave, onOpenAsset, onClose }: Props)
                     {onOpenAsset && <button onClick={() => onOpenAsset(l.assetId)} className="text-[10px] text-white/45 hover:text-white/80 underline">Abrir ficha</button>}
                   </div>
                 </div>
+                <p className="text-[9.5px] text-white/30 mb-1">Marca las columnas que llegan al destino. Las desmarcadas existen pero no se envían.</p>
                 {l.assetColumns.length === 0 ? (
                   <p className="text-[11px] text-white/30">Este activo no tiene columnas registradas. Ábrelo para declararlas.</p>
                 ) : (
@@ -71,8 +73,15 @@ export function JourneyEdgeModal({ links, onSave, onOpenAsset, onClose }: Props)
                     ))}
                   </div>
                 )}
-                <input value={d?.justification ?? ''} onChange={(e) => setJust(l.opId, e.target.value)} placeholder="Justificación de la transferencia…"
-                  className="w-full mt-2 bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[12px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/50" />
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <input value={d?.justification ?? ''} onChange={(e) => setJust(l.opId, e.target.value)} placeholder="Justificación de la transferencia…"
+                    className="flex-1 min-w-[160px] bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[12px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/50" />
+                  <select value={d?.dest ?? ''} onChange={(e) => setDest(l.opId, e.target.value)} title="¿Qué hace el proceso destino con el dato?"
+                    className="shrink-0 bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[12px] text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50">
+                    <option value="">Tratamiento en destino…</option>
+                    {ASSET_OPERATIONS.filter((o) => o.value !== 'transfiere').map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
               </div>
             )
           })}

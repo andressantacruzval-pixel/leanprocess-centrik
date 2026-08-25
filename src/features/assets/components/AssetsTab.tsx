@@ -18,6 +18,7 @@ import { placeDataStoreNear, removeNode } from '../placeAssetNode'
 import { AssetFormModal } from './AssetFormModal'
 import { AssetRiskModal } from './AssetRiskModal'
 import { AssetHeatMap } from './AssetHeatMap'
+import { ReceivedAssetsPanel } from './ReceivedAssetsPanel'
 
 // Nodos del diagrama que representan almacenes/objetos de datos (activos).
 const DATA_NODE_TYPES = new Set([
@@ -226,6 +227,7 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
       )}
 
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
+        <ReceivedAssetsPanel processId={processId} />
         {unregistered.length > 0 && (
           <div className="rounded-lg border border-amber-500/25 bg-amber-500/[0.06] p-2.5 space-y-1.5">
             <div className="flex items-center justify-between gap-2">

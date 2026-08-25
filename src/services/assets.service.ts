@@ -71,8 +71,9 @@ export interface AssetOperationRow {
   operation: string
   source_process_id: string | null
   target_process_id: string | null
-  columns?: { name: string; description: string }[]
+  columns?: { name: string; code?: string; description: string; operation?: string }[]
   justification?: string
+  dest_operation?: string
   sort_order: number
   created_at: string
   updated_at: string
@@ -112,6 +113,16 @@ export async function createOperation(data: Partial<AssetOperationRow>): Service
       .single()
     if (error) return { data: null, error: new Error(error.message) }
     return { data: row as unknown as AssetOperationRow, error: null }
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
+  }
+}
+
+export async function deleteOperationById(id: string): ServiceResult<void> {
+  try {
+    const { error } = await supabase.from('asset_operations').delete().eq('id', id)
+    if (error) return { data: null, error: new Error(error.message) }
+    return { data: null, error: null }
   } catch (err) {
     return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
   }

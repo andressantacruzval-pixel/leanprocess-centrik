@@ -226,7 +226,7 @@ export function DataJourneyGraph() {
       {edgeLinks && (
         <JourneyEdgeModal
           links={edgeLinks}
-          onSave={(opId, cols, justification) => updateJourneyLink(opId, cols, justification)}
+          onSave={(opId, cols, justification, destOp) => updateJourneyLink(opId, cols, justification, destOp)}
           onOpenAsset={(assetId) => { const a = assets.find((x) => x.id === assetId); if (a) { setEdgeLinks(null); setEditAsset(a) } }}
           onClose={() => setEdgeLinks(null)}
         />

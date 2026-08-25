@@ -136,6 +136,7 @@ export type Database = {
           target_process_id: string | null
           columns: { name: string; code?: string; description: string; operation?: string }[] | null
           justification: string | null
+          dest_operation: string | null
           sort_order: number
           created_at: string
           updated_at: string
@@ -150,6 +151,7 @@ export type Database = {
           target_process_id?: string | null
           columns?: { name: string; code?: string; description: string; operation?: string }[] | null
           justification?: string | null
+          dest_operation?: string | null
           sort_order?: number
           created_at?: string
           updated_at?: string
@@ -164,6 +166,7 @@ export type Database = {
           target_process_id?: string | null
           columns?: { name: string; code?: string; description: string; operation?: string }[] | null
           justification?: string | null
+          dest_operation?: string | null
           sort_order?: number
           created_at?: string
           updated_at?: string

@@ -16,8 +16,9 @@ export type AssetFormat = 'Digital' | 'Físico' | 'Verbal'
 export const ASSET_FORMATS: AssetFormat[] = ['Digital', 'Físico', 'Verbal']
 
 // Ciclo de vida del activo en un proceso (trazabilidad / Data Journey).
-export type AssetOperationKind = 'crea' | 'usa' | 'almacena' | 'transforma' | 'transfiere' | 'elimina'
+export type AssetOperationKind = 'capta' | 'crea' | 'usa' | 'almacena' | 'transforma' | 'transfiere' | 'elimina'
 export const ASSET_OPERATIONS: { value: AssetOperationKind; label: string }[] = [
+  { value: 'capta', label: 'Obtención / Captura' },
   { value: 'crea', label: 'Crea' },
   { value: 'usa', label: 'Usa / Consulta' },
   { value: 'almacena', label: 'Almacena' },
