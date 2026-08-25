@@ -25,8 +25,8 @@ function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
   // (gris = no se envía).
   if (data.level === 'field') {
     return (
-      <div style={{ width: data.width, height: data.height, borderLeft: `3px solid ${data.fieldColor ?? '#64748b'}`, cursor: 'pointer' }}
-        className="relative rounded-md border border-white/10 bg-white/[0.03] flex items-center gap-1.5 px-2 hover:border-white/25" title={data.label}>
+      <div style={{ width: data.width, height: data.height, borderLeft: `3px solid ${data.fieldColor ?? '#64748b'}`, cursor: 'pointer', opacity: data.dimmed ? 0.2 : 1 }}
+        className="relative rounded-md border border-white/10 bg-white/[0.03] flex items-center gap-1.5 px-2 hover:border-white/25 transition-opacity" title={data.label}>
         <Handle id="in" type="target" position={Position.Top} isConnectable={false} style={HIDDEN} />
         <Handle id="tin" type="target" position={Position.Left} isConnectable={false} style={HIDDEN} />
         <span className="text-[10.5px] text-white/70 truncate">{data.label}</span>
@@ -49,7 +49,7 @@ function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
 
   return (
     <div
-      style={{ width, height: selected ? 'auto' : data.height, minHeight: data.height, background: bg, borderColor: border, borderTop: `2px solid ${cat}`, boxShadow: glow ? '0 0 0 2px rgba(34,211,238,0.7), 0 0 16px rgba(34,211,238,0.5)' : selected ? '0 0 0 2px rgba(34,211,238,0.6)' : undefined, opacity: dim ? 0.4 : 1 }}
+      style={{ width, height: selected ? 'auto' : data.height, minHeight: data.height, background: bg, borderColor: border, borderTop: `2px solid ${cat}`, boxShadow: glow ? '0 0 0 2px rgba(34,211,238,0.7), 0 0 16px rgba(34,211,238,0.5)' : selected ? '0 0 0 2px rgba(34,211,238,0.6)' : undefined, opacity: (dim ? 0.4 : 1) * (data.dimmed ? 0.22 : 1) }}
       className="relative rounded-xl border flex items-center gap-2 px-2.5 py-1.5 shadow-lg shadow-black/30 backdrop-blur-sm transition-all"
       title={data.label}
     >

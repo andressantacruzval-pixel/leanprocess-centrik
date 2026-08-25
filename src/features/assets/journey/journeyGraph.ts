@@ -62,6 +62,7 @@ export interface JourneyNodeData {
   fieldColor?: string
   connecting?: boolean
   selected?: boolean
+  dimmed?: boolean
   onToggle?: (id: string) => void
 }
 export interface JourneyBandData { label: string; color: string; width: number; height: number }

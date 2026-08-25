@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Plus, Pencil, Trash2, ShieldCheck, Database, Sparkles, Loader2, Shield, BarChart3 } from 'lucide-react'
+import { Plus, Pencil, Trash2, ShieldCheck, Database, Sparkles, Loader2, Shield, BarChart3, Route } from 'lucide-react'
 import { useAssetStore } from '@/stores/assetStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useCompanyStore } from '@/stores/companyStore'
@@ -19,6 +19,7 @@ import { AssetFormModal } from './AssetFormModal'
 import { AssetRiskModal } from './AssetRiskModal'
 import { AssetHeatMap } from './AssetHeatMap'
 import { ReceivedAssetsPanel } from './ReceivedAssetsPanel'
+import { AssetLifecycleModal } from '../journey/AssetLifecycleModal'
 
 // Nodos del diagrama que representan almacenes/objetos de datos (activos).
 const DATA_NODE_TYPES = new Set([
@@ -54,6 +55,7 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
   const [editing, setEditing] = useState<InformationAsset | null>(null)
   const [litId, setLitId] = useState<string | null>(null)
   const [riskAsset, setRiskAsset] = useState<InformationAsset | null>(null)
+  const [lifecycleAsset, setLifecycleAsset] = useState<InformationAsset | null>(null)
   const [showHeat, setShowHeat] = useState(false)
 
   const list = assets.filter((a) => a.process_id === processId)
@@ -283,6 +285,7 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
                 </div>
                 <div className="flex flex-col gap-0.5 shrink-0">
                   <button onClick={() => { setEditing(a); setShowForm(true) }} title="Editar / ampliar" className="p-1.5 rounded text-white/30 hover:text-cyan-400 hover:bg-white/5"><Pencil size={13} /></button>
+                  <button onClick={() => setLifecycleAsset(a)} title="Ver ciclo de vida del dato (por subproceso)" className="p-1.5 rounded text-white/30 hover:text-cyan-400 hover:bg-cyan-500/10"><Route size={13} /></button>
                   <button onClick={() => setRiskAsset(a)} title="Evaluar riesgo del activo" className="p-1.5 rounded text-white/30 hover:text-amber-400 hover:bg-amber-500/10"><Shield size={13} /></button>
                   <button onClick={() => removeAsset(a)} title="Eliminar" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button>
                 </div>
@@ -303,6 +306,9 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
       )}
       {riskAsset && (
         <AssetRiskModal asset={riskAsset} onClose={() => setRiskAsset(null)} />
+      )}
+      {lifecycleAsset && (
+        <AssetLifecycleModal asset={lifecycleAsset} onClose={() => setLifecycleAsset(null)} />
       )}
       <InsufficientTokensModal
         open={budget.showInsufficientModal}

@@ -5,6 +5,7 @@ import ReactFlow, {
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { Search, X, Maximize2, Minimize2, Route } from 'lucide-react'
+import { AssetLifecycleModal } from './AssetLifecycleModal'
 import { useProcessStore } from '@/stores/processStore'
 import { useAssetStore } from '@/stores/assetStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
@@ -59,6 +60,7 @@ export function DataJourneyGraph() {
   const [pending, setPending] = useState<{ assetId: string; procId: string } | null>(null)
   const [editAsset, setEditAsset] = useState<InformationAsset | null>(null)
   const [edgeLinks, setEdgeLinks] = useState<JourneyEdgeLink[] | null>(null)
+  const [lifecycleAsset, setLifecycleAsset] = useState<InformationAsset | null>(null)
   const [editField, setEditField] = useState<{ kind: 'asset'; assetId: string; idx: number; col: AssetColumn } | { kind: 'link'; opId: string; idx: number; col: AssetColumn } | null>(null)
   const addJourneyLink = useAssetStore((s) => s.addJourneyLink)
   const updateJourneyLink = useAssetStore((s) => s.updateJourneyLink)
@@ -82,7 +84,12 @@ export function DataJourneyGraph() {
       return
     }
     if (id.startsWith('a:')) { const a = assets.find((x) => x.id === id.slice(2)); if (a) setEditAsset(a) }
-    else if (id.startsWith('r:')) { const op = operations.find((o) => o.id === id.slice(2)); const a = op && assets.find((x) => x.id === op.asset_id); if (a) setEditAsset(a) }
+    else if (id.startsWith('r:')) {
+      // Recibido: el tratamiento es POR SUBPROCESO → se edita en el enlace, no en
+      // el activo origen. Abre el detalle del enlace (no la ficha compartida).
+      const op = operations.find((o) => o.id === id.slice(2)); const a = op && assets.find((x) => x.id === op.asset_id)
+      if (op && a) setEdgeLinks([{ opId: op.id, assetId: a.id, assetName: a.name, assetColumns: a.columns ?? [], columns: op.columns ?? [], justification: op.justification ?? '', destOperation: op.dest_operation, medium: op.medium, mediumDetail: op.medium_detail }])
+    }
   }, [assets, operations])
 
   const saveField = (col: AssetColumn) => {
@@ -132,7 +139,30 @@ export function DataJourneyGraph() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   useEffect(() => { setNodes(built.nodes); setEdges(built.edges) }, [built, setNodes, setEdges])
+
+  // Al seleccionar un nodo, se «encienden» sus relacionados (los unidos por una
+  // flecha o por la jerarquía) y se atenúan los demás, para leer el viaje del dato.
+  const onSelectionChange = useCallback((p: { nodes: Node[] }) => setSelectedId(p.nodes[0]?.id ?? null), [])
+  const displayNodes = useMemo(() => {
+    const active = selectedId && nodes.some((n) => n.id === selectedId)
+    if (!active) return nodes
+    const related = new Set<string>([selectedId!])
+    for (const e of edges) {
+      if (e.source === selectedId) related.add(e.target)
+      if (e.target === selectedId) related.add(e.source)
+    }
+    return nodes.map((n) => (n.type !== 'journeyNode' ? n : { ...n, data: { ...n.data, dimmed: !related.has(n.id) } }))
+  }, [nodes, edges, selectedId])
+  const displayEdges = useMemo(() => {
+    const active = selectedId && nodes.some((n) => n.id === selectedId)
+    if (!active) return edges
+    return edges.map((e) => {
+      const on = e.source === selectedId || e.target === selectedId
+      return { ...e, animated: on ? true : e.animated, style: { ...e.style, opacity: on ? 1 : 0.06 }, labelStyle: { ...(e.labelStyle as object), opacity: on ? 1 : 0.15 } }
+    })
+  }, [edges, nodes, selectedId])
   const drillKey = useMemo(() => `${[...expandedMacros].sort().join(',')}|${[...expandedProcesses].sort().join(',')}|${[...expandedAssets].sort().join(',')}`, [expandedMacros, expandedProcesses, expandedAssets])
 
   const expandAll = () => {
@@ -200,6 +230,9 @@ export function DataJourneyGraph() {
         ))}
 
         <div className="ml-auto flex items-center gap-1.5">
+          {selected.length === 1 && (
+            <button onClick={() => setLifecycleAsset(selected[0])} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-[10.5px] text-cyan-200 hover:bg-cyan-500/20" title="Ver el ciclo de vida del dato por subproceso"><Route size={12} /> Ciclo de vida</button>
+          )}
           <button onClick={expandAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10.5px] text-white/60 hover:bg-white/10"><Maximize2 size={12} /> Expandir</button>
           <button onClick={collapseAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10.5px] text-white/60 hover:bg-white/10"><Minimize2 size={12} /> Colapsar</button>
         </div>
@@ -226,7 +259,7 @@ export function DataJourneyGraph() {
           </div>
         )}
         <ReactFlow
-          nodes={nodes} edges={edges}
+          nodes={displayNodes} edges={displayEdges}
           onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
           onConnect={onConnect}
@@ -234,6 +267,7 @@ export function DataJourneyGraph() {
           onConnectEnd={() => setConnecting(false)}
           onNodeClick={onNodeClick}
           onEdgeClick={onEdgeClick}
+          onSelectionChange={onSelectionChange}
           isValidConnection={isValidConnection}
           fitView fitViewOptions={{ padding: 0.2 }}
           minZoom={0.15} maxZoom={2}
@@ -267,6 +301,10 @@ export function DataJourneyGraph() {
 
       {editField && (
         <FieldEditModal column={editField.col} onSave={saveField} onClose={() => setEditField(null)} />
+      )}
+
+      {lifecycleAsset && (
+        <AssetLifecycleModal asset={lifecycleAsset} onClose={() => setLifecycleAsset(null)} />
       )}
 
       {edgeLinks && (
