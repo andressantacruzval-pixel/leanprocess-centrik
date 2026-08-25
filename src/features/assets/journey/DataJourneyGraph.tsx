@@ -10,11 +10,12 @@ import { useAssetStore } from '@/stores/assetStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { toast } from '@/stores/toastStore'
 import type { AssetColumn, InformationAsset } from '@/types/asset'
-import type { Node } from 'reactflow'
-import { buildJourney, STATE_COLORS, STATE_LABELS } from './journeyGraph'
+import type { Node, Edge } from 'reactflow'
+import { buildJourney, STATE_COLORS, STATE_LABELS, type JourneyEdgeLink } from './journeyGraph'
 import { JourneyNode } from './JourneyNode'
 import { JourneyBand } from './JourneyBand'
 import { JourneyLinkModal } from './JourneyLinkModal'
+import { JourneyEdgeModal } from './JourneyEdgeModal'
 import { AssetFormModal } from '../components/AssetFormModal'
 
 const nodeTypes = { journeyNode: JourneyNode, journeyBand: JourneyBand }
@@ -55,7 +56,9 @@ export function DataJourneyGraph() {
   const [connecting, setConnecting] = useState(false)
   const [pending, setPending] = useState<{ assetId: string; procId: string } | null>(null)
   const [editAsset, setEditAsset] = useState<InformationAsset | null>(null)
+  const [edgeLinks, setEdgeLinks] = useState<JourneyEdgeLink[] | null>(null)
   const addJourneyLink = useAssetStore((s) => s.addJourneyLink)
+  const updateJourneyLink = useAssetStore((s) => s.updateJourneyLink)
 
   // Clic en un nodo de activo → abre su ficha completa (bidireccional).
   const onNodeClick = useCallback((_e: MouseEvent, node: Node) => {
@@ -63,6 +66,11 @@ export function DataJourneyGraph() {
     const a = assets.find((x) => x.id === node.id.slice(2))
     if (a) setEditAsset(a)
   }, [assets])
+  // Clic en una flecha de transferencia → detalle de activos y columnas.
+  const onEdgeClick = useCallback((_e: MouseEvent, edge: Edge) => {
+    const links = (edge.data as { links?: JourneyEdgeLink[] } | undefined)?.links
+    if (links && links.length) setEdgeLinks(links)
+  }, [])
 
   const onToggle = useCallback((nodeId: string) => {
     const raw = nodeId.slice(2)
@@ -183,6 +191,7 @@ export function DataJourneyGraph() {
           onConnectStart={() => setConnecting(true)}
           onConnectEnd={() => setConnecting(false)}
           onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
           isValidConnection={isValidConnection}
           fitView fitViewOptions={{ padding: 0.2 }}
           minZoom={0.15} maxZoom={2}
@@ -211,6 +220,15 @@ export function DataJourneyGraph() {
           bpmnElementId={editAsset.bpmn_element_id}
           asset={editAsset}
           onClose={() => setEditAsset(null)}
+        />
+      )}
+
+      {edgeLinks && (
+        <JourneyEdgeModal
+          links={edgeLinks}
+          onSave={(opId, cols, justification) => updateJourneyLink(opId, cols, justification)}
+          onOpenAsset={(assetId) => { const a = assets.find((x) => x.id === assetId); if (a) { setEdgeLinks(null); setEditAsset(a) } }}
+          onClose={() => setEdgeLinks(null)}
         />
       )}
     </div>

@@ -117,6 +117,19 @@ export async function createOperation(data: Partial<AssetOperationRow>): Service
   }
 }
 
+export async function updateOperation(id: string, updates: Partial<AssetOperationRow>): ServiceResult<void> {
+  try {
+    const { error } = await supabase
+      .from('asset_operations')
+      .update({ ...updates, updated_at: new Date().toISOString() } as unknown as OperationInsert)
+      .eq('id', id)
+    if (error) return { data: null, error: new Error(error.message) }
+    return { data: null, error: null }
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
+  }
+}
+
 // Reemplaza SOLO la operación de ciclo de vida (filas sin origen/destino) de un
 // activo en un proceso. No toca los enlaces de trazabilidad (va a / viene de).
 export async function replaceOperationForAssetProcess(assetId: string, processId: string | null): ServiceResult<void> {

@@ -1,7 +1,17 @@
 import { MarkerType, type Node, type Edge } from 'reactflow'
 import type { Macroprocess, Process } from '@/types/process'
-import type { InformationAsset } from '@/types/asset'
+import type { InformationAsset, AssetColumn } from '@/types/asset'
 import type { AssetOperationRow } from '@/services/assets.service'
+
+// Detalle de un enlace de transferencia (para el modal al hacer clic en la flecha).
+export interface JourneyEdgeLink {
+  opId: string
+  assetId: string
+  assetName: string
+  assetColumns: AssetColumn[]
+  columns: AssetColumn[]
+  justification: string
+}
 
 // ── Constructor del grafo del Data Journey ────────────────────────────────
 // Jerarquía en árbol: al expandir, los hijos bajan DEBAJO del padre (el padre
@@ -149,15 +159,19 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
   })
 
   // ── Aristas de transferencia ─────────────────────────────────────────────
-  const edgeMap = new Map<string, { from: string; to: string; assets: Set<string> }>()
+  const assetMap = new Map(assets.map((a) => [a.id, a]))
+  const edgeMap = new Map<string, { from: string; to: string; assets: Set<string>; links: JourneyEdgeLink[] }>()
   if (stateFilter.has('transfiere')) {
     for (const op of operations) {
       if ((!op.source_process_id && !op.target_process_id) || !passes(op.asset_id)) continue
       const home = op.process_id
       const from = representative(op.source_process_id || home || ''); const to = representative(op.target_process_id || home || '')
       if (!from || !to || from === to) continue
-      const key = `${from}|${to}`; const e = edgeMap.get(key) ?? { from, to, assets: new Set<string>() }
-      e.assets.add(op.asset_id); edgeMap.set(key, e)
+      const key = `${from}|${to}`; const e = edgeMap.get(key) ?? { from, to, assets: new Set<string>(), links: [] }
+      e.assets.add(op.asset_id)
+      const a = assetMap.get(op.asset_id)
+      e.links.push({ opId: op.id, assetId: op.asset_id, assetName: a?.name ?? 'Activo', assetColumns: a?.columns ?? [], columns: op.columns ?? [], justification: op.justification ?? '' })
+      edgeMap.set(key, e)
     }
   }
 
@@ -214,12 +228,14 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
   edgeMap.forEach((e) => {
     if (!nodeIds.has(e.from) || !nodeIds.has(e.to)) return
     const count = e.assets.size
+    const cols = e.links.reduce((s, l) => s + (l.columns?.length || 0), 0)
     edges.push({
       id: `t:${e.from}=>${e.to}`, source: e.from, sourceHandle: 'tout', target: e.to, targetHandle: 'tin', type: 'default', animated: !!assetFilter,
-      label: String(count), labelBgPadding: [4, 2], labelBgBorderRadius: 4,
-      labelBgStyle: { fill: '#0b1220', fillOpacity: 0.85 }, labelStyle: { fill: '#cbd5e1', fontSize: 10, fontWeight: 600 },
-      style: { stroke: color, strokeWidth: Math.min(2 + count, 8), opacity: assetFilter ? 1 : 0.8 },
+      label: `${count} act · ${cols} col`, labelBgPadding: [4, 2], labelBgBorderRadius: 4,
+      labelBgStyle: { fill: '#0b1220', fillOpacity: 0.9 }, labelStyle: { fill: '#cbd5e1', fontSize: 10, fontWeight: 600 },
+      style: { stroke: color, strokeWidth: Math.min(2 + count, 8), opacity: assetFilter ? 1 : 0.8, cursor: 'pointer' },
       markerEnd: { type: MarkerType.ArrowClosed, color, width: 16, height: 16 },
+      data: { links: e.links },
     })
   })
 

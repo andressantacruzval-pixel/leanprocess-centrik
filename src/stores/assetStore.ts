@@ -12,7 +12,7 @@ import { createAsset, updateAsset, deleteAsset, getAssetsByCompany,
   createOperation, replaceOperationForAssetProcess, replaceJourneyLinks, getOperationsByCompany,
   deleteOperationsForAsset, type AssetOperationRow,
   createAssetControl, updateAssetControl as updateAssetControlDB, deleteAssetControl as deleteAssetControlDB,
-  deleteControlsForAsset, getAssetControlsByCompany } from '@/services/assets.service'
+  deleteControlsForAsset, getAssetControlsByCompany, updateOperation } from '@/services/assets.service'
 
 function currentCompanyId(): string | null {
   return useWorkspaceStore.getState().activeCompanyId
@@ -43,6 +43,7 @@ interface AssetState {
   setJourney: (assetId: string, processId: string | null, direction: 'to' | 'from', processIds: string[]) => void
   setJourneyDetailed: (assetId: string, processId: string | null, direction: 'to' | 'from', links: { processId: string; columns: AssetColumn[]; justification: string }[]) => void
   addJourneyLink: (assetId: string, homeProcessId: string | null, direction: 'to' | 'from', otherProcessId: string, columns: AssetColumn[], justification: string) => void
+  updateJourneyLink: (opId: string, columns: AssetColumn[], justification: string) => void
   addAsset: (data: Partial<InformationAsset>) => InformationAsset | null
   updateAsset: (id: string, updates: Partial<InformationAsset>) => void
   linkAssetToNode: (assetId: string, bpmnElementId: string) => void
@@ -186,6 +187,13 @@ export const useAssetStore = create<AssetState>()(
         }
         set((s) => ({ operations: [...s.operations, row] }))
         void dbWrite('asset:journeyLink', createOperation(row), { silent: true })
+      },
+
+      // Edita las columnas/justificación de un enlace de transferencia existente.
+      updateJourneyLink: (opId, columns, justification) => {
+        const now = new Date().toISOString()
+        set((s) => ({ operations: s.operations.map((o) => (o.id === opId ? { ...o, columns, justification, updated_at: now } : o)) }))
+        void dbWrite('asset:journeyLink:update', updateOperation(opId, { columns, justification }), { silent: true })
       },
 
       addAsset: (data) => {
