@@ -91,6 +91,14 @@ jobs:
 
 # trigger migración milestones aea4a03
 
+# trigger migraciones activos de información (Fase 1/2 + data journey):
+#   20260824000001 information_assets + asset_operations
+#   20260825000001 asset_risk (probability/threat/vulnerability + asset_controls)
+#   20260825000002 asset_columns (information_assets.columns jsonb)
+#   20260825000003 asset_link_details (asset_operations.columns + justification)
+#   20260825000004 asset_link_dest (asset_operations.dest_operation)
+#   20260825000005 asset_link_medium (asset_operations.medium + medium_detail)
+
 # trigger migración drop_plan_cap_create (20260822000002): crear procesos es libre;
 # el cupo del plan gobierna DOCUMENTAR. Sin esta migración, el trigger de tope de
 # creación seguía rechazando los subprocesos (nivel más bajo) al volcar el inventario.
