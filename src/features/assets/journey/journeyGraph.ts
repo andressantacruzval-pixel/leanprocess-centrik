@@ -23,8 +23,8 @@ type Category = 'estrategico' | 'productivo' | 'apoyo'
 const CATEGORY_ORDER: Category[] = ['estrategico', 'productivo', 'apoyo']
 export const CATEGORY_META: Record<Category, { label: string; color: string }> = {
   estrategico: { label: 'Estratégicos', color: '#DC2626' },
-  productivo: { label: 'Cadena de valor', color: '#0891b2' },
-  apoyo: { label: 'Apoyo', color: '#7C3AED' },
+  productivo: { label: 'Productivos', color: '#0891b2' },
+  apoyo: { label: 'Apoyos', color: '#7C3AED' },
 }
 
 export type JourneyLevel = 'macro' | 'process' | 'subprocess' | 'asset'
