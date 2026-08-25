@@ -7,6 +7,9 @@ interface Props {
   assetName: string
   columns: AssetColumn[]
   targetName: string
+  fixedDirection?: 'to' | 'from'
+  initialSelected?: string[]
+  initialJustification?: string
   onConfirm: (direction: 'to' | 'from', columns: AssetColumn[], justification: string) => void
   onClose: () => void
 }
@@ -14,10 +17,10 @@ interface Props {
 // Detalle de la conexión de un activo con un subproceso: dirección (sale hacia /
 // entra desde), qué columnas del activo viajan (minimización de datos) y una
 // justificación. El contador ayuda a enviar solo lo necesario.
-export function JourneyLinkModal({ assetName, columns, targetName, onConfirm, onClose }: Props) {
-  const [direction, setDirection] = useState<'to' | 'from'>('to')
-  const [picked, setPicked] = useState<Set<string>>(new Set(columns.map((c) => c.name)))
-  const [justification, setJustification] = useState('')
+export function JourneyLinkModal({ assetName, columns, targetName, fixedDirection, initialSelected, initialJustification, onConfirm, onClose }: Props) {
+  const [direction, setDirection] = useState<'to' | 'from'>(fixedDirection ?? 'to')
+  const [picked, setPicked] = useState<Set<string>>(new Set(initialSelected ?? columns.map((c) => c.name)))
+  const [justification, setJustification] = useState(initialJustification ?? '')
 
   const toggle = (name: string) => setPicked((p) => { const n = new Set(p); if (n.has(name)) n.delete(name); else n.add(name); return n })
   const selected = columns.filter((c) => picked.has(c.name))
@@ -35,13 +38,15 @@ export function JourneyLinkModal({ assetName, columns, targetName, onConfirm, on
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           <p className="text-[12px] text-white/60"><span className="text-white font-medium">{assetName}</span> ↔ <span className="text-white font-medium">{targetName}</span></p>
 
-          <div>
-            <label className="block text-[10px] font-medium text-white/50 mb-1.5 uppercase tracking-wide">Dirección</label>
-            <div className="flex gap-2">
-              <button onClick={() => setDirection('to')} className={dirBtn(direction === 'to')}><ArrowRight size={13} /> Sale hacia {targetName}</button>
-              <button onClick={() => setDirection('from')} className={dirBtn(direction === 'from')}><ArrowLeft size={13} /> Entra desde {targetName}</button>
+          {!fixedDirection && (
+            <div>
+              <label className="block text-[10px] font-medium text-white/50 mb-1.5 uppercase tracking-wide">Dirección</label>
+              <div className="flex gap-2">
+                <button onClick={() => setDirection('to')} className={dirBtn(direction === 'to')}><ArrowRight size={13} /> Sale hacia {targetName}</button>
+                <button onClick={() => setDirection('from')} className={dirBtn(direction === 'from')}><ArrowLeft size={13} /> Entra desde {targetName}</button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
@@ -55,7 +60,7 @@ export function JourneyLinkModal({ assetName, columns, targetName, onConfirm, on
                 {columns.map((c) => (
                   <label key={c.name} className="flex items-start gap-2 px-2 py-1.5 rounded hover:bg-white/5 cursor-pointer">
                     <input type="checkbox" checked={picked.has(c.name)} onChange={() => toggle(c.name)} className="accent-cyan-500 mt-0.5 shrink-0" />
-                    <span className="min-w-0"><span className="text-[12px] text-white/80">{c.name}</span>{c.description && <span className="block text-[10px] text-white/35 truncate">{c.description}</span>}</span>
+                    <span className="min-w-0"><span className="text-[12px] text-white/80">{c.code ? <span className="text-white/40 font-mono">{c.code} · </span> : ''}{c.name}</span>{c.description && <span className="block text-[10px] text-white/35 truncate">{c.description}</span>}</span>
                   </label>
                 ))}
               </div>

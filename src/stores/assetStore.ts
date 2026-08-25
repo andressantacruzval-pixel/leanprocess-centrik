@@ -41,6 +41,7 @@ interface AssetState {
   getTargets: (assetId: string, processId: string | null) => string[]
   getSources: (assetId: string, processId: string | null) => string[]
   setJourney: (assetId: string, processId: string | null, direction: 'to' | 'from', processIds: string[]) => void
+  setJourneyDetailed: (assetId: string, processId: string | null, direction: 'to' | 'from', links: { processId: string; columns: AssetColumn[]; justification: string }[]) => void
   addJourneyLink: (assetId: string, homeProcessId: string | null, direction: 'to' | 'from', otherProcessId: string, columns: AssetColumn[], justification: string) => void
   addAsset: (data: Partial<InformationAsset>) => InformationAsset | null
   updateAsset: (id: string, updates: Partial<InformationAsset>) => void
@@ -146,6 +147,27 @@ export const useAssetStore = create<AssetState>()(
         void (async () => {
           await replaceJourneyLinks(assetId, processId ?? null, direction)
           for (const r of rows) await dbWrite('asset:journey', createOperation(r), { silent: true })
+        })()
+      },
+
+      // Reemplaza los enlaces de una dirección con el detalle por proceso (qué
+      // columnas viajan + justificación). Lo usa el formulario del activo.
+      setJourneyDetailed: (assetId, processId, direction, links) => {
+        const companyId = currentCompanyId()
+        if (!companyId) return
+        const now = new Date().toISOString()
+        const key = direction === 'to' ? 'target_process_id' : 'source_process_id'
+        const rows: AssetOperationRow[] = links.map((l) => ({
+          id: generateId(), company_id: companyId, asset_id: assetId, process_id: processId ?? null,
+          operation: direction === 'to' ? 'transfiere' : 'recibe',
+          source_process_id: direction === 'from' ? l.processId : null,
+          target_process_id: direction === 'to' ? l.processId : null,
+          columns: l.columns, justification: l.justification, sort_order: 0, created_at: now, updated_at: now,
+        }))
+        set((s) => ({ operations: [...s.operations.filter((o) => !(o.asset_id === assetId && o.process_id === (processId ?? null) && o[key as 'target_process_id' | 'source_process_id'])), ...rows] }))
+        void (async () => {
+          await replaceJourneyLinks(assetId, processId ?? null, direction)
+          for (const r of rows) await dbWrite('asset:journeyDetailed', createOperation(r), { silent: true })
         })()
       },
 

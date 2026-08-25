@@ -9,6 +9,7 @@ import { CreatableSelect } from '@/components/ui/CreatableSelect'
 import { ArrowRight, ArrowLeft } from 'lucide-react'
 import type { BpmnModelerInstance } from '@/types/bpmn'
 import { renameNode } from '../placeAssetNode'
+import { JourneyLinkModal } from '../journey/JourneyLinkModal'
 import { ASSET_STATUSES, type InformationAsset } from '@/types/asset'
 
 interface Props {
@@ -28,13 +29,36 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
   const addCatalogItem = useCatalogStore((s) => s.addCatalogItem)
   const opts = (type: string) => getCatalogByType(type).map((c) => ({ value: c.value, label: c.value }))
 
-  const setJourney = useAssetStore((s) => s.setJourney)
+  const setJourneyDetailed = useAssetStore((s) => s.setJourneyDetailed)
   const allProcesses = useProcessStore((s) => s.processes)
   const journeyProcesses = allProcesses.filter((p) => p.id !== processId)
-  const [targets, setTargets] = useState<string[]>(() => asset ? useAssetStore.getState().getTargets(asset.id, processId) : [])
-  const [sources, setSources] = useState<string[]>(() => asset ? useAssetStore.getState().getSources(asset.id, processId) : [])
-  const toggle = (arr: string[], setArr: (v: string[]) => void, id: string) =>
-    setArr(arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id])
+  const procName = (id: string) => allProcesses.find((p) => p.id === id)?.name ?? 'Proceso'
+
+  // Enlaces del Data Journey con detalle: qué columnas viajan + justificación.
+  type Link = { columns: AssetColumn[]; justification: string }
+  const initLinks = (dir: 'to' | 'from'): Record<string, Link> => {
+    if (!asset) return {}
+    const ops = useAssetStore.getState().operations.filter((o) => o.asset_id === asset.id && o.process_id === processId && (dir === 'to' ? o.target_process_id : o.source_process_id))
+    const m: Record<string, Link> = {}
+    ops.forEach((o) => { const pid = dir === 'to' ? o.target_process_id : o.source_process_id; if (pid) m[pid] = { columns: o.columns ?? [], justification: o.justification ?? '' } })
+    return m
+  }
+  const [toLinks, setToLinks] = useState<Record<string, Link>>(() => initLinks('to'))
+  const [fromLinks, setFromLinks] = useState<Record<string, Link>>(() => initLinks('from'))
+  const [linkPicker, setLinkPicker] = useState<{ direction: 'to' | 'from'; procId: string } | null>(null)
+
+  const journeyToggle = (direction: 'to' | 'from', procId: string) => {
+    const links = direction === 'to' ? toLinks : fromLinks
+    const setLinks = direction === 'to' ? setToLinks : setFromLinks
+    if (links[procId]) { const n = { ...links }; delete n[procId]; setLinks(n) }
+    else setLinkPicker({ direction, procId })
+  }
+  const confirmLink = (_dir: 'to' | 'from', cols: AssetColumn[], justification: string) => {
+    if (!linkPicker) return
+    const setLinks = linkPicker.direction === 'to' ? setToLinks : setFromLinks
+    setLinks((prev) => ({ ...prev, [linkPicker.procId]: { columns: cols, justification } }))
+    setLinkPicker(null)
+  }
 
   const [f, setF] = useState({
     name: asset?.name ?? '', code: asset?.code ?? '', asset_type: asset?.asset_type ?? '',
@@ -55,7 +79,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
 
   // Columnas / campos del activo (estructura de datos con descripción rápida).
   const [columns, setColumns] = useState<AssetColumn[]>(() => asset?.columns ?? [])
-  const addColumn = () => setColumns((c) => [...c, { name: '', description: '' }])
+  const addColumn = () => setColumns((c) => [...c, { name: '', code: '', description: '' }])
   const updateColumn = (i: number, key: keyof AssetColumn, v: string) =>
     setColumns((c) => c.map((col, idx) => (idx === i ? { ...col, [key]: v } : col)))
   const removeColumn = (i: number) => setColumns((c) => c.filter((_, idx) => idx !== i))
@@ -76,7 +100,10 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
     if (asset) updateAsset(asset.id, payload)
     else { const created = addAsset(payload); id = created?.id }
     if (id && f.operation) setOperation(id, processId, f.operation)
-    if (id) { setJourney(id, processId, 'to', targets); setJourney(id, processId, 'from', sources) }
+    if (id) {
+      setJourneyDetailed(id, processId, 'to', Object.entries(toLinks).map(([pid, v]) => ({ processId: pid, columns: v.columns, justification: v.justification })))
+      setJourneyDetailed(id, processId, 'from', Object.entries(fromLinks).map(([pid, v]) => ({ processId: pid, columns: v.columns, justification: v.justification })))
+    }
     // Sincroniza el nombre con el nodo del diagrama (bidireccional).
     const nodeId = payload.bpmn_element_id ?? asset?.bpmn_element_id
     if (modeler && nodeId) renameNode(modeler, nodeId, f.name.trim())
@@ -131,8 +158,9 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
             ) : (
               <div className="space-y-1.5">
                 {columns.map((col, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <input className={`${inp} sm:w-44 shrink-0`} value={col.name} onChange={(e) => updateColumn(i, 'name', e.target.value)} placeholder="Campo" />
+                  <div key={i} className="flex items-start gap-2">
+                    <input className={`${inp} w-20 shrink-0`} value={col.code ?? ''} onChange={(e) => updateColumn(i, 'code', e.target.value)} placeholder="Código" />
+                    <div className="w-40 shrink-0"><CreatableSelect options={opts('asset_field')} value={col.name} onChange={(v) => updateColumn(i, 'name', v)} onCreateOption={(v) => addCatalogItem('asset_field', v)} placeholder="Campo…" /></div>
                     <input className={inp} value={col.description} onChange={(e) => updateColumn(i, 'description', e.target.value)} placeholder="Descripción rápida" />
                     <button onClick={() => removeColumn(i)} className="p-1.5 rounded text-white/25 hover:text-red-400 hover:bg-red-500/10 shrink-0" title="Quitar"><Trash2 size={13} /></button>
                   </div>
@@ -157,11 +185,11 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className={`${lbl} flex items-center gap-1`}><ArrowLeft size={11} /> Viene de los procesos</label>
-                <ProcessPicker processes={journeyProcesses} selected={sources} onToggle={(id) => toggle(sources, setSources, id)} />
+                <ProcessPicker processes={journeyProcesses} selected={Object.keys(fromLinks)} onToggle={(id) => journeyToggle('from', id)} countOf={(id) => fromLinks[id]?.columns.length} />
               </div>
               <div>
                 <label className={`${lbl} flex items-center gap-1`}><ArrowRight size={11} /> Va a los procesos</label>
-                <ProcessPicker processes={journeyProcesses} selected={targets} onToggle={(id) => toggle(targets, setTargets, id)} />
+                <ProcessPicker processes={journeyProcesses} selected={Object.keys(toLinks)} onToggle={(id) => journeyToggle('to', id)} countOf={(id) => toLinks[id]?.columns.length} />
               </div>
             </div>
           </div>
@@ -172,16 +200,30 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
           <button onClick={save} disabled={!f.name.trim()} className="px-4 py-2 rounded-lg text-[12px] font-medium bg-gradient-to-r from-indigo-600 to-cyan-600 text-white hover:from-indigo-500 hover:to-cyan-500 disabled:opacity-40">{asset ? 'Guardar cambios' : 'Crear activo'}</button>
         </div>
       </div>
+
+      {linkPicker && (
+        <JourneyLinkModal
+          assetName={f.name || asset?.name || 'Activo'}
+          columns={columns.filter((c) => c.name.trim())}
+          targetName={procName(linkPicker.procId)}
+          fixedDirection={linkPicker.direction}
+          initialSelected={(linkPicker.direction === 'to' ? toLinks : fromLinks)[linkPicker.procId]?.columns.map((c) => c.name)}
+          initialJustification={(linkPicker.direction === 'to' ? toLinks : fromLinks)[linkPicker.procId]?.justification}
+          onConfirm={confirmLink}
+          onClose={() => setLinkPicker(null)}
+        />
+      )}
     </>,
     document.body
   )
 }
 
 // Selector múltiple de procesos (checkbox chips) para la trazabilidad.
-function ProcessPicker({ processes, selected, onToggle }: {
+function ProcessPicker({ processes, selected, onToggle, countOf }: {
   processes: { id: string; name: string }[]
   selected: string[]
   onToggle: (id: string) => void
+  countOf?: (id: string) => number | undefined
 }) {
   const [q, setQ] = useState('')
   const shown = q ? processes.filter((p) => p.name.toLowerCase().includes(q.toLowerCase())) : processes
@@ -198,7 +240,8 @@ function ProcessPicker({ processes, selected, onToggle }: {
         {shown.map((p) => (
           <label key={p.id} className="flex items-center gap-2 px-1.5 py-1 rounded hover:bg-white/5 cursor-pointer">
             <input type="checkbox" checked={selected.includes(p.id)} onChange={() => onToggle(p.id)} className="accent-cyan-500 shrink-0" />
-            <span className="text-[12px] text-white/70 truncate">{p.name}</span>
+            <span className="text-[12px] text-white/70 truncate flex-1">{p.name}</span>
+            {selected.includes(p.id) && <span className="text-[9px] text-cyan-300 shrink-0">{countOf?.(p.id) ?? 0} campos</span>}
           </label>
         ))}
       </div>

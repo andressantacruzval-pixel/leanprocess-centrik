@@ -93,6 +93,7 @@ export function assetCriticality(c?: number | null, i?: number | null, a?: numbe
 // menos campos; aquí se declara su estructura con una descripción rápida.
 export interface AssetColumn {
   name: string
+  code?: string
   description: string
 }
 

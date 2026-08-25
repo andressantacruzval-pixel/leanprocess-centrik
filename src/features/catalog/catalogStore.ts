@@ -213,6 +213,22 @@ const SEED_CATALOGS: Omit<CatalogItem, 'id'>[] = [
   { catalog_type: 'asset_control', value: 'Seguridad de redes y segmentación', sort_order: 16, is_active: true },
   { catalog_type: 'asset_control', value: 'Borrado seguro de la información', sort_order: 17, is_active: true },
   { catalog_type: 'asset_control', value: 'Plan de continuidad del negocio', sort_order: 18, is_active: true },
+  // Campos / columnas de los activos de información (para trazar por dónde viajan).
+  { catalog_type: 'asset_field', value: 'Nombre', sort_order: 0, is_active: true },
+  { catalog_type: 'asset_field', value: 'Apellido', sort_order: 1, is_active: true },
+  { catalog_type: 'asset_field', value: 'Identificación / Cédula', sort_order: 2, is_active: true },
+  { catalog_type: 'asset_field', value: 'Correo electrónico', sort_order: 3, is_active: true },
+  { catalog_type: 'asset_field', value: 'Teléfono', sort_order: 4, is_active: true },
+  { catalog_type: 'asset_field', value: 'Dirección', sort_order: 5, is_active: true },
+  { catalog_type: 'asset_field', value: 'Fecha de nacimiento', sort_order: 6, is_active: true },
+  { catalog_type: 'asset_field', value: 'Cargo', sort_order: 7, is_active: true },
+  { catalog_type: 'asset_field', value: 'Empresa', sort_order: 8, is_active: true },
+  { catalog_type: 'asset_field', value: 'RUC / NIT / RFC', sort_order: 9, is_active: true },
+  { catalog_type: 'asset_field', value: 'Número de cuenta', sort_order: 10, is_active: true },
+  { catalog_type: 'asset_field', value: 'Monto / Valor', sort_order: 11, is_active: true },
+  { catalog_type: 'asset_field', value: 'Producto / Servicio', sort_order: 12, is_active: true },
+  { catalog_type: 'asset_field', value: 'Fecha', sort_order: 13, is_active: true },
+  { catalog_type: 'asset_field', value: 'Estado', sort_order: 14, is_active: true },
 ]
 
 /**
@@ -238,6 +254,7 @@ export const MANAGED_CATALOGS: { type: string; label: string; description: strin
   { type: 'asset_threat', label: 'Amenazas (ISO 27005)', description: 'Amenazas típicas sobre activos de información. Base pre-cargada; puedes añadir las tuyas.' },
   { type: 'asset_vulnerability', label: 'Vulnerabilidades', description: 'Debilidades que una amenaza podría aprovechar. Base pre-cargada; puedes añadir las tuyas.' },
   { type: 'asset_control', label: 'Controles (Anexo A ISO 27001)', description: 'Controles de seguridad del Anexo A ISO 27001:2022 para mitigar el riesgo de los activos.' },
+  { type: 'asset_field', label: 'Campos / columnas de activos', description: 'Campos que contienen los activos (nombre, cédula, correo…). Reutilizarlos permite trazar por dónde viaja cada columna.' },
 ]
 
 function seedCatalogs(): CatalogItem[] {
