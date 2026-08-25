@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Route } from 'lucide-react'
+import { Route, LayoutDashboard, Columns3 } from 'lucide-react'
 import type { Process, Macroprocess } from '@/types/process'
 import type { InformationAsset } from '@/types/asset'
 import { useAssetStore } from '@/stores/assetStore'
@@ -12,6 +12,7 @@ import { hierarchyColumns } from '../components/hierarchyColumns'
 import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
 import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
 import { AssetHeatMap } from '@/features/assets/components/AssetHeatMap'
+import { AssetColumnsReport } from './AssetColumnsReport'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de Activos de Información (ISO 27001): tablero (criticidad C·I·D, tipos,
@@ -59,6 +60,7 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
 
   const [fBand, setFBand] = useState('')
   const [fType, setFType] = useState('')
+  const [view, setView] = useState<'general' | 'columns'>('general')
 
   const shown = useMemo(() => {
     let out = list
@@ -116,7 +118,11 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
 
   return (
     <Dashboard>
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex rounded-xl border border-white/10 overflow-hidden">
+          <button onClick={() => setView('general')} className={`inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium ${view === 'general' ? 'bg-cyan-500/20 text-cyan-100' : 'text-white/55 hover:bg-white/5'}`}><LayoutDashboard size={14} /> Vista general</button>
+          <button onClick={() => setView('columns')} className={`inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium ${view === 'columns' ? 'bg-cyan-500/20 text-cyan-100' : 'text-white/55 hover:bg-white/5'}`}><Columns3 size={14} /> Por columnas</button>
+        </div>
         <button
           onClick={() => navigate('/app/data-journey')}
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 text-white text-[13px] font-medium hover:from-indigo-500 hover:to-cyan-500 transition-colors shadow-lg shadow-cyan-900/20"
@@ -125,6 +131,10 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
         </button>
       </div>
 
+      {view === 'columns' ? (
+        <AssetColumnsReport processes={processes} assets={assets} />
+      ) : (
+      <>
       <Grid cols={4}>
         <Stat label="Activos" value={list.length} sub="de información" tone="cyan" />
         <Stat label="Críticos + altos" value={criticos} sub={`${list.length ? Math.round(criticos / list.length * 100) : 0}% del total`} tone="red" />
@@ -160,6 +170,8 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
       </div>
 
       <DataTable columns={columns} rows={shown} minWidth={2300} rowKey={(a) => a.id} />
+      </>
+      )}
     </Dashboard>
   )
 }
