@@ -5,13 +5,17 @@ import { ASSET_OPERATIONS, type AssetColumn } from '@/types/asset'
 
 interface Props {
   column: AssetColumn
+  lockIdentity?: boolean
   onSave: (col: AssetColumn) => void
   onClose: () => void
 }
 
 // Edición rápida de una columna desde el Data Journey: código, nombre,
-// tratamiento y descripción (bidireccional con la ficha del activo).
-export function FieldEditModal({ column, onSave, onClose }: Props) {
+// tratamiento y descripción (bidireccional con la ficha del activo). En columnas
+// RECIBIDAS (enlace) el código y el nombre son de solo lectura: la identidad la
+// fija el activo origen, así que aquí solo se ajusta el tratamiento por-subproceso
+// y la descripción (renombrar rompería la correspondencia por nombre).
+export function FieldEditModal({ column, lockIdentity, onSave, onClose }: Props) {
   const [f, setF] = useState<AssetColumn>({ ...column })
   const set = (k: keyof AssetColumn, v: string) => setF((p) => ({ ...p, [k]: v }))
   const inp = 'w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[13px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/50'
@@ -26,8 +30,8 @@ export function FieldEditModal({ column, onSave, onClose }: Props) {
         </div>
         <div className="p-5 space-y-3">
           <div className="grid grid-cols-3 gap-2">
-            <div className="col-span-1"><label className={lbl}>Código</label><input className={inp} value={f.code ?? ''} onChange={(e) => set('code', e.target.value)} /></div>
-            <div className="col-span-2"><label className={lbl}>Nombre</label><input className={inp} value={f.name} onChange={(e) => set('name', e.target.value)} /></div>
+            <div className="col-span-1"><label className={lbl}>Código</label><input className={`${inp} ${lockIdentity ? 'opacity-60 cursor-not-allowed' : ''}`} value={f.code ?? ''} readOnly={lockIdentity} onChange={(e) => set('code', e.target.value)} /></div>
+            <div className="col-span-2"><label className={lbl}>Nombre {lockIdentity && <span className="text-white/30 normal-case">· del origen</span>}</label><input className={`${inp} ${lockIdentity ? 'opacity-60 cursor-not-allowed' : ''}`} value={f.name} readOnly={lockIdentity} onChange={(e) => set('name', e.target.value)} /></div>
           </div>
           <div>
             <label className={lbl}>Tratamiento</label>

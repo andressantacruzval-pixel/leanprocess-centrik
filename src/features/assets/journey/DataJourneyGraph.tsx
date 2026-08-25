@@ -302,7 +302,7 @@ export function DataJourneyGraph() {
       )}
 
       {editField && (
-        <FieldEditModal column={editField.col} onSave={saveField} onClose={() => setEditField(null)} />
+        <FieldEditModal column={editField.col} lockIdentity={editField.kind === 'link'} onSave={saveField} onClose={() => setEditField(null)} />
       )}
 
       {lifecycleAsset && (

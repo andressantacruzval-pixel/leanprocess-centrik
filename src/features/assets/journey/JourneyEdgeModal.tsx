@@ -40,7 +40,12 @@ export function JourneyEdgeModal({ links, onSave, onOpenAsset, onClose }: Props)
   const saveAll = () => {
     links.forEach((l) => {
       const d = drafts[l.opId]; if (!d) return
-      onSave(l.opId, l.assetColumns.filter((c) => d.picked.has(c.name)), d.justification, d.dest, d.medium, d.mediumDetail)
+      // Conserva el tratamiento POR SUBPROCESO de las columnas ya presentes en el
+      // enlace (l.columns); solo las nuevas heredan la definición del origen. Así
+      // marcar/desmarcar columnas aquí no pisa el tratamiento fijado en destino.
+      const existing = new Map(l.columns.map((c) => [c.name, c]))
+      const cols = l.assetColumns.filter((c) => d.picked.has(c.name)).map((c) => existing.get(c.name) ?? c)
+      onSave(l.opId, cols, d.justification, d.dest, d.medium, d.mediumDetail)
     })
     onClose()
   }

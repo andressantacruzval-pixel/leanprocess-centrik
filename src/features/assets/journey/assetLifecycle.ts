@@ -24,11 +24,19 @@ export function buildStages(asset: InformationAsset, ops: AssetOperationRow[], p
   const map = new Map<string, Stage>()
   const home = asset.process_id ?? '__home'
   map.set(home, { procId: home, name: nameOf(asset.process_id), kind: 'origin' })
+  // Si (por datos antiguos) hubiera varias operaciones al mismo proceso, se fusionan
+  // sus columnas por nombre para que ninguna quede invisible. El id de enlace y el
+  // tratamiento en destino los aporta la primera; las nuevas ya no se duplican
+  // (addJourneyLink hace upsert).
+  const add = (procId: string, kind: StageKind, o: AssetOperationRow) => {
+    const ex = map.get(procId)
+    if (!ex || ex.kind === 'origin') { map.set(procId, { procId, name: nameOf(procId), kind, opId: o.id, cols: [...(o.columns ?? [])], dest: o.dest_operation }); return }
+    const names = new Set((ex.cols ?? []).map((c) => c.name))
+    ex.cols = [...(ex.cols ?? []), ...(o.columns ?? []).filter((c) => !names.has(c.name))]
+  }
   for (const o of rel) {
-    if (o.target_process_id && !map.has(o.target_process_id))
-      map.set(o.target_process_id, { procId: o.target_process_id, name: nameOf(o.target_process_id), kind: 'target', opId: o.id, cols: o.columns ?? [], dest: o.dest_operation })
-    if (o.source_process_id && !map.has(o.source_process_id))
-      map.set(o.source_process_id, { procId: o.source_process_id, name: nameOf(o.source_process_id), kind: 'source', opId: o.id, cols: o.columns ?? [], dest: o.dest_operation })
+    if (o.target_process_id) add(o.target_process_id, 'target', o)
+    if (o.source_process_id) add(o.source_process_id, 'source', o)
   }
   return [...map.values()].sort((a, b) => (a.kind === 'origin' ? -1 : b.kind === 'origin' ? 1 : a.name.localeCompare(b.name)))
 }

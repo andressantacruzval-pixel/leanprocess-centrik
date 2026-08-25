@@ -159,13 +159,24 @@ export const useAssetStore = create<AssetState>()(
         if (!companyId) return
         const now = new Date().toISOString()
         const key = direction === 'to' ? 'target_process_id' : 'source_process_id'
-        const rows: AssetOperationRow[] = links.map((l) => ({
-          id: generateId(), company_id: companyId, asset_id: assetId, process_id: processId ?? null,
-          operation: direction === 'to' ? 'transfiere' : 'recibe',
-          source_process_id: direction === 'from' ? l.processId : null,
-          target_process_id: direction === 'to' ? l.processId : null,
-          columns: l.columns, justification: l.justification, sort_order: 0, created_at: now, updated_at: now,
-        }))
+        // Enlaces previos de esta dirección: se conservan su id y el tratamiento /
+        // medio fijados EN EL SUBPROCESO DESTINO. Guardar la ficha del activo (que
+        // solo conoce columnas + justificación) NO debe borrar esos campos, que
+        // son propiedad del subproceso que recibe el dato.
+        const prior = get().operations.filter((o) => o.asset_id === assetId && o.process_id === (processId ?? null) && o[key as 'target_process_id' | 'source_process_id'])
+        const priorByProc = new Map(prior.map((o) => [o[key as 'target_process_id' | 'source_process_id'] as string, o]))
+        const rows: AssetOperationRow[] = links.map((l) => {
+          const ex = priorByProc.get(l.processId)
+          return {
+            id: ex?.id ?? generateId(), company_id: companyId, asset_id: assetId, process_id: processId ?? null,
+            operation: direction === 'to' ? 'transfiere' : 'recibe',
+            source_process_id: direction === 'from' ? l.processId : null,
+            target_process_id: direction === 'to' ? l.processId : null,
+            columns: l.columns, justification: l.justification,
+            dest_operation: ex?.dest_operation, medium: ex?.medium, medium_detail: ex?.medium_detail,
+            sort_order: 0, created_at: ex?.created_at ?? now, updated_at: now,
+          }
+        })
         set((s) => ({ operations: [...s.operations.filter((o) => !(o.asset_id === assetId && o.process_id === (processId ?? null) && o[key as 'target_process_id' | 'source_process_id'])), ...rows] }))
         void (async () => {
           await replaceJourneyLinks(assetId, processId ?? null, direction)
@@ -178,6 +189,12 @@ export const useAssetStore = create<AssetState>()(
       addJourneyLink: (assetId, homeProcessId, direction, otherProcessId, columns, justification) => {
         const companyId = currentCompanyId()
         if (!companyId) return
+        const key = direction === 'to' ? 'target_process_id' : 'source_process_id'
+        // Si ya existe el enlace hacia/desde ese proceso, se ACTUALIZA (no se
+        // duplica): dos filas al mismo destino harían invisible una en el ciclo de
+        // vida y en el panel de recibidos. Se conserva el tratamiento/medio previos.
+        const dup = get().operations.find((o) => o.asset_id === assetId && o.process_id === (homeProcessId ?? null) && o[key as 'target_process_id' | 'source_process_id'] === otherProcessId)
+        if (dup) { get().updateJourneyLink(dup.id, columns, justification, dup.dest_operation, dup.medium, dup.medium_detail); return }
         const now = new Date().toISOString()
         const row: AssetOperationRow = {
           id: generateId(), company_id: companyId, asset_id: assetId, process_id: homeProcessId ?? null,
