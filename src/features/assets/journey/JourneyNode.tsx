@@ -31,7 +31,10 @@ function JourneyNodeInner({ id, data }: NodeProps<JourneyNodeData>) {
       className="relative rounded-xl border flex items-center gap-2 px-2.5 shadow-lg shadow-black/30 backdrop-blur-sm"
       title={data.label}
     >
-      <Handle type="target" position={Position.Left} style={{ background: '#475569', width: 7, height: 7 }} />
+      <Handle id="in" type="target" position={Position.Top} style={{ background: '#475569', width: 6, height: 6 }} />
+      <Handle id="out" type="source" position={Position.Bottom} style={{ background: '#475569', width: 6, height: 6 }} />
+      <Handle id="tl" type="target" position={Position.Left} style={{ background: '#0891b2', width: 6, height: 6 }} />
+      <Handle id="tr" type="source" position={Position.Right} style={{ background: '#0891b2', width: 6, height: 6 }} />
       <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full" style={{ background: accent }} />
 
       <Icon size={isAsset ? 13 : data.level === 'macro' ? 17 : 15} className="shrink-0 ml-1" color={isAsset ? '#cbd5e1' : data.level === 'macro' ? '#a5b4fc' : '#7dd3fc'} />
@@ -57,7 +60,6 @@ function JourneyNodeInner({ id, data }: NodeProps<JourneyNodeData>) {
         </button>
       )}
 
-      <Handle type="source" position={Position.Right} style={{ background: '#475569', width: 7, height: 7 }} />
     </div>
   )
 }
