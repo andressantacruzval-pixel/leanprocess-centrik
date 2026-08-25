@@ -73,32 +73,24 @@ export const useAssetStore = create<AssetState>()(
           ...newAssetControlDefaults(), description: description ?? '',
           sort_order: existing.length, created_at: now, updated_at: now,
         }
-        const prev = get().assetControls
-        set({ assetControls: [...prev, control] })
-        void dbWrite('asset:control:create', createAssetControl(control), {
-          silent: true,
-          rollback: () => set({ assetControls: prev }),
-        })
+        set((s) => ({ assetControls: [...s.assetControls, control] }))
+        void dbWrite('asset:control:create', createAssetControl(control), { silent: true })
         return control
       },
 
       updateAssetControl: (id, updates) => {
-        const prev = get().assetControls
-        set({
-          assetControls: prev.map((c) => {
+        set((s) => ({
+          assetControls: s.assetControls.map((c) => {
             if (c.id !== id) return c
             const merged = { ...c, ...updates, updated_at: new Date().toISOString() }
             const { score, effectiveness } = computeAssetControlScore(merged)
             return { ...merged, score, effectiveness }
           }),
-        })
+        }))
         const merged = get().assetControls.find((c) => c.id === id)
         if (!merged) return
         const { id: _i, asset_id: _a, company_id: _c, created_at: _ca, ...payload } = merged
-        void dbWrite('asset:control:update', updateAssetControlDB(id, payload), {
-          silent: true,
-          rollback: () => set({ assetControls: prev }),
-        })
+        void dbWrite('asset:control:update', updateAssetControlDB(id, payload), { silent: true })
       },
 
       deleteAssetControl: (id) => {
@@ -121,11 +113,11 @@ export const useAssetStore = create<AssetState>()(
           operation, source_process_id: null, target_process_id: null, sort_order: 0,
           created_at: now, updated_at: now,
         }
-        const prev = get().operations
-        set({ operations: [...prev.filter((o) => !(o.asset_id === assetId && o.process_id === (processId ?? null) && !o.source_process_id && !o.target_process_id)), row] })
+        set((s) => ({ operations: [...s.operations.filter((o) => !(o.asset_id === assetId && o.process_id === (processId ?? null) && !o.source_process_id && !o.target_process_id)), row] }))
+        // Local-first: la operación queda guardada en la UI aunque la nube falle.
         void (async () => {
           await replaceOperationForAssetProcess(assetId, processId ?? null)
-          await dbWrite('asset:operation', createOperation(row), { silent: true, rollback: () => set({ operations: prev }) })
+          await dbWrite('asset:operation', createOperation(row), { silent: true })
         })()
       },
 
@@ -147,13 +139,12 @@ export const useAssetStore = create<AssetState>()(
           target_process_id: direction === 'to' ? pid : null,
           sort_order: 0, created_at: now, updated_at: now,
         }))
-        const prev = get().operations
         // Quita las filas de esta dirección para este activo+proceso y añade las nuevas.
-        const kept = prev.filter((o) => !(o.asset_id === assetId && o.process_id === (processId ?? null) && o[key as 'target_process_id' | 'source_process_id']))
-        set({ operations: [...kept, ...rows] })
+        set((s) => ({ operations: [...s.operations.filter((o) => !(o.asset_id === assetId && o.process_id === (processId ?? null) && o[key as 'target_process_id' | 'source_process_id'])), ...rows] }))
+        // Local-first: los enlaces del Data Journey persisten aunque la nube falle.
         void (async () => {
           await replaceJourneyLinks(assetId, processId ?? null, direction)
-          for (const r of rows) await dbWrite('asset:journey', createOperation(r), { silent: true, rollback: () => set({ operations: prev }) })
+          for (const r of rows) await dbWrite('asset:journey', createOperation(r), { silent: true })
         })()
       },
 
@@ -197,27 +188,23 @@ export const useAssetStore = create<AssetState>()(
           created_at: now,
           updated_at: now,
         })
-        const prev = get().assets
-        set({ assets: [...prev, asset] })
-        void dbWrite('asset:create', createAsset(asset), {
-          silent: true,
-          rollback: () => set({ assets: prev }),
-        })
+        set((s) => ({ assets: [...s.assets, asset] }))
+        // Local-first: si la nube falla, el activo se conserva en la UI.
+        void dbWrite('asset:create', createAsset(asset), { silent: true })
         return asset
       },
 
       updateAsset: (id, updates) => {
-        const prev = get().assets
-        set({
-          assets: prev.map((a) => (a.id === id ? withDerived({ ...a, ...updates, updated_at: new Date().toISOString() }) : a)),
-        })
+        set((s) => ({
+          assets: s.assets.map((a) => (a.id === id ? withDerived({ ...a, ...updates, updated_at: new Date().toISOString() }) : a)),
+        }))
         const merged = get().assets.find((a) => a.id === id)
         if (!merged) return
         const { id: _i, company_id: _c, created_at: _ca, ...payload } = merged
-        void dbWrite('asset:update', updateAsset(id, payload), {
-          silent: true,
-          rollback: () => set({ assets: prev }),
-        })
+        // Local-first: el cambio persiste en la UI aunque la nube falle. NO se
+        // revierte —revertir era justo lo que borraba el valor recién guardado
+        // (p. ej. la probabilidad) cuando la nube fallaba o faltaba migrar.
+        void dbWrite('asset:update', updateAsset(id, payload), { silent: true })
       },
 
       // El activo (panel derecho) y el nodo del diagrama están DESACOPLADOS: son un
