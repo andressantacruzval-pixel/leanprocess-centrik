@@ -41,6 +41,21 @@ export function buildStages(asset: InformationAsset, ops: AssetOperationRow[], p
   return [...map.values()].sort((a, b) => (a.kind === 'origin' ? -1 : b.kind === 'origin' ? 1 : a.name.localeCompare(b.name)))
 }
 
+// Columnas DISPONIBLES en un subproceso para reenviar más adelante. En el proceso
+// origen son todas las del activo; en cualquier otro subproceso son SOLO las que
+// llegaron allí (la unión de las columnas de las operaciones que lo entregan). Una
+// columna que no se envió a un subproceso no puede reenviarse desde él.
+export function columnsAvailableAt(asset: InformationAsset, procId: string | null, ops: AssetOperationRow[]): AssetColumn[] {
+  if (!procId || procId === (asset.process_id ?? null)) return asset.columns ?? []
+  const seen = new Set<string>(); const out: AssetColumn[] = []
+  for (const o of ops) {
+    if (o.asset_id === asset.id && o.target_process_id === procId) {
+      for (const c of o.columns ?? []) if (!seen.has(c.name)) { seen.add(c.name); out.push(c) }
+    }
+  }
+  return out
+}
+
 // Tratamiento de una columna en una etapa. undefined = no viaja ahí · null =
 // presente sin tratamiento definido · string = el tratamiento declarado.
 export function treatmentAt(stage: Stage, col: AssetColumn): string | null | undefined {

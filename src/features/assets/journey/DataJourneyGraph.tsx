@@ -13,6 +13,7 @@ import { toast } from '@/stores/toastStore'
 import type { AssetColumn, InformationAsset } from '@/types/asset'
 import type { Node, Edge } from 'reactflow'
 import { buildJourney, STATE_COLORS, STATE_LABELS, type JourneyEdgeLink } from './journeyGraph'
+import { columnsAvailableAt } from './assetLifecycle'
 import { JourneyNode } from './JourneyNode'
 import { JourneyBand } from './JourneyBand'
 import { JourneyLinkModal } from './JourneyLinkModal'
@@ -57,7 +58,7 @@ export function DataJourneyGraph() {
   const [query, setQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const [connecting, setConnecting] = useState(false)
-  const [pending, setPending] = useState<{ assetId: string; procId: string; home: string | null } | null>(null)
+  const [pending, setPending] = useState<{ assetId: string; procId: string; home: string | null; available: AssetColumn[] } | null>(null)
   const [editAsset, setEditAsset] = useState<InformationAsset | null>(null)
   const [edgeLinks, setEdgeLinks] = useState<JourneyEdgeLink[] | null>(null)
   const [lifecycleAsset, setLifecycleAsset] = useState<InformationAsset | null>(null)
@@ -150,7 +151,13 @@ export function DataJourneyGraph() {
     }
     const procId = c.target.slice(2)
     if (!assetId || procId === home) return // no migrar a donde ya está
-    setPending({ assetId, procId, home })
+    const asset = assets.find((a) => a.id === assetId)
+    if (!asset) return
+    // Solo se pueden reenviar las columnas DISPONIBLES en el subproceso origen del
+    // salto (todas si es el proceso del activo; solo las recibidas si es un salto
+    // encadenado). Lo que no llegó aquí no puede seguir viajando.
+    const available = columnsAvailableAt(asset, home, operations)
+    setPending({ assetId, procId, home, available })
   }, [assets, operations])
   const pendingAsset = pending ? assets.find((a) => a.id === pending.assetId) : undefined
   const pendingProc = pending ? processes.find((p) => p.id === pending.procId) : undefined
@@ -308,7 +315,7 @@ export function DataJourneyGraph() {
       {pending && pendingAsset && pendingProc && (
         <JourneyLinkModal
           assetName={pendingAsset.name}
-          columns={pendingAsset.columns ?? []}
+          columns={pending.available}
           targetName={pendingProc.name}
           onConfirm={confirmLink}
           onClose={() => setPending(null)}

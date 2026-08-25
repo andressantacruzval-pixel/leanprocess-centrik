@@ -3,6 +3,7 @@ import { useAssetStore } from '@/stores/assetStore'
 import { useProcessStore } from '@/stores/processStore'
 import { ASSET_OPERATIONS } from '@/types/asset'
 import { STATE_COLORS } from '../journey/journeyGraph'
+import { columnsAvailableAt } from '../journey/assetLifecycle'
 
 // Activos que OTROS procesos envían a este proceso (integración bidireccional del
 // Data Journey). Muestra de qué proceso viene, con qué justificación, qué columnas
@@ -27,7 +28,9 @@ export function ReceivedAssetsPanel({ processId }: { processId: string }) {
         const sourceName = processes.find((p) => p.id === o.process_id)?.name ?? 'otro proceso'
         const arriving = o.columns ?? []
         const arrivingNames = new Set(arriving.map((c) => c.name))
-        const notArriving = (asset.columns ?? []).filter((c) => !arrivingNames.has(c.name))
+        // Solo se pueden incorporar columnas disponibles en el proceso de origen del
+        // enlace (las que llegaron a él): lo no enviado antes no puede reenviarse.
+        const notArriving = columnsAvailableAt(asset, o.process_id, operations).filter((c) => !arrivingNames.has(c.name))
         return (
           <div key={o.id} className="rounded-lg border border-white/8 bg-white/[0.03] p-2.5">
             <div className="flex items-start justify-between gap-2">

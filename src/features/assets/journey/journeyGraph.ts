@@ -2,6 +2,7 @@ import { MarkerType, type Node, type Edge } from 'reactflow'
 import type { Macroprocess, Process } from '@/types/process'
 import type { InformationAsset, AssetColumn } from '@/types/asset'
 import type { AssetOperationRow } from '@/services/assets.service'
+import { columnsAvailableAt } from './assetLifecycle'
 
 // Detalle de un enlace de transferencia (para el modal al hacer clic en la flecha).
 export interface JourneyEdgeLink {
@@ -235,7 +236,10 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
       }
       const key = `${from}|${to}`; const e = edgeMap.get(key) ?? { from, to, assets: new Set<string>(), links: [] }
       e.assets.add(op.asset_id)
-      e.links.push({ opId: op.id, assetId: op.asset_id, assetName: a?.name ?? 'Activo', assetColumns: a?.columns ?? [], columns: op.columns ?? [], justification: op.justification ?? '', destOperation: op.dest_operation, medium: op.medium, mediumDetail: op.medium_detail })
+      // La lista de columnas seleccionables es la DISPONIBLE en el origen del enlace
+      // (todas si sale del proceso del activo; solo las recibidas si es encadenado).
+      const available = a ? columnsAvailableAt(a, op.process_id, operations) : []
+      e.links.push({ opId: op.id, assetId: op.asset_id, assetName: a?.name ?? 'Activo', assetColumns: available, columns: op.columns ?? [], justification: op.justification ?? '', destOperation: op.dest_operation, medium: op.medium, mediumDetail: op.medium_detail })
       edgeMap.set(key, e)
     }
   }

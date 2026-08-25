@@ -5,7 +5,7 @@ import { useCatalogStore } from '@/features/catalog/catalogStore'
 import { CreatableSelect } from '@/components/ui/CreatableSelect'
 import { ASSET_OPERATIONS, type AssetColumn, type InformationAsset } from '@/types/asset'
 import { STATE_COLORS, STATE_LABELS } from './journeyGraph'
-import { KIND_LABEL, treatmentAt, type Stage } from './assetLifecycle'
+import { KIND_LABEL, treatmentAt, columnsAvailableAt, type Stage } from './assetLifecycle'
 
 // Editor de UNA etapa (subproceso) del recorrido del activo. Muestra la ficha de
 // cada columna (código · nombre · descripción, heredados del origen) y su
@@ -18,7 +18,8 @@ export function AssetStageEditor({ asset, stage, stages, onGoToStage }: {
 }) {
   const updateAsset = useAssetStore((s) => s.updateAsset)
   const updateJourneyLink = useAssetStore((s) => s.updateJourneyLink)
-  const op = useAssetStore((s) => s.operations.find((o) => o.id === stage.opId))
+  const allOps = useAssetStore((s) => s.operations)
+  const op = allOps.find((o) => o.id === stage.opId)
   const getCatalogByType = useCatalogStore((s) => s.getCatalogByType)
   const addCatalogItem = useCatalogStore((s) => s.addCatalogItem)
   const mediumOpts = getCatalogByType('transfer_medium').map((c) => ({ value: c.value, label: c.value }))
@@ -66,7 +67,11 @@ export function AssetStageEditor({ asset, stage, stages, onGoToStage }: {
   )
 
   const rows = isOrigin ? originCols : arriving
-  const notArriving = originCols.filter((c) => !arrivingNames.has(c.name))
+  // Solo se pueden incorporar columnas DISPONIBLES en el subproceso de origen del
+  // enlace (las que llegaron a él); una columna que no se envió al paso anterior no
+  // puede reenviarse desde aquí.
+  const sourceCols = op ? columnsAvailableAt(asset, op.process_id, allOps) : originCols
+  const notArriving = sourceCols.filter((c) => !arrivingNames.has(c.name))
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -107,7 +112,7 @@ export function AssetStageEditor({ asset, stage, stages, onGoToStage }: {
 
       {!isOrigin && notArriving.length > 0 && (
         <div className="rounded-lg border border-dashed border-white/12 p-2.5">
-          <p className="text-[9.5px] text-white/40 uppercase tracking-wide mb-1.5">Incorporar columnas del origen ({notArriving.length})</p>
+          <p className="text-[9.5px] text-white/40 uppercase tracking-wide mb-1.5">Incorporar columnas disponibles en el origen del enlace ({notArriving.length})</p>
           <div className="flex flex-wrap gap-1">
             {notArriving.map((c) => (
               <button key={c.name} onClick={() => addColToLink(c)} className="text-[10px] px-1.5 py-0.5 rounded border border-dashed border-white/15 text-white/50 hover:text-cyan-300 hover:border-cyan-500/40 inline-flex items-center gap-1"><Plus size={10} /> {c.name}</button>
