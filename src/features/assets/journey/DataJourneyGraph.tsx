@@ -57,7 +57,7 @@ export function DataJourneyGraph() {
   const [query, setQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
   const [connecting, setConnecting] = useState(false)
-  const [pending, setPending] = useState<{ assetId: string; procId: string } | null>(null)
+  const [pending, setPending] = useState<{ assetId: string; procId: string; home: string | null } | null>(null)
   const [editAsset, setEditAsset] = useState<InformationAsset | null>(null)
   const [edgeLinks, setEdgeLinks] = useState<JourneyEdgeLink[] | null>(null)
   const [lifecycleAsset, setLifecycleAsset] = useState<InformationAsset | null>(null)
@@ -131,17 +131,32 @@ export function DataJourneyGraph() {
     return { nodes: nodes.map((n) => (n.type === 'journeyNode' ? { ...n, data: { ...n.data, onToggle, onOpenForm, connecting } } : n)), edges }
   }, [macros, processes, assets, operations, expandedMacros, expandedProcesses, expandedAssets, assetFilter, stateFilter, onToggle, onOpenForm, connecting])
 
-  // Conexión activo → subproceso (Data Journey). Solo se permite ese sentido.
-  const isValidConnection = useCallback((c: Connection) => !!c.source?.startsWith('a:') && !!c.target?.startsWith('p:'), [])
+  // Conexión → subproceso (Data Journey). El origen puede ser un activo (a:) o un
+  // activo YA RECIBIDO en otro subproceso (r:): así el dato puede seguir migrando
+  // de subproceso en subproceso, encadenando el recorrido (N destinos).
+  const isValidConnection = useCallback((c: Connection) => (!!c.source?.startsWith('a:') || !!c.source?.startsWith('r:')) && !!c.target?.startsWith('p:'), [])
   const onConnect = useCallback((c: Connection) => {
-    if (!c.source?.startsWith('a:') || !c.target?.startsWith('p:')) return
-    setPending({ assetId: c.source.slice(2), procId: c.target.slice(2) })
-  }, [])
+    if (!c.target?.startsWith('p:')) return
+    let assetId: string | undefined
+    let home: string | null = null
+    if (c.source?.startsWith('a:')) {
+      assetId = c.source.slice(2)
+      home = assets.find((a) => a.id === assetId)?.process_id ?? null
+    } else if (c.source?.startsWith('r:')) {
+      // Encadenado: el «origen» es el subproceso donde el activo fue recibido.
+      const op = operations.find((o) => o.id === c.source!.slice(2))
+      assetId = op?.asset_id
+      home = op?.target_process_id ?? op?.source_process_id ?? null
+    }
+    const procId = c.target.slice(2)
+    if (!assetId || procId === home) return // no migrar a donde ya está
+    setPending({ assetId, procId, home })
+  }, [assets, operations])
   const pendingAsset = pending ? assets.find((a) => a.id === pending.assetId) : undefined
   const pendingProc = pending ? processes.find((p) => p.id === pending.procId) : undefined
   const confirmLink = (direction: 'to' | 'from', cols: AssetColumn[], justification: string) => {
     if (!pendingAsset || !pending) return
-    addJourneyLink(pendingAsset.id, pendingAsset.process_id, direction, pending.procId, cols, justification)
+    addJourneyLink(pendingAsset.id, pending.home, direction, pending.procId, cols, justification)
     toast.success('Conexión registrada en el Data Journey.')
     setPending(null)
   }
