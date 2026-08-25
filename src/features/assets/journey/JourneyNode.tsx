@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from 'reactflow'
-import { Database, Layers, Box, FileText, ChevronDown, ChevronRight, ShieldAlert } from 'lucide-react'
+import { Database, Layers, Box, FileText, ChevronDown, ChevronRight, ShieldAlert, SquarePen } from 'lucide-react'
 import { STATE_COLORS, CATEGORY_META, type JourneyNodeData } from './journeyGraph'
 
 // Nodo del Data Journey: macroproceso / proceso / subproceso / activo. Solo los
@@ -50,7 +50,7 @@ function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
   return (
     <div
       style={{ width, height: selected ? 'auto' : data.height, minHeight: data.height, background: bg, borderColor: border, borderTop: `2px solid ${cat}`, boxShadow: glow ? '0 0 0 2px rgba(34,211,238,0.7), 0 0 16px rgba(34,211,238,0.5)' : selected ? '0 0 0 2px rgba(34,211,238,0.6)' : undefined, opacity: (dim ? 0.4 : 1) * (data.dimmed ? 0.22 : 1) }}
-      className="relative rounded-xl border flex items-center gap-2 px-2.5 py-1.5 shadow-lg shadow-black/30 backdrop-blur-sm transition-all"
+      className="relative rounded-xl border flex items-center gap-2 px-2.5 pt-2.5 pb-1.5 shadow-lg shadow-black/30 backdrop-blur-sm transition-all"
       title={data.label}
     >
       <span className="absolute -top-2 left-2.5 px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider text-white/70" style={{ background: '#0b1220', border: `1px solid ${cat}66` }}>{LEVEL_LABEL[data.level]}</span>
@@ -67,18 +67,28 @@ function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
 
       <Icon size={isAsset ? 13 : data.level === 'macro' ? 17 : 15} className="shrink-0 ml-1" color={isAsset ? '#cbd5e1' : data.level === 'macro' ? '#a5b4fc' : '#7dd3fc'} />
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 overflow-hidden">
         <p className={`${isAsset ? 'text-[11px]' : 'text-[12px]'} font-semibold text-white leading-tight ${selected ? 'whitespace-normal break-words' : 'truncate'}`}>{data.label}</p>
-        <div className="flex items-center gap-1.5 mt-0.5">
-          {!isAsset && <span className="text-[9px] text-white/45">{data.count} activo{data.count === 1 ? '' : 's'}</span>}
-          {isAsset && <span className="text-[9px] text-white/45">{data.fields ?? 0} campo{(data.fields ?? 0) === 1 ? '' : 's'}</span>}
-          {isAsset && data.received && data.sourceName && <span className="text-[9px] text-cyan-300/80 truncate">de {data.sourceName}</span>}
-          {data.hasCrea && <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATE_COLORS.crea }} title="Se crean datos aquí" />}
-          {data.hasElimina && <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATE_COLORS.elimina }} title="Se eliminan datos aquí" />}
-          {data.personalData && <ShieldAlert size={10} className="text-amber-400" aria-label="Datos personales" />}
-          {isAsset && data.critical > 0 && <span className="text-[8.5px] px-1 py-0.5 rounded text-white" style={{ background: critColor(data.critical) }}>C·I·D {data.critical}</span>}
+        <div className={`flex items-center gap-1.5 mt-0.5 ${selected ? 'flex-wrap' : 'overflow-hidden'}`}>
+          {!isAsset && <span className="text-[9px] text-white/45 shrink-0">{data.count} activo{data.count === 1 ? '' : 's'}</span>}
+          {isAsset && <span className="text-[9px] text-white/45 shrink-0">{data.fields ?? 0} campo{(data.fields ?? 0) === 1 ? '' : 's'}</span>}
+          {isAsset && data.received && data.sourceName && <span className="text-[9px] text-cyan-300/80 truncate min-w-0">de {data.sourceName}</span>}
+          {data.hasCrea && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATE_COLORS.crea }} title="Se crean datos aquí" />}
+          {data.hasElimina && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATE_COLORS.elimina }} title="Se eliminan datos aquí" />}
+          {data.personalData && <ShieldAlert size={10} className="text-amber-400 shrink-0" aria-label="Datos personales" />}
+          {isAsset && data.critical > 0 && <span className="text-[8.5px] px-1 py-0.5 rounded text-white shrink-0" style={{ background: critColor(data.critical) }}>C·I·D {data.critical}</span>}
         </div>
       </div>
+
+      {isAsset && !data.received && (
+        <button
+          onClick={(e) => { e.stopPropagation(); data.onOpenForm?.(id) }}
+          className="shrink-0 nodrag p-1 rounded-md text-white/25 hover:text-cyan-300 hover:bg-white/10 transition-colors"
+          title="Abrir formulario del activo"
+        >
+          <SquarePen size={12} />
+        </button>
+      )}
 
       {data.hasChildren && (
         <button

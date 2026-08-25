@@ -84,8 +84,10 @@ export function DataJourneyGraph() {
       }
       return
     }
-    if (id.startsWith('a:')) { const a = assets.find((x) => x.id === id.slice(2)); if (a) setEditAsset(a) }
-    else if (id.startsWith('r:')) {
+    // Un clic en un activo (a:) solo lo SELECCIONA (se agranda para leer el nombre
+    // completo y se resaltan sus relacionados). El formulario se abre con el
+    // botoncito de la ficha, no con el clic del nodo.
+    if (id.startsWith('r:')) {
       // Recibido: el tratamiento es POR SUBPROCESO. Abre el ciclo de vida enfocado
       // en ESTE subproceso, con la ficha completa de columnas (código · nombre ·
       // tratamiento · descripción) editable aquí, sin tocar el activo origen.
@@ -93,6 +95,11 @@ export function DataJourneyGraph() {
       if (op && a) { setLifecycleProcId(op.target_process_id ?? op.source_process_id ?? null); setLifecycleAsset(a) }
     }
   }, [assets, operations])
+
+  // Botoncito de ficha en el nodo del activo → abre el formulario (no el clic).
+  const onOpenForm = useCallback((nodeId: string) => {
+    if (nodeId.startsWith('a:')) { const a = assets.find((x) => x.id === nodeId.slice(2)); if (a) setEditAsset(a) }
+  }, [assets])
 
   const saveField = (col: AssetColumn) => {
     if (!editField) return
@@ -121,8 +128,8 @@ export function DataJourneyGraph() {
   const built = useMemo(() => {
     const filter = assetFilter.size ? assetFilter : null
     const { nodes, edges } = buildJourney({ macros, processes, assets, operations, expandedMacros, expandedProcesses, expandedAssets, assetFilter: filter, stateFilter })
-    return { nodes: nodes.map((n) => (n.type === 'journeyNode' ? { ...n, data: { ...n.data, onToggle, connecting } } : n)), edges }
-  }, [macros, processes, assets, operations, expandedMacros, expandedProcesses, expandedAssets, assetFilter, stateFilter, onToggle, connecting])
+    return { nodes: nodes.map((n) => (n.type === 'journeyNode' ? { ...n, data: { ...n.data, onToggle, onOpenForm, connecting } } : n)), edges }
+  }, [macros, processes, assets, operations, expandedMacros, expandedProcesses, expandedAssets, assetFilter, stateFilter, onToggle, onOpenForm, connecting])
 
   // Conexión activo → subproceso (Data Journey). Solo se permite ese sentido.
   const isValidConnection = useCallback((c: Connection) => !!c.source?.startsWith('a:') && !!c.target?.startsWith('p:'), [])
@@ -270,6 +277,7 @@ export function DataJourneyGraph() {
           onNodeClick={onNodeClick}
           onEdgeClick={onEdgeClick}
           onSelectionChange={onSelectionChange}
+          onPaneClick={() => setSelectedId(null)}
           isValidConnection={isValidConnection}
           fitView fitViewOptions={{ padding: 0.2 }}
           minZoom={0.15} maxZoom={2}

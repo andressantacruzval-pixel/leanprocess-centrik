@@ -64,6 +64,7 @@ export interface JourneyNodeData {
   selected?: boolean
   dimmed?: boolean
   onToggle?: (id: string) => void
+  onOpenForm?: (id: string) => void
 }
 export interface JourneyBandData { label: string; color: string; width: number; height: number }
 
@@ -80,10 +81,10 @@ export interface BuildInput {
 }
 
 const DIM = {
-  macro: { width: 206, height: 68 }, process: { width: 168, height: 56 },
-  subprocess: { width: 136, height: 52 }, asset: { width: 150, height: 40 }, field: { width: 150, height: 32 },
+  macro: { width: 206, height: 68 }, process: { width: 172, height: 58 },
+  subprocess: { width: 150, height: 56 }, asset: { width: 176, height: 54 }, field: { width: 158, height: 32 },
 }
-const SLOT_W = 170, LEVEL_GAP_Y = 98, TREE_GAP = 56, BAND_GAP = 64, TOP_PAD = 34
+const SLOT_W = 190, LEVEL_GAP_Y = 100, TREE_GAP = 56, BAND_GAP = 64, TOP_PAD = 34
 
 interface V { id: string; data: JourneyNodeData; children: V[] }
 
