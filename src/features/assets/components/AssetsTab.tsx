@@ -13,11 +13,16 @@ import { assetInherentImpact, calculateAssetResidual } from '@/types/assetRisk'
 import { identifyAssetsFromProcess } from '@/lib/assetAi'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { toast } from '@/stores/toastStore'
-import type { BpmnModelerInstance } from '@/types/bpmn'
+import type { BpmnModelerInstance, BpmnEventBus, BpmnElement, BpmnElementRegistry } from '@/types/bpmn'
 import { placeDataStoreNear, removeNode } from '../placeAssetNode'
 import { AssetFormModal } from './AssetFormModal'
 import { AssetRiskModal } from './AssetRiskModal'
 import { AssetHeatMap } from './AssetHeatMap'
+
+// Nodos del diagrama que representan almacenes/objetos de datos (activos).
+const DATA_NODE_TYPES = new Set([
+  'bpmn:DataStoreReference', 'bpmn:DataStore', 'bpmn:DataObjectReference', 'bpmn:DataObject',
+])
 
 // Panel de Activos de Información del proceso (rail derecho / ventana emergente).
 // Muestra TODOS los activos del proceso (los anclados a cualquier nodo del
@@ -51,6 +56,34 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
   const [showHeat, setShowHeat] = useState(false)
 
   const list = assets.filter((a) => a.process_id === processId)
+
+  // Nodos «Almacén/Objeto de datos» del diagrama que aún NO están registrados como
+  // activo. Aparecen cuando el flujograma (o la IA) dibuja el nodo pero no se creó
+  // la ficha del activo. Se detectan en vivo del modeler y se pueden registrar.
+  const [diagVer, setDiagVer] = useState(0)
+  useEffect(() => {
+    if (!modeler) return
+    const bus = modeler.get('eventBus') as BpmnEventBus
+    const bump = () => setDiagVer((v) => v + 1)
+    ;['shape.added', 'shape.removed', 'element.changed', 'import.done'].forEach((e) => bus.on(e, bump))
+    return () => { ['shape.added', 'shape.removed', 'element.changed', 'import.done'].forEach((e) => bus.off(e, bump)) }
+  }, [modeler])
+
+  const unregistered = useMemo(() => {
+    if (!modeler) return [] as { id: string; name: string }[]
+    const covered = new Set(list.filter((a) => a.bpmn_element_id).map((a) => a.bpmn_element_id as string))
+    try {
+      const registry = modeler.get('elementRegistry') as BpmnElementRegistry
+      return (registry.filter(() => true) as BpmnElement[])
+        .filter((el) => DATA_NODE_TYPES.has(el.type) && !covered.has(el.id))
+        .map((el) => ({ id: el.id, name: (el.businessObject?.name || '').trim() || 'Almacén de datos' }))
+    } catch { return [] }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modeler, list, diagVer])
+
+  const registerNode = (node: { id: string; name: string }) =>
+    addAsset({ process_id: processId, bpmn_element_id: node.id, name: node.name, status: 'en_revision' })
+  const registerAllNodes = () => { unregistered.forEach(registerNode); if (unregistered.length) toast.success(`${unregistered.length} activo(s) registrados desde el diagrama.`) }
 
   // Riesgo por activo (inherente y residual) reutilizando la matriz 5×5.
   const riskOf = (a: InformationAsset) => {
@@ -193,7 +226,24 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
       )}
 
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {list.length === 0 ? (
+        {unregistered.length > 0 && (
+          <div className="rounded-lg border border-amber-500/25 bg-amber-500/[0.06] p-2.5 space-y-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[11px] text-amber-200/90">{unregistered.length} nodo(s) de datos en el diagrama sin registrar como activo.</p>
+              <button onClick={registerAllNodes} className="shrink-0 px-2 py-1 rounded-lg bg-amber-500/20 text-amber-100 border border-amber-500/30 text-[10.5px] font-medium hover:bg-amber-500/30">Registrar todos</button>
+            </div>
+            <div className="space-y-1">
+              {unregistered.map((n) => (
+                <div key={n.id} className="flex items-center gap-2 px-2 py-1.5 rounded bg-white/[0.03] border border-white/8">
+                  <Database size={12} className="text-white/40 shrink-0" />
+                  <span className="text-[11px] text-white/70 truncate flex-1">{n.name}</span>
+                  <button onClick={() => registerNode(n)} className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-cyan-300 hover:bg-cyan-500/15" title="Registrar como activo"><Plus size={11} /> Registrar</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {list.length === 0 && unregistered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
             <ShieldCheck size={24} className="text-white/10 mb-3" />
             <p className="text-xs text-white/30 mb-1">Aún no hay activos de información</p>
