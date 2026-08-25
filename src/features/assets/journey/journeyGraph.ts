@@ -176,8 +176,12 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
   const roots = forest.map((f) => ({ cat: f.cat, root: relevant ? prune(f.root) : f.root })).filter((f): f is { cat: Category; root: V } => !!f.root)
 
   // ── Layout: árbol de arriba a abajo, bandas apiladas ─────────────────────
-  const nodes: Node[] = []; const bandNodes: Node[] = []; const edges: Edge[] = []
-  let runningY = TOP_PAD
+  // LEFT_PAD deja libre la franja de la etiqueta vertical (la banda arranca en
+  // x=0 con su franja de color de ~32px; el contenido empieza más a la derecha
+  // para no taparla). Todas las bandas se pintan del ANCHO de la más larga.
+  const LEFT_PAD = 64
+  const nodes: Node[] = []; const edges: Edge[] = []
+  let runningY = TOP_PAD; let maxRight = SLOT_W
   const place = (v: V, depth: number, baseY: number, cursor: { x: number }, onDepth: (d: number) => void): number => {
     const y = baseY + depth * LEVEL_GAP_Y; onDepth(depth)
     let cx: number
@@ -187,15 +191,22 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
     v.children.forEach((c) => edges.push({ id: `h:${v.id}->${c.id}`, source: v.id, sourceHandle: 'out', target: c.id, targetHandle: 'in', type: 'smoothstep', style: { stroke: '#475569', strokeWidth: 1.4, opacity: 0.7 } }))
     return cx
   }
+  const bandMeta: { cat: Category; baseY: number; height: number }[] = []
   for (const cat of CATEGORY_ORDER) {
     const band = roots.filter((r) => r.cat === cat)
     if (band.length === 0) continue
-    const baseY = runningY; const cursor = { x: 0 }; let maxDepth = 0
+    const baseY = runningY; const cursor = { x: LEFT_PAD }; let maxDepth = 0
     band.forEach((r) => { place(r.root, 0, baseY, cursor, (d) => { maxDepth = Math.max(maxDepth, d) }); cursor.x += TREE_GAP })
-    const bandW = Math.max(cursor.x - TREE_GAP, SLOT_W); const bandH = (maxDepth + 1) * LEVEL_GAP_Y
-    bandNodes.push({ id: `band:${cat}`, type: 'journeyBand', position: { x: -30, y: baseY - 16 }, data: { label: CATEGORY_META[cat].label, color: CATEGORY_META[cat].color, width: bandW + 44, height: bandH - LEVEL_GAP_Y + DIM.macro.height + 24 }, draggable: false, selectable: false, connectable: false, zIndex: 0 })
-    runningY = baseY + bandH + BAND_GAP
+    maxRight = Math.max(maxRight, cursor.x - TREE_GAP)
+    bandMeta.push({ cat, baseY, height: maxDepth * LEVEL_GAP_Y + DIM.macro.height + 24 })
+    runningY = baseY + (maxDepth + 1) * LEVEL_GAP_Y + BAND_GAP
   }
+  // Ancho homogéneo: todas las bandas del largo de la más larga.
+  const bandNodes: Node[] = bandMeta.map((m) => ({
+    id: `band:${m.cat}`, type: 'journeyBand', position: { x: 0, y: m.baseY - 16 },
+    data: { label: CATEGORY_META[m.cat].label, color: CATEGORY_META[m.cat].color, width: maxRight + 24, height: m.height },
+    draggable: false, selectable: false, connectable: false, zIndex: 0,
+  }))
 
   // ── Flechas de transferencia entre nodos visibles ────────────────────────
   const color = STATE_COLORS.transfiere
