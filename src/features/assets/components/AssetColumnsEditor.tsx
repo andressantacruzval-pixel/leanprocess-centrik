@@ -12,7 +12,9 @@ import { suggestAssetColumns, type AiColumnSuggestion } from '@/lib/assetAi'
 import { buildColumnCode } from '../assetCodes'
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
-const inp = 'w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[13px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/50'
+const inpBase = 'bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[13px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/50'
+const inp = `w-full ${inpBase}`
+const inpCode = `w-24 shrink-0 ${inpBase}` // sin w-full para no tapar nombre/descripción
 
 interface Props {
   columns: AssetColumn[]
@@ -76,11 +78,11 @@ export function AssetColumnsEditor({ columns, setColumns, assetName, assetType, 
           {columns.map((col, i) => {
             const inCat = !!col.name.trim() && fieldSet.has(norm(col.name))
             return (
-              <div key={i} className="flex items-start gap-2">
-                <span className={`mt-2.5 w-1.5 h-1.5 rounded-full shrink-0 ${!col.name.trim() ? 'bg-white/20' : inCat ? 'bg-emerald-400' : 'bg-amber-400'}`} title={!col.name.trim() ? '' : inCat ? 'En catálogo' : 'Campo nuevo (se agrega al catálogo al guardar)'} />
-                <input className={`${inp} w-20 shrink-0`} value={col.code ?? ''} onChange={(e) => updateColumn(i, 'code', e.target.value)} placeholder="Código" />
-                <div className="w-40 shrink-0"><CreatableSelect options={opts} value={col.name} onChange={(v) => updateColumn(i, 'name', v)} onCreateOption={() => { /* se persiste al guardar */ }} placeholder="Buscar campo…" /></div>
-                <input className={inp} value={col.description} onChange={(e) => updateColumn(i, 'description', e.target.value)} placeholder="Descripción rápida" />
+              <div key={i} className="flex flex-wrap items-center gap-2">
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${!col.name.trim() ? 'bg-white/20' : inCat ? 'bg-emerald-400' : 'bg-amber-400'}`} title={!col.name.trim() ? '' : inCat ? 'En catálogo' : 'Campo nuevo (se agrega al catálogo al guardar)'} />
+                <input className={inpCode} value={col.code ?? ''} onChange={(e) => updateColumn(i, 'code', e.target.value)} placeholder="Código" title="Código de la columna" />
+                <div className="flex-1 min-w-[130px]"><CreatableSelect options={opts} value={col.name} onChange={(v) => updateColumn(i, 'name', v)} onCreateOption={() => { /* se persiste al guardar */ }} placeholder="Buscar campo por nombre…" /></div>
+                <div className="flex-[1.4] min-w-[150px]"><input className={inp} value={col.description} onChange={(e) => updateColumn(i, 'description', e.target.value)} placeholder="Descripción de la columna" /></div>
                 <button type="button" onClick={() => removeColumn(i)} className="p-1.5 rounded text-white/25 hover:text-red-400 hover:bg-red-500/10 shrink-0" title="Quitar"><Trash2 size={13} /></button>
               </div>
             )
