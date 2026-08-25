@@ -1,16 +1,20 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X, ShieldCheck, Plus, Trash2, Columns3 } from 'lucide-react'
+import { X, ShieldCheck, Wand2, ArrowRight, ArrowLeft } from 'lucide-react'
 import type { AssetColumn } from '@/types/asset'
 import { useAssetStore } from '@/stores/assetStore'
 import { useProcessStore } from '@/stores/processStore'
+import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
 import { CreatableSelect } from '@/components/ui/CreatableSelect'
-import { ArrowRight, ArrowLeft } from 'lucide-react'
+import { orgProcPrefix, buildAssetCode } from '../assetCodes'
 import type { BpmnModelerInstance } from '@/types/bpmn'
 import { renameNode } from '../placeAssetNode'
 import { JourneyLinkModal } from '../journey/JourneyLinkModal'
+import { AssetColumnsEditor } from './AssetColumnsEditor'
 import { ASSET_STATUSES, type InformationAsset } from '@/types/asset'
+
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 
 interface Props {
   processId: string
@@ -77,12 +81,18 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
   })
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
 
-  // Columnas / campos del activo (estructura de datos con descripción rápida).
+  // Columnas / campos del activo (el editor gestiona alta, IA y auto-código).
   const [columns, setColumns] = useState<AssetColumn[]>(() => asset?.columns ?? [])
-  const addColumn = () => setColumns((c) => [...c, { name: '', code: '', description: '' }])
-  const updateColumn = (i: number, key: keyof AssetColumn, v: string) =>
-    setColumns((c) => c.map((col, idx) => (idx === i ? { ...col, [key]: v } : col)))
-  const removeColumn = (i: number) => setColumns((c) => c.filter((_, idx) => idx !== i))
+
+  // Codificación automática del activo (organización · proceso · ACT · nnn).
+  const process = useProcessStore((s) => s.processes.find((p) => p.id === processId))
+  const companyId = useWorkspaceStore((s) => s.activeCompanyId)
+  const allAssets = useAssetStore((s) => s.assets)
+  const prefix = orgProcPrefix(process?.management, process?.coordination, process?.name)
+  const autoAssetCode = () => {
+    const seq = allAssets.filter((a) => a.company_id === companyId).length + 1
+    set('code', buildAssetCode(prefix, seq))
+  }
 
   const save = () => {
     if (!f.name.trim()) return
@@ -104,6 +114,11 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
       setJourneyDetailed(id, processId, 'to', Object.entries(toLinks).map(([pid, v]) => ({ processId: pid, columns: v.columns, justification: v.justification })))
       setJourneyDetailed(id, processId, 'from', Object.entries(fromLinks).map(([pid, v]) => ({ processId: pid, columns: v.columns, justification: v.justification })))
     }
+    // Al guardar, las columnas confirmadas se suman al catálogo de campos.
+    const fieldSet = new Set(getCatalogByType('asset_field').map((c) => norm(c.value)))
+    columns.filter((c) => c.name.trim()).forEach((c) => {
+      if (!fieldSet.has(norm(c.name))) { addCatalogItem('asset_field', c.name.trim()); fieldSet.add(norm(c.name)) }
+    })
     // Sincroniza el nombre con el nodo del diagrama (bidireccional).
     const nodeId = payload.bpmn_element_id ?? asset?.bpmn_element_id
     if (modeler && nodeId) renameNode(modeler, nodeId, f.name.trim())
@@ -129,7 +144,12 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
           {/* Identificación */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2"><label className={lbl}>Nombre *</label><input className={inp} value={f.name} onChange={(e) => set('name', e.target.value)} placeholder="Ej. Base de datos de clientes" /></div>
-            <div><label className={lbl}>Código</label><input className={inp} value={f.code} onChange={(e) => set('code', e.target.value)} placeholder="ACT-INF-001" /></div>
+            <div><label className={lbl}>Código</label>
+              <div className="flex gap-1.5">
+                <input className={inp} value={f.code} onChange={(e) => set('code', e.target.value)} placeholder={`${prefix}-ACT-001`} />
+                <button type="button" onClick={autoAssetCode} title="Generar código automático (organización · proceso · ACT)" className="shrink-0 inline-flex items-center gap-1 px-2 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10.5px] font-medium hover:bg-indigo-500/25"><Wand2 size={12} /></button>
+              </div>
+            </div>
             <div><label className={lbl}>Tipo</label><CreatableSelect options={opts('asset_type')} value={f.asset_type} onChange={(v) => set('asset_type', v)} onCreateOption={(v) => addCatalogItem('asset_type', v)} placeholder="Tipo de activo…" /></div>
             <div><label className={lbl}>Formato / Soporte</label><CreatableSelect options={opts('asset_format')} value={f.format} onChange={(v) => set('format', v)} onCreateOption={(v) => addCatalogItem('asset_format', v)} placeholder="Digital, Físico…" /></div>
             <div><label className={lbl}>Operación en este proceso</label><CreatableSelect options={opts('asset_operation')} value={f.operation} onChange={(v) => set('operation', v)} onCreateOption={(v) => addCatalogItem('asset_operation', v)} placeholder="Operación…" /></div>
@@ -147,27 +167,15 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
           {/* La clasificación C·I·D (impacto) se valora en «Riesgo del activo»
               para no evaluar lo mismo dos veces. */}
 
-          {/* Columnas / campos del activo */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] font-semibold text-white/70 flex items-center gap-1.5"><Columns3 size={13} className="text-indigo-400" />Columnas / campos del activo <span className="text-[10px] font-medium text-indigo-300 bg-indigo-500/15 rounded px-1.5 py-0.5">{columns.length}</span></p>
-              <button onClick={addColumn} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10.5px] font-medium hover:bg-indigo-500/25"><Plus size={11} /> Columna</button>
-            </div>
-            {columns.length === 0 ? (
-              <p className="text-[11px] text-white/30 py-2">Sin columnas. Añade los campos que contiene (ej. nombre, cédula, teléfono) con una descripción rápida.</p>
-            ) : (
-              <div className="space-y-1.5">
-                {columns.map((col, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <input className={`${inp} w-20 shrink-0`} value={col.code ?? ''} onChange={(e) => updateColumn(i, 'code', e.target.value)} placeholder="Código" />
-                    <div className="w-40 shrink-0"><CreatableSelect options={opts('asset_field')} value={col.name} onChange={(v) => updateColumn(i, 'name', v)} onCreateOption={(v) => addCatalogItem('asset_field', v)} placeholder="Campo…" /></div>
-                    <input className={inp} value={col.description} onChange={(e) => updateColumn(i, 'description', e.target.value)} placeholder="Descripción rápida" />
-                    <button onClick={() => removeColumn(i)} className="p-1.5 rounded text-white/25 hover:text-red-400 hover:bg-red-500/10 shrink-0" title="Quitar"><Trash2 size={13} /></button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Columnas / campos del activo (editor con IA + auto-código) */}
+          <AssetColumnsEditor
+            columns={columns}
+            setColumns={setColumns}
+            assetName={f.name || asset?.name || ''}
+            assetType={f.asset_type}
+            description={f.description}
+            getCodeBase={() => (f.code.trim() ? f.code.trim() : prefix)}
+          />
 
           {/* Legal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

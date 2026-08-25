@@ -87,6 +87,7 @@ const STATIC_OPERATION_COSTS: Record<string, number> = {
   inventory:                 20, // Inventario de procesos con IA: por macroproceso
   transcription:              0, // Voz→texto: función embebida, NO cuesta tokens
   asset_identification:      15, // Identificar activos de información con IA
+  asset_columns:             5,  // Sugerir columnas/campos de un activo con IA
 }
 
 export const useBillingStore = create<BillingState>()(() => ({

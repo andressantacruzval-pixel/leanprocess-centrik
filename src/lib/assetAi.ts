@@ -37,6 +37,51 @@ export interface AssetAiContext {
   existingAssetNames?: string[]
 }
 
+// ── Sugerencia de columnas/campos de un activo ─────────────────────────────
+export interface AiColumnSuggestion { name: string; description: string }
+
+export async function suggestAssetColumns(ctx: {
+  assetName: string; assetType?: string; description?: string
+  companyName?: string; industry?: string
+  existingFields: string[]; currentColumns: string[]
+}): Promise<AiColumnSuggestion[]> {
+  const name = sanitizePromptInput(ctx.assetName || 'el activo', 150)
+  const tipo = ctx.assetType ? sanitizePromptInput(ctx.assetType, 60) : 'no especificado'
+  const desc = ctx.description ? sanitizePromptInput(ctx.description, 500) : 'sin descripción'
+  const empresa = ctx.companyName ? sanitizePromptInput(ctx.companyName, 120) : 'la empresa'
+  const industria = ctx.industry ? sanitizePromptInput(ctx.industry, 100) : 'no especificada'
+  const existentes = sanitizeStringArray(ctx.existingFields || [], 60).slice(0, 80).join(', ') || 'ninguno'
+  const actuales = sanitizeStringArray(ctx.currentColumns || [], 60).join(', ') || 'ninguna'
+
+  const prompt = `Eres un consultor de gobierno de datos y ISO/IEC 27001. Propón las COLUMNAS/CAMPOS lógicos que debería contener este activo de información.
+
+CONTEXTO:
+- Empresa: "${empresa}" (industria: ${industria})
+- Activo: "${name}" (tipo: ${tipo})
+- Descripción: ${desc}
+- Campos del CATÁLOGO ya existentes (REUTILÍZALOS textualmente cuando apliquen): ${existentes}
+- Columnas que el activo YA tiene (NO las repitas): ${actuales}
+
+REGLAS:
+- Prioriza y reutiliza EXACTAMENTE los nombres del catálogo existente cuando correspondan.
+- Propón entre 4 y 12 campos concretos y realistas para ESTE activo (no genéricos).
+- Español. Responde ÚNICAMENTE un JSON array: [{"name":"","description":""}]`
+
+  const raw = await callAiProxy([{ role: 'user', content: prompt }], {
+    modelId: 'gemini-2.5-flash', temperature: 0.3, maxOutputTokens: 2048,
+    responseMimeType: 'application/json', feature: 'asset_columns',
+  })
+  try {
+    const parsed = JSON.parse(cleanJson(raw)) as Partial<AiColumnSuggestion>[]
+    const seen = new Set((ctx.currentColumns || []).map((c) => c.toLowerCase().trim()))
+    return parsed.filter((c) => c && c.name).map((c) => ({ name: String(c.name).trim(), description: String(c.description || '') }))
+      .filter((c) => { const k = c.name.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true })
+  } catch {
+    console.warn('[assetAi] columns parse failed', raw?.slice(0, 200))
+    return []
+  }
+}
+
 function cleanJson(text: string | undefined): string {
   if (!text) return '[]'
   const clean = text.replace(/```(?:json)?/gi, '').trim()
