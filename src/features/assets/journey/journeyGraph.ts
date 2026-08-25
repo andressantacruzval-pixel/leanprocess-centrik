@@ -12,6 +12,8 @@ export interface JourneyEdgeLink {
   columns: AssetColumn[]
   justification: string
   destOperation?: string
+  medium?: string
+  mediumDetail?: string
 }
 
 // ── Constructor del grafo del Data Journey ────────────────────────────────
@@ -38,7 +40,7 @@ export const CATEGORY_META: Record<Category, { label: string; color: string }> =
   apoyo: { label: 'Apoyos', color: '#7C3AED' },
 }
 
-export type JourneyLevel = 'macro' | 'process' | 'subprocess' | 'asset'
+export type JourneyLevel = 'macro' | 'process' | 'subprocess' | 'asset' | 'field'
 
 export interface JourneyNodeData {
   nodeId: string
@@ -55,7 +57,11 @@ export interface JourneyNodeData {
   width: number
   height: number
   fields?: number
+  received?: boolean
+  sourceName?: string
+  fieldColor?: string
   connecting?: boolean
+  selected?: boolean
   onToggle?: (id: string) => void
 }
 export interface JourneyBandData { label: string; color: string; width: number; height: number }
@@ -67,20 +73,22 @@ export interface BuildInput {
   operations: AssetOperationRow[]
   expandedMacros: Set<string>
   expandedProcesses: Set<string>
+  expandedAssets: Set<string>
   assetFilter: Set<string> | null
   stateFilter: Set<string>
 }
 
 const DIM = {
   macro: { width: 206, height: 68 }, process: { width: 168, height: 56 },
-  subprocess: { width: 136, height: 52 }, asset: { width: 150, height: 40 },
+  subprocess: { width: 136, height: 52 }, asset: { width: 150, height: 40 }, field: { width: 150, height: 32 },
 }
 const SLOT_W = 170, LEVEL_GAP_Y = 98, TREE_GAP = 56, BAND_GAP = 64, TOP_PAD = 34
 
 interface V { id: string; data: JourneyNodeData; children: V[] }
 
 export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] } {
-  const { macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter, stateFilter } = input
+  const { macros, processes, assets, operations, expandedMacros, expandedProcesses, expandedAssets, assetFilter, stateFilter } = input
+  const assetMap = new Map(assets.map((a) => [a.id, a]))
 
   const procById = new Map(processes.map((p) => [p.id, p]))
   const childrenOf = new Map<string, Process[]>()
@@ -98,6 +106,20 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
   for (const a of assets) { if (a.process_id && passes(a.id)) { const arr = assetsByProc.get(a.process_id) ?? []; arr.push(a); assetsByProc.set(a.process_id, arr) } }
   const hasChildProcs = (pid: string) => (childrenOf.get(pid)?.length ?? 0) > 0
   const hasAssets = (pid: string) => (assetsByProc.get(pid)?.length ?? 0) > 0
+
+  // Activos RECIBIDOS por proceso (llegan por transferencia desde otro proceso).
+  const receivedByProc = new Map<string, { op: AssetOperationRow; asset: InformationAsset }[]>()
+  // Columnas «enviadas» por activo (para pintar en gris las que no viajan).
+  const sentByAsset = new Map<string, Set<string>>()
+  for (const op of operations) {
+    if (!passes(op.asset_id)) continue
+    const a = assetMap.get(op.asset_id)
+    if (op.target_process_id && a) { const arr = receivedByProc.get(op.target_process_id) ?? []; arr.push({ op, asset: a }); receivedByProc.set(op.target_process_id, arr) }
+    if (op.source_process_id || op.target_process_id) {
+      const set = sentByAsset.get(op.asset_id) ?? new Set<string>(); (op.columns ?? []).forEach((c) => set.add(c.name)); sentByAsset.set(op.asset_id, set)
+    }
+  }
+  const hasReceived = (pid: string) => (receivedByProc.get(pid)?.length ?? 0) > 0
 
   const pathOf = (pid: string): string[] => {
     const chain: string[] = []; const guard = new Set<string>(); let cur = procById.get(pid)
@@ -139,20 +161,41 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
       if (st.startsWith('elimina') && stateFilter.has('elimina')) s.elim = true
     }))
   }
+  // Los activos recibidos también cuentan en el proceso destino (y sus ancestros).
+  receivedByProc.forEach((arr, pid) => {
+    ancestorsOf(pid).forEach((id) => addTo(id, (s) => { arr.forEach(({ asset }) => { s.count++; s.crit = Math.max(s.crit, asset.criticality || 0); if (asset.has_personal_data) s.pd = true }) }))
+  })
   const dataOf = (id: string, label: string, level: JourneyLevel, cat: Category, hasChildren: boolean, expanded: boolean, extra?: Partial<JourneyNodeData>): JourneyNodeData => {
     const s = stat.get(id)
     return { nodeId: id, label, level, category: cat, count: s?.count ?? 0, hasChildren, expanded, critical: s?.crit ?? 0, personalData: s?.pd ?? false, hasCrea: s?.crea ?? false, hasElimina: s?.elim ?? false, ...DIM[level], ...extra }
   }
 
   // ── Construcción del bosque (un árbol por macroproceso) ──────────────────
+  // Nodo de activo con expansión opcional a sus columnas (nivel «campo»),
+  // coloreadas por su tratamiento (gris si esa columna no se envía).
+  const assetNode = (a: InformationAsset, cat: Category, opts?: { received?: boolean; opId?: string; sourceName?: string }): V => {
+    const nodeId = opts?.received ? `r:${opts.opId}` : `a:${a.id}`
+    const cols = a.columns ?? []
+    const expanded = expandedAssets.has(nodeId)
+    const children: V[] = expanded ? cols.map((c, idx) => {
+      const sent = sentByAsset.get(a.id)?.has(c.name)
+      const fcolor = !sent ? '#64748b' : (c.operation ? (STATE_COLORS[c.operation] ?? '#06b6d4') : '#06b6d4')
+      const fid = `${nodeId}::f${idx}`
+      return { id: fid, data: dataOf(fid, c.code ? `${c.code} · ${c.name}` : c.name, 'field', cat, false, false, { fieldColor: fcolor }), children: [] }
+    }) : []
+    return { id: nodeId, data: dataOf(nodeId, a.name, 'asset', cat, cols.length > 0, expanded, { critical: a.criticality || 0, personalData: a.has_personal_data, fields: cols.length, received: opts?.received, sourceName: opts?.sourceName }), children }
+  }
   const buildProc = (p: Process, cat: Category): V => {
     const level: JourneyLevel = p.parent_process_id ? 'subprocess' : 'process'
     const children: V[] = []
     if (expandedProcesses.has(p.id)) {
       if (hasChildProcs(p.id)) (childrenOf.get(p.id) ?? []).forEach((c) => children.push(buildProc(c, cat)))
-      else (assetsByProc.get(p.id) ?? []).forEach((a) => children.push({ id: `a:${a.id}`, data: dataOf(`a:${a.id}`, a.name, 'asset', cat, false, false, { critical: a.criticality || 0, personalData: a.has_personal_data, fields: a.columns?.length ?? 0 }), children: [] }))
+      else {
+        (assetsByProc.get(p.id) ?? []).forEach((a) => children.push(assetNode(a, cat)))
+        ;(receivedByProc.get(p.id) ?? []).forEach(({ op, asset }) => children.push(assetNode(asset, cat, { received: true, opId: op.id, sourceName: procById.get(op.process_id || '')?.name })))
+      }
     }
-    return { id: `p:${p.id}`, data: dataOf(`p:${p.id}`, p.name, level, cat, hasChildProcs(p.id) || hasAssets(p.id), expandedProcesses.has(p.id)), children }
+    return { id: `p:${p.id}`, data: dataOf(`p:${p.id}`, p.name, level, cat, hasChildProcs(p.id) || hasAssets(p.id) || hasReceived(p.id), expandedProcesses.has(p.id)), children }
   }
   const forest = sortedMacros.map((m) => {
     const children = expandedMacros.has(m.id) ? (topOfMacro.get(m.id) ?? []).map((p) => buildProc(p, m.category)) : []
@@ -160,18 +203,24 @@ export function buildJourney(input: BuildInput): { nodes: Node[]; edges: Edge[] 
   })
 
   // ── Aristas de transferencia ─────────────────────────────────────────────
-  const assetMap = new Map(assets.map((a) => [a.id, a]))
+  // Origen de la flecha = nodo visible más profundo del activo: subproceso o, si
+  // el subproceso está expandido a activos, el propio nodo del activo.
+  const sourceRep = (assetId: string, home: string | null): string | null => {
+    if (home && expandedProcesses.has(home) && !hasChildProcs(home) && (assetsByProc.get(home)?.some((a) => a.id === assetId))) return `a:${assetId}`
+    return representative(home || '')
+  }
   const edgeMap = new Map<string, { from: string; to: string; assets: Set<string>; links: JourneyEdgeLink[] }>()
   if (stateFilter.has('transfiere')) {
     for (const op of operations) {
       if ((!op.source_process_id && !op.target_process_id) || !passes(op.asset_id)) continue
       const home = op.process_id
-      const from = representative(op.source_process_id || home || ''); const to = representative(op.target_process_id || home || '')
+      const from = op.target_process_id ? sourceRep(op.asset_id, home) : representative(op.source_process_id || home || '')
+      const to = op.target_process_id ? representative(op.target_process_id) : representative(home || '')
       if (!from || !to || from === to) continue
       const key = `${from}|${to}`; const e = edgeMap.get(key) ?? { from, to, assets: new Set<string>(), links: [] }
       e.assets.add(op.asset_id)
       const a = assetMap.get(op.asset_id)
-      e.links.push({ opId: op.id, assetId: op.asset_id, assetName: a?.name ?? 'Activo', assetColumns: a?.columns ?? [], columns: op.columns ?? [], justification: op.justification ?? '', destOperation: op.dest_operation })
+      e.links.push({ opId: op.id, assetId: op.asset_id, assetName: a?.name ?? 'Activo', assetColumns: a?.columns ?? [], columns: op.columns ?? [], justification: op.justification ?? '', destOperation: op.dest_operation, medium: op.medium, mediumDetail: op.medium_detail })
       edgeMap.set(key, e)
     }
   }

@@ -229,6 +229,15 @@ const SEED_CATALOGS: Omit<CatalogItem, 'id'>[] = [
   { catalog_type: 'asset_field', value: 'Producto / Servicio', sort_order: 12, is_active: true },
   { catalog_type: 'asset_field', value: 'Fecha', sort_order: 13, is_active: true },
   { catalog_type: 'asset_field', value: 'Estado', sort_order: 14, is_active: true },
+  // Medios de transferencia de datos entre procesos.
+  { catalog_type: 'transfer_medium', value: 'Correo electrónico', sort_order: 0, is_active: true },
+  { catalog_type: 'transfer_medium', value: 'SFTP', sort_order: 1, is_active: true },
+  { catalog_type: 'transfer_medium', value: 'SharePoint', sort_order: 2, is_active: true },
+  { catalog_type: 'transfer_medium', value: 'Carpeta compartida', sort_order: 3, is_active: true },
+  { catalog_type: 'transfer_medium', value: 'Sistema / API', sort_order: 4, is_active: true },
+  { catalog_type: 'transfer_medium', value: 'Base de datos', sort_order: 5, is_active: true },
+  { catalog_type: 'transfer_medium', value: 'Físico (papel/USB)', sort_order: 6, is_active: true },
+  { catalog_type: 'transfer_medium', value: 'Mensajería / Chat', sort_order: 7, is_active: true },
 ]
 
 /**
@@ -255,6 +264,7 @@ export const MANAGED_CATALOGS: { type: string; label: string; description: strin
   { type: 'asset_vulnerability', label: 'Vulnerabilidades', description: 'Debilidades que una amenaza podría aprovechar. Base pre-cargada; puedes añadir las tuyas.' },
   { type: 'asset_control', label: 'Controles (Anexo A ISO 27001)', description: 'Controles de seguridad del Anexo A ISO 27001:2022 para mitigar el riesgo de los activos.' },
   { type: 'asset_field', label: 'Campos / columnas de activos', description: 'Campos que contienen los activos (nombre, cédula, correo…). Reutilizarlos permite trazar por dónde viaja cada columna.' },
+  { type: 'transfer_medium', label: 'Medios de transferencia', description: 'Por qué medio viaja un activo entre procesos: correo, SFTP, SharePoint, carpeta compartida, físico, etc.' },
 ]
 
 function seedCatalogs(): CatalogItem[] {

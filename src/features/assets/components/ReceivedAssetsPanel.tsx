@@ -39,6 +39,7 @@ export function ReceivedAssetsPanel({ processId }: { processId: string }) {
             </div>
 
             {o.justification && <p className="text-[10.5px] text-white/40 mt-1 italic">“{o.justification}”</p>}
+            {o.medium && <p className="text-[10px] text-white/45 mt-0.5">Medio: <span className="text-white/65">{o.medium}</span>{o.medium_detail ? ` · ${o.medium_detail}` : ''}</p>}
 
             <div className="mt-1.5">
               <p className="text-[9.5px] text-white/40 uppercase tracking-wide mb-1">Columnas que llegan ({arriving.length})</p>

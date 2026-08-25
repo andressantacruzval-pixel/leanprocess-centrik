@@ -16,11 +16,23 @@ function critColor(n: number): string {
   return 'transparent'
 }
 
-const LEVEL_ICON = { macro: Layers, process: Box, subprocess: Database, asset: FileText }
-const LEVEL_LABEL = { macro: 'Macroproceso', process: 'Proceso', subprocess: 'Subproceso', asset: 'Activo' }
+const LEVEL_ICON = { macro: Layers, process: Box, subprocess: Database, asset: FileText, field: FileText }
+const LEVEL_LABEL = { macro: 'Macroproceso', process: 'Proceso', subprocess: 'Subproceso', asset: 'Activo', field: 'Campo' }
 const HIDDEN = { opacity: 0, width: 1, height: 1, minWidth: 1, minHeight: 1, border: 'none', background: 'transparent', pointerEvents: 'none' as const }
 
 function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
+  // Nodo de CAMPO (columna): compacto, con punto de color por tratamiento
+  // (gris = no se envía).
+  if (data.level === 'field') {
+    return (
+      <div style={{ width: data.width, height: data.height, borderLeft: `3px solid ${data.fieldColor ?? '#64748b'}` }}
+        className="relative rounded-md border border-white/10 bg-white/[0.03] flex items-center gap-1.5 px-2" title={data.label}>
+        <Handle id="in" type="target" position={Position.Top} isConnectable={false} style={HIDDEN} />
+        <span className="text-[10.5px] text-white/70 truncate">{data.label}</span>
+        <Handle id="out" type="source" position={Position.Bottom} isConnectable={false} style={HIDDEN} />
+      </div>
+    )
+  }
   const Icon = LEVEL_ICON[data.level]
   const accent = critColor(data.critical)
   const cat = CATEGORY_META[data.category]?.color ?? '#334155'
@@ -40,6 +52,7 @@ function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
       title={data.label}
     >
       <span className="absolute -top-2 left-2.5 px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider text-white/70" style={{ background: '#0b1220', border: `1px solid ${cat}66` }}>{LEVEL_LABEL[data.level]}</span>
+      {data.received && <span className="absolute -top-2 right-2.5 px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider text-cyan-200" style={{ background: '#0b1220', border: '1px solid rgba(34,211,238,0.4)' }} title={data.sourceName ? `Recibido de ${data.sourceName}` : 'Recibido'}>↙ Recibido</span>}
       {/* Handles de jerarquía (para las líneas del árbol) — invisibles, no conectables */}
       <Handle id="in" type="target" position={Position.Top} isConnectable={false} style={HIDDEN} />
       <Handle id="out" type="source" position={Position.Bottom} isConnectable={false} style={HIDDEN} />
@@ -57,6 +70,7 @@ function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
         <div className="flex items-center gap-1.5 mt-0.5">
           {!isAsset && <span className="text-[9px] text-white/45">{data.count} activo{data.count === 1 ? '' : 's'}</span>}
           {isAsset && <span className="text-[9px] text-white/45">{data.fields ?? 0} campo{(data.fields ?? 0) === 1 ? '' : 's'}</span>}
+          {isAsset && data.received && data.sourceName && <span className="text-[9px] text-cyan-300/80 truncate">de {data.sourceName}</span>}
           {data.hasCrea && <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATE_COLORS.crea }} title="Se crean datos aquí" />}
           {data.hasElimina && <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATE_COLORS.elimina }} title="Se eliminan datos aquí" />}
           {data.personalData && <ShieldAlert size={10} className="text-amber-400" aria-label="Datos personales" />}

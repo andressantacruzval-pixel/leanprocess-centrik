@@ -49,6 +49,7 @@ export function DataJourneyGraph() {
 
   const [expandedMacros, setExpandedMacros] = useState<Set<string>>(new Set())
   const [expandedProcesses, setExpandedProcesses] = useState<Set<string>>(new Set())
+  const [expandedAssets, setExpandedAssets] = useState<Set<string>>(new Set())
   const [assetFilter, setAssetFilter] = useState<Set<string>>(new Set())
   const [stateFilter, setStateFilter] = useState<Set<string>>(new Set(ALL_STATES))
   const [query, setQuery] = useState('')
@@ -75,14 +76,15 @@ export function DataJourneyGraph() {
   const onToggle = useCallback((nodeId: string) => {
     const raw = nodeId.slice(2)
     if (nodeId.startsWith('m:')) setExpandedMacros((prev) => flip(prev, raw))
-    else setExpandedProcesses((prev) => flip(prev, raw))
+    else if (nodeId.startsWith('p:')) setExpandedProcesses((prev) => flip(prev, raw))
+    else setExpandedAssets((prev) => flip(prev, nodeId)) // a:/r: → expandir campos
   }, [])
 
   const built = useMemo(() => {
     const filter = assetFilter.size ? assetFilter : null
-    const { nodes, edges } = buildJourney({ macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter: filter, stateFilter })
+    const { nodes, edges } = buildJourney({ macros, processes, assets, operations, expandedMacros, expandedProcesses, expandedAssets, assetFilter: filter, stateFilter })
     return { nodes: nodes.map((n) => (n.type === 'journeyNode' ? { ...n, data: { ...n.data, onToggle, connecting } } : n)), edges }
-  }, [macros, processes, assets, operations, expandedMacros, expandedProcesses, assetFilter, stateFilter, onToggle, connecting])
+  }, [macros, processes, assets, operations, expandedMacros, expandedProcesses, expandedAssets, assetFilter, stateFilter, onToggle, connecting])
 
   // Conexión activo → subproceso (Data Journey). Solo se permite ese sentido.
   const isValidConnection = useCallback((c: Connection) => !!c.source?.startsWith('a:') && !!c.target?.startsWith('p:'), [])
@@ -102,13 +104,13 @@ export function DataJourneyGraph() {
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   useEffect(() => { setNodes(built.nodes); setEdges(built.edges) }, [built, setNodes, setEdges])
-  const drillKey = useMemo(() => `${[...expandedMacros].sort().join(',')}|${[...expandedProcesses].sort().join(',')}`, [expandedMacros, expandedProcesses])
+  const drillKey = useMemo(() => `${[...expandedMacros].sort().join(',')}|${[...expandedProcesses].sort().join(',')}|${[...expandedAssets].sort().join(',')}`, [expandedMacros, expandedProcesses, expandedAssets])
 
   const expandAll = () => {
     setExpandedMacros(new Set(macros.map((m) => m.id)))
     setExpandedProcesses(new Set(processes.filter((p) => processes.some((c) => c.parent_process_id === p.id)).map((p) => p.id)))
   }
-  const collapseAll = () => { setExpandedMacros(new Set()); setExpandedProcesses(new Set()) }
+  const collapseAll = () => { setExpandedMacros(new Set()); setExpandedProcesses(new Set()); setExpandedAssets(new Set()) }
 
   const toggleState = (st: string) => setStateFilter((prev) => flip(prev, st))
   const toggleAsset = (id: string) => setAssetFilter((prev) => flip(prev, id))
@@ -174,6 +176,17 @@ export function DataJourneyGraph() {
         </div>
       </div>
 
+      {/* Leyenda de tratamientos de datos */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-1.5 border-b border-white/8 bg-[#0a1018]">
+        <span className="text-[9px] uppercase tracking-wider text-white/35">Tratamiento del dato:</span>
+        {['capta', 'crea', 'usa', 'almacena', 'transforma', 'transfiere', 'elimina'].map((st) => (
+          <span key={st} className="inline-flex items-center gap-1 text-[10px] text-white/55">
+            <span className="w-2 h-2 rounded-full" style={{ background: STATE_COLORS[st] }} /> {STATE_LABELS[st]}
+          </span>
+        ))}
+        <span className="inline-flex items-center gap-1 text-[10px] text-white/40"><span className="w-2 h-2 rounded-full bg-slate-500" /> No se envía</span>
+      </div>
+
       {/* Lienzo */}
       <div className="flex-1 min-h-0 relative">
         {nodes.length === 0 && (
@@ -226,7 +239,7 @@ export function DataJourneyGraph() {
       {edgeLinks && (
         <JourneyEdgeModal
           links={edgeLinks}
-          onSave={(opId, cols, justification, destOp) => updateJourneyLink(opId, cols, justification, destOp)}
+          onSave={(opId, cols, justification, destOp, medium, mediumDetail) => updateJourneyLink(opId, cols, justification, destOp, medium, mediumDetail)}
           onOpenAsset={(assetId) => { const a = assets.find((x) => x.id === assetId); if (a) { setEdgeLinks(null); setEditAsset(a) } }}
           onClose={() => setEdgeLinks(null)}
         />

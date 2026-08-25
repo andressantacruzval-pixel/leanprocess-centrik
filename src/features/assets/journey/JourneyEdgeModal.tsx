@@ -2,23 +2,28 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ArrowRight, ShieldCheck } from 'lucide-react'
 import { ASSET_OPERATIONS, type AssetColumn } from '@/types/asset'
+import { useCatalogStore } from '@/features/catalog/catalogStore'
+import { CreatableSelect } from '@/components/ui/CreatableSelect'
 import { STATE_COLORS, type JourneyEdgeLink } from './journeyGraph'
 
 interface Props {
   links: JourneyEdgeLink[]
-  onSave: (opId: string, columns: AssetColumn[], justification: string, destOperation: string) => void
+  onSave: (opId: string, columns: AssetColumn[], justification: string, destOperation: string, medium: string, mediumDetail: string) => void
   onOpenAsset?: (assetId: string) => void
   onClose: () => void
 }
 
-interface Draft { picked: Set<string>; justification: string; dest: string }
+interface Draft { picked: Set<string>; justification: string; dest: string; medium: string; mediumDetail: string }
 
 // Detalle de una flecha del Data Journey: qué activos se transfieren y con qué
 // columnas. Un bloque por activo, editable en el sitio (columnas + justificación).
 export function JourneyEdgeModal({ links, onSave, onOpenAsset, onClose }: Props) {
+  const getCatalogByType = useCatalogStore((s) => s.getCatalogByType)
+  const addCatalogItem = useCatalogStore((s) => s.addCatalogItem)
+  const mediumOpts = getCatalogByType('transfer_medium').map((c) => ({ value: c.value, label: c.value }))
   const [drafts, setDrafts] = useState<Record<string, Draft>>(() => {
     const m: Record<string, Draft> = {}
-    links.forEach((l) => { m[l.opId] = { picked: new Set(l.columns.map((c) => c.name)), justification: l.justification, dest: l.destOperation ?? '' } })
+    links.forEach((l) => { m[l.opId] = { picked: new Set(l.columns.map((c) => c.name)), justification: l.justification, dest: l.destOperation ?? '', medium: l.medium ?? '', mediumDetail: l.mediumDetail ?? '' } })
     return m
   })
   const totalCols = links.reduce((s, l) => s + (drafts[l.opId]?.picked.size ?? 0), 0)
@@ -30,11 +35,12 @@ export function JourneyEdgeModal({ links, onSave, onOpenAsset, onClose }: Props)
   })
   const setJust = (opId: string, v: string) => setDrafts((d) => ({ ...d, [opId]: { ...d[opId], justification: v } }))
   const setDest = (opId: string, v: string) => setDrafts((d) => ({ ...d, [opId]: { ...d[opId], dest: v } }))
+  const setField = (opId: string, k: 'medium' | 'mediumDetail', v: string) => setDrafts((d) => ({ ...d, [opId]: { ...d[opId], [k]: v } }))
 
   const saveAll = () => {
     links.forEach((l) => {
       const d = drafts[l.opId]; if (!d) return
-      onSave(l.opId, l.assetColumns.filter((c) => d.picked.has(c.name)), d.justification, d.dest)
+      onSave(l.opId, l.assetColumns.filter((c) => d.picked.has(c.name)), d.justification, d.dest, d.medium, d.mediumDetail)
     })
     onClose()
   }
@@ -81,6 +87,11 @@ export function JourneyEdgeModal({ links, onSave, onOpenAsset, onClose }: Props)
                     <option value="">Tratamiento en destino…</option>
                     {ASSET_OPERATIONS.filter((o) => o.value !== 'transfiere').map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <div className="w-44 shrink-0"><CreatableSelect options={mediumOpts} value={d?.medium ?? ''} onChange={(v) => setField(l.opId, 'medium', v)} onCreateOption={(v) => addCatalogItem('transfer_medium', v)} placeholder="Medio de transferencia…" /></div>
+                  <input value={d?.mediumDetail ?? ''} onChange={(e) => setField(l.opId, 'mediumDetail', e.target.value)} placeholder="Descripción del medio (buzón, ruta, carpeta…)"
+                    className="flex-1 min-w-[150px] bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[12px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/50" />
                 </div>
               </div>
             )

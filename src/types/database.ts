@@ -137,6 +137,8 @@ export type Database = {
           columns: { name: string; code?: string; description: string; operation?: string }[] | null
           justification: string | null
           dest_operation: string | null
+          medium: string | null
+          medium_detail: string | null
           sort_order: number
           created_at: string
           updated_at: string
@@ -152,6 +154,8 @@ export type Database = {
           columns?: { name: string; code?: string; description: string; operation?: string }[] | null
           justification?: string | null
           dest_operation?: string | null
+          medium?: string | null
+          medium_detail?: string | null
           sort_order?: number
           created_at?: string
           updated_at?: string
@@ -167,6 +171,8 @@ export type Database = {
           columns?: { name: string; code?: string; description: string; operation?: string }[] | null
           justification?: string | null
           dest_operation?: string | null
+          medium?: string | null
+          medium_detail?: string | null
           sort_order?: number
           created_at?: string
           updated_at?: string

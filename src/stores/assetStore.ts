@@ -43,7 +43,7 @@ interface AssetState {
   setJourney: (assetId: string, processId: string | null, direction: 'to' | 'from', processIds: string[]) => void
   setJourneyDetailed: (assetId: string, processId: string | null, direction: 'to' | 'from', links: { processId: string; columns: AssetColumn[]; justification: string }[]) => void
   addJourneyLink: (assetId: string, homeProcessId: string | null, direction: 'to' | 'from', otherProcessId: string, columns: AssetColumn[], justification: string) => void
-  updateJourneyLink: (opId: string, columns: AssetColumn[], justification: string, destOperation?: string) => void
+  updateJourneyLink: (opId: string, columns: AssetColumn[], justification: string, destOperation?: string, medium?: string, mediumDetail?: string) => void
   deleteOperation: (opId: string) => void
   addAsset: (data: Partial<InformationAsset>) => InformationAsset | null
   updateAsset: (id: string, updates: Partial<InformationAsset>) => void
@@ -191,9 +191,14 @@ export const useAssetStore = create<AssetState>()(
       },
 
       // Edita columnas/justificación y el tratamiento en destino de un enlace.
-      updateJourneyLink: (opId, columns, justification, destOperation) => {
+      updateJourneyLink: (opId, columns, justification, destOperation, medium, mediumDetail) => {
         const now = new Date().toISOString()
-        const patch = { columns, justification, ...(destOperation !== undefined ? { dest_operation: destOperation } : {}) }
+        const patch = {
+          columns, justification,
+          ...(destOperation !== undefined ? { dest_operation: destOperation } : {}),
+          ...(medium !== undefined ? { medium } : {}),
+          ...(mediumDetail !== undefined ? { medium_detail: mediumDetail } : {}),
+        }
         set((s) => ({ operations: s.operations.map((o) => (o.id === opId ? { ...o, ...patch, updated_at: now } : o)) }))
         void dbWrite('asset:journeyLink:update', updateOperation(opId, patch), { silent: true })
       },

@@ -74,6 +74,8 @@ export interface AssetOperationRow {
   columns?: { name: string; code?: string; description: string; operation?: string }[]
   justification?: string
   dest_operation?: string
+  medium?: string
+  medium_detail?: string
   sort_order: number
   created_at: string
   updated_at: string
