@@ -8,10 +8,7 @@ import { CreatableSelect } from '@/components/ui/CreatableSelect'
 import { ArrowRight, ArrowLeft } from 'lucide-react'
 import type { BpmnModelerInstance } from '@/types/bpmn'
 import { renameNode } from '../placeAssetNode'
-import {
-  ASSET_STATUSES, CIA_IMPACT_SCALE,
-  type InformationAsset, type CiaDimension,
-} from '@/types/asset'
+import { ASSET_STATUSES, type InformationAsset } from '@/types/asset'
 
 interface Props {
   processId: string
@@ -20,8 +17,6 @@ interface Props {
   modeler?: BpmnModelerInstance | null
   onClose: () => void
 }
-
-const CIA_ORDER: CiaDimension[] = ['C', 'I', 'A']
 
 export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClose }: Props) {
   const addAsset = useAssetStore((s) => s.addAsset)
@@ -56,9 +51,6 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
     operation: existingOp ?? '',
   })
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
-
-  const cia: Record<CiaDimension, number | null> = { C: f.confidentiality, I: f.integrity, A: f.availability }
-  const ciaKey: Record<CiaDimension, keyof typeof f> = { C: 'confidentiality', I: 'integrity', A: 'availability' }
 
   const save = () => {
     if (!f.name.trim()) return
@@ -116,22 +108,8 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
             <div><label className={lbl}>Ubicación / Repositorio</label><CreatableSelect options={opts('asset_location')} value={f.location} onChange={(v) => set('location', v)} onCreateOption={(v) => addCatalogItem('asset_location', v)} placeholder="Sistema, servidor, ubicación…" /></div>
           </div>
 
-          {/* Clasificación C·I·D */}
-          <div>
-            <p className="text-[11px] font-semibold text-white/70 mb-2">Clasificación C·I·D <span className="text-white/35 font-normal">(1 Insignificante → 5 Catastrófico)</span></p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {CIA_ORDER.map((d) => (
-                <div key={d}>
-                  <label className={lbl}>{CIA_IMPACT_SCALE[d].label}</label>
-                  <select className={inp} value={cia[d] ?? ''} onChange={(e) => set(ciaKey[d], e.target.value ? Number(e.target.value) : null)}
-                    title={cia[d] ? CIA_IMPACT_SCALE[d].levels[cia[d] as number] : ''}>
-                    <option value="">—</option>
-                    {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n} title={CIA_IMPACT_SCALE[d].levels[n]}>{n} · {CIA_IMPACT_SCALE[d].levels[n].split(' — ')[0]}</option>)}
-                  </select>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* La clasificación C·I·D (impacto) se valora en «Riesgo del activo»
+              para no evaluar lo mismo dos veces. */}
 
           {/* Legal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
