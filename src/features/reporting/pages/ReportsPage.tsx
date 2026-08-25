@@ -15,7 +15,9 @@ import { useAuthStore } from '@/stores/authStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { useOrgLabels, useOrgUnitNamesByLevel } from '@/hooks/useOrgLabels'
-import { exportReportToExcel, exportReportToPdf } from '@/utils/reportExporter'
+import { exportReportToExcel, exportReportToPdf, type AssetRiskExport } from '@/utils/reportExporter'
+import { getRiskLevel } from '@/types/risk'
+import { assetInherentImpact, calculateAssetResidual } from '@/types/assetRisk'
 import { useImprovementStore } from '@/stores/improvementStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
 import { CARGO_CATALOG } from '@/features/cargos/cargoData'
@@ -79,11 +81,27 @@ export default function ReportsPage() {
   const deleteOpportunity = useImprovementStore((s) => s.deleteOpportunity)
   const allAssets = useAssetStore((s) => s.assets)
   const assetOperations = useAssetStore((s) => s.operations)
+  const assetControls = useAssetStore((s) => s.assetControls)
   const assetOps = useMemo(() => {
     const m: Record<string, string> = {}
     assetOperations.forEach((o) => { if (o.asset_id && o.operation) m[o.asset_id] = o.operation })
     return m
   }, [assetOperations])
+  const assetRisk = useMemo(() => {
+    const m: Record<string, AssetRiskExport> = {}
+    allAssets.forEach((a) => {
+      const controls = assetControls.filter((c) => c.asset_id === a.id)
+      const inhImp = assetInherentImpact(a.confidentiality, a.integrity, a.availability)
+      const res = calculateAssetResidual(a.confidentiality, a.integrity, a.availability, a.probability, controls)
+      m[a.id] = {
+        threat: a.threat || '', vulnerability: a.vulnerability || '', probability: a.probability ?? null,
+        controls: controls.length,
+        inherent: a.probability && inhImp ? getRiskLevel(a.probability, inhImp).label : '',
+        residual: res.rProb && res.residualImpact ? getRiskLevel(res.rProb, res.residualImpact).label : '',
+      }
+    })
+    return m
+  }, [allAssets, assetControls])
   const catalogItems = useCatalogStore((s) => s.catalogItems)
   const cargoCatalog = useMemo(() => catalogItems.filter((c) => c.catalog_type === CARGO_CATALOG && c.is_active).map((c) => c.value), [catalogItems])
 
@@ -124,11 +142,11 @@ export default function ReportsPage() {
       tab: activeTab, company, generatedBy: profile?.full_name ?? null,
       processes: filteredProcesses, macroMap, processMap,
       allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog, orgLabels: org,
-      allAssets, assetOps,
+      allAssets, assetOps, assetRisk,
     }
     if (format === 'excel') exportReportToExcel(data)
     else exportReportToPdf(data)
-  }, [activeTab, company, profile, filteredProcesses, macroMap, processMap, allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog, org, allAssets, assetOps])
+  }, [activeTab, company, profile, filteredProcesses, macroMap, processMap, allRisks, allIndicators, allProcedures, allAudits, allAnalyses, allImprovements, cargoCatalog, org, allAssets, assetOps, assetRisk])
 
   const hasFilters = search || filterManagement || filterArea || filterOperative || filterMacro || filterLevel
 

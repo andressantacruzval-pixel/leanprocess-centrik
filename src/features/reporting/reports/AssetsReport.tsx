@@ -2,11 +2,14 @@ import { useMemo, useState } from 'react'
 import type { Process, Macroprocess } from '@/types/process'
 import type { InformationAsset } from '@/types/asset'
 import { useAssetStore } from '@/stores/assetStore'
+import { getRiskLevel } from '@/types/risk'
+import { assetInherentImpact, calculateAssetResidual } from '@/types/assetRisk'
 import { Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
 import { hierarchyColumns } from '../components/hierarchyColumns'
 import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
 import { OrgTopChart, type OrgTopItem } from '../components/OrgTopChart'
+import { AssetHeatMap } from '@/features/assets/components/AssetHeatMap'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 // Reporte de Activos de Información (ISO 27001): tablero (criticidad C·I·D, tipos,
@@ -27,6 +30,7 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
 }) {
   const org = useOrgLabels()
   const operations = useAssetStore((s) => s.operations)
+  const assetControls = useAssetStore((s) => s.assetControls)
   const ids = useMemo(() => new Set(processes.map((p) => p.id)), [processes])
   const list = useMemo(() => assets.filter((a) => a.process_id && ids.has(a.process_id)), [assets, ids])
   const opByAsset = useMemo(() => {
@@ -34,6 +38,21 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
     operations.forEach((o) => { if (o.asset_id && o.operation) m.set(o.asset_id, o.operation) })
     return m
   }, [operations])
+
+  // Riesgo por activo (inherente y residual) reutilizando la matriz 5×5.
+  const riskByAsset = useMemo(() => {
+    const m = new Map<string, { inhImp: number; inhProb: number; resImp: number; resProb: number; controls: number }>()
+    list.forEach((a) => {
+      const controls = assetControls.filter((c) => c.asset_id === a.id)
+      const inhImp = assetInherentImpact(a.confidentiality, a.integrity, a.availability)
+      const res = calculateAssetResidual(a.confidentiality, a.integrity, a.availability, a.probability, controls)
+      m.set(a.id, { inhImp, inhProb: a.probability || 0, resImp: res.residualImpact, resProb: res.rProb, controls: controls.length })
+    })
+    return m
+  }, [list, assetControls])
+  const heatInh = useMemo(() => list.map((a) => riskByAsset.get(a.id)).filter((r): r is NonNullable<typeof r> => !!r && !!r.inhProb && !!r.inhImp).map((r) => ({ p: r.inhProb, i: r.inhImp })), [list, riskByAsset])
+  const heatRes = useMemo(() => list.map((a) => riskByAsset.get(a.id)).filter((r): r is NonNullable<typeof r> => !!r && !!r.resProb && !!r.resImp).map((r) => ({ p: r.resProb, i: r.resImp })), [list, riskByAsset])
+  const extremos = useMemo(() => [...riskByAsset.values()].filter((r) => r.resProb && r.resImp && r.resProb * r.resImp >= 8).length, [riskByAsset])
 
   const [fBand, setFBand] = useState('')
   const [fType, setFType] = useState('')
@@ -62,12 +81,18 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
     { key: 'i', header: 'I', accessor: (a) => a.integrity ?? 0 },
     { key: 'a', header: 'D', accessor: (a) => a.availability ?? 0 },
     { key: 'crit', header: 'Criticidad', accessor: (a) => a.criticality || 0, cell: (a) => { const b = critBand(a.criticality || 0); return <Badge label={`${a.criticality || 0} · ${b.label}`} hex={b.hex} /> } },
+    { key: 'threat', header: 'Amenaza', accessor: (a) => a.threat || '', className: 'max-w-[160px]', cell: (a) => <div className="truncate" title={a.threat}>{a.threat || '-'}</div> },
+    { key: 'vuln', header: 'Vulnerabilidad', accessor: (a) => a.vulnerability || '', className: 'max-w-[160px]', cell: (a) => <div className="truncate" title={a.vulnerability}>{a.vulnerability || '-'}</div> },
+    { key: 'prob', header: 'Prob.', accessor: (a) => a.probability ?? 0 },
+    { key: 'nctrl', header: 'Controles', accessor: (a) => riskByAsset.get(a.id)?.controls ?? 0 },
+    { key: 'inh', header: 'Sev. inherente', accessor: (a) => { const r = riskByAsset.get(a.id); return r && r.inhProb && r.inhImp ? r.inhProb * r.inhImp : 0 }, cell: (a) => { const r = riskByAsset.get(a.id); if (!r || !r.inhProb || !r.inhImp) return <span className="text-white/30">-</span>; const l = getRiskLevel(r.inhProb, r.inhImp); return <Badge label={l.label} hex={l.hex} /> } },
+    { key: 'res', header: 'Sev. residual', accessor: (a) => { const r = riskByAsset.get(a.id); return r && r.resProb && r.resImp ? r.resProb * r.resImp : 0 }, cell: (a) => { const r = riskByAsset.get(a.id); if (!r || !r.resProb || !r.resImp) return <span className="text-white/30">-</span>; const l = getRiskLevel(r.resProb, r.resImp); return <Badge label={l.label} hex={l.hex} /> } },
     { key: 'label', header: 'Clasificación', accessor: (a) => a.label || '' },
     { key: 'pd', header: 'Datos personales', accessor: (a) => (a.has_personal_data ? 'Sí' : 'No'), cell: (a) => a.has_personal_data ? <Badge label={a.personal_data_category || 'Sí'} hex="#d97706" /> : <span className="text-white/30">No</span> },
     { key: 'ret', header: 'Retención', accessor: (a) => a.retention_period || '' },
     { key: 'disp', header: 'Disposición', accessor: (a) => a.disposal_method || '' },
     { key: 'status', header: 'Estado', accessor: (a) => a.status || '' },
-  ], [org, processMap, macroMap, opByAsset])
+  ], [org, processMap, macroMap, opByAsset, riskByAsset])
 
   const byBand = useMemo<Datum[]>(() => BANDS.map((b) => ({
     label: b, color: BAND_HEX[b], value: list.filter((a) => critBand(a.criticality || 0).label === b).length,
@@ -91,8 +116,8 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
       <Grid cols={4}>
         <Stat label="Activos" value={list.length} sub="de información" tone="cyan" />
         <Stat label="Críticos + altos" value={criticos} sub={`${list.length ? Math.round(criticos / list.length * 100) : 0}% del total`} tone="red" />
+        <Stat label="Riesgo residual alto/extremo" value={extremos} sub="tras controles" tone="red" />
         <Stat label="Con datos personales" value={conDatos} sub="requieren protección" tone="amber" />
-        <Stat label="Sin clasificar C·I·D" value={sinClasif} sub="pendientes de valorar" tone="violet" />
       </Grid>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -105,6 +130,15 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
         <Card title="Por tipo de activo" sub="Clic para filtrar la tabla."><HBars data={byType} onBar={(l) => setFType(fType === l ? '' : l)} active={fType} /></Card>
       </div>
 
+      {(heatInh.length > 0 || heatRes.length > 0) && (
+        <Card title="Mapa de calor de riesgo de activos" sub="Probabilidad × mayor impacto C·I·D. Inherente (antes de controles) vs. residual (después).">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl mx-auto">
+            <AssetHeatMap points={heatInh} label="Riesgo Inherente" />
+            <AssetHeatMap points={heatRes} label="Riesgo Residual" />
+          </div>
+        </Card>
+      )}
+
       <OrgTopChart title="Activos más críticos" sub="Criticidad alta/crítica por nivel organizacional." items={criticosItems} org={org} color="#ef4444" />
 
       <div className="space-y-2">
@@ -113,7 +147,7 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
         {sinClasif > 0 && <Insight tone="warn">{sinClasif} activo(s) sin clasificación C·I·D. Sin valorarlos no se puede priorizar su riesgo.</Insight>}
       </div>
 
-      <DataTable columns={columns} rows={shown} minWidth={1700} rowKey={(a) => a.id} />
+      <DataTable columns={columns} rows={shown} minWidth={2300} rowKey={(a) => a.id} />
     </Dashboard>
   )
 }

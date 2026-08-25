@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Plus, Pencil, Trash2, ShieldCheck, Database, Sparkles, Loader2 } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Plus, Pencil, Trash2, ShieldCheck, Database, Sparkles, Loader2, Shield, BarChart3 } from 'lucide-react'
 import { useAssetStore } from '@/stores/assetStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useCompanyStore } from '@/stores/companyStore'
@@ -9,12 +9,15 @@ import { InsufficientTokensModal } from '@/components/ui/InsufficientTokensModal
 import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 import { getRiskLevel } from '@/types/risk'
 import { assetCriticality, type InformationAsset } from '@/types/asset'
+import { assetInherentImpact, calculateAssetResidual } from '@/types/assetRisk'
 import { identifyAssetsFromProcess } from '@/lib/assetAi'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { toast } from '@/stores/toastStore'
 import type { BpmnModelerInstance } from '@/types/bpmn'
 import { placeDataStoreNear, removeNode } from '../placeAssetNode'
 import { AssetFormModal } from './AssetFormModal'
+import { AssetRiskModal } from './AssetRiskModal'
+import { AssetHeatMap } from './AssetHeatMap'
 
 // Panel de Activos de Información del proceso (rail derecho / ventana emergente).
 // Muestra TODOS los activos del proceso (los anclados a cualquier nodo del
@@ -33,6 +36,7 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
   const addAsset = useAssetStore((s) => s.addAsset)
   const setOperation = useAssetStore((s) => s.setOperation)
   const deleteAsset = useAssetStore((s) => s.deleteAsset)
+  const assetControls = useAssetStore((s) => s.assetControls)
 
   const process = useProcessStore((s) => s.processes.find((p) => p.id === processId))
   const company = useCompanyStore((s) => s.company)
@@ -43,8 +47,29 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<InformationAsset | null>(null)
   const [litId, setLitId] = useState<string | null>(null)
+  const [riskAsset, setRiskAsset] = useState<InformationAsset | null>(null)
+  const [showHeat, setShowHeat] = useState(false)
 
   const list = assets.filter((a) => a.process_id === processId)
+
+  // Riesgo por activo (inherente y residual) reutilizando la matriz 5×5.
+  const riskOf = (a: InformationAsset) => {
+    const controls = assetControls.filter((c) => c.asset_id === a.id)
+    const inhImp = assetInherentImpact(a.confidentiality, a.integrity, a.availability)
+    const res = calculateAssetResidual(a.confidentiality, a.integrity, a.availability, a.probability, controls)
+    return { inhImp, inhProb: a.probability || 0, resImp: res.residualImpact, resProb: res.rProb }
+  }
+  const heat = useMemo(() => {
+    const inh: { p: number; i: number }[] = []
+    const resd: { p: number; i: number }[] = []
+    list.forEach((a) => {
+      const r = riskOf(a)
+      if (r.inhProb && r.inhImp) inh.push({ p: r.inhProb, i: r.inhImp })
+      if (r.resProb && r.resImp) resd.push({ p: r.resProb, i: r.resImp })
+    })
+    return { inh, resd }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list, assetControls])
 
   // Borra el activo del catálogo y, si tiene nodo en el diagrama, también lo quita.
   // Se borra el activo PRIMERO para que el listener de «nodo eliminado» no intente
@@ -129,6 +154,15 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
           {list.length > 0 && <span className="text-[9px] bg-white/10 px-1.5 py-0.5 rounded text-white/50">{list.length}</span>}
         </div>
         <div className="flex items-center gap-1.5">
+          {list.length > 0 && (
+            <button
+              onClick={() => setShowHeat((v) => !v)}
+              className={`p-1.5 rounded-md border transition-colors ${showHeat ? 'text-cyan-400 bg-cyan-500/20 border-cyan-500/30' : 'text-white/40 hover:text-white/70 hover:bg-white/10 border-white/10'}`}
+              title="Mapa de calor de riesgo de activos"
+            >
+              <BarChart3 size={13} />
+            </button>
+          )}
           <button
             onClick={handleIdentify}
             disabled={identifying || budget.isConsuming}
@@ -148,6 +182,16 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
         </div>
       </div>
 
+      {showHeat && list.length > 0 && (
+        <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-3">
+            <AssetHeatMap points={heat.inh} label="Riesgo Inherente" />
+            <AssetHeatMap points={heat.resd} label="Riesgo Residual" />
+          </div>
+          <p className="text-[9px] text-white/30 text-center mt-2">Probabilidad × mayor impacto C·I·D. Evalúa cada activo con el botón de escudo.</p>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {list.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
@@ -159,6 +203,9 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
           const crit = a.criticality || 0
           const lvl = crit ? getRiskLevel(crit, crit) : null
           const op = getOperation(a.id, processId)?.operation
+          const r = riskOf(a)
+          const inhLvl = r.inhProb && r.inhImp ? getRiskLevel(r.inhProb, r.inhImp) : null
+          const resLvl = r.resProb && r.resImp ? getRiskLevel(r.resProb, r.resImp) : null
           return (
             <div key={a.id} className={`group rounded-lg border p-3 transition-colors ${litId === a.id ? 'border-amber-400/50 bg-amber-500/[0.06]' : 'border-white/8 bg-white/[0.03]'}`}>
               <div className="flex items-start justify-between gap-2">
@@ -172,10 +219,18 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
                     {a.owner && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/45">Prop: {a.owner}</span>}
                     {lvl && <span className={`text-[9px] px-1.5 py-0.5 rounded text-white ${lvl.color}`} title="Criticidad C·I·D (mayor de las tres)">C·I·D {crit}</span>}
                     {a.has_personal_data && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300">Datos personales</span>}
+                    {inhLvl && (
+                      <span className="inline-flex items-center gap-1 text-[9px]" title="Riesgo inherente → residual">
+                        <span className={`px-1.5 py-0.5 rounded text-white ${inhLvl.color}`}>{inhLvl.label}</span>
+                        <span className="text-white/25">→</span>
+                        <span className={`px-1.5 py-0.5 rounded text-white ${resLvl?.color ?? 'bg-white/10'}`}>{resLvl?.label ?? '—'}</span>
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col gap-0.5 shrink-0">
                   <button onClick={() => { setEditing(a); setShowForm(true) }} title="Editar / ampliar" className="p-1.5 rounded text-white/30 hover:text-cyan-400 hover:bg-white/5"><Pencil size={13} /></button>
+                  <button onClick={() => setRiskAsset(a)} title="Evaluar riesgo del activo" className="p-1.5 rounded text-white/30 hover:text-amber-400 hover:bg-amber-500/10"><Shield size={13} /></button>
                   <button onClick={() => removeAsset(a)} title="Eliminar" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button>
                 </div>
               </div>
@@ -192,6 +247,9 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
           modeler={modeler}
           onClose={() => { setShowForm(false); setEditing(null) }}
         />
+      )}
+      {riskAsset && (
+        <AssetRiskModal asset={riskAsset} onClose={() => setRiskAsset(null)} />
       )}
       <InsufficientTokensModal
         open={budget.showInsufficientModal}

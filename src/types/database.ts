@@ -34,6 +34,9 @@ export type Database = {
           integrity: number | null
           availability: number | null
           criticality: number | null
+          probability: number | null
+          threat: string | null
+          vulnerability: string | null
           label: string | null
           has_personal_data: boolean
           personal_data_category: string | null
@@ -66,6 +69,9 @@ export type Database = {
           integrity?: number | null
           availability?: number | null
           criticality?: number | null
+          probability?: number | null
+          threat?: string | null
+          vulnerability?: string | null
           label?: string | null
           has_personal_data?: boolean
           personal_data_category?: string | null
@@ -98,6 +104,9 @@ export type Database = {
           integrity?: number | null
           availability?: number | null
           criticality?: number | null
+          probability?: number | null
+          threat?: string | null
+          vulnerability?: string | null
           label?: string | null
           has_personal_data?: boolean
           personal_data_category?: string | null
@@ -146,6 +155,78 @@ export type Database = {
           operation?: string
           source_process_id?: string | null
           target_process_id?: string | null
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      asset_controls: {
+        Row: {
+          id: string
+          company_id: string
+          asset_id: string
+          description: string | null
+          doc: number
+          type: number
+          segregation: number
+          evidence: number
+          freq: number
+          nature: number
+          training: number
+          monitoring: number
+          mitigates_probability: boolean
+          mitigates_c: boolean
+          mitigates_i: boolean
+          mitigates_a: boolean
+          score: number
+          effectiveness: string
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          asset_id: string
+          description?: string | null
+          doc?: number
+          type?: number
+          segregation?: number
+          evidence?: number
+          freq?: number
+          nature?: number
+          training?: number
+          monitoring?: number
+          mitigates_probability?: boolean
+          mitigates_c?: boolean
+          mitigates_i?: boolean
+          mitigates_a?: boolean
+          score?: number
+          effectiveness?: string
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          asset_id?: string
+          description?: string | null
+          doc?: number
+          type?: number
+          segregation?: number
+          evidence?: number
+          freq?: number
+          nature?: number
+          training?: number
+          monitoring?: number
+          mitigates_probability?: boolean
+          mitigates_c?: boolean
+          mitigates_i?: boolean
+          mitigates_a?: boolean
+          score?: number
+          effectiveness?: string
           sort_order?: number
           created_at?: string
           updated_at?: string

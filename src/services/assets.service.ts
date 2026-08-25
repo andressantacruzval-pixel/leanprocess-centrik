@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 import type { InformationAsset } from '@/types/asset'
+import type { AssetControl } from '@/types/assetRisk'
 import type { ServiceResult } from './types'
 
 type AssetInsert = Database['public']['Tables']['information_assets']['Insert']
@@ -122,6 +123,73 @@ export async function replaceOperationForAssetProcess(assetId: string, processId
       .eq('asset_id', assetId).is('source_process_id', null).is('target_process_id', null)
     q = processId ? q.eq('process_id', processId) : q.is('process_id', null)
     const { error } = await q
+    if (error) return { data: null, error: new Error(error.message) }
+    return { data: null, error: null }
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
+  }
+}
+
+// ── Controles de seguridad del activo (Fase 2) ─────────────────────────────
+type AssetControlInsert = Database['public']['Tables']['asset_controls']['Insert']
+type AssetControlUpdate = Database['public']['Tables']['asset_controls']['Update']
+
+export async function getAssetControlsByCompany(companyId: string): ServiceResult<AssetControl[]> {
+  try {
+    const { data, error } = await supabase
+      .from('asset_controls')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('sort_order', { ascending: true })
+    if (error) return { data: null, error: new Error(error.message) }
+    return { data: data as unknown as AssetControl[], error: null }
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
+  }
+}
+
+export async function createAssetControl(data: Partial<AssetControl>): ServiceResult<AssetControl> {
+  try {
+    const { data: row, error } = await supabase
+      .from('asset_controls')
+      .insert(data as unknown as AssetControlInsert)
+      .select()
+      .single()
+    if (error) return { data: null, error: new Error(error.message) }
+    return { data: row as unknown as AssetControl, error: null }
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
+  }
+}
+
+export async function updateAssetControl(id: string, updates: Partial<AssetControl>): ServiceResult<void> {
+  try {
+    const { error } = await supabase
+      .from('asset_controls')
+      .update({ ...updates, updated_at: new Date().toISOString() } as unknown as AssetControlUpdate)
+      .eq('id', id)
+    if (error) return { data: null, error: new Error(error.message) }
+    return { data: null, error: null }
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
+  }
+}
+
+export async function deleteAssetControl(id: string): ServiceResult<void> {
+  try {
+    const { error } = await supabase.from('asset_controls').delete().eq('id', id)
+    if (error) return { data: null, error: new Error(error.message) }
+    return { data: null, error: null }
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err : new Error(String(err)) }
+  }
+}
+
+// Borra todos los controles de un activo (por si el FK no está en cascada). Se
+// llama antes de borrar el activo.
+export async function deleteControlsForAsset(assetId: string): ServiceResult<void> {
+  try {
+    const { error } = await supabase.from('asset_controls').delete().eq('asset_id', assetId)
     if (error) return { data: null, error: new Error(error.message) }
     return { data: null, error: null }
   } catch (err) {

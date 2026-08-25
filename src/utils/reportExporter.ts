@@ -67,6 +67,17 @@ export interface ReportData {
   orgLabels?: { l0: string; l1: string; l2: string; hasL2: boolean }
   allAssets?: InformationAsset[]
   assetOps?: Record<string, string>
+  assetRisk?: Record<string, AssetRiskExport>
+}
+
+// Resumen de riesgo por activo para exportes (calculado en ReportsPage).
+export interface AssetRiskExport {
+  threat: string
+  vulnerability: string
+  probability: number | null
+  controls: number
+  inherent: string
+  residual: string
 }
 
 // Efectividad promedio de los controles de un riesgo (0–40) → etiqueta.
@@ -336,14 +347,15 @@ function excelValue(wb: ExcelJS.Workbook, data: ReportData, company: string, dat
 function excelAssets(wb: ExcelJS.Workbook, data: ReportData, company: string, date: string) {
   const ws = wb.addWorksheet('Activos de Informacion')
   const { headers: HH, W, cells } = hierParts(data)
-  const H = [...HH, 'Codigo', 'Activo', 'Tipo', 'Formato', 'Operacion', 'Propietario', 'Custodio', 'Ubicacion', 'C', 'I', 'D', 'Criticidad', 'Clasificacion', 'Datos personales', 'Retencion', 'Disposicion', 'Estado']
+  const H = [...HH, 'Codigo', 'Activo', 'Tipo', 'Formato', 'Operacion', 'Propietario', 'Custodio', 'Ubicacion', 'C', 'I', 'D', 'Criticidad', 'Clasificacion', 'Amenaza', 'Vulnerabilidad', 'Probabilidad', 'Controles', 'Sev. inherente', 'Sev. residual', 'Datos personales', 'Retencion', 'Disposicion', 'Estado']
   ws.columns = H.map((h, i) => ({ header: h, key: `c${i}`, width: i < W ? 22 : 14 }))
   const ids = new Set(data.processes.map((p) => p.id))
   const rows: (string | number)[][] = []
   for (const a of (data.allAssets || [])) {
     if (!a.process_id || !ids.has(a.process_id)) continue
     const p = data.processMap.get(a.process_id)
-    rows.push([...cells(p), a.code || '-', a.name, a.asset_type || '-', a.format || '-', data.assetOps?.[a.id] || '-', a.owner || '-', a.custodian || '-', a.location || '-', a.confidentiality ?? '-', a.integrity ?? '-', a.availability ?? '-', a.criticality ?? '-', a.label || '-', a.has_personal_data ? (a.personal_data_category || 'Si') : 'No', a.retention_period || '-', a.disposal_method || '-', a.status || '-'])
+    const rk = data.assetRisk?.[a.id]
+    rows.push([...cells(p), a.code || '-', a.name, a.asset_type || '-', a.format || '-', data.assetOps?.[a.id] || '-', a.owner || '-', a.custodian || '-', a.location || '-', a.confidentiality ?? '-', a.integrity ?? '-', a.availability ?? '-', a.criticality ?? '-', a.label || '-', rk?.threat || '-', rk?.vulnerability || '-', rk?.probability ?? '-', rk?.controls ?? 0, rk?.inherent || '-', rk?.residual || '-', a.has_personal_data ? (a.personal_data_category || 'Si') : 'No', a.retention_period || '-', a.disposal_method || '-', a.status || '-'])
   }
   rows.forEach((r) => ws.addRow(r))
   styleHeaders(ws, H.length, 1)
@@ -453,13 +465,14 @@ export function exportReportToPdf(data: ReportData) {
       break
     }
     case 'activos': {
-      head = [[...HH, 'Codigo', 'Activo', 'Tipo', 'Operacion', 'Propietario', 'Ubicacion', 'C', 'I', 'D', 'Crit.', 'Clasif.', 'D. pers.', 'Retencion', 'Disposicion', 'Estado']]
+      head = [[...HH, 'Codigo', 'Activo', 'Tipo', 'Operacion', 'Propietario', 'C', 'I', 'D', 'Crit.', 'Amenaza', 'Prob.', 'Ctrl.', 'Sev. inh.', 'Sev. res.', 'D. pers.', 'Estado']]
       const assetIds = new Set(data.processes.map((p) => p.id))
       body = (data.allAssets || [])
         .filter((a) => a.process_id && assetIds.has(a.process_id))
         .map((a) => {
           const proc = a.process_id ? pMap.get(a.process_id) : undefined
-          return [...cells(proc), a.code || '-', a.name, a.asset_type || '-', data.assetOps?.[a.id] || '-', a.owner || '-', a.location || '-', String(a.confidentiality ?? '-'), String(a.integrity ?? '-'), String(a.availability ?? '-'), String(a.criticality ?? '-'), a.label || '-', a.has_personal_data ? 'Si' : 'No', a.retention_period || '-', a.disposal_method || '-', a.status || '-']
+          const rk = data.assetRisk?.[a.id]
+          return [...cells(proc), a.code || '-', a.name, a.asset_type || '-', data.assetOps?.[a.id] || '-', a.owner || '-', String(a.confidentiality ?? '-'), String(a.integrity ?? '-'), String(a.availability ?? '-'), String(a.criticality ?? '-'), rk?.threat || '-', String(rk?.probability ?? '-'), String(rk?.controls ?? 0), rk?.inherent || '-', rk?.residual || '-', a.has_personal_data ? 'Si' : 'No', a.status || '-']
         })
       break
     }

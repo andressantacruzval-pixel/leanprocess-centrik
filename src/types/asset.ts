@@ -108,6 +108,12 @@ export interface InformationAsset {
   availability: number | null
   criticality: number | null
   label: string
+  // ── Riesgo del activo (Fase 2) ──────────────────────────────────────────
+  // Impacto = mayor de C·I·D (arriba); la probabilidad es única y se relaciona
+  // con ese mayor impacto. Amenaza/vulnerabilidad describen el origen del riesgo.
+  probability: number | null
+  threat: string
+  vulnerability: string
   has_personal_data: boolean
   personal_data_category: string
   legal_requirements: string

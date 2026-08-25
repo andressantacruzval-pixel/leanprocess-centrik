@@ -6,9 +6,13 @@ import { generateId } from '@/utils/id'
 import { dbWrite } from '@/lib/dbWrite'
 import type { InformationAsset } from '@/types/asset'
 import { assetCriticality, assetLabel } from '@/types/asset'
+import type { AssetControl } from '@/types/assetRisk'
+import { computeAssetControlScore, newAssetControlDefaults } from '@/types/assetRisk'
 import { createAsset, updateAsset, deleteAsset, getAssetsByCompany,
   createOperation, replaceOperationForAssetProcess, replaceJourneyLinks, getOperationsByCompany,
-  deleteOperationsForAsset, type AssetOperationRow } from '@/services/assets.service'
+  deleteOperationsForAsset, type AssetOperationRow,
+  createAssetControl, updateAssetControl as updateAssetControlDB, deleteAssetControl as deleteAssetControlDB,
+  deleteControlsForAsset, getAssetControlsByCompany } from '@/services/assets.service'
 
 function currentCompanyId(): string | null {
   return useWorkspaceStore.getState().activeCompanyId
@@ -26,7 +30,12 @@ function withDerived(a: InformationAsset): InformationAsset {
 interface AssetState {
   assets: InformationAsset[]
   operations: AssetOperationRow[]
+  assetControls: AssetControl[]
   getByProcess: (processId: string) => InformationAsset[]
+  getAssetControls: (assetId: string) => AssetControl[]
+  addAssetControl: (assetId: string, description?: string) => AssetControl | null
+  updateAssetControl: (id: string, updates: Partial<AssetControl>) => void
+  deleteAssetControl: (id: string) => void
   getOperation: (assetId: string, processId: string | null) => AssetOperationRow | undefined
   setOperation: (assetId: string, processId: string | null, operation: string) => void
   getTargets: (assetId: string, processId: string | null) => string[]
@@ -46,8 +55,58 @@ export const useAssetStore = create<AssetState>()(
     (set, get) => ({
       assets: [],
       operations: [],
+      assetControls: [],
 
       getByProcess: (processId) => get().assets.filter((a) => a.process_id === processId),
+
+      // ── Controles de seguridad del activo (Fase 2) ──────────────────────
+      getAssetControls: (assetId) =>
+        get().assetControls.filter((c) => c.asset_id === assetId).sort((a, b) => a.sort_order - b.sort_order),
+
+      addAssetControl: (assetId, description) => {
+        const companyId = currentCompanyId()
+        if (!companyId) { toast.error('No hay empresa activa.'); return null }
+        const now = new Date().toISOString()
+        const existing = get().assetControls.filter((c) => c.asset_id === assetId)
+        const control: AssetControl = {
+          id: generateId(), asset_id: assetId, company_id: companyId,
+          ...newAssetControlDefaults(), description: description ?? '',
+          sort_order: existing.length, created_at: now, updated_at: now,
+        }
+        const prev = get().assetControls
+        set({ assetControls: [...prev, control] })
+        void dbWrite('asset:control:create', createAssetControl(control), {
+          silent: true,
+          rollback: () => set({ assetControls: prev }),
+        })
+        return control
+      },
+
+      updateAssetControl: (id, updates) => {
+        const prev = get().assetControls
+        set({
+          assetControls: prev.map((c) => {
+            if (c.id !== id) return c
+            const merged = { ...c, ...updates, updated_at: new Date().toISOString() }
+            const { score, effectiveness } = computeAssetControlScore(merged)
+            return { ...merged, score, effectiveness }
+          }),
+        })
+        const merged = get().assetControls.find((c) => c.id === id)
+        if (!merged) return
+        const { id: _i, asset_id: _a, company_id: _c, created_at: _ca, ...payload } = merged
+        void dbWrite('asset:control:update', updateAssetControlDB(id, payload), {
+          silent: true,
+          rollback: () => set({ assetControls: prev }),
+        })
+      },
+
+      deleteAssetControl: (id) => {
+        const prev = get().assetControls
+        // Borrado definitivo en la UI (no se revierte si la nube falla).
+        set({ assetControls: prev.filter((c) => c.id !== id) })
+        void dbWrite('asset:control:delete', deleteAssetControlDB(id), { silent: true })
+      },
 
       // Operación de ciclo de vida = fila sin origen/destino.
       getOperation: (assetId, processId) =>
@@ -122,6 +181,9 @@ export const useAssetStore = create<AssetState>()(
           availability: data.availability ?? null,
           criticality: null,
           label: '',
+          probability: data.probability ?? null,
+          threat: data.threat ?? '',
+          vulnerability: data.vulnerability ?? '',
           has_personal_data: data.has_personal_data ?? false,
           personal_data_category: data.personal_data_category ?? '',
           legal_requirements: data.legal_requirements ?? '',
@@ -166,13 +228,19 @@ export const useAssetStore = create<AssetState>()(
       deleteAsset: (id) => {
         const prevAssets = get().assets
         const prevOps = get().operations
+        const prevControls = get().assetControls
         // El borrado es DEFINITIVO en la UI: el estado local persistido es la fuente
         // de verdad. No se revierte si la nube falla (fila inexistente, RLS o tabla
         // sin migrar): reponer el activo era justo lo que impedía eliminarlo.
-        set({ assets: prevAssets.filter((a) => a.id !== id), operations: prevOps.filter((o) => o.asset_id !== id) })
+        set({
+          assets: prevAssets.filter((a) => a.id !== id),
+          operations: prevOps.filter((o) => o.asset_id !== id),
+          assetControls: prevControls.filter((c) => c.asset_id !== id),
+        })
         void (async () => {
-          // Primero las operaciones (por si el FK no está en cascada), luego el activo.
+          // Primero dependencias (por si el FK no está en cascada), luego el activo.
           await deleteOperationsForAsset(id)
+          await deleteControlsForAsset(id)
           await dbWrite('asset:delete', deleteAsset(id), { silent: true })
         })()
       },
@@ -181,12 +249,14 @@ export const useAssetStore = create<AssetState>()(
         set((s) => ({
           assets: s.assets.filter((a) => a.company_id !== companyId),
           operations: s.operations.filter((o) => o.company_id !== companyId),
+          assetControls: s.assetControls.filter((c) => c.company_id !== companyId),
         })),
 
       loadFromDB: async (companyId) => {
-        const [assetsRes, opsRes] = await Promise.all([
+        const [assetsRes, opsRes, controlsRes] = await Promise.all([
           getAssetsByCompany(companyId),
           getOperationsByCompany(companyId),
+          getAssetControlsByCompany(companyId),
         ])
         set((s) => ({
           assets: assetsRes.data
@@ -195,6 +265,9 @@ export const useAssetStore = create<AssetState>()(
           operations: opsRes.data
             ? [...s.operations.filter((o) => o.company_id !== companyId), ...(opsRes.data as AssetOperationRow[])]
             : s.operations,
+          assetControls: controlsRes.data
+            ? [...s.assetControls.filter((c) => c.company_id !== companyId), ...(controlsRes.data as AssetControl[])]
+            : s.assetControls,
         }))
       },
     }),
