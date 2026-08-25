@@ -61,6 +61,7 @@ export function DataJourneyGraph() {
   const [editAsset, setEditAsset] = useState<InformationAsset | null>(null)
   const [edgeLinks, setEdgeLinks] = useState<JourneyEdgeLink[] | null>(null)
   const [lifecycleAsset, setLifecycleAsset] = useState<InformationAsset | null>(null)
+  const [lifecycleProcId, setLifecycleProcId] = useState<string | null>(null)
   const [editField, setEditField] = useState<{ kind: 'asset'; assetId: string; idx: number; col: AssetColumn } | { kind: 'link'; opId: string; idx: number; col: AssetColumn } | null>(null)
   const addJourneyLink = useAssetStore((s) => s.addJourneyLink)
   const updateJourneyLink = useAssetStore((s) => s.updateJourneyLink)
@@ -85,10 +86,11 @@ export function DataJourneyGraph() {
     }
     if (id.startsWith('a:')) { const a = assets.find((x) => x.id === id.slice(2)); if (a) setEditAsset(a) }
     else if (id.startsWith('r:')) {
-      // Recibido: el tratamiento es POR SUBPROCESO → se edita en el enlace, no en
-      // el activo origen. Abre el detalle del enlace (no la ficha compartida).
+      // Recibido: el tratamiento es POR SUBPROCESO. Abre el ciclo de vida enfocado
+      // en ESTE subproceso, con la ficha completa de columnas (código · nombre ·
+      // tratamiento · descripción) editable aquí, sin tocar el activo origen.
       const op = operations.find((o) => o.id === id.slice(2)); const a = op && assets.find((x) => x.id === op.asset_id)
-      if (op && a) setEdgeLinks([{ opId: op.id, assetId: a.id, assetName: a.name, assetColumns: a.columns ?? [], columns: op.columns ?? [], justification: op.justification ?? '', destOperation: op.dest_operation, medium: op.medium, mediumDetail: op.medium_detail }])
+      if (op && a) { setLifecycleProcId(op.target_process_id ?? op.source_process_id ?? null); setLifecycleAsset(a) }
     }
   }, [assets, operations])
 
@@ -231,7 +233,7 @@ export function DataJourneyGraph() {
 
         <div className="ml-auto flex items-center gap-1.5">
           {selected.length === 1 && (
-            <button onClick={() => setLifecycleAsset(selected[0])} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-[10.5px] text-cyan-200 hover:bg-cyan-500/20" title="Ver el ciclo de vida del dato por subproceso"><Route size={12} /> Ciclo de vida</button>
+            <button onClick={() => { setLifecycleProcId(null); setLifecycleAsset(selected[0]) }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-[10.5px] text-cyan-200 hover:bg-cyan-500/20" title="Ver el ciclo de vida del dato por subproceso"><Route size={12} /> Ciclo de vida</button>
           )}
           <button onClick={expandAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10.5px] text-white/60 hover:bg-white/10"><Maximize2 size={12} /> Expandir</button>
           <button onClick={collapseAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10.5px] text-white/60 hover:bg-white/10"><Minimize2 size={12} /> Colapsar</button>
@@ -304,7 +306,7 @@ export function DataJourneyGraph() {
       )}
 
       {lifecycleAsset && (
-        <AssetLifecycleModal asset={lifecycleAsset} onClose={() => setLifecycleAsset(null)} />
+        <AssetLifecycleModal asset={lifecycleAsset} initialProcId={lifecycleProcId} onClose={() => { setLifecycleAsset(null); setLifecycleProcId(null) }} />
       )}
 
       {edgeLinks && (
