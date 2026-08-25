@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react'
 import ReactFlow, {
   Background, BackgroundVariant, Controls, MiniMap,
   useNodesState, useEdgesState, useReactFlow, type Connection,
@@ -9,11 +9,13 @@ import { useProcessStore } from '@/stores/processStore'
 import { useAssetStore } from '@/stores/assetStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { toast } from '@/stores/toastStore'
-import type { AssetColumn } from '@/types/asset'
+import type { AssetColumn, InformationAsset } from '@/types/asset'
+import type { Node } from 'reactflow'
 import { buildJourney, STATE_COLORS, STATE_LABELS } from './journeyGraph'
 import { JourneyNode } from './JourneyNode'
 import { JourneyBand } from './JourneyBand'
 import { JourneyLinkModal } from './JourneyLinkModal'
+import { AssetFormModal } from '../components/AssetFormModal'
 
 const nodeTypes = { journeyNode: JourneyNode, journeyBand: JourneyBand }
 
@@ -52,7 +54,15 @@ export function DataJourneyGraph() {
   const [showSearch, setShowSearch] = useState(false)
   const [connecting, setConnecting] = useState(false)
   const [pending, setPending] = useState<{ assetId: string; procId: string } | null>(null)
+  const [editAsset, setEditAsset] = useState<InformationAsset | null>(null)
   const addJourneyLink = useAssetStore((s) => s.addJourneyLink)
+
+  // Clic en un nodo de activo → abre su ficha completa (bidireccional).
+  const onNodeClick = useCallback((_e: MouseEvent, node: Node) => {
+    if (!node.id.startsWith('a:')) return
+    const a = assets.find((x) => x.id === node.id.slice(2))
+    if (a) setEditAsset(a)
+  }, [assets])
 
   const onToggle = useCallback((nodeId: string) => {
     const raw = nodeId.slice(2)
@@ -172,6 +182,7 @@ export function DataJourneyGraph() {
           onConnect={onConnect}
           onConnectStart={() => setConnecting(true)}
           onConnectEnd={() => setConnecting(false)}
+          onNodeClick={onNodeClick}
           isValidConnection={isValidConnection}
           fitView fitViewOptions={{ padding: 0.2 }}
           minZoom={0.15} maxZoom={2}
@@ -191,6 +202,15 @@ export function DataJourneyGraph() {
           targetName={pendingProc.name}
           onConfirm={confirmLink}
           onClose={() => setPending(null)}
+        />
+      )}
+
+      {editAsset && (
+        <AssetFormModal
+          processId={editAsset.process_id ?? ''}
+          bpmnElementId={editAsset.bpmn_element_id}
+          asset={editAsset}
+          onClose={() => setEditAsset(null)}
         />
       )}
     </div>

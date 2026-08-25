@@ -17,9 +17,10 @@ function critColor(n: number): string {
 }
 
 const LEVEL_ICON = { macro: Layers, process: Box, subprocess: Database, asset: FileText }
+const LEVEL_LABEL = { macro: 'Macroproceso', process: 'Proceso', subprocess: 'Subproceso', asset: 'Activo' }
 const HIDDEN = { opacity: 0, width: 1, height: 1, minWidth: 1, minHeight: 1, border: 'none', background: 'transparent', pointerEvents: 'none' as const }
 
-function JourneyNodeInner({ id, data }: NodeProps<JourneyNodeData>) {
+function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
   const Icon = LEVEL_ICON[data.level]
   const accent = critColor(data.critical)
   const cat = CATEGORY_META[data.category]?.color ?? '#334155'
@@ -28,14 +29,17 @@ function JourneyNodeInner({ id, data }: NodeProps<JourneyNodeData>) {
   const glow = data.connecting && canReceive
   const dim = data.connecting && data.level === 'macro'
   const bg = isAsset ? 'rgba(148,163,184,0.08)' : data.level === 'macro' ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)'
-  const border = glow ? '#22d3ee' : data.level === 'macro' ? 'rgba(129,140,248,0.45)' : 'rgba(255,255,255,0.12)'
+  const border = glow || selected ? '#22d3ee' : data.level === 'macro' ? 'rgba(129,140,248,0.45)' : 'rgba(255,255,255,0.12)'
+  // Al seleccionar (clic), el nodo se agranda para leer el nombre completo.
+  const width = selected ? Math.max(data.width, 250) : data.width
 
   return (
     <div
-      style={{ width: data.width, height: data.height, background: bg, borderColor: border, borderTop: `2px solid ${cat}`, boxShadow: glow ? '0 0 0 2px rgba(34,211,238,0.7), 0 0 16px rgba(34,211,238,0.5)' : undefined, opacity: dim ? 0.4 : 1 }}
-      className="relative rounded-xl border flex items-center gap-2 px-2.5 shadow-lg shadow-black/30 backdrop-blur-sm transition-all"
+      style={{ width, height: selected ? 'auto' : data.height, minHeight: data.height, background: bg, borderColor: border, borderTop: `2px solid ${cat}`, boxShadow: glow ? '0 0 0 2px rgba(34,211,238,0.7), 0 0 16px rgba(34,211,238,0.5)' : selected ? '0 0 0 2px rgba(34,211,238,0.6)' : undefined, opacity: dim ? 0.4 : 1 }}
+      className="relative rounded-xl border flex items-center gap-2 px-2.5 py-1.5 shadow-lg shadow-black/30 backdrop-blur-sm transition-all"
       title={data.label}
     >
+      <span className="absolute -top-2 left-2.5 px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider text-white/70" style={{ background: '#0b1220', border: `1px solid ${cat}66` }}>{LEVEL_LABEL[data.level]}</span>
       {/* Handles de jerarquía (para las líneas del árbol) — invisibles, no conectables */}
       <Handle id="in" type="target" position={Position.Top} isConnectable={false} style={HIDDEN} />
       <Handle id="out" type="source" position={Position.Bottom} isConnectable={false} style={HIDDEN} />
@@ -49,7 +53,7 @@ function JourneyNodeInner({ id, data }: NodeProps<JourneyNodeData>) {
       <Icon size={isAsset ? 13 : data.level === 'macro' ? 17 : 15} className="shrink-0 ml-1" color={isAsset ? '#cbd5e1' : data.level === 'macro' ? '#a5b4fc' : '#7dd3fc'} />
 
       <div className="min-w-0 flex-1">
-        <p className={`${isAsset ? 'text-[11px]' : 'text-[12px]'} font-semibold text-white truncate leading-tight`}>{data.label}</p>
+        <p className={`${isAsset ? 'text-[11px]' : 'text-[12px]'} font-semibold text-white leading-tight ${selected ? 'whitespace-normal break-words' : 'truncate'}`}>{data.label}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
           {!isAsset && <span className="text-[9px] text-white/45">{data.count} activo{data.count === 1 ? '' : 's'}</span>}
           {isAsset && <span className="text-[9px] text-white/45">{data.fields ?? 0} campo{(data.fields ?? 0) === 1 ? '' : 's'}</span>}
