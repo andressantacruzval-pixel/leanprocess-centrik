@@ -48,6 +48,7 @@ import { useDocumentableGuard } from '@/hooks/useDocumentableGuard'
 import { useTokenBudget } from '@/hooks/useTokenBudget'
 import { InsufficientTokensModal } from '@/components/ui/InsufficientTokensModal'
 import { processMapUrl } from '@/lib/processMapUrl'
+import { normalizeDataAssociationsForBizagi } from '@/lib/bpmnLayoutFix'
 import {
   BLANK_BPMN,
   TOOLBAR_TABS,
@@ -297,7 +298,9 @@ export default function ProcessCharacterizationPage() {
   const handleExportBpmn = useCallback(() => {
     if (!bpmnXml || bpmnXml === BLANK_BPMN) return
 
-    let exportXml = bpmnXml
+    // Convierte las asociaciones de datos en flechas que Bizagi dibuja (los
+    // dataInputAssociation de bpmn-js no los renderiza).
+    let exportXml = normalizeDataAssociationsForBizagi(bpmnXml)
 
     if (exportXml.includes('xmlns:bpmn=') && !exportXml.includes('xmlns:bpmn2=')) {
       exportXml = exportXml

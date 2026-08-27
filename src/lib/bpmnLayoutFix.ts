@@ -272,6 +272,104 @@ export function fixBpmnWaypoints(xml: string): string {
   }
 }
 
+// Normaliza las asociaciones de datos para que Bizagi DIBUJE las flechas que unen
+// los nodos de datos/aplicaciones con las actividades. bpmn-js las crea como
+// dataInputAssociation/dataOutputAssociation (hijas de la actividad), que Bizagi
+// no renderiza. Aquí se convierten en `association` de nivel proceso (con
+// sourceRef/targetRef) y se garantiza un BPMNEdge con waypoints calculados de la
+// geometría. También completa waypoints faltantes en asociaciones ya existentes.
+export function normalizeDataAssociationsForBizagi(xml: string): string {
+  try {
+    const NS_MODEL = 'http://www.omg.org/spec/BPMN/20100524/MODEL'
+    const NS_BPMNDI = 'http://www.omg.org/spec/BPMN/20100524/DI'
+    const NS_DIWP = 'http://www.omg.org/spec/DD/20100524/DI'
+    const doc = new DOMParser().parseFromString(xml, 'application/xml')
+    if (els(doc, 'parsererror').length) return xml
+
+    // Bounds por bpmnElement
+    const bounds = new Map<string, B>()
+    els(doc, 'BPMNShape').forEach((shape) => {
+      const id = shape.getAttribute('bpmnElement')
+      const b = Array.from(shape.children).find((c) => c.localName === 'Bounds')
+      if (!id || !b) return
+      bounds.set(id, { x: +(b.getAttribute('x') ?? 0), y: +(b.getAttribute('y') ?? 0), w: +(b.getAttribute('width') ?? 100), h: +(b.getAttribute('height') ?? 80) })
+    })
+
+    const plane = els(doc, 'BPMNPlane')[0]
+    const procOf = (el: Element): Element | null => {
+      let cur: Element | null = el
+      while (cur && cur.localName !== 'process') cur = cur.parentElement
+      return cur
+    }
+    const prefixOf = (el: Element) => (el.tagName.includes(':') ? el.tagName.split(':')[0] : 'bpmn2')
+
+    let counter = 0
+    const removeEdgeFor = (id: string) => {
+      els(doc, 'BPMNEdge').forEach((e) => { if (e.getAttribute('bpmnElement') === id) e.parentNode?.removeChild(e) })
+    }
+
+    // 1) dataInputAssociation / dataOutputAssociation → association de proceso
+    const dataAssocs = [...els(doc, 'dataInputAssociation'), ...els(doc, 'dataOutputAssociation')]
+    for (const da of dataAssocs) {
+      const activity = da.parentElement
+      if (!activity) continue
+      const taskId = activity.getAttribute('id') || ''
+      const isInput = da.localName === 'dataInputAssociation'
+      const refEl = Array.from(da.children).find((c) => c.localName === (isInput ? 'sourceRef' : 'targetRef'))
+      const dataId = refEl?.textContent?.trim() || ''
+      if (!taskId || !dataId) { da.parentNode?.removeChild(da); continue }
+      const source = isInput ? dataId : taskId
+      const target = isInput ? taskId : dataId
+      const proc = procOf(activity)
+      if (!proc) continue
+      const px = prefixOf(proc)
+      const assoc = doc.createElementNS(NS_MODEL, `${px}:association`)
+      assoc.setAttribute('id', `Association_lp_${counter++}`)
+      assoc.setAttribute('sourceRef', source)
+      assoc.setAttribute('targetRef', target)
+      assoc.setAttribute('associationDirection', 'One')
+      proc.appendChild(assoc)
+      if (da.getAttribute('id')) removeEdgeFor(da.getAttribute('id') as string)
+      da.parentNode?.removeChild(da)
+    }
+
+    // 2) toda association → asegurar BPMNEdge con waypoints
+    if (plane) {
+      const edgeByEl = new Map<string, Element>()
+      els(doc, 'BPMNEdge').forEach((e) => { const be = e.getAttribute('bpmnElement'); if (be) edgeByEl.set(be, e) })
+      els(doc, 'association').forEach((assoc) => {
+        const id = assoc.getAttribute('id'); const s = assoc.getAttribute('sourceRef'); const t = assoc.getAttribute('targetRef')
+        if (!id || !s || !t) return
+        const sb = bounds.get(s); const tb = bounds.get(t)
+        if (!sb || !tb) return
+        const sCY = sb.y + sb.h / 2, tCY = tb.y + tb.h / 2
+        const sx = sb.x + sb.w / 2, tx = tb.x + tb.w / 2
+        const start = sCY < tCY ? { x: sx, y: sb.y + sb.h } : { x: sx, y: sb.y }
+        const end = sCY < tCY ? { x: tx, y: tb.y } : { x: tx, y: tb.y + tb.h }
+        let edge = edgeByEl.get(id)
+        if (!edge) {
+          edge = doc.createElementNS(NS_BPMNDI, 'bpmndi:BPMNEdge')
+          edge.setAttribute('id', `${id}_di`)
+          edge.setAttribute('bpmnElement', id)
+          plane.appendChild(edge)
+        }
+        if (Array.from(edge.children).filter((c) => c.localName === 'waypoint').length < 2) {
+          Array.from(edge.children).filter((c) => c.localName === 'waypoint').forEach((c) => edge!.removeChild(c))
+          for (const p of [start, end]) {
+            const wp = doc.createElementNS(NS_DIWP, 'di:waypoint')
+            wp.setAttribute('x', String(Math.round(p.x))); wp.setAttribute('y', String(Math.round(p.y)))
+            edge.appendChild(wp)
+          }
+        }
+      })
+    }
+
+    return new XMLSerializer().serializeToString(doc)
+  } catch {
+    return xml
+  }
+}
+
 export function injectMissingBpmnEdges(xml: string): string {
   const sfIds = [...xml.matchAll(/<(?:\w+:)?sequenceFlow\b[^>]+\bid="([^"]+)"/g)]
     .map(m => m[1])
