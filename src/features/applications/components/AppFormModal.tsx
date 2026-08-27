@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X, MonitorSmartphone, Wand2, Sparkles, Loader2 } from 'lucide-react'
+import { X, MonitorSmartphone, Wand2, Sparkles, Loader2, ShieldAlert } from 'lucide-react'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
@@ -14,7 +14,7 @@ import { parseBpmnXml } from '@/utils/bpmnParser'
 import { toast } from '@/stores/toastStore'
 import {
   OWNERSHIP_OPTIONS, DEPLOYMENT_OPTIONS, APP_STATUS_OPTIONS, INTEGRATION_OPTIONS,
-  AUTH_OPTIONS, LICENSE_OPTIONS, type Application,
+  AUTH_OPTIONS, LICENSE_OPTIONS, techRisk, type Application,
 } from '@/types/application'
 
 interface Props {
@@ -22,10 +22,12 @@ interface Props {
   application?: Application | null
   bpmnElementId?: string | null
   activityName?: string
+  // Si false, guardar NO crea un uso en el proceso (gestión desde el catálogo).
+  linkUsage?: boolean
   onClose: () => void
 }
 
-export function AppFormModal({ processId, application, bpmnElementId, activityName, onClose }: Props) {
+export function AppFormModal({ processId, application, bpmnElementId, activityName, linkUsage = true, onClose }: Props) {
   const addApplication = useApplicationStore((s) => s.addApplication)
   const updateApplication = useApplicationStore((s) => s.updateApplication)
   const addUsage = useApplicationStore((s) => s.addUsage)
@@ -99,12 +101,15 @@ export function AppFormModal({ processId, application, bpmnElementId, activityNa
     if (application) updateApplication(application.id, payload)
     else { const created = addApplication(payload); appId = created?.id }
     // Registra el uso de la app en este proceso (y en la actividad si viene el nodo).
-    if (appId && !application) addUsage(appId, processId, bpmnElementId ?? null, activityName ?? '')
+    if (appId && !application && linkUsage && processId) addUsage(appId, processId, bpmnElementId ?? null, activityName ?? '')
     onClose()
   }
 
   const inp = 'w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[13px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/50'
   const lbl = 'block text-[10px] font-medium text-white/50 mb-1 uppercase tracking-wide'
+
+  // Riesgo tecnológico calculado EN VIVO con los valores actuales del formulario.
+  const risk = techRisk({ criticality: f.criticality, deployment: f.deployment, has_api: f.has_api, auth_method: f.auth_method, status: f.status, handles_personal_data: f.handles_personal_data } as unknown as Application)
 
   return createPortal(
     <>
@@ -165,6 +170,18 @@ export function AppFormModal({ processId, application, bpmnElementId, activityNa
               <div><label className={lbl}>Tipo de integración</label><select className={inp} value={f.integration_type} onChange={(e) => set('integration_type', e.target.value)}><option value="">—</option>{INTEGRATION_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
               <div><label className={lbl}>Autenticación</label><select className={inp} value={f.auth_method} onChange={(e) => set('auth_method', e.target.value)}><option value="">—</option>{AUTH_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
             </div>
+          </div>
+
+          {/* Riesgo tecnológico: se calcula solo; aquí se explica de dónde sale. */}
+          <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: `${risk.hex}55`, background: `${risk.hex}12` }}>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[11px] font-semibold text-white/85 flex items-center gap-1.5"><ShieldAlert size={13} style={{ color: risk.hex }} /> Riesgo tecnológico</p>
+              <span className="text-[10.5px] px-2 py-0.5 rounded font-medium text-white" style={{ background: risk.hex }}>{risk.label} · {risk.score}/100</span>
+            </div>
+            <p className="text-[10.5px] text-white/50 leading-relaxed">Se calcula <b className="text-white/70">automáticamente</b> con lo que llenas arriba: <b className="text-white/70">criticidad</b>, <b className="text-white/70">despliegue</b> (on-premise pesa más), <b className="text-white/70">API</b> (sin API pesa más), <b className="text-white/70">autenticación</b> (débil pesa más), <b className="text-white/70">estado</b> (deprecado / a reemplazar) y si <b className="text-white/70">maneja datos personales</b>.</p>
+            {risk.factors.length > 0
+              ? <div className="flex flex-wrap gap-1">{risk.factors.map((fac) => <span key={fac} className="text-[9px] px-1.5 py-0.5 rounded bg-white/8 text-white/70">{fac}</span>)}</div>
+              : <p className="text-[9.5px] text-white/35">Completa los campos de arriba para ver qué eleva el riesgo.</p>}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -11,9 +11,14 @@
 
 import { useMemo, useState } from 'react'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { BookOpen, Plus, Trash2, Pencil, Check, X, EyeOff, Eye } from 'lucide-react'
+import { BookOpen, Plus, Trash2, Pencil, Check, X, EyeOff, Eye, MonitorSmartphone } from 'lucide-react'
 import { useCatalogStore, MANAGED_CATALOGS, type CatalogItem } from '@/features/catalog/catalogStore'
 import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal'
+import { ApplicationsCatalog } from '@/features/applications/components/ApplicationsCatalog'
+
+// Entrada especial: inventario de aplicaciones (no es un combo simple).
+const APPS_TYPE = '__applications__'
+const APPS_META = { type: APPS_TYPE, label: 'Aplicaciones (inventario)', description: 'Inventario central de las aplicaciones/software de la empresa. El área de TI completa aquí la ficha (proveedor, despliegue, API, criticidad…) y todos los usuarios la ven actualizada.' }
 
 export default function CatalogsPage() {
   const catalogItems = useCatalogStore((s) => s.catalogItems)
@@ -22,7 +27,7 @@ export default function CatalogsPage() {
   const deleteCatalogItem = useCatalogStore((s) => s.deleteCatalogItem)
 
   const [activeType, setActiveType] = useState<string>(MANAGED_CATALOGS[0].type)
-  const activeMeta = MANAGED_CATALOGS.find((c) => c.type === activeType)!
+  const activeMeta = activeType === APPS_TYPE ? APPS_META : MANAGED_CATALOGS.find((c) => c.type === activeType)!
 
   const items = useMemo(
     () =>
@@ -46,6 +51,16 @@ export default function CatalogsPage() {
         {/* ─── Tabs lateral ──────────────────────────────────────── */}
         <aside className="col-span-12 md:col-span-4 lg:col-span-3">
           <nav className="space-y-1">
+            {/* Inventario de aplicaciones (destacado) */}
+            <button
+              onClick={() => setActiveType(APPS_TYPE)}
+              className={`w-full text-left px-3 py-2.5 rounded-xl transition-all border ${activeType === APPS_TYPE ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' : 'border-transparent text-white/50 hover:text-white/80 hover:bg-white/5'}`}
+            >
+              <div className="flex items-center gap-2">
+                <MonitorSmartphone size={14} className="shrink-0" />
+                <span className="text-sm font-medium truncate">Aplicaciones (inventario)</span>
+              </div>
+            </button>
             {MANAGED_CATALOGS.map((cat) => {
               const count = catalogItems.filter((c) => c.catalog_type === cat.type && c.is_active).length
               const isActive = activeType === cat.type
@@ -81,13 +96,17 @@ export default function CatalogsPage() {
               </div>
             </div>
 
-            <CatalogEditor
-              type={activeType}
-              items={items}
-              onAdd={(value) => addCatalogItem(activeType, value)}
-              onUpdate={updateCatalogItem}
-              onDelete={deleteCatalogItem}
-            />
+            {activeType === APPS_TYPE ? (
+              <ApplicationsCatalog />
+            ) : (
+              <CatalogEditor
+                type={activeType}
+                items={items}
+                onAdd={(value) => addCatalogItem(activeType, value)}
+                onUpdate={updateCatalogItem}
+                onDelete={deleteCatalogItem}
+              />
+            )}
           </div>
         </section>
       </div>
