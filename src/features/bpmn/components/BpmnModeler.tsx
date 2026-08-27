@@ -16,6 +16,7 @@ import type {
   BpmnModelerInstance,
 } from '@/types/bpmn'
 import { injectMissingBpmnEdges } from '@/lib/bpmnLayoutFix'
+import appNodeRendererModule from '../appNodeRenderer'
 import { useUiStore } from '@/stores/uiStore'
 
 // Elimina waypoints con coordenadas NaN del XML antes de importar.
@@ -376,7 +377,7 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
     setReady(false)
 
     if (readOnly) {
-      const viewer = new NavigatedViewer({ container: containerRef.current })
+      const viewer = new NavigatedViewer({ container: containerRef.current, additionalModules: [appNodeRendererModule] })
       importWithFallback(viewer as unknown as InstanceType<typeof BpmnJS>, xml, () => !cancelled).then((success) => {
         if (cancelled) return
         if (success) {
@@ -396,7 +397,7 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
       }
     }
 
-    const modeler = new BpmnJS({ container: containerRef.current })
+    const modeler = new BpmnJS({ container: containerRef.current, additionalModules: [appNodeRendererModule] })
     modelerRef.current = modeler
     modeler.on('commandStack.changed', handleChanged)
 

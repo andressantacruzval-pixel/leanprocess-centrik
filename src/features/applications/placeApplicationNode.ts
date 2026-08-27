@@ -54,7 +54,7 @@ export function placeApplicationNode(modeler: BpmnModelerInstance, activityName:
     // Se coloca ARRIBA de la actividad (los activos van abajo) para no encimarse.
     const pos = { x: Math.round(ax + aw / 2), y: Math.round(ay - 110) }
 
-    const shape = factory.createShape({ type: 'bpmn:DataObjectReference' })
+    const shape = factory.createShape({ type: 'bpmn:DataObjectReference', width: 46, height: 44 })
     const created = modeling.createShape(shape, pos, parent) || shape
     if (appName) { try { modeling.updateProperties(created, { name: appLabel(appName) }) } catch { /* no-op */ } }
     if (anchor && /Task$/.test(anchor.type)) { try { modeling.connect(created, anchor) } catch { /* no-op */ } }
