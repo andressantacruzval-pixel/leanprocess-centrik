@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Plus, Pencil, Trash2, MonitorSmartphone, Sparkles, Loader2, Link2, Cpu, Zap } from 'lucide-react'
+import { Plus, Pencil, Trash2, MonitorSmartphone, Sparkles, Loader2, Link2, Cpu, Zap, AlertTriangle } from 'lucide-react'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useCompanyStore } from '@/stores/companyStore'
@@ -28,6 +28,7 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
   const addApplication = useApplicationStore((s) => s.addApplication)
   const addUsage = useApplicationStore((s) => s.addUsage)
   const deleteUsage = useApplicationStore((s) => s.deleteUsage)
+  const updateApplication = useApplicationStore((s) => s.updateApplication)
   const process = useProcessStore((s) => s.processes.find((p) => p.id === processId))
   const company = useCompanyStore((s) => s.company)
   const budget = useTokenBudget({ operationKey: 'application_identification' })
@@ -35,6 +36,29 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Application | null>(null)
   const [pickExisting, setPickExisting] = useState(false)
+  const [litId, setLitId] = useState<string | null>(null)
+
+  // «Encender» en el diagrama los nodos de la app pulsada (como en activos).
+  const canvasOf = () => modeler?.get('canvas') as unknown as { addMarker: (id: string, m: string) => void; removeMarker: (id: string, m: string) => void } | undefined
+  const clearLit = () => {
+    const canvas = canvasOf(); if (!canvas) return
+    usages.forEach((u) => { if (u.bpmn_element_id) try { canvas.removeMarker(u.bpmn_element_id, 'app-lit') } catch { /* no-op */ } })
+  }
+  const highlight = (us: ApplicationUsage[], appId: string) => {
+    const canvas = canvasOf()
+    const nodes = us.map((u) => u.bpmn_element_id).filter(Boolean) as string[]
+    clearLit()
+    if (canvas) nodes.forEach((n) => { try { canvas.addMarker(n, 'app-lit') } catch { /* no-op */ } })
+    setLitId(appId)
+  }
+  useEffect(() => {
+    if (!modeler) return
+    const bus = modeler.get('eventBus') as BpmnEventBus
+    const off = () => { clearLit(); setLitId(null) }
+    bus.on('selection.changed', off)
+    return () => bus.off('selection.changed', off)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modeler])
 
   const list = usages.filter((u) => u.process_id === processId)
   const appById = useMemo(() => new Map(applications.map((a) => [a.id, a])), [applications])
@@ -193,12 +217,16 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
           const risk = techRisk(app)
           const nodes = us.filter((u) => u.bpmn_element_id).length
           const acts = [...new Set(us.map((u) => u.activity_name).filter(Boolean))]
+          const pending = app.status === 'en_evaluacion'
           return (
-            <div key={app.id} className="group rounded-lg border border-white/8 bg-white/[0.03] p-3">
+            <div key={app.id} className={`group rounded-lg border p-3 transition-colors ${litId === app.id ? 'border-sky-400/50 bg-sky-500/[0.06]' : 'border-white/8 bg-white/[0.03]'}`}>
               <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 cursor-pointer" onClick={() => highlight(us, app.id)} title={nodes ? 'Resaltar sus nodos en el diagrama' : 'Sin nodo en el diagrama'}>
                   <p className="text-[13px] font-medium text-white flex items-center gap-1.5"><MonitorSmartphone size={12} className="text-sky-300 shrink-0" />{app.name}{nodes > 1 && <span className="text-[9px] text-white/40">· {nodes} nodos</span>}</p>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                    {pending
+                      ? <button onClick={(e) => { e.stopPropagation(); updateApplication(app.id, { status: 'activo' }) }} className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 inline-flex items-center gap-0.5"><Plus size={9} /> Agregar al catálogo</button>
+                      : <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/12 text-emerald-300">En catálogo</span>}
                     {app.category && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{app.category}</span>}
                     {app.ownership && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{app.ownership === 'propia' ? 'Propia' : app.ownership === 'terceros' ? 'Terceros' : 'Mixta'}</span>}
                     {app.deployment && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/45">{deployLabel(app.deployment)}</span>}
@@ -206,6 +234,9 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
                     <span className="text-[9px] px-1.5 py-0.5 rounded text-white" style={{ background: risk.hex }} title={`Riesgo tecnológico: ${risk.factors.join(', ') || 'bajo'}`}>Riesgo {risk.label}</span>
                     {acts.length > 0 && <span className="text-[9px] text-white/40 truncate">en «{acts.join('», «')}»</span>}
                   </div>
+                  {nodes === 0 && (
+                    <p className="text-[10px] text-amber-300/90 mt-1.5 flex items-center gap-1"><AlertTriangle size={11} className="shrink-0" /> Sin nodo en el diagrama. Agrégalo a una actividad o quítalo del panel.</p>
+                  )}
                 </div>
                 <div className="flex flex-col gap-0.5 shrink-0">
                   <button onClick={() => { setEditing(app); setShowForm(true) }} title="Editar" className="p-1.5 rounded text-white/30 hover:text-cyan-400 hover:bg-white/5"><Pencil size={13} /></button>

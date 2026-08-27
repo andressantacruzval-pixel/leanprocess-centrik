@@ -496,3 +496,11 @@ html[data-theme="light"]{ background-color:#e9eff8; }
   fill: rgba(245, 158, 11, 0.14) !important;
   filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8));
 }
+
+/* Aplicación «encendida»: al pulsar una app en el panel derecho se resaltan sus
+   nodos de computadora en el diagrama. */
+.djs-element.app-lit .djs-visual > :first-child {
+  stroke: #38bdf8 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.85));
+}

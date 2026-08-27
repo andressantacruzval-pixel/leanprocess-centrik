@@ -130,7 +130,9 @@ export async function describeApplication(ctx: {
 Responde SOLO la descripción, sin comillas ni prefijos.`
 
   const raw = await callAiProxy([{ role: 'user', content: prompt }], {
-    modelId: 'gemini-2.5-flash', temperature: 0.4, maxOutputTokens: 256, feature: 'application_describe',
+    // Amplio para dejar margen a los tokens de «pensamiento» del modelo y que la
+    // respuesta no salga cortada.
+    modelId: 'gemini-2.5-flash', temperature: 0.4, maxOutputTokens: 1024, feature: 'application_describe',
   })
   return (raw || '').replace(/```/g, '').replace(/^["'\s]+|["'\s]+$/g, '').trim()
 }

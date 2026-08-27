@@ -70,7 +70,13 @@ export function ApplicationsPanel({ modeler, processId, readOnly }: Props) {
       if (!id) return
       const st = useApplicationStore.getState()
       const u = st.usages.find((x) => x.bpmn_element_id === id)
-      if (u) st.deleteUsage(u.id)
+      if (!u) return
+      // ¿Hay otro nodo de la misma app en este proceso? Si sí, se borra este uso.
+      const otherNode = st.usages.some((x) => x.application_id === u.application_id && x.process_id === u.process_id && x.id !== u.id && x.bpmn_element_id)
+      if (otherNode) st.deleteUsage(u.id)
+      // Si era el ÚLTIMO nodo, el uso QUEDA (sin nodo) para poder re-asociarlo a
+      // otra actividad; el panel lo marca «sin nodo en el diagrama».
+      else st.updateUsage(u.id, { bpmn_element_id: null })
     }
     bus.on('commandStack.shape.delete.postExecuted', onDelete)
     return () => bus.off('commandStack.shape.delete.postExecuted', onDelete)
