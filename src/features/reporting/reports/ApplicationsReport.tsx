@@ -21,6 +21,19 @@ interface CargoRow { app: Application; cargo: string; process: Process | undefin
 const deployLabel = (v: string) => DEPLOYMENT_OPTIONS.find((o) => o.value === v)?.label ?? (v || '—')
 const ownLabel = (v: string) => (v === 'propia' ? 'Propia' : v === 'terceros' ? 'Terceros' : v === 'mixta' ? 'Mixta' : '—')
 const RISK_HEX: Record<string, string> = { bajo: '#10b981', medio: '#facc15', alto: '#f97316', critico: '#ef4444' }
+const RISK_LEVEL_LABEL: Record<string, string> = { critico: 'Crítico', alto: 'Alto', medio: 'Medio', bajo: 'Bajo' }
+// Etiqueta de despliegue/propiedad tal como la muestran los donuts (para casar el clic).
+const depLabelForRow = (r: AppRow) => { const l = deployLabel(r.app.deployment); return l === '—' ? 'Sin definir' : l }
+const ownLabelForRow = (r: AppRow) => { const l = ownLabel(r.app.ownership); return l === '—' ? 'Sin definir' : l }
+type ChartPick = { k: 'deployment' | 'ownership' | 'risk' | 'category'; v: string }
+const matchPick = (r: AppRow, p: ChartPick): boolean => {
+  switch (p.k) {
+    case 'deployment': return depLabelForRow(r) === p.v
+    case 'ownership': return ownLabelForRow(r) === p.v
+    case 'risk': return RISK_LEVEL_LABEL[r.risk.level] === p.v
+    case 'category': return (r.app.category || '') === p.v
+  }
+}
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 
 interface AppRow {
@@ -146,10 +159,16 @@ export function ApplicationsReport() {
   }, [usages, canonId, procById, macroMap, org, analyses, cargoOf])
 
   const [q, setQ] = useState('')
+  // Filtro por clic en los gráficos del resumen (despliegue, propiedad, riesgo,
+  // categoría). Clic de nuevo en el mismo corte lo quita. Igual que Riesgos/Activos.
+  const [pick, setPick] = useState<ChartPick | null>(null)
+  const togglePick = useCallback((k: ChartPick['k'], v: string) => setPick((p) => (p && p.k === k && p.v === v ? null : { k, v })), [])
   const shown = useMemo(() => {
+    let base = pick ? rows.filter((r) => matchPick(r, pick)) : rows
     const query = q.trim().toLowerCase()
-    return query ? rows.filter((r) => r.app.name.toLowerCase().includes(query) || (r.app.category || '').toLowerCase().includes(query) || (r.app.vendor || '').toLowerCase().includes(query)) : rows
-  }, [rows, q])
+    if (query) base = base.filter((r) => r.app.name.toLowerCase().includes(query) || (r.app.category || '').toLowerCase().includes(query) || (r.app.vendor || '').toLowerCase().includes(query))
+    return base
+  }, [rows, q, pick])
 
   // Vista «Por cargo»: una fila por aplicación × cargo × actividad (qué cargos usan
   // cada aplicación, con jerarquía y tiempo) → sirve para levantar perfiles.
@@ -253,12 +272,12 @@ export function ApplicationsReport() {
 
       {view === 'resumen' && (<>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card title="Despliegue" sub="On-premise vs. nube."><Donut data={byDeployment} center={String(dedupApps.length)} unit="apps" /></Card>
-        <Card title="Propiedad" sub="Propias vs. de terceros."><Donut data={byOwnership} center={String(dedupApps.length)} unit="apps" /></Card>
-        <Card title="Semáforo de riesgo tecnológico" sub="Criticidad + legado + sin API + auth débil."><Donut data={byRisk} center={String(dedupApps.length)} unit="apps" /></Card>
+        <Card title="Despliegue" sub="Clic para filtrar la tabla."><Donut data={byDeployment} center={String(dedupApps.length)} unit="apps" onSlice={(l) => togglePick('deployment', l)} active={pick?.k === 'deployment' ? pick.v : undefined} /></Card>
+        <Card title="Propiedad" sub="Clic para filtrar la tabla."><Donut data={byOwnership} center={String(dedupApps.length)} unit="apps" onSlice={(l) => togglePick('ownership', l)} active={pick?.k === 'ownership' ? pick.v : undefined} /></Card>
+        <Card title="Semáforo de riesgo tecnológico" sub="Clic para filtrar la tabla."><Donut data={byRisk} center={String(dedupApps.length)} unit="apps" onSlice={(l) => togglePick('risk', l)} active={pick?.k === 'risk' ? pick.v : undefined} /></Card>
       </div>
 
-      {byCategory.length > 0 && <Card title="Por categoría"><HBars data={byCategory} /></Card>}
+      {byCategory.length > 0 && <Card title="Por categoría" sub="Clic para filtrar la tabla."><HBars data={byCategory} onBar={(l) => togglePick('category', l)} active={pick?.k === 'category' ? pick.v : undefined} /></Card>}
 
       <div className="space-y-2">
         {automationCandidates.length > 0 && (
@@ -275,6 +294,11 @@ export function ApplicationsReport() {
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar aplicación…"
             className="pl-7 pr-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11.5px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 w-52" />
         </div>
+        {pick && (
+          <button onClick={() => setPick(null)} className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md border border-cyan-500/40 text-cyan-200 bg-cyan-500/10 hover:bg-cyan-500/20">
+            {pick.v} <span className="text-cyan-300/70">✕</span>
+          </button>
+        )}
         <span className="text-[10px] text-white/25">Tiempo total: {Math.round(totalMinutes)} min/día · {Math.round(scaleToPeriod(totalMinutes, 'mes'))} min/mes · {Math.round(scaleToPeriod(totalMinutes, 'año') / 60 * 10) / 10} hrs/año</span>
       </div>
 
