@@ -53,8 +53,8 @@ function JourneyNodeInner({ id, data, selected }: NodeProps<JourneyNodeData>) {
       className="relative rounded-xl border flex items-center gap-2 px-2.5 pt-2.5 pb-1.5 shadow-lg shadow-black/30 backdrop-blur-sm transition-all"
       title={data.label}
     >
-      <span className="absolute -top-2 left-2.5 px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider text-white/70" style={{ background: '#0b1220', border: `1px solid ${cat}66` }}>{LEVEL_LABEL[data.level]}</span>
-      {data.received && <span className="absolute -top-2 right-2.5 px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider text-cyan-200" style={{ background: '#0b1220', border: '1px solid rgba(34,211,238,0.4)' }} title={data.sourceName ? `Recibido de ${data.sourceName}` : 'Recibido'}>↙ Recibido</span>}
+      <span className="absolute -top-2 left-2.5 px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider text-white/70" style={{ background: 'var(--lp-node-chip-bg)', border: `1px solid ${cat}66` }}>{LEVEL_LABEL[data.level]}</span>
+      {data.received && <span className="absolute -top-2 right-2.5 px-1.5 py-0.5 rounded text-[7.5px] font-bold uppercase tracking-wider text-cyan-200" style={{ background: 'var(--lp-node-chip-bg)', border: '1px solid rgba(34,211,238,0.4)' }} title={data.sourceName ? `Recibido de ${data.sourceName}` : 'Recibido'}>↙ Recibido</span>}
       {/* Handles de jerarquía (para las líneas del árbol) — invisibles, no conectables */}
       <Handle id="in" type="target" position={Position.Top} isConnectable={false} style={HIDDEN} />
       <Handle id="out" type="source" position={Position.Bottom} isConnectable={false} style={HIDDEN} />
