@@ -10,7 +10,7 @@ import { identifyApplicationsFromProcess } from '@/lib/applicationAi'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { toast } from '@/stores/toastStore'
 import { techRisk, DEPLOYMENT_OPTIONS, type Application } from '@/types/application'
-import type { BpmnModelerInstance, BpmnEventBus, BpmnElement, BpmnElementRegistry } from '@/types/bpmn'
+import type { BpmnModelerInstance, BpmnEventBus, BpmnEvent, BpmnElement, BpmnElementRegistry } from '@/types/bpmn'
 import { placeApplicationNode, isApplicationBO, stripAppPrefix } from '../placeApplicationNode'
 import { removeNode } from '../../assets/placeAssetNode'
 import { AppFormModal } from './AppFormModal'
@@ -50,6 +50,26 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
     const bump = () => setDiagVer((v) => v + 1)
     ;['shape.added', 'shape.removed', 'element.changed', 'import.done'].forEach((e) => bus.on(e, bump))
     return () => { ['shape.added', 'shape.removed', 'element.changed', 'import.done'].forEach((e) => bus.off(e, bump)) }
+  }, [modeler])
+
+  // Integración bidireccional: al ELIMINAR el nodo en el diagrama, se quita su
+  // uso del panel; si la aplicación se queda sin ningún nodo/uso, se elimina del
+  // inventario. Se escucha el comando de borrado (no la reconstrucción al importar).
+  useEffect(() => {
+    if (!modeler) return
+    const bus = modeler.get('eventBus') as BpmnEventBus
+    const onDelete = (e: BpmnEvent) => {
+      const id = (e as unknown as { context?: { shape?: { id?: string } } }).context?.shape?.id
+      if (!id) return
+      const st = useApplicationStore.getState()
+      const u = st.usages.find((x) => x.bpmn_element_id === id)
+      if (!u) return
+      st.deleteUsage(u.id)
+      // ¿Quedan otros nodos/usos de la misma aplicación? Si no, se elimina la app.
+      if (!st.usages.some((x) => x.application_id === u.application_id && x.id !== u.id)) st.deleteApplication(u.application_id)
+    }
+    bus.on('commandStack.shape.delete.postExecuted', onDelete)
+    return () => bus.off('commandStack.shape.delete.postExecuted', onDelete)
   }, [modeler])
 
   const unregistered = useMemo(() => {
