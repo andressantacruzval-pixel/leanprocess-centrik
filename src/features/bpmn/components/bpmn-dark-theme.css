@@ -170,10 +170,16 @@
 }
 
 .djs-popup .entry:hover,
-.djs-popup .entry.active {
-  background: rgba(6, 182, 212, 0.1) !important;
+.djs-popup .entry.active,
+.djs-popup .entry.selected,
+.djs-popup .entry:focus {
+  background: rgba(6, 182, 212, 0.16) !important;
   color: #22d3ee !important;
 }
+/* La entrada resaltada por teclado (.selected) traía el fondo casi blanco por
+   defecto de bpmn-js — ilegible en oscuro. Forzamos también su texto claro. */
+.djs-popup .entry.selected *,
+.djs-popup .entry:hover * { color: #22d3ee !important; }
 
 .djs-popup .djs-popup-header {
   background: rgba(255, 255, 255, 0.03) !important;
@@ -288,7 +294,25 @@
   fill: rgba(37,99,235,0.03) !important; stroke: rgba(37,99,235,0.25) !important;
 }
 
-/* Context pad */
+/* Paleta (panel izquierdo): el contenedor tenía fondo oscuro sin override claro
+   → salía como un bloque negro sobre el lienzo blanco. */
+:root[data-theme="light"] .djs-palette {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(15,23,42,0.12) !important;
+}
+:root[data-theme="light"] .djs-palette .entry { color: #475569 !important; }
+:root[data-theme="light"] .djs-palette .entry:hover { color: #0891b2 !important; background: rgba(6,182,212,0.10) !important; }
+:root[data-theme="light"] .djs-palette .separator { border-color: #e2e8f0 !important; }
+:root[data-theme="light"] .djs-palette-toggle { color: #94a3b8 !important; }
+
+/* Context pad: el CONTENEDOR seguía oscuro (solo .entry tenía override claro) →
+   caja negra al pasar el cursor sobre un nodo. Lo volvemos claro. */
+:root[data-theme="light"] .djs-context-pad {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(15,23,42,0.12) !important;
+}
 :root[data-theme="light"] .djs-context-pad .entry {
   background: #ffffff !important; color: #334155 !important;
   border-color: #e2e8f0 !important; box-shadow: 0 4px 20px rgba(15,23,42,0.12) !important;
@@ -302,7 +326,11 @@
 }
 :root[data-theme="light"] .djs-popup .entry { color: rgba(30,41,59,0.85) !important; }
 :root[data-theme="light"] .djs-popup .entry:hover,
-:root[data-theme="light"] .djs-popup .entry.active { background: rgba(6,182,212,0.10) !important; color: #0891b2 !important; }
+:root[data-theme="light"] .djs-popup .entry.active,
+:root[data-theme="light"] .djs-popup .entry.selected,
+:root[data-theme="light"] .djs-popup .entry:focus { background: rgba(6,182,212,0.12) !important; color: #0891b2 !important; }
+:root[data-theme="light"] .djs-popup .entry.selected *,
+:root[data-theme="light"] .djs-popup .entry:hover * { color: #0891b2 !important; }
 :root[data-theme="light"] .djs-popup .djs-popup-header {
   background: #f8fafc !important; border-bottom: 1px solid #e2e8f0 !important; color: #475569 !important;
 }

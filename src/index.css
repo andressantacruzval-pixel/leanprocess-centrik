@@ -314,6 +314,12 @@ html[data-theme="light"]{ background-color:#e9eff8; }
 :root[data-theme="light"] .bg-\[\#0d1420\]\/90{background-color:rgba(255,255,255,.85) !important}
 :root[data-theme="light"] .bg-\[\#070b14\]\/95{background-color:rgba(242,246,253,.9) !important}
 :root[data-theme="light"] .bg-\[\#070b14\]\/80{background-color:rgba(242,246,253,.8) !important}
+/* Paneles flotantes del diagramador (Activos, Apps, Cargos) y superficies del
+   Data Journey: usan /95 y navys que faltaban en el remapeo → salían oscuros. */
+:root[data-theme="light"] .bg-\[\#0d1420\]\/95,
+:root[data-theme="light"] .bg-\[\#0c1322\]\/95{background-color:rgba(255,255,255,.94) !important; box-shadow: var(--lp-sh-card);}
+:root[data-theme="light"] .bg-\[\#0b1220\]{background-color:#ffffff !important; box-shadow: var(--lp-sh-card);}
+:root[data-theme="light"] .bg-\[\#0a1018\]{background-color:#f3f7fd !important}
 
 /* ── Stops de gradiente navy (sidebar, cabeceras) → blanco→azul suave ── */
 :root[data-theme="light"] .from-\[\#0a0f1a\]{--tw-gradient-from:#ffffff !important}
