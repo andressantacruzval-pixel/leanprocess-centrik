@@ -193,7 +193,7 @@ export function RisksReport({ processes, allRisks, macroMap, processMap }: { pro
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card title="Riesgo inherente" sub="Antes de controles. Clic para filtrar la tabla.">
-          <Donut data={byInh} center={String(risks.length)} unit="riesgos" />
+          <Donut data={byInh} center={String(risks.length)} unit="riesgos" onSlice={(l) => setFLevel(fLevel === l ? '' : l)} active={fLevel} />
           <div className="mt-3 flex flex-wrap gap-1.5">
             {LEVELS.map((l) => <button key={l} onClick={() => setFLevel(fLevel === l ? '' : l)} className={`text-[10px] px-2 py-1 rounded-md border ${fLevel === l ? 'border-white/40 text-white' : 'border-white/10 text-white/50'}`}>{l}</button>)}
           </div>

@@ -26,6 +26,10 @@ export function CargosReport() {
   const [open, setOpen] = useState<Set<string>>(new Set())
   const [period, setPeriod] = useState<CargoPeriod>('mes')
   const [unit, setUnit] = useState<'min' | 'h'>('min')
+  // Filtro por clic en los gráficos (todos agrupan por cargo). Clic de nuevo en el
+  // mismo cargo lo quita. Igual que Riesgos/Activos/Aplicaciones.
+  const [pickCargo, setPickCargo] = useState<string | null>(null)
+  const togglePick = (label: string) => setPickCargo((p) => (p === label ? null : label))
 
   // Formateo del tiempo según periodo/unidad elegidos.
   const fmt = (dailyMinutes: number): string => {
@@ -37,8 +41,9 @@ export function CargosReport() {
 
   const shown = useMemo(() => cargos.filter((c) =>
     (!q || c.cargo.toLowerCase().includes(q.toLowerCase())) &&
-    (!soloSin || (!c.inCatalog && c.activities.length > 0))
-  ), [cargos, q, soloSin])
+    (!soloSin || (!c.inCatalog && c.activities.length > 0)) &&
+    (!pickCargo || c.cargo === pickCargo)
+  ), [cargos, q, soloSin, pickCargo])
 
   if (!cargos.length) {
     return (
@@ -74,9 +79,9 @@ export function CargosReport() {
       </Grid>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card title="Cargos con más actividades" sub="Carga estructural (top 8)."><HBars data={byAct} /></Card>
-        <Card title="Desperdicio por cargo" sub={`Tiempo NVA (${unitLabel}, top 8).`}><HBars data={byNva} /></Card>
-        <Card title="Cargos por N.º de procesos" sub="Transversalidad (top 8)."><HBars data={byProc} /></Card>
+        <Card title="Cargos con más actividades" sub="Clic para filtrar la tabla."><HBars data={byAct} onBar={togglePick} active={pickCargo ?? undefined} /></Card>
+        <Card title="Desperdicio por cargo" sub={`Clic para filtrar (${unitLabel}).`}><HBars data={byNva} onBar={togglePick} active={pickCargo ?? undefined} /></Card>
+        <Card title="Cargos por N.º de procesos" sub="Clic para filtrar la tabla."><HBars data={byProc} onBar={togglePick} active={pickCargo ?? undefined} /></Card>
       </div>
 
       <div className="space-y-2">
@@ -93,6 +98,7 @@ export function CargosReport() {
           {q && <button onClick={() => setQ('')} className="text-white/25 hover:text-white/50"><X size={12} /></button>}
         </div>
         <button onClick={() => setSoloSin((v) => !v)} className={`text-[11px] px-2.5 py-1.5 rounded-lg border transition-colors ${soloSin ? 'border-amber-500/40 bg-amber-500/10 text-amber-300' : 'border-white/10 text-white/50 hover:text-white/80'}`}>Solo sin catalogar</button>
+        {pickCargo && <button onClick={() => setPickCargo(null)} className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20">{pickCargo} <X size={12} /></button>}
         <div className="ml-auto flex items-center gap-2">
           <PeriodSel value={period} onChange={setPeriod} />
           <UnitSel value={unit} onChange={setUnit} />

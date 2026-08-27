@@ -46,6 +46,8 @@ export function ImprovementsReport({
   const [fStatus, setFStatus] = useState<ImprovementStatus | ''>('')
   const [fPrio, setFPrio] = useState<'high' | 'mid' | 'low' | ''>('')
   const statusByLabel = useMemo(() => Object.fromEntries(STATUS_OPTIONS.map((s) => [STATUS_LABELS[s], s])) as Record<string, ImprovementStatus>, [])
+  const typeByLabel = useMemo(() => Object.fromEntries(IMPROVEMENT_TYPE_OPTIONS.map((t) => [IMPROVEMENT_TYPE_LABELS[t], t])) as Record<string, string>, [])
+  const typeActiveLabel = fType ? IMPROVEMENT_TYPE_LABELS[fType as keyof typeof IMPROVEMENT_TYPE_LABELS] : ''
   const prioByLabel: Record<string, 'high' | 'mid' | 'low'> = { 'Quick win': 'high', Media: 'mid', Difícil: 'low' }
   const shownRows = useMemo(() => rows.filter((r) =>
     (!fType || r.o.type === fType) &&
@@ -124,7 +126,7 @@ export function ImprovementsReport({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card title="Por tipo de mejora" sub="Catálogo. Clic para filtrar la tabla.">
-          <Donut data={byType} center={String(opps.length)} unit="mejoras" />
+          <Donut data={byType} center={String(opps.length)} unit="mejoras" onSlice={(l) => setFType(typeActiveLabel === l ? '' : (typeByLabel[l] ?? ''))} active={typeActiveLabel} />
           <div className="mt-3 flex flex-wrap gap-1.5">
             {IMPROVEMENT_TYPE_OPTIONS.map((t) => (
               <button key={t} onClick={() => setFType(fType === t ? '' : t)}

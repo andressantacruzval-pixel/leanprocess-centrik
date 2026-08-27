@@ -144,7 +144,7 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card title="Criticidad (C·I·D)" sub="Mayor de las tres dimensiones. Clic para filtrar la tabla.">
-          <Donut data={byBand} center={String(list.length)} unit="activos" />
+          <Donut data={byBand} center={String(list.length)} unit="activos" onSlice={(l) => setFBand(fBand === l ? '' : l)} active={fBand} />
           <div className="mt-3 flex flex-wrap gap-1.5">
             {byBand.map((d) => <button key={d.label} onClick={() => setFBand(fBand === d.label ? '' : d.label)} className={`text-[10px] px-2 py-1 rounded-md border ${fBand === d.label ? 'border-white/40 text-white' : 'border-white/10 text-white/50'}`}>{d.label}</button>)}
           </div>
