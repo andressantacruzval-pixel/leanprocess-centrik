@@ -238,6 +238,23 @@ const SEED_CATALOGS: Omit<CatalogItem, 'id'>[] = [
   { catalog_type: 'transfer_medium', value: 'Base de datos', sort_order: 5, is_active: true },
   { catalog_type: 'transfer_medium', value: 'Físico (papel/USB)', sort_order: 6, is_active: true },
   { catalog_type: 'transfer_medium', value: 'Mensajería / Chat', sort_order: 7, is_active: true },
+  // ── Aplicaciones / Software (APM) ───────────────────────────────────────
+  { catalog_type: 'application_category', value: 'ERP', sort_order: 0, is_active: true },
+  { catalog_type: 'application_category', value: 'CRM', sort_order: 1, is_active: true },
+  { catalog_type: 'application_category', value: 'BI / Reportería', sort_order: 2, is_active: true },
+  { catalog_type: 'application_category', value: 'Ofimática', sort_order: 3, is_active: true },
+  { catalog_type: 'application_category', value: 'Correo / Mensajería', sort_order: 4, is_active: true },
+  { catalog_type: 'application_category', value: 'Gestión documental', sort_order: 5, is_active: true },
+  { catalog_type: 'application_category', value: 'RPA / Automatización', sort_order: 6, is_active: true },
+  { catalog_type: 'application_category', value: 'Base de datos', sort_order: 7, is_active: true },
+  { catalog_type: 'application_category', value: 'Contabilidad / Finanzas', sort_order: 8, is_active: true },
+  { catalog_type: 'application_category', value: 'RRHH / Nómina', sort_order: 9, is_active: true },
+  { catalog_type: 'application_category', value: 'Ecommerce', sort_order: 10, is_active: true },
+  { catalog_type: 'application_category', value: 'Desarrollo propio / Custom', sort_order: 11, is_active: true },
+  { catalog_type: 'application_category', value: 'Firma electrónica', sort_order: 12, is_active: true },
+  { catalog_type: 'application_category', value: 'Almacenamiento / Nube', sort_order: 13, is_active: true },
+  { catalog_type: 'application_category', value: 'Colaboración / Proyectos', sort_order: 14, is_active: true },
+  { catalog_type: 'application_category', value: 'Seguridad / Ciberseguridad', sort_order: 15, is_active: true },
 ]
 
 /**
@@ -265,6 +282,8 @@ export const MANAGED_CATALOGS: { type: string; label: string; description: strin
   { type: 'asset_control', label: 'Controles (Anexo A ISO 27001)', description: 'Controles de seguridad del Anexo A ISO 27001:2022 para mitigar el riesgo de los activos.' },
   { type: 'asset_field', label: 'Campos / columnas de activos', description: 'Campos que contienen los activos (nombre, cédula, correo…). Reutilizarlos permite trazar por dónde viaja cada columna.' },
   { type: 'transfer_medium', label: 'Medios de transferencia', description: 'Por qué medio viaja un activo entre procesos: correo, SFTP, SharePoint, carpeta compartida, físico, etc.' },
+  { type: 'application_category', label: 'Categoría de aplicación', description: 'Tipo de software: ERP, CRM, BI, ofimática, RPA, base de datos, custom, etc.' },
+  { type: 'application_vendor', label: 'Fabricante / proveedor de software', description: 'Proveedores de las aplicaciones (SAP, Microsoft, Oracle, Salesforce, desarrollo interno, etc.).' },
 ]
 
 function seedCatalogs(): CatalogItem[] {

@@ -88,6 +88,8 @@ const STATIC_OPERATION_COSTS: Record<string, number> = {
   transcription:              0, // Voz→texto: función embebida, NO cuesta tokens
   asset_identification:      15, // Identificar activos de información con IA
   asset_columns:             5,  // Sugerir columnas/campos de un activo con IA
+  application_identification: 15, // Identificar aplicaciones/software con IA
+  application_enrich:        4,  // Completar la ficha de una aplicación con IA
 }
 
 export const useBillingStore = create<BillingState>()(() => ({

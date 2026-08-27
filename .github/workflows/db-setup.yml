@@ -102,3 +102,6 @@ jobs:
 # trigger migración drop_plan_cap_create (20260822000002): crear procesos es libre;
 # el cupo del plan gobierna DOCUMENTAR. Sin esta migración, el trigger de tope de
 # creación seguía rechazando los subprocesos (nivel más bajo) al volcar el inventario.
+
+# trigger migración aplicaciones (20260827000001): inventario de aplicaciones/
+# software (applications) + usos por actividad/proceso (application_usages) + RLS.

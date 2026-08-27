@@ -78,7 +78,8 @@ export function AssetsTab({ processId, processName, isExpanded, modeler }: Props
     try {
       const registry = modeler.get('elementRegistry') as BpmnElementRegistry
       return (registry.filter(() => true) as BpmnElement[])
-        .filter((el) => DATA_NODE_TYPES.has(el.type) && !covered.has(el.id))
+        // Excluye los nodos de Aplicación (prefijo 🖥) — esos son del módulo de apps.
+        .filter((el) => DATA_NODE_TYPES.has(el.type) && !covered.has(el.id) && !(el.businessObject?.name || '').startsWith('🖥 '))
         .map((el) => ({ id: el.id, name: (el.businessObject?.name || '').trim() || 'Almacén de datos' }))
     } catch { return [] }
     // eslint-disable-next-line react-hooks/exhaustive-deps

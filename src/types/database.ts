@@ -14,6 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          id: string
+          company_id: string
+          code: string | null
+          name: string
+          description: string | null
+          category: string | null
+          ownership: string | null
+          vendor: string | null
+          deployment: string | null
+          url: string | null
+          criticality: number | null
+          business_owner: string | null
+          technical_custodian: string | null
+          status: string
+          has_api: boolean
+          integration_type: string | null
+          automatable: boolean
+          handles_personal_data: boolean
+          auth_method: string | null
+          license_model: string | null
+          cost_estimate: number | null
+          cost_period: string | null
+          version: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          code?: string | null
+          name: string
+          description?: string | null
+          category?: string | null
+          ownership?: string | null
+          vendor?: string | null
+          deployment?: string | null
+          url?: string | null
+          criticality?: number | null
+          business_owner?: string | null
+          technical_custodian?: string | null
+          status?: string
+          has_api?: boolean
+          integration_type?: string | null
+          automatable?: boolean
+          handles_personal_data?: boolean
+          auth_method?: string | null
+          license_model?: string | null
+          cost_estimate?: number | null
+          cost_period?: string | null
+          version?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          code?: string | null
+          name?: string
+          description?: string | null
+          category?: string | null
+          ownership?: string | null
+          vendor?: string | null
+          deployment?: string | null
+          url?: string | null
+          criticality?: number | null
+          business_owner?: string | null
+          technical_custodian?: string | null
+          status?: string
+          has_api?: boolean
+          integration_type?: string | null
+          automatable?: boolean
+          handles_personal_data?: boolean
+          auth_method?: string | null
+          license_model?: string | null
+          cost_estimate?: number | null
+          cost_period?: string | null
+          version?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      application_usages: {
+        Row: {
+          id: string
+          company_id: string
+          application_id: string
+          process_id: string | null
+          bpmn_element_id: string | null
+          activity_name: string | null
+          note: string | null
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          application_id: string
+          process_id?: string | null
+          bpmn_element_id?: string | null
+          activity_name?: string | null
+          note?: string | null
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          application_id?: string
+          process_id?: string | null
+          bpmn_element_id?: string | null
+          activity_name?: string | null
+          note?: string | null
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       information_assets: {
         Row: {
           id: string
