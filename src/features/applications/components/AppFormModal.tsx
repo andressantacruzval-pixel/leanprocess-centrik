@@ -7,8 +7,10 @@ import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { useCompanyStore } from '@/stores/companyStore'
 import { useCatalogStore } from '@/features/catalog/catalogStore'
 import { CreatableSelect } from '@/components/ui/CreatableSelect'
+import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 import { orgProcPrefix } from '../../assets/assetCodes'
-import { enrichApplication } from '@/lib/applicationAi'
+import { enrichApplication, describeApplication } from '@/lib/applicationAi'
+import { parseBpmnXml } from '@/utils/bpmnParser'
 import { toast } from '@/stores/toastStore'
 import {
   OWNERSHIP_OPTIONS, DEPLOYMENT_OPTIONS, APP_STATUS_OPTIONS, INTEGRATION_OPTIONS,
@@ -51,6 +53,21 @@ export function AppFormModal({ processId, application, bpmnElementId, activityNa
   })
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }))
   const [enriching, setEnriching] = useState(false)
+  const [describing, setDescribing] = useState(false)
+
+  const describe = async () => {
+    if (!f.name.trim() || describing) return
+    setDescribing(true)
+    try {
+      const activities = process?.bpmn_xml ? parseBpmnXml(process.bpmn_xml).activities.map((a) => a.name).filter(Boolean) : []
+      const d = await describeApplication({
+        name: f.name, companyName: company?.name, industry: company?.industry || undefined,
+        processName: process?.name, processDescription: process?.description || undefined, activities,
+      })
+      if (d) { set('description', d); toast.success('Descripción generada con IA.') }
+      else toast.info('La IA no pudo generar la descripción.')
+    } catch { toast.error('No se pudo generar la descripción.') } finally { setDescribing(false) }
+  }
 
   const autoCode = () => {
     const seq = allApps.filter((a) => a.company_id === companyId).length + 1
@@ -119,7 +136,18 @@ export function AppFormModal({ processId, application, bpmnElementId, activityNa
             <div><label className={lbl}>Fabricante / Proveedor</label><CreatableSelect options={opts('application_vendor')} value={f.vendor} onChange={(v) => set('vendor', v)} onCreateOption={(v) => addCatalogItem('application_vendor', v)} placeholder="SAP, Microsoft, interno…" /></div>
             <div><label className={lbl}>Propiedad</label><select className={inp} value={f.ownership} onChange={(e) => set('ownership', e.target.value)}><option value="">—</option>{OWNERSHIP_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
             <div><label className={lbl}>Despliegue</label><select className={inp} value={f.deployment} onChange={(e) => set('deployment', e.target.value)}><option value="">—</option>{DEPLOYMENT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
-            <div className="sm:col-span-2"><label className={lbl}>Descripción</label><textarea rows={2} className={`${inp} resize-none`} value={f.description} onChange={(e) => set('description', e.target.value)} placeholder="Qué hace y para qué se usa en el proceso" /></div>
+            <div className="sm:col-span-2">
+              <div className="flex items-center justify-between mb-1">
+                <label className={`${lbl} mb-0`}>Descripción</label>
+                <button type="button" onClick={describe} disabled={describing || !f.name.trim()}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-gradient-to-r from-purple-600/80 to-cyan-600/80 text-white text-[10px] font-medium hover:from-purple-500 hover:to-cyan-500 disabled:opacity-50"
+                  title="Genera qué es y para qué se usa, leyendo el nombre y el contexto del subproceso">
+                  {describing ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />} Describir IA
+                  <TokenCostBadge operationKey="application_describe" />
+                </button>
+              </div>
+              <textarea rows={2} className={`${inp} resize-none`} value={f.description} onChange={(e) => set('description', e.target.value)} placeholder="Qué hace y para qué se usa en el proceso" />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

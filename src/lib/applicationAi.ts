@@ -104,6 +104,36 @@ ${bpmn ? `DIAGRAMA BPMN:\n${bpmn}` : ''}`
   }
 }
 
+// ── Descripción de la aplicación (qué es y para qué se usa) ────────────────
+// Lee el NOMBRE de la herramienta y el contexto del subproceso (objetivo y
+// actividades) para redactar qué es la aplicación y para qué se usa en ese flujo.
+export async function describeApplication(ctx: {
+  name: string; companyName?: string; industry?: string
+  processName?: string; processDescription?: string; activities?: string[]
+}): Promise<string> {
+  const name = sanitizePromptInput(ctx.name || '', 150)
+  if (!name) return ''
+  const empresa = ctx.companyName ? sanitizePromptInput(ctx.companyName, 120) : 'la empresa'
+  const industria = ctx.industry ? sanitizePromptInput(ctx.industry, 100) : 'no especificada'
+  const proc = ctx.processName ? sanitizePromptInput(ctx.processName, 150) : 'un proceso'
+  const obj = ctx.processDescription ? sanitizePromptInput(ctx.processDescription, 500) : 'sin objetivo declarado'
+  const acts = sanitizeStringArray(ctx.activities || [], 60).slice(0, 30)
+
+  const prompt = `Redacta en español, en 1 o 2 frases (máx. 45 palabras), QUÉ es esta aplicación y PARA QUÉ se usa en este subproceso. Sé concreto y útil para un área de tecnología/procesos.
+
+- Empresa: "${empresa}" (industria: ${industria})
+- Aplicación / herramienta: "${name}"
+- Subproceso: "${proc}" — objetivo: ${obj}
+- Actividades del subproceso: ${acts.map((a) => `"${a}"`).join(', ') || 'sin actividades'}
+
+Responde SOLO la descripción, sin comillas ni prefijos.`
+
+  const raw = await callAiProxy([{ role: 'user', content: prompt }], {
+    modelId: 'gemini-2.5-flash', temperature: 0.4, maxOutputTokens: 256, feature: 'application_describe',
+  })
+  return (raw || '').replace(/```/g, '').replace(/^["'\s]+|["'\s]+$/g, '').trim()
+}
+
 // ── Enriquecimiento de una aplicación (corta el tiempo de levantamiento) ────
 export interface AiAppEnrichment {
   category: string; vendor: string; ownership: string; deployment: string

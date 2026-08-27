@@ -90,6 +90,7 @@ const STATIC_OPERATION_COSTS: Record<string, number> = {
   asset_columns:             5,  // Sugerir columnas/campos de un activo con IA
   application_identification: 15, // Identificar aplicaciones/software con IA
   application_enrich:        4,  // Completar la ficha de una aplicación con IA
+  application_describe:      5,  // Describir la aplicación con IA (nombre + contexto)
 }
 
 export const useBillingStore = create<BillingState>()(() => ({
