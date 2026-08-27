@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Search, Zap, LayoutDashboard, ListTree, ChevronRight, ChevronDown, MonitorSmartphone } from 'lucide-react'
+import { useCallback, useMemo, useState } from 'react'
+import { Search, Zap, LayoutDashboard, ListTree, ChevronRight, ChevronDown, MonitorSmartphone, Trash2 } from 'lucide-react'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
@@ -36,6 +36,7 @@ export function ApplicationsReport() {
   const companyId = useWorkspaceStore((s) => s.activeCompanyId)
   const allApps = useApplicationStore((s) => s.applications)
   const allUsages = useApplicationStore((s) => s.usages)
+  const deleteApplication = useApplicationStore((s) => s.deleteApplication)
   const allProcesses = useProcessStore((s) => s.processes)
   const allMacros = useProcessStore((s) => s.macroprocesses)
   const analyses = useValueAnalysisStore((s) => s.analyses)
@@ -153,6 +154,15 @@ export function ApplicationsReport() {
   const automationCandidates = rows.filter((r) => r.app.has_api && r.dailyMinutes > 0).sort((a, b) => b.dailyMinutes - a.dailyMinutes).slice(0, 5)
   const highRisk = rows.filter((r) => r.risk.level === 'critico' || r.risk.level === 'alto').length
 
+  // Eliminación desde el CATÁLOGO (solo aquí): confirma listando los procesos
+  // donde se usa antes de borrar la app y sus usos. Elimina también duplicados.
+  const delApp = useCallback((row: AppRow) => {
+    const names = row.processNames
+    const msg = names.length ? `Se usa en ${names.length} proceso(s): ${names.join(', ')}.\nSe quitarán sus nodos de esos diagramas.` : 'No se usa en ningún proceso.'
+    if (!confirm(`¿Eliminar «${row.app.name}» del catálogo de aplicaciones?\n\n${msg}`)) return
+    apps.filter((a) => norm(a.name) === norm(row.app.name)).forEach((a) => deleteApplication(a.id))
+  }, [apps, deleteApplication])
+
   const columns = useMemo<Column<AppRow>[]>(() => [
     { key: 'code', header: 'Código', accessor: (r) => r.app.code || '' },
     { key: 'name', header: 'Aplicación', accessor: (r) => r.app.name, className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.app.name}>{r.app.name}</div> },
@@ -171,7 +181,8 @@ export function ApplicationsReport() {
     { key: 'tmes', header: 'Min/mes', accessor: (r) => Math.round(scaleToPeriod(r.dailyMinutes, 'mes')), cell: (r) => r.dailyMinutes ? Math.round(scaleToPeriod(r.dailyMinutes, 'mes')) : '-' },
     { key: 'tanio', header: 'Hrs/año', accessor: (r) => Math.round(scaleToPeriod(r.dailyMinutes, 'año') / 60 * 10) / 10, cell: (r) => r.dailyMinutes ? Math.round(scaleToPeriod(r.dailyMinutes, 'año') / 60 * 10) / 10 : '-' },
     { key: 'status', header: 'Estado', accessor: (r) => r.app.status || '' },
-  ], [])
+    { key: 'del', header: '', accessor: () => '', cell: (r) => <button onClick={() => delApp(r)} title="Eliminar del catálogo" className="p-1 rounded text-white/25 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button> },
+  ], [delApp])
 
   return (
     <Dashboard>

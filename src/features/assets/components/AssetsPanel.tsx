@@ -5,6 +5,7 @@ import { useAssetStore } from '@/stores/assetStore'
 import { getRiskLevel } from '@/types/risk'
 import { type InformationAsset } from '@/types/asset'
 import { removeNode, renameNode } from '../placeAssetNode'
+import { isApplicationBO } from '../../applications/placeApplicationNode'
 import { AssetFormModal } from './AssetFormModal'
 
 // Panel flotante de Activos de Información. Aparece al seleccionar un nodo de
@@ -39,7 +40,9 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
     const onSel = (e: BpmnEvent) => {
       const newSelection = (e as unknown as { newSelection?: BpmnElement[] }).newSelection
       const sel = newSelection && newSelection.length === 1 ? newSelection[0] : null
-      if (sel && DATA_NODE_TYPES.has(sel.type)) {
+      // Los nodos de APLICACIÓN (marca isApplication) NO son activos: los maneja
+      // el panel de Aplicaciones. Aquí solo activos de datos.
+      if (sel && DATA_NODE_TYPES.has(sel.type) && !isApplicationBO(sel.businessObject)) {
         setNode({ id: sel.id, label: sel.businessObject?.name || 'Almacén de datos' })
       } else {
         setNode(null)

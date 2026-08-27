@@ -29,6 +29,7 @@ import { formatDate } from '@/utils/helpers'
 import { BpmnModeler } from '@/features/bpmn/components/BpmnModeler'
 import { CargoLanesPanel } from '@/features/cargos/components/CargoLanesPanel'
 import { AssetsPanel } from '@/features/assets/components/AssetsPanel'
+import { ApplicationsPanel } from '@/features/applications/components/ApplicationsPanel'
 import BpmnPalette from '@/components/workspace/BpmnPalette'
 import type { BpmnModelerInstance, BpmnCommandStack } from '@/types/bpmn'
 import { ProcedureTab } from '@/features/procedure/components/ProcedureTab'
@@ -675,6 +676,7 @@ export default function ProcessCharacterizationPage() {
           />
           <CargoLanesPanel modeler={modelerInstance} readOnly={readOnly} />
           <AssetsPanel modeler={modelerInstance} processId={process.id} readOnly={readOnly} />
+          <ApplicationsPanel modeler={modelerInstance} processId={process.id} readOnly={readOnly} />
           <ChangeTimelinePanel
             processId={process.id}
             open={timelineOpen}

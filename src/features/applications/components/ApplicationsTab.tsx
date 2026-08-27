@@ -9,8 +9,8 @@ import { TokenCostBadge } from '@/components/ui/TokenCostBadge'
 import { identifyApplicationsFromProcess } from '@/lib/applicationAi'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { toast } from '@/stores/toastStore'
-import { techRisk, DEPLOYMENT_OPTIONS, type Application } from '@/types/application'
-import type { BpmnModelerInstance, BpmnEventBus, BpmnEvent, BpmnElement, BpmnElementRegistry } from '@/types/bpmn'
+import { techRisk, DEPLOYMENT_OPTIONS, type Application, type ApplicationUsage } from '@/types/application'
+import type { BpmnModelerInstance, BpmnEventBus, BpmnElement, BpmnElementRegistry } from '@/types/bpmn'
 import { placeApplicationNode, isApplicationBO, stripAppPrefix } from '../placeApplicationNode'
 import { removeNode } from '../../assets/placeAssetNode'
 import { AppFormModal } from './AppFormModal'
@@ -28,7 +28,6 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
   const addApplication = useApplicationStore((s) => s.addApplication)
   const addUsage = useApplicationStore((s) => s.addUsage)
   const deleteUsage = useApplicationStore((s) => s.deleteUsage)
-  const deleteApplication = useApplicationStore((s) => s.deleteApplication)
   const process = useProcessStore((s) => s.processes.find((p) => p.id === processId))
   const company = useCompanyStore((s) => s.company)
   const budget = useTokenBudget({ operationKey: 'application_identification' })
@@ -41,6 +40,12 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
   const appById = useMemo(() => new Map(applications.map((a) => [a.id, a])), [applications])
   const usedAppIds = new Set(list.map((u) => u.application_id))
   const availableApps = applications.filter((a) => !usedAppIds.has(a.id))
+  // Una fila por APLICACIÓN en este proceso (agrupa sus nodos/usos).
+  const byApp = useMemo(() => {
+    const m = new Map<string, { app: Application; us: ApplicationUsage[] }>()
+    for (const u of list) { const app = appById.get(u.application_id); if (!app) continue; const e = m.get(app.id) ?? { app, us: [] }; e.us.push(u); m.set(app.id, e) }
+    return [...m.values()]
+  }, [list, appById])
 
   // Nodos «Aplicación» del diagrama (DataObject con prefijo) sin registrar como uso.
   const [diagVer, setDiagVer] = useState(0)
@@ -52,25 +57,7 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
     return () => { ['shape.added', 'shape.removed', 'element.changed', 'import.done'].forEach((e) => bus.off(e, bump)) }
   }, [modeler])
 
-  // Integración bidireccional: al ELIMINAR el nodo en el diagrama, se quita su
-  // uso del panel; si la aplicación se queda sin ningún nodo/uso, se elimina del
-  // inventario. Se escucha el comando de borrado (no la reconstrucción al importar).
-  useEffect(() => {
-    if (!modeler) return
-    const bus = modeler.get('eventBus') as BpmnEventBus
-    const onDelete = (e: BpmnEvent) => {
-      const id = (e as unknown as { context?: { shape?: { id?: string } } }).context?.shape?.id
-      if (!id) return
-      const st = useApplicationStore.getState()
-      const u = st.usages.find((x) => x.bpmn_element_id === id)
-      if (!u) return
-      st.deleteUsage(u.id)
-      // ¿Quedan otros nodos/usos de la misma aplicación? Si no, se elimina la app.
-      if (!st.usages.some((x) => x.application_id === u.application_id && x.id !== u.id)) st.deleteApplication(u.application_id)
-    }
-    bus.on('commandStack.shape.delete.postExecuted', onDelete)
-    return () => bus.off('commandStack.shape.delete.postExecuted', onDelete)
-  }, [modeler])
+  // (El borrado nodo → panel lo maneja ApplicationsPanel, que está siempre montado.)
 
   const unregistered = useMemo(() => {
     if (!modeler) return [] as { id: string; name: string }[]
@@ -90,17 +77,13 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
   }
   const registerAll = () => { unregistered.forEach(registerNode); if (unregistered.length) toast.success(`${unregistered.length} aplicación(es) registradas desde el diagrama.`) }
 
-  const removeUsage = (usageId: string, appName: string) => {
-    if (!confirm(`¿Quitar «${appName}» de este proceso? (No borra la aplicación del inventario.)`)) return
-    const u = list.find((x) => x.id === usageId)
-    deleteUsage(usageId)
-    if (modeler && u?.bpmn_element_id) removeNode(modeler, u.bpmn_element_id)
-  }
-  const removeApp = (app: Application) => {
-    if (!confirm(`¿Eliminar la aplicación «${app.name}» del inventario y de TODOS los procesos donde se usa?`)) return
-    const nodes = usages.filter((u) => u.application_id === app.id).map((u) => u.bpmn_element_id).filter(Boolean) as string[]
-    deleteApplication(app.id)
-    if (modeler) nodes.forEach((n) => removeNode(modeler, n))
+  // Quita la app de ESTE proceso: elimina sus usos y TODOS sus nodos en el
+  // diagrama actual. NO borra la app del catálogo (eso solo se hace desde el
+  // catálogo/inventario).
+  const removeFromProcess = (app: Application, us: ApplicationUsage[]) => {
+    const nodes = us.map((u) => u.bpmn_element_id).filter(Boolean).length
+    if (!confirm(`¿Quitar «${app.name}» de este proceso? Se eliminan sus ${nodes} nodo(s) del diagrama. La aplicación se conserva en el catálogo.`)) return
+    us.forEach((u) => { deleteUsage(u.id); if (modeler && u.bpmn_element_id) removeNode(modeler, u.bpmn_element_id) })
   }
 
   const handleIdentify = async () => {
@@ -206,28 +189,27 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
             <p className="text-xs text-white/30 mb-1">Aún no hay aplicaciones registradas</p>
             <p className="text-[10px] text-white/20">Identifícalas con IA desde el diagrama o agrégalas manualmente.</p>
           </div>
-        ) : list.map((u) => {
-          const app = appById.get(u.application_id)
-          if (!app) return null
+        ) : byApp.map(({ app, us }) => {
           const risk = techRisk(app)
+          const nodes = us.filter((u) => u.bpmn_element_id).length
+          const acts = [...new Set(us.map((u) => u.activity_name).filter(Boolean))]
           return (
-            <div key={u.id} className="group rounded-lg border border-white/8 bg-white/[0.03] p-3">
+            <div key={app.id} className="group rounded-lg border border-white/8 bg-white/[0.03] p-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-medium text-white flex items-center gap-1.5"><MonitorSmartphone size={12} className="text-sky-300 shrink-0" />{app.name}</p>
+                  <p className="text-[13px] font-medium text-white flex items-center gap-1.5"><MonitorSmartphone size={12} className="text-sky-300 shrink-0" />{app.name}{nodes > 1 && <span className="text-[9px] text-white/40">· {nodes} nodos</span>}</p>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                     {app.category && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{app.category}</span>}
                     {app.ownership && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{app.ownership === 'propia' ? 'Propia' : app.ownership === 'terceros' ? 'Terceros' : 'Mixta'}</span>}
                     {app.deployment && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/45">{deployLabel(app.deployment)}</span>}
                     {app.has_api && <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 inline-flex items-center gap-0.5"><Zap size={9} /> API</span>}
                     <span className="text-[9px] px-1.5 py-0.5 rounded text-white" style={{ background: risk.hex }} title={`Riesgo tecnológico: ${risk.factors.join(', ') || 'bajo'}`}>Riesgo {risk.label}</span>
-                    {u.activity_name && <span className="text-[9px] text-white/40 truncate">en «{u.activity_name}»</span>}
+                    {acts.length > 0 && <span className="text-[9px] text-white/40 truncate">en «{acts.join('», «')}»</span>}
                   </div>
                 </div>
                 <div className="flex flex-col gap-0.5 shrink-0">
                   <button onClick={() => { setEditing(app); setShowForm(true) }} title="Editar" className="p-1.5 rounded text-white/30 hover:text-cyan-400 hover:bg-white/5"><Pencil size={13} /></button>
-                  <button onClick={() => removeUsage(u.id, app.name)} title="Quitar de este proceso" className="p-1.5 rounded text-white/30 hover:text-amber-400 hover:bg-amber-500/10"><Link2 size={13} /></button>
-                  <button onClick={() => removeApp(app)} title="Eliminar del inventario" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button>
+                  <button onClick={() => removeFromProcess(app, us)} title="Quitar de este proceso (elimina sus nodos; conserva la app en el catálogo)" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button>
                 </div>
               </div>
             </div>
