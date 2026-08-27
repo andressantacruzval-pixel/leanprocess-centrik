@@ -14,11 +14,12 @@ import { DataTable, type Column } from '../components/DataTable'
 import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
-interface UsageDetail { activity: string; process: Process | undefined; path: string; dailyMinutes: number }
+interface UsageDetail { activity: string; process: Process | undefined; path: string; cargo: string; dailyMinutes: number }
 
 const deployLabel = (v: string) => DEPLOYMENT_OPTIONS.find((o) => o.value === v)?.label ?? (v || '—')
 const ownLabel = (v: string) => (v === 'propia' ? 'Propia' : v === 'terceros' ? 'Terceros' : v === 'mixta' ? 'Mixta' : '—')
 const RISK_HEX: Record<string, string> = { bajo: '#10b981', medio: '#facc15', alto: '#f97316', critico: '#ef4444' }
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 
 interface AppRow {
   app: Application
@@ -41,6 +42,17 @@ export function ApplicationsReport() {
   const org = useOrgLabels()
 
   const apps = useMemo(() => allApps.filter((a) => a.company_id === companyId), [allApps, companyId])
+  // Deduplica por nombre: si hay aplicaciones repetidas se muestran UNA vez y se
+  // agregan sus usos. canonId mapea cada id de app a su id canónico.
+  const { dedupApps, canonId } = useMemo(() => {
+    const byName = new Map<string, Application>(); const canon = new Map<string, string>()
+    for (const a of apps) {
+      const k = norm(a.name); const first = byName.get(k)
+      if (first) canon.set(a.id, first.id)
+      else { byName.set(k, a); canon.set(a.id, a.id) }
+    }
+    return { dedupApps: [...byName.values()], canonId: canon }
+  }, [apps])
   const usages = useMemo(() => allUsages.filter((u) => u.company_id === companyId), [allUsages, companyId])
   const procById = useMemo(() => new Map(allProcesses.map((p) => [p.id, p])), [allProcesses])
   const macroMap = useMemo(() => new Map(allMacros.map((m) => [m.id, m])), [allMacros])
@@ -68,15 +80,15 @@ export function ApplicationsReport() {
     return (analyses[processId] ?? []).find((v) => v.bpmnNodeId === nodeId)?.dailyMinutes ?? 0
   }
 
-  const rows = useMemo<AppRow[]>(() => apps.map((app) => {
-    const us = usages.filter((u) => u.application_id === app.id)
+  const rows = useMemo<AppRow[]>(() => dedupApps.map((app) => {
+    const us = usages.filter((u) => (canonId.get(u.application_id) ?? u.application_id) === app.id)
     const processNames = [...new Set(us.map((u) => (u.process_id ? procById.get(u.process_id)?.name : null)).filter((n): n is string => !!n))]
     const cargos = [...new Set(us.map((u) => (u.process_id && u.bpmn_element_id ? laneByProc.get(u.process_id)?.get(u.bpmn_element_id) : null)).filter((c): c is string => !!c))]
     const dailyMinutes = us.reduce((s, u) => s + timeOf(u.process_id, u.bpmn_element_id), 0)
     const activities = us.filter((u) => u.bpmn_element_id).length
     return { app, processNames, activities, cargos, dailyMinutes, risk: techRisk(app) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [apps, usages, procById, laneByProc, analyses])
+  }), [dedupApps, canonId, usages, procById, laneByProc, analyses])
 
   // Vista «Por aplicación»: periodo/unidad configurables + detalle de actividades.
   const [open, setOpen] = useState<Set<string>>(new Set())
@@ -86,21 +98,23 @@ export function ApplicationsReport() {
   const fmtT = (dm: number) => { if (!dm) return '-'; const v = scaleDaily(dm, period, unit); return unit === 'h' ? (Math.round(v * 10) / 10).toLocaleString('es') : Math.round(v).toLocaleString('es') }
   const unitLabel = `${unit === 'h' ? 'h' : 'min'}/${PERIOD_LABELS[period].toLowerCase()}`
 
-  // Actividades (con su ruta jerárquica y tiempo) por aplicación.
+  // Actividades (con su ruta jerárquica, CARGO y tiempo) por aplicación (canónica).
   const usagesByApp = useMemo(() => {
     const m = new Map<string, UsageDetail[]>()
     for (const u of usages) {
+      const key = canonId.get(u.application_id) ?? u.application_id
       const p = u.process_id ? procById.get(u.process_id) : undefined
       const h = resolveProcessHierarchy(p, macroMap, procById)
       const path = p ? [p.management, p.coordination, org.hasL2 ? p.operative : null, h.macro, h.proceso, h.subproceso].filter(Boolean).join(' › ') : '—'
       const arrV = u.process_id ? (analyses[u.process_id] ?? []) : []
       const dm = arrV.find((v) => v.bpmnNodeId === u.bpmn_element_id)?.dailyMinutes ?? 0
-      const arr = m.get(u.application_id) ?? []
-      arr.push({ activity: u.activity_name || '', process: p, path, dailyMinutes: dm })
-      m.set(u.application_id, arr)
+      const cargo = (u.process_id && u.bpmn_element_id ? laneByProc.get(u.process_id)?.get(u.bpmn_element_id) : '') || ''
+      const arr = m.get(key) ?? []
+      arr.push({ activity: u.activity_name || '', process: p, path, cargo, dailyMinutes: dm })
+      m.set(key, arr)
     }
     return m
-  }, [usages, procById, macroMap, org, analyses])
+  }, [usages, canonId, procById, macroMap, org, analyses, laneByProc])
 
   const [q, setQ] = useState('')
   const shown = useMemo(() => {
@@ -111,16 +125,16 @@ export function ApplicationsReport() {
   // ── Distribuciones ────────────────────────────────────────────────────────
   const byDeployment = useMemo<Datum[]>(() => {
     const m = new Map<string, number>()
-    apps.forEach((a) => { const k = a.deployment || 'sin_definir'; m.set(k, (m.get(k) || 0) + 1) })
+    dedupApps.forEach((a) => { const k = a.deployment || 'sin_definir'; m.set(k, (m.get(k) || 0) + 1) })
     const colors: Record<string, string> = { on_premise: '#f97316', cloud_saas: '#06b6d4', cloud_iaas: '#6366f1', hibrido: '#a855f7', sin_definir: '#6b7280' }
     return [...m.entries()].map(([k, value]) => ({ label: deployLabel(k) === '—' ? 'Sin definir' : deployLabel(k), value, color: colors[k] ?? '#6366f1' }))
-  }, [apps])
+  }, [dedupApps])
   const byOwnership = useMemo<Datum[]>(() => {
     const m = new Map<string, number>()
-    apps.forEach((a) => { const k = a.ownership || 'sin_definir'; m.set(k, (m.get(k) || 0) + 1) })
+    dedupApps.forEach((a) => { const k = a.ownership || 'sin_definir'; m.set(k, (m.get(k) || 0) + 1) })
     const colors: Record<string, string> = { propia: '#10b981', terceros: '#0ea5e9', mixta: '#a855f7', sin_definir: '#6b7280' }
     return [...m.entries()].map(([k, value]) => ({ label: ownLabel(k) === '—' ? 'Sin definir' : ownLabel(k), value, color: colors[k] ?? '#6366f1' }))
-  }, [apps])
+  }, [dedupApps])
   const byRisk = useMemo<Datum[]>(() => {
     const order = ['critico', 'alto', 'medio', 'bajo']
     const m = new Map<string, number>()
@@ -129,12 +143,12 @@ export function ApplicationsReport() {
   }, [rows])
   const byCategory = useMemo<Datum[]>(() => {
     const m = new Map<string, number>()
-    apps.forEach((a) => { if (a.category) m.set(a.category, (m.get(a.category) || 0) + 1) })
+    dedupApps.forEach((a) => { if (a.category) m.set(a.category, (m.get(a.category) || 0) + 1) })
     return [...m.entries()].map(([label, value]) => ({ label, value, color: '#0ea5e9' })).sort((a, b) => b.value - a.value)
-  }, [apps])
+  }, [dedupApps])
 
-  const cloud = apps.filter((a) => a.deployment?.startsWith('cloud')).length
-  const withApi = apps.filter((a) => a.has_api).length
+  const cloud = dedupApps.filter((a) => a.deployment?.startsWith('cloud')).length
+  const withApi = dedupApps.filter((a) => a.has_api).length
   const totalMinutes = rows.reduce((s, r) => s + r.dailyMinutes, 0)
   const automationCandidates = rows.filter((r) => r.app.has_api && r.dailyMinutes > 0).sort((a, b) => b.dailyMinutes - a.dailyMinutes).slice(0, 5)
   const highRisk = rows.filter((r) => r.risk.level === 'critico' || r.risk.level === 'alto').length
@@ -162,8 +176,8 @@ export function ApplicationsReport() {
   return (
     <Dashboard>
       <Grid cols={4}>
-        <Stat label="Aplicaciones" value={apps.length} sub="en el inventario" tone="cyan" />
-        <Stat label="En la nube" value={cloud} sub={`${apps.length ? Math.round(cloud / apps.length * 100) : 0}% cloud · resto on-premise`} tone="cyan" />
+        <Stat label="Aplicaciones" value={dedupApps.length} sub="en el inventario" tone="cyan" />
+        <Stat label="En la nube" value={cloud} sub={`${dedupApps.length ? Math.round(cloud / dedupApps.length * 100) : 0}% cloud · resto on-premise`} tone="cyan" />
         <Stat label="Con API" value={withApi} sub="candidatas a automatizar" tone="emerald" />
         <Stat label="Riesgo tecnológico alto" value={highRisk} sub="crítico o alto" tone="red" />
       </Grid>
@@ -175,9 +189,9 @@ export function ApplicationsReport() {
 
       {view === 'resumen' ? (<>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card title="Despliegue" sub="On-premise vs. nube."><Donut data={byDeployment} center={String(apps.length)} unit="apps" /></Card>
-        <Card title="Propiedad" sub="Propias vs. de terceros."><Donut data={byOwnership} center={String(apps.length)} unit="apps" /></Card>
-        <Card title="Semáforo de riesgo tecnológico" sub="Criticidad + legado + sin API + auth débil."><Donut data={byRisk} center={String(apps.length)} unit="apps" /></Card>
+        <Card title="Despliegue" sub="On-premise vs. nube."><Donut data={byDeployment} center={String(dedupApps.length)} unit="apps" /></Card>
+        <Card title="Propiedad" sub="Propias vs. de terceros."><Donut data={byOwnership} center={String(dedupApps.length)} unit="apps" /></Card>
+        <Card title="Semáforo de riesgo tecnológico" sub="Criticidad + legado + sin API + auth débil."><Donut data={byRisk} center={String(dedupApps.length)} unit="apps" /></Card>
       </div>
 
       {byCategory.length > 0 && <Card title="Por categoría"><HBars data={byCategory} /></Card>}
@@ -253,6 +267,7 @@ export function ApplicationsReport() {
                             <div key={i} className="grid grid-cols-[1fr_auto] items-start gap-3 text-[11px]">
                               <span className="min-w-0">
                                 <span className="text-white/80">{d.activity || '(sin actividad)'}</span>
+                                {d.cargo && <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-300 align-middle">{d.cargo}</span>}
                                 <span className="block text-[10px] text-white/35 truncate" title={d.path}>{d.path}</span>
                               </span>
                               <span className="text-white/55 tabular-nums w-24 text-right">{fmtT(d.dailyMinutes)}</span>
