@@ -61,22 +61,48 @@ export function ApplicationsReport() {
   const macroMap = useMemo(() => new Map(allMacros.map((m) => [m.id, m])), [allMacros])
   const [view, setView] = useState<'resumen' | 'actividades' | 'porCargo'>('resumen')
 
-  // Lanes (cargos) por nodo: se parsea el BPMN de los procesos con uso de apps.
+  // Cargos por proceso. El cargo NO es el lane del nodo de app (una computadora no
+  // tiene cargo), sino el lane de la ACTIVIDAD conectada al nodo (por la asociación
+  // del diagrama), igual que el manual de funciones. Se guarda: el lane por
+  // id/nombre de actividad + la adyacencia por asociaciones (nodo app ↔ actividad).
   const laneByProc = useMemo(() => {
-    const m = new Map<string, Map<string, string>>()
+    const laneOf = new Map<string, Map<string, string>>()
+    const adj = new Map<string, Map<string, string[]>>()
     const procIds = new Set(usages.map((u) => u.process_id).filter(Boolean) as string[])
     for (const pid of procIds) {
       const xml = procById.get(pid)?.bpmn_xml
       if (!xml) continue
       try {
         const parsed = parseBpmnXml(xml)
-        const nodeMap = new Map<string, string>()
-        parsed.activities.forEach((a) => { if (a.laneName) nodeMap.set(a.id, a.laneName) })
-        m.set(pid, nodeMap)
+        const lm = new Map<string, string>()
+        parsed.activities.forEach((a) => { if (a.laneName) { lm.set(a.id, a.laneName); if (a.name) lm.set(a.name, a.laneName) } })
+        laneOf.set(pid, lm)
+        const am = new Map<string, string[]>()
+        const link = (a?: string | null, b?: string | null) => { if (!a || !b) return; (am.get(a) ?? am.set(a, []).get(a))!.push(b); (am.get(b) ?? am.set(b, []).get(b))!.push(a) }
+        const doc = new DOMParser().parseFromString(xml, 'application/xml')
+        for (const el of Array.from(doc.querySelectorAll('*'))) {
+          if (el.localName === 'association') link(el.getAttribute('sourceRef'), el.getAttribute('targetRef'))
+          else if (el.localName === 'dataInputAssociation' || el.localName === 'dataOutputAssociation') {
+            const ref = Array.from(el.children).find((c) => c.localName === 'sourceRef' || c.localName === 'targetRef')?.textContent?.trim()
+            link(el.parentElement?.getAttribute('id'), ref)
+          }
+        }
+        adj.set(pid, am)
       } catch { /* no-op */ }
     }
-    return m
+    return { laneOf, adj }
   }, [usages, procById])
+
+  // Cargo de un uso = lane de la actividad conectada al nodo (asociación), o por el
+  // nombre de la actividad guardado en el uso.
+  const cargoOf = useCallback((processId: string | null, nodeId: string | null, activityName: string | null): string => {
+    if (!processId) return ''
+    const lm = laneByProc.laneOf.get(processId); if (!lm) return ''
+    for (const n of (nodeId ? laneByProc.adj.get(processId)?.get(nodeId) ?? [] : [])) {
+      const lane = lm.get(n); if (lane) return lane
+    }
+    return (activityName && lm.get(activityName)) || ''
+  }, [laneByProc])
 
   const timeOf = (processId: string | null, nodeId: string | null) => {
     if (!processId || !nodeId) return 0
@@ -86,12 +112,12 @@ export function ApplicationsReport() {
   const rows = useMemo<AppRow[]>(() => dedupApps.map((app) => {
     const us = usages.filter((u) => (canonId.get(u.application_id) ?? u.application_id) === app.id)
     const processNames = [...new Set(us.map((u) => (u.process_id ? procById.get(u.process_id)?.name : null)).filter((n): n is string => !!n))]
-    const cargos = [...new Set(us.map((u) => (u.process_id && u.bpmn_element_id ? laneByProc.get(u.process_id)?.get(u.bpmn_element_id) : null)).filter((c): c is string => !!c))]
+    const cargos = [...new Set(us.map((u) => cargoOf(u.process_id, u.bpmn_element_id, u.activity_name)).filter((c): c is string => !!c))]
     const dailyMinutes = us.reduce((s, u) => s + timeOf(u.process_id, u.bpmn_element_id), 0)
     const activities = us.filter((u) => u.bpmn_element_id).length
     return { app, processNames, activities, cargos, dailyMinutes, risk: techRisk(app) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [dedupApps, canonId, usages, procById, laneByProc, analyses])
+  }), [dedupApps, canonId, usages, procById, cargoOf, analyses])
 
   // Vista «Por aplicación»: periodo/unidad configurables + detalle de actividades.
   const [open, setOpen] = useState<Set<string>>(new Set())
@@ -111,13 +137,13 @@ export function ApplicationsReport() {
       const path = p ? [p.management, p.coordination, org.hasL2 ? p.operative : null, h.macro, h.proceso, h.subproceso].filter(Boolean).join(' › ') : '—'
       const arrV = u.process_id ? (analyses[u.process_id] ?? []) : []
       const dm = arrV.find((v) => v.bpmnNodeId === u.bpmn_element_id)?.dailyMinutes ?? 0
-      const cargo = (u.process_id && u.bpmn_element_id ? laneByProc.get(u.process_id)?.get(u.bpmn_element_id) : '') || ''
+      const cargo = cargoOf(u.process_id, u.bpmn_element_id, u.activity_name)
       const arr = m.get(key) ?? []
       arr.push({ activity: u.activity_name || '', process: p, path, cargo, dailyMinutes: dm })
       m.set(key, arr)
     }
     return m
-  }, [usages, canonId, procById, macroMap, org, analyses, laneByProc])
+  }, [usages, canonId, procById, macroMap, org, analyses, cargoOf])
 
   const [q, setQ] = useState('')
   const shown = useMemo(() => {
