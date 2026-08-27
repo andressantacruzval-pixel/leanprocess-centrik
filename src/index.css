@@ -490,17 +490,15 @@ html[data-theme="light"]{ background-color:#e9eff8; }
 
 /* ── Activo de información «encendido»: al pulsar un activo en el panel derecho
    se resalta su nodo Almacén de datos en el diagrama (canvas.addMarker). ────── */
-.djs-element.asset-lit .djs-visual > :first-child {
-  stroke: #f59e0b !important;
-  stroke-width: 3px !important;
-  fill: rgba(245, 158, 11, 0.14) !important;
-  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8));
-}
-
-/* Aplicación «encendida»: al pulsar una app en el panel derecho se resaltan sus
-   nodos de computadora en el diagrama. */
+.djs-element.asset-lit .djs-visual > :first-child,
 .djs-element.app-lit .djs-visual > :first-child {
-  stroke: #38bdf8 !important;
-  stroke-width: 3px !important;
-  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.85));
+  stroke: #f59e0b !important;
+  stroke-width: 4px !important;
+  fill: rgba(245, 158, 11, 0.18) !important;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 1)) drop-shadow(0 0 22px rgba(245, 158, 11, 0.75));
+  animation: lp-lit-pulse 1.2s ease-in-out infinite;
+}
+@keyframes lp-lit-pulse {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 1)) drop-shadow(0 0 22px rgba(245, 158, 11, 0.75)); }
+  50%      { filter: drop-shadow(0 0 16px rgba(245, 158, 11, 1)) drop-shadow(0 0 34px rgba(245, 158, 11, 0.9)); }
 }

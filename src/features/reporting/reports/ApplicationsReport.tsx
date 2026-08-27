@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { Search, Zap, LayoutDashboard, ListTree, ChevronRight, ChevronDown, MonitorSmartphone, Trash2 } from 'lucide-react'
+import { Search, Zap, LayoutDashboard, ListTree, ChevronRight, ChevronDown, MonitorSmartphone, Trash2, UserCog } from 'lucide-react'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
@@ -11,10 +11,12 @@ import { techRisk, DEPLOYMENT_OPTIONS, type Application } from '@/types/applicat
 import type { Process } from '@/types/process'
 import { Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, Th, Td, EmptyRow, TableWrap, type Datum } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { hierarchyColumns } from '../components/hierarchyColumns'
 import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
 import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 interface UsageDetail { activity: string; process: Process | undefined; path: string; cargo: string; dailyMinutes: number }
+interface CargoRow { app: Application; cargo: string; process: Process | undefined; activity: string; dailyMinutes: number }
 
 const deployLabel = (v: string) => DEPLOYMENT_OPTIONS.find((o) => o.value === v)?.label ?? (v || '—')
 const ownLabel = (v: string) => (v === 'propia' ? 'Propia' : v === 'terceros' ? 'Terceros' : v === 'mixta' ? 'Mixta' : '—')
@@ -57,7 +59,7 @@ export function ApplicationsReport() {
   const usages = useMemo(() => allUsages.filter((u) => u.company_id === companyId), [allUsages, companyId])
   const procById = useMemo(() => new Map(allProcesses.map((p) => [p.id, p])), [allProcesses])
   const macroMap = useMemo(() => new Map(allMacros.map((m) => [m.id, m])), [allMacros])
-  const [view, setView] = useState<'resumen' | 'actividades'>('resumen')
+  const [view, setView] = useState<'resumen' | 'actividades' | 'porCargo'>('resumen')
 
   // Lanes (cargos) por nodo: se parsea el BPMN de los procesos con uso de apps.
   const laneByProc = useMemo(() => {
@@ -122,6 +124,30 @@ export function ApplicationsReport() {
     const query = q.trim().toLowerCase()
     return query ? rows.filter((r) => r.app.name.toLowerCase().includes(query) || (r.app.category || '').toLowerCase().includes(query) || (r.app.vendor || '').toLowerCase().includes(query)) : rows
   }, [rows, q])
+
+  // Vista «Por cargo»: una fila por aplicación × cargo × actividad (qué cargos usan
+  // cada aplicación, con jerarquía y tiempo) → sirve para levantar perfiles.
+  const cargoRows = useMemo<CargoRow[]>(() => {
+    const out: CargoRow[] = []
+    for (const app of dedupApps) for (const d of usagesByApp.get(app.id) ?? []) {
+      if (!d.cargo) continue
+      out.push({ app, cargo: d.cargo, process: d.process, activity: d.activity, dailyMinutes: d.dailyMinutes })
+    }
+    return out.sort((a, b) => a.app.name.localeCompare(b.app.name) || a.cargo.localeCompare(b.cargo))
+  }, [dedupApps, usagesByApp])
+  const cargoShown = useMemo(() => {
+    const query = q.trim().toLowerCase()
+    return query ? cargoRows.filter((r) => r.app.name.toLowerCase().includes(query) || r.cargo.toLowerCase().includes(query) || r.activity.toLowerCase().includes(query)) : cargoRows
+  }, [cargoRows, q])
+  const cargoCols = useMemo<Column<CargoRow>[]>(() => [
+    { key: 'app', header: 'Aplicación', accessor: (r) => r.app.name, className: 'text-white font-medium max-w-[180px]', cell: (r) => <div className="truncate" title={r.app.name}>{r.app.name}</div> },
+    { key: 'cargo', header: 'Cargo', accessor: (r) => r.cargo, className: 'max-w-[160px]', cell: (r) => <div className="truncate text-violet-300" title={r.cargo}>{r.cargo}</div> },
+    ...hierarchyColumns<CargoRow>(org, (r) => { const p = r.process; return { management: p?.management, coordination: p?.coordination, operative: p?.operative, ...resolveProcessHierarchy(p, macroMap, procById) } }),
+    { key: 'act', header: 'Actividad', accessor: (r) => r.activity, className: 'max-w-[200px]', cell: (r) => <div className="truncate" title={r.activity}>{r.activity || '—'}</div> },
+    { key: 'tdia', header: 'Min/día', accessor: (r) => Math.round(r.dailyMinutes), cell: (r) => r.dailyMinutes ? Math.round(r.dailyMinutes * 10) / 10 : '-' },
+    { key: 'tmes', header: 'Min/mes', accessor: (r) => Math.round(scaleToPeriod(r.dailyMinutes, 'mes')), cell: (r) => r.dailyMinutes ? Math.round(scaleToPeriod(r.dailyMinutes, 'mes')) : '-' },
+    { key: 'tanio', header: 'Hrs/año', accessor: (r) => Math.round(scaleToPeriod(r.dailyMinutes, 'año') / 60 * 10) / 10, cell: (r) => r.dailyMinutes ? Math.round(scaleToPeriod(r.dailyMinutes, 'año') / 60 * 10) / 10 : '-' },
+  ], [org, macroMap, procById])
 
   // ── Distribuciones ────────────────────────────────────────────────────────
   const byDeployment = useMemo<Datum[]>(() => {
@@ -193,12 +219,13 @@ export function ApplicationsReport() {
         <Stat label="Riesgo tecnológico alto" value={highRisk} sub="crítico o alto" tone="red" />
       </Grid>
 
-      <div className="flex rounded-lg border border-white/10 overflow-hidden w-max">
+      <div className="flex rounded-lg border border-white/10 overflow-hidden w-max flex-wrap">
         <button onClick={() => setView('resumen')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'resumen' ? 'bg-cyan-500/20 text-cyan-200' : 'text-white/50 hover:bg-white/5'}`}><LayoutDashboard size={13} /> Resumen</button>
         <button onClick={() => setView('actividades')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'actividades' ? 'bg-cyan-500/20 text-cyan-200' : 'text-white/50 hover:bg-white/5'}`}><ListTree size={13} /> Por aplicación / actividad</button>
+        <button onClick={() => setView('porCargo')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'porCargo' ? 'bg-cyan-500/20 text-cyan-200' : 'text-white/50 hover:bg-white/5'}`}><UserCog size={13} /> Por cargo</button>
       </div>
 
-      {view === 'resumen' ? (<>
+      {view === 'resumen' && (<>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card title="Despliegue" sub="On-premise vs. nube."><Donut data={byDeployment} center={String(dedupApps.length)} unit="apps" /></Card>
         <Card title="Propiedad" sub="Propias vs. de terceros."><Donut data={byOwnership} center={String(dedupApps.length)} unit="apps" /></Card>
@@ -226,7 +253,9 @@ export function ApplicationsReport() {
       </div>
 
       <DataTable columns={columns} rows={shown} minWidth={2100} rowKey={(r) => r.app.id} />
-      </>) : (<>
+      </>)}
+
+      {view === 'actividades' && (<>
       <div className="flex items-center gap-2 flex-wrap">
         <div className="relative flex-1 max-w-[240px]">
           <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/30" />
@@ -295,6 +324,17 @@ export function ApplicationsReport() {
           {shown.length === 0 && <EmptyRow cols={8} />}
         </tbody>
       </TableWrap>
+      </>)}
+
+      {view === 'porCargo' && (<>
+      <div className="flex items-center gap-2 px-1">
+        <div className="relative">
+          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/30" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar aplicación, cargo o actividad…" className="pl-7 pr-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11.5px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 w-64" />
+        </div>
+        <span className="text-[10px] text-white/25">Qué cargos usan cada aplicación (para levantar perfiles y necesidades).</span>
+      </div>
+      <DataTable columns={cargoCols} rows={cargoShown} minWidth={1700} rowKey={(r, i) => `${r.app.id}:${r.cargo}:${i}`} />
       </>)}
     </Dashboard>
   )
