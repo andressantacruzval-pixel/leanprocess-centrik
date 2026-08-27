@@ -74,9 +74,11 @@ const MiniTimerEvent = () => (
   <Clock size={18} className="text-blue-400" />
 );
 
+// Nota: los trazos usan currentColor + text-white/50 para que el remapeo de tema
+// los oscurezca en claro (antes eran blanco fijo → invisibles sobre el lienzo blanco).
 const MiniTask = () => (
-  <svg width="22" height="16" viewBox="0 0 22 16">
-    <rect x="1" y="1" width="20" height="14" rx="3" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" />
+  <svg width="22" height="16" viewBox="0 0 22 16" className="text-white/50">
+    <rect x="1" y="1" width="20" height="14" rx="3" fill="none" stroke="currentColor" strokeWidth="1.5" />
   </svg>
 );
 
@@ -114,11 +116,11 @@ const MiniDataObject = () => (
 );
 
 const MiniDataStore = () => (
-  <svg width="20" height="18" viewBox="0 0 20 18">
-    <ellipse cx="10" cy="4" rx="8" ry="3" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.3" />
-    <line x1="2" y1="4" x2="2" y2="14" stroke="rgba(255,255,255,0.5)" strokeWidth="1.3" />
-    <line x1="18" y1="4" x2="18" y2="14" stroke="rgba(255,255,255,0.5)" strokeWidth="1.3" />
-    <ellipse cx="10" cy="14" rx="8" ry="3" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.3" />
+  <svg width="20" height="18" viewBox="0 0 20 18" className="text-white/50">
+    <ellipse cx="10" cy="4" rx="8" ry="3" fill="none" stroke="currentColor" strokeWidth="1.3" />
+    <line x1="2" y1="4" x2="2" y2="14" stroke="currentColor" strokeWidth="1.3" />
+    <line x1="18" y1="4" x2="18" y2="14" stroke="currentColor" strokeWidth="1.3" />
+    <ellipse cx="10" cy="14" rx="8" ry="3" fill="none" stroke="currentColor" strokeWidth="1.3" />
   </svg>
 );
 
@@ -136,18 +138,18 @@ const MiniComputer = () => (
 );
 
 const MiniLane = () => (
-  <svg width="24" height="14" viewBox="0 0 24 14">
-    <rect x="1" y="1" width="22" height="12" rx="1" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.3" />
-    <line x1="1" y1="7" x2="23" y2="7" stroke="rgba(255,255,255,0.5)" strokeWidth="1.3" strokeDasharray="2 2" />
+  <svg width="24" height="14" viewBox="0 0 24 14" className="text-white/50">
+    <rect x="1" y="1" width="22" height="12" rx="1" fill="none" stroke="currentColor" strokeWidth="1.3" />
+    <line x1="1" y1="7" x2="23" y2="7" stroke="currentColor" strokeWidth="1.3" strokeDasharray="2 2" />
   </svg>
 );
 
 const MiniSubProcess = () => (
-  <svg width="22" height="16" viewBox="0 0 22 16">
-    <rect x="1" y="1" width="20" height="14" rx="3" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" />
-    <rect x="8" y="11" width="6" height="4" rx="1" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1" />
-    <line x1="11" y1="12" x2="11" y2="14" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8" />
-    <line x1="9.5" y1="13" x2="12.5" y2="13" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8" />
+  <svg width="22" height="16" viewBox="0 0 22 16" className="text-white/50">
+    <rect x="1" y="1" width="20" height="14" rx="3" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    <rect x="8" y="11" width="6" height="4" rx="1" fill="none" stroke="currentColor" strokeWidth="1" />
+    <line x1="11" y1="12" x2="11" y2="14" stroke="currentColor" strokeWidth="0.8" />
+    <line x1="9.5" y1="13" x2="12.5" y2="13" stroke="currentColor" strokeWidth="0.8" />
   </svg>
 );
 
