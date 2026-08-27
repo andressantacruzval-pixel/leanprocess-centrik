@@ -17,6 +17,8 @@ import { AppFormModal } from './AppFormModal'
 
 const DATA_NODE_TYPES = new Set(['bpmn:DataStoreReference', 'bpmn:DataObjectReference'])
 const deployLabel = (v: string) => DEPLOYMENT_OPTIONS.find((o) => o.value === v)?.label ?? v
+// Normaliza el nombre para comparar (sin acentos, minúsculas) y evitar duplicados.
+const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 
 interface Props { processId: string; processName: string; isExpanded?: boolean; modeler?: BpmnModelerInstance | null }
 
@@ -92,8 +94,22 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
         existingAppNames: applications.map((a) => a.name),
       }))
       if (!suggestions) return
-      let added = 0
+      let added = 0, linked = 0
+      const seen = new Set<string>()
       for (const s of suggestions) {
+        const key = norm(s.name)
+        if (!key || seen.has(key)) continue // no repetir la misma app en una corrida
+        seen.add(key)
+        // ¿La aplicación ya existe en el inventario? → reutilizar, no duplicar.
+        const existing = applications.find((a) => norm(a.name) === key)
+        if (existing) {
+          // Si ya se usa en ESTE proceso, no la vinculamos de nuevo.
+          if (usages.some((u) => u.application_id === existing.id && u.process_id === processId)) continue
+          const nodeId = modeler ? placeApplicationNode(modeler, s.relatedActivity, existing.name) : null
+          addUsage(existing.id, processId, nodeId, s.relatedActivity)
+          linked++
+          continue
+        }
         const nodeId = modeler ? placeApplicationNode(modeler, s.relatedActivity, s.name) : null
         const app = addApplication({
           name: s.name, category: s.category, vendor: s.vendor, ownership: s.ownership,
@@ -102,7 +118,7 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
         })
         if (app) { added++; addUsage(app.id, processId, nodeId, s.relatedActivity) }
       }
-      if (added) toast.success(`${added} aplicación(es) identificadas. Revísalas y ajústalas.`)
+      if (added || linked) toast.success(`${added} nueva(s) y ${linked} vinculada(s). Revísalas y ajústalas.`)
       else toast.info('La IA no encontró aplicaciones nuevas para este proceso.')
     } catch (err) {
       console.warn('[ApplicationsTab] identify error', err)
