@@ -57,9 +57,10 @@ CONTEXTO:
 - Proceso: "${proc}"
 - Objetivo: ${desc}
 - Actividades: ${acts.map((a) => `"${a}"`).join(', ') || 'sin actividades'}
-- Aplicaciones ya registradas (NO las repitas): ${existentes}
+- Aplicaciones YA REGISTRADAS en el catálogo (PRIORÍZALAS): ${existentes}
 
 REGLAS CLAVE:
+- PRIORIZA EL CATÁLOGO: si una actividad usa una aplicación equivalente a una ya registrada, REUTILIZA su nombre EXACTO (tal cual aparece en la lista). Solo propón una aplicación NUEVA cuando ninguna registrada aplique.
 - Propón SOLO software real: sistemas, plataformas, aplicaciones (ERP, CRM, BI, correo, portales, RPA, sistemas a medida, etc.).
 - NO confundas una aplicación con un ARTEFACTO DE DATOS: un archivo de Excel, un documento, un formato o un reporte SON DATOS (activos de información), no aplicaciones. Tampoco propongas herramientas físicas.
 - Si una actividad claramente usa un sistema pero su nombre NO se puede identificar, propón un marcador genérico ("Aplicación 1", "Sistema del área…") con "generic": true para que el usuario lo nombre.

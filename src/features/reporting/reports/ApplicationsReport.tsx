@@ -5,6 +5,7 @@ import { useProcessStore } from '@/stores/processStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { parseBpmnXml } from '@/utils/bpmnParser'
+import { scaleToPeriod } from '@/utils/valueAnalysis'
 import { techRisk, DEPLOYMENT_OPTIONS, type Application } from '@/types/application'
 import { Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
@@ -118,7 +119,9 @@ export function ApplicationsReport() {
     { key: 'procs', header: 'Procesos', accessor: (r) => r.processNames.join(', '), className: 'max-w-[220px]', cell: (r) => <div className="truncate" title={r.processNames.join(', ')}>{r.processNames.join(', ') || '-'}</div> },
     { key: 'nact', header: '# Actividades', accessor: (r) => r.activities },
     { key: 'cargos', header: 'Cargos', accessor: (r) => r.cargos.join(', '), className: 'max-w-[180px]', cell: (r) => <div className="truncate" title={r.cargos.join(', ')}>{r.cargos.join(', ') || '-'}</div> },
-    { key: 'time', header: 'Tiempo (min/día)', accessor: (r) => Math.round(r.dailyMinutes) },
+    { key: 'tdia', header: 'Min/día', accessor: (r) => Math.round(r.dailyMinutes), cell: (r) => r.dailyMinutes ? Math.round(r.dailyMinutes * 10) / 10 : '-' },
+    { key: 'tmes', header: 'Min/mes', accessor: (r) => Math.round(scaleToPeriod(r.dailyMinutes, 'mes')), cell: (r) => r.dailyMinutes ? Math.round(scaleToPeriod(r.dailyMinutes, 'mes')) : '-' },
+    { key: 'tanio', header: 'Hrs/año', accessor: (r) => Math.round(scaleToPeriod(r.dailyMinutes, 'año') / 60 * 10) / 10, cell: (r) => r.dailyMinutes ? Math.round(scaleToPeriod(r.dailyMinutes, 'año') / 60 * 10) / 10 : '-' },
     { key: 'status', header: 'Estado', accessor: (r) => r.app.status || '' },
   ], [])
 
@@ -154,10 +157,10 @@ export function ApplicationsReport() {
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar aplicación…"
             className="pl-7 pr-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11.5px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 w-52" />
         </div>
-        <span className="text-[10px] text-white/25">Tiempo total: {Math.round(totalMinutes)} min/día</span>
+        <span className="text-[10px] text-white/25">Tiempo total: {Math.round(totalMinutes)} min/día · {Math.round(scaleToPeriod(totalMinutes, 'mes'))} min/mes · {Math.round(scaleToPeriod(totalMinutes, 'año') / 60 * 10) / 10} hrs/año</span>
       </div>
 
-      <DataTable columns={columns} rows={shown} minWidth={1900} rowKey={(r) => r.app.id} />
+      <DataTable columns={columns} rows={shown} minWidth={2100} rowKey={(r) => r.app.id} />
     </Dashboard>
   )
 }
