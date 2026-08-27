@@ -12,7 +12,7 @@ const leanModdle = {
   types: [
     {
       name: 'AppMarker',
-      extends: ['bpmn:DataObjectReference'],
+      extends: ['bpmn:DataStoreReference', 'bpmn:DataObjectReference'],
       properties: [
         { name: 'isApplication', isAttr: true, type: 'Boolean' },
       ],

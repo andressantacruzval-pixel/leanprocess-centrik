@@ -274,7 +274,7 @@ const CATEGORIES: PaletteCategory[] = [
       {
         id: 'application',
         label: 'Aplicacion',
-        bpmnType: 'bpmn:DataObjectReference',
+        bpmnType: 'bpmn:DataStoreReference',
         shapeOptions: { _isApp: true, width: 46, height: 44 },
         icon: <MiniComputer />,
       },

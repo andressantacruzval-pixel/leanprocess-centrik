@@ -38,7 +38,8 @@ export function placeApplicationNode(modeler: BpmnModelerInstance, activityName:
     const modeling = modeler.get('modeling') as unknown as {
       createShape: (shape: BpmnElement, pos: { x: number; y: number }, parent: BpmnElement) => BpmnElement
       updateProperties: (el: BpmnElement, props: Record<string, unknown>) => void
-      connect: (a: BpmnElement, b: BpmnElement) => BpmnElement
+      connect: (a: BpmnElement, b: BpmnElement, attrs?: Record<string, unknown>) => BpmnElement
+      updateWaypoints: (conn: BpmnElement, wps: { x: number; y: number }[]) => void
     }
 
     const all = registry.filter(() => true) as Placeable[]
@@ -59,11 +60,25 @@ export function placeApplicationNode(modeler: BpmnModelerInstance, activityName:
     // Se coloca ARRIBA de la actividad (los activos van abajo) para no encimarse.
     const pos = { x: Math.round(ax + aw / 2), y: Math.round(ay - 110) }
 
-    const shape = factory.createShape({ type: 'bpmn:DataObjectReference', width: 46, height: 44 })
+    // Se exporta como «Almacén de datos» (cilindro): Bizagi NO tiene nodo de
+    // computadora y el «Objeto de datos» (documento) se reserva para otra función.
+    // En la app se dibuja como computadora vía el renderer (marca isApplication).
+    const shape = factory.createShape({ type: 'bpmn:DataStoreReference', width: 46, height: 44 })
     const created = modeling.createShape(shape, pos, parent) || shape
     // Marca de aplicación (atributo moddle, persistente) + nombre limpio.
     try { modeling.updateProperties(created, { isApplication: true, ...(appName ? { name: appName } : {}) }) } catch { /* no-op */ }
-    if (anchor && /Task$/.test(anchor.type)) { try { modeling.connect(created, anchor) } catch { /* no-op */ } }
+    // Flecha a la actividad: Association (Bizagi la dibuja) con waypoints
+    // explícitos (nodo abajo → arriba de la actividad) para que exporte con
+    // geometría y no se pierda al abrir en Bizagi.
+    if (anchor && /Task$/.test(anchor.type)) {
+      try {
+        const conn = modeling.connect(created, anchor, { type: 'bpmn:Association', associationDirection: 'One' })
+        if (conn) modeling.updateWaypoints(conn, [
+          { x: (created.x ?? pos.x) + (created.width ?? 46) / 2, y: (created.y ?? pos.y) + (created.height ?? 44) },
+          { x: (anchor.x ?? ax) + (anchor.width ?? aw) / 2, y: anchor.y ?? ay },
+        ])
+      } catch { /* no-op */ }
+    }
     return created?.id ?? null
   } catch (err) {
     console.warn('[placeApplicationNode] no se pudo crear el nodo', err)

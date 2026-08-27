@@ -13,7 +13,7 @@ interface RShape { type?: string; width?: number; height?: number; x?: number; y
 
 function isAppShape(el: unknown): el is RShape {
   const s = el as RShape
-  return s?.type === 'bpmn:DataObjectReference' && isApplicationBO(s.businessObject)
+  return (s?.type === 'bpmn:DataStoreReference' || s?.type === 'bpmn:DataObjectReference') && isApplicationBO(s.businessObject)
 }
 
 class AppNodeRenderer extends BaseRenderer {

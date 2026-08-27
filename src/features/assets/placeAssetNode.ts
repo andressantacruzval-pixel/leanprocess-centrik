@@ -53,7 +53,8 @@ export function placeDataStoreNear(modeler: BpmnModelerInstance, activityName: s
     const modeling = modeler.get('modeling') as unknown as {
       createShape: (shape: BpmnElement, pos: { x: number; y: number }, parent: BpmnElement) => BpmnElement
       updateProperties: (el: BpmnElement, props: Record<string, unknown>) => void
-      connect: (a: BpmnElement, b: BpmnElement) => BpmnElement
+      connect: (a: BpmnElement, b: BpmnElement, attrs?: Record<string, unknown>) => BpmnElement
+      updateWaypoints: (conn: BpmnElement, wps: { x: number; y: number }[]) => void
     }
 
     // Actividad ancla: coincide por nombre; si no, cualquier tarea; si no, el proceso.
@@ -80,8 +81,17 @@ export function placeDataStoreNear(modeler: BpmnModelerInstance, activityName: s
     const created = modeling.createShape(shape, pos, parent) || shape
     // Nombre del activo como título del nodo (bidireccional con el formulario).
     if (assetName) { try { modeling.updateProperties(created, { name: assetName }) } catch { /* no-op */ } }
-    // Flecha (asociación de datos) del nodo a la actividad donde se usa el activo.
-    if (anchor && /Task$/.test(anchor.type)) { try { modeling.connect(created, anchor) } catch { /* no-op */ } }
+    // Flecha del nodo (abajo) a la actividad: Association (Bizagi la dibuja) con
+    // waypoints explícitos para que exporte con geometría.
+    if (anchor && /Task$/.test(anchor.type)) {
+      try {
+        const conn = modeling.connect(created, anchor, { type: 'bpmn:Association', associationDirection: 'One' })
+        if (conn) modeling.updateWaypoints(conn, [
+          { x: (created.x ?? pos.x) + (created.width ?? 50) / 2, y: created.y ?? pos.y },
+          { x: (anchor.x ?? ax) + (anchor.width ?? aw) / 2, y: (anchor.y ?? ay) + (anchor.height ?? ah) },
+        ])
+      } catch { /* no-op */ }
+    }
     return created?.id ?? null
   } catch (err) {
     console.warn('[placeDataStoreNear] no se pudo crear el nodo', err)
