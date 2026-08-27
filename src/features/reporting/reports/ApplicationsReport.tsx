@@ -1,14 +1,20 @@
 import { useMemo, useState } from 'react'
-import { Search, Zap } from 'lucide-react'
+import { Search, Zap, LayoutDashboard, ListTree, ChevronRight, ChevronDown, MonitorSmartphone } from 'lucide-react'
 import { useApplicationStore } from '@/stores/applicationStore'
 import { useProcessStore } from '@/stores/processStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { scaleToPeriod } from '@/utils/valueAnalysis'
+import { scaleDaily, PERIOD_LABELS, PERIOD_OPTIONS, type CargoPeriod } from '@/features/cargos/cargoData'
 import { techRisk, DEPLOYMENT_OPTIONS, type Application } from '@/types/application'
-import { Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, type Datum } from '../components/reportUi'
+import type { Process } from '@/types/process'
+import { Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, Th, Td, EmptyRow, TableWrap, type Datum } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
+import { resolveProcessHierarchy } from '@/lib/reportHierarchy'
+import { useOrgLabels } from '@/hooks/useOrgLabels'
+
+interface UsageDetail { activity: string; process: Process | undefined; path: string; dailyMinutes: number }
 
 const deployLabel = (v: string) => DEPLOYMENT_OPTIONS.find((o) => o.value === v)?.label ?? (v || '—')
 const ownLabel = (v: string) => (v === 'propia' ? 'Propia' : v === 'terceros' ? 'Terceros' : v === 'mixta' ? 'Mixta' : '—')
@@ -30,11 +36,15 @@ export function ApplicationsReport() {
   const allApps = useApplicationStore((s) => s.applications)
   const allUsages = useApplicationStore((s) => s.usages)
   const allProcesses = useProcessStore((s) => s.processes)
+  const allMacros = useProcessStore((s) => s.macroprocesses)
   const analyses = useValueAnalysisStore((s) => s.analyses)
+  const org = useOrgLabels()
 
   const apps = useMemo(() => allApps.filter((a) => a.company_id === companyId), [allApps, companyId])
   const usages = useMemo(() => allUsages.filter((u) => u.company_id === companyId), [allUsages, companyId])
   const procById = useMemo(() => new Map(allProcesses.map((p) => [p.id, p])), [allProcesses])
+  const macroMap = useMemo(() => new Map(allMacros.map((m) => [m.id, m])), [allMacros])
+  const [view, setView] = useState<'resumen' | 'actividades'>('resumen')
 
   // Lanes (cargos) por nodo: se parsea el BPMN de los procesos con uso de apps.
   const laneByProc = useMemo(() => {
@@ -67,6 +77,30 @@ export function ApplicationsReport() {
     return { app, processNames, activities, cargos, dailyMinutes, risk: techRisk(app) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [apps, usages, procById, laneByProc, analyses])
+
+  // Vista «Por aplicación»: periodo/unidad configurables + detalle de actividades.
+  const [open, setOpen] = useState<Set<string>>(new Set())
+  const [period, setPeriod] = useState<CargoPeriod>('mes')
+  const [unit, setUnit] = useState<'min' | 'h'>('min')
+  const toggleRow = (k: string) => setOpen((p) => { const n = new Set(p); if (n.has(k)) n.delete(k); else n.add(k); return n })
+  const fmtT = (dm: number) => { if (!dm) return '-'; const v = scaleDaily(dm, period, unit); return unit === 'h' ? (Math.round(v * 10) / 10).toLocaleString('es') : Math.round(v).toLocaleString('es') }
+  const unitLabel = `${unit === 'h' ? 'h' : 'min'}/${PERIOD_LABELS[period].toLowerCase()}`
+
+  // Actividades (con su ruta jerárquica y tiempo) por aplicación.
+  const usagesByApp = useMemo(() => {
+    const m = new Map<string, UsageDetail[]>()
+    for (const u of usages) {
+      const p = u.process_id ? procById.get(u.process_id) : undefined
+      const h = resolveProcessHierarchy(p, macroMap, procById)
+      const path = p ? [p.management, p.coordination, org.hasL2 ? p.operative : null, h.macro, h.proceso, h.subproceso].filter(Boolean).join(' › ') : '—'
+      const arrV = u.process_id ? (analyses[u.process_id] ?? []) : []
+      const dm = arrV.find((v) => v.bpmnNodeId === u.bpmn_element_id)?.dailyMinutes ?? 0
+      const arr = m.get(u.application_id) ?? []
+      arr.push({ activity: u.activity_name || '', process: p, path, dailyMinutes: dm })
+      m.set(u.application_id, arr)
+    }
+    return m
+  }, [usages, procById, macroMap, org, analyses])
 
   const [q, setQ] = useState('')
   const shown = useMemo(() => {
@@ -134,6 +168,12 @@ export function ApplicationsReport() {
         <Stat label="Riesgo tecnológico alto" value={highRisk} sub="crítico o alto" tone="red" />
       </Grid>
 
+      <div className="flex rounded-lg border border-white/10 overflow-hidden w-max">
+        <button onClick={() => setView('resumen')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'resumen' ? 'bg-cyan-500/20 text-cyan-200' : 'text-white/50 hover:bg-white/5'}`}><LayoutDashboard size={13} /> Resumen</button>
+        <button onClick={() => setView('actividades')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'actividades' ? 'bg-cyan-500/20 text-cyan-200' : 'text-white/50 hover:bg-white/5'}`}><ListTree size={13} /> Por aplicación / actividad</button>
+      </div>
+
+      {view === 'resumen' ? (<>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card title="Despliegue" sub="On-premise vs. nube."><Donut data={byDeployment} center={String(apps.length)} unit="apps" /></Card>
         <Card title="Propiedad" sub="Propias vs. de terceros."><Donut data={byOwnership} center={String(apps.length)} unit="apps" /></Card>
@@ -161,6 +201,75 @@ export function ApplicationsReport() {
       </div>
 
       <DataTable columns={columns} rows={shown} minWidth={2100} rowKey={(r) => r.app.id} />
+      </>) : (<>
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative flex-1 max-w-[240px]">
+          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/30" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar aplicación…" className="w-full pl-7 pr-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11.5px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50" />
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <label className="inline-flex items-center gap-1.5 text-[11px] text-white/50">Periodo
+            <select value={period} onChange={(e) => setPeriod(e.target.value as CargoPeriod)} className="appearance-none bg-white/[0.03] border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white/80 outline-none cursor-pointer focus:ring-2 focus:ring-cyan-500/50">
+              {PERIOD_OPTIONS.map((p) => <option key={p} value={p}>{PERIOD_LABELS[p]}</option>)}
+            </select>
+          </label>
+          <div className="inline-flex rounded-lg border border-white/10 p-0.5">
+            {(['min', 'h'] as const).map((u) => <button key={u} onClick={() => setUnit(u)} className={`px-2 py-1 rounded text-[11px] ${unit === u ? 'bg-cyan-500/20 text-cyan-300' : 'text-white/40 hover:text-white/70'}`}>{u === 'h' ? 'Horas' : 'Minutos'}</button>)}
+          </div>
+        </div>
+      </div>
+
+      <TableWrap minWidth={1000}>
+        <thead>
+          <tr className="bg-white/[0.03] border-b border-white/5">
+            <Th> </Th><Th>Aplicación</Th><Th>Categoría</Th><Th>Propiedad</Th><Th>Riesgo</Th><Th>Procesos</Th><Th>Actividades</Th><Th>{unitLabel}</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {shown.map((r) => {
+            const dets = usagesByApp.get(r.app.id) ?? []
+            const isOpen = open.has(r.app.id)
+            return [
+              <tr key={r.app.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                <Td>{dets.length > 0 && <button onClick={() => toggleRow(r.app.id)} className="text-white/40 hover:text-white/80">{isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</button>}</Td>
+                <Td className="text-white font-medium"><span className="inline-flex items-center gap-1.5"><MonitorSmartphone size={12} className="text-sky-300 shrink-0" />{r.app.name}</span></Td>
+                <Td className="text-white/60">{r.app.category || '—'}</Td>
+                <Td className="text-white/60">{ownLabel(r.app.ownership)}</Td>
+                <Td><Badge label={r.risk.label} hex={r.risk.hex} /></Td>
+                <Td className="tabular-nums">{r.processNames.length}</Td>
+                <Td className="tabular-nums text-white/85">{r.activities}</Td>
+                <Td className="tabular-nums">{fmtT(r.dailyMinutes)}</Td>
+              </tr>,
+              isOpen && (
+                <tr key={r.app.id + '-d'} className="bg-black/20">
+                  <td colSpan={8} className="px-3 py-2">
+                    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5">
+                      <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-white/35 mb-1.5">
+                        <span>Actividades de «{r.app.name}» ({dets.length})</span><span>{unitLabel}</span>
+                      </div>
+                      {dets.length === 0 ? <p className="text-[11px] text-white/30">Sin actividades ancladas (uso a nivel de proceso).</p> : (
+                        <div className="space-y-1">
+                          {dets.map((d, i) => (
+                            <div key={i} className="grid grid-cols-[1fr_auto] items-start gap-3 text-[11px]">
+                              <span className="min-w-0">
+                                <span className="text-white/80">{d.activity || '(sin actividad)'}</span>
+                                <span className="block text-[10px] text-white/35 truncate" title={d.path}>{d.path}</span>
+                              </span>
+                              <span className="text-white/55 tabular-nums w-24 text-right">{fmtT(d.dailyMinutes)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ),
+            ]
+          })}
+          {shown.length === 0 && <EmptyRow cols={8} />}
+        </tbody>
+      </TableWrap>
+      </>)}
     </Dashboard>
   )
 }
