@@ -11,7 +11,7 @@ import { parseBpmnXml } from '@/utils/bpmnParser'
 import { toast } from '@/stores/toastStore'
 import { techRisk, DEPLOYMENT_OPTIONS, type Application } from '@/types/application'
 import type { BpmnModelerInstance, BpmnEventBus, BpmnElement, BpmnElementRegistry } from '@/types/bpmn'
-import { placeApplicationNode, isAppNode, stripAppPrefix } from '../placeApplicationNode'
+import { placeApplicationNode, isApplicationBO, stripAppPrefix } from '../placeApplicationNode'
 import { removeNode } from '../../assets/placeAssetNode'
 import { AppFormModal } from './AppFormModal'
 
@@ -56,7 +56,7 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
     try {
       const registry = modeler.get('elementRegistry') as BpmnElementRegistry
       return (registry.filter(() => true) as BpmnElement[])
-        .filter((el) => DATA_NODE_TYPES.has(el.type) && isAppNode(el.businessObject?.name) && !covered.has(el.id))
+        .filter((el) => DATA_NODE_TYPES.has(el.type) && isApplicationBO(el.businessObject) && !covered.has(el.id))
         .map((el) => ({ id: el.id, name: stripAppPrefix(el.businessObject?.name) || 'Aplicación' }))
     } catch { return [] }
     // eslint-disable-next-line react-hooks/exhaustive-deps

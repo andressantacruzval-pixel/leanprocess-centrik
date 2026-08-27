@@ -122,6 +122,19 @@ const MiniDataStore = () => (
   </svg>
 );
 
+const MiniComputer = () => (
+  <svg width="22" height="18" viewBox="0 0 22 18">
+    <rect x="1" y="1" width="14" height="10" rx="1.5" fill="none" stroke="#38bdf8" strokeWidth="1.3" />
+    <rect x="3" y="3" width="10" height="6" rx="0.5" fill="#0ea5e9" />
+    <rect x="6.5" y="11" width="3" height="2" fill="#38bdf8" />
+    <rect x="4" y="13" width="8" height="1.5" rx="0.7" fill="#38bdf8" />
+    <rect x="16" y="1" width="5" height="13" rx="1" fill="none" stroke="#38bdf8" strokeWidth="1.3" />
+    <line x1="17.2" y1="3.5" x2="19.8" y2="3.5" stroke="#38bdf8" strokeWidth="1" />
+    <line x1="17.2" y1="5.5" x2="19.8" y2="5.5" stroke="#38bdf8" strokeWidth="1" />
+    <circle cx="18.5" cy="10.5" r="1" fill="#38bdf8" />
+  </svg>
+);
+
 const MiniLane = () => (
   <svg width="24" height="14" viewBox="0 0 24 14">
     <rect x="1" y="1" width="22" height="12" rx="1" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.3" />
@@ -258,6 +271,13 @@ const CATEGORIES: PaletteCategory[] = [
         bpmnType: 'bpmn:DataStoreReference',
         icon: <MiniDataStore />,
       },
+      {
+        id: 'application',
+        label: 'Aplicacion',
+        bpmnType: 'bpmn:DataObjectReference',
+        shapeOptions: { _isApp: true, width: 46, height: 44 },
+        icon: <MiniComputer />,
+      },
     ],
   },
   {
@@ -373,7 +393,7 @@ export default function BpmnPalette({ modeler }: BpmnPaletteProps) {
         if (element.isParticipant) {
           shape = elementFactory.createParticipantShape();
         } else {
-          const { _isControl, _isRisk, ...cleanOptions } = (element.shapeOptions ?? {}) as Record<string, unknown>;
+          const { _isControl, _isRisk, _isApp, ...cleanOptions } = (element.shapeOptions ?? {}) as Record<string, unknown>;
           shape = elementFactory.createShape({
             type: element.bpmnType,
             ...cleanOptions,
@@ -384,6 +404,10 @@ export default function BpmnPalette({ modeler }: BpmnPaletteProps) {
             shape.businessObject.name = '[Control] ';
           } else if (_isRisk && shape.businessObject) {
             shape.businessObject.name = '[Riesgo] ';
+          } else if (_isApp && shape.businessObject) {
+            // Marca de aplicación (atributo moddle) → se dibuja como computadora y
+            // lo detecta el panel de Aplicaciones. Persiste aunque se renombre.
+            (shape.businessObject as unknown as { isApplication?: boolean }).isApplication = true;
           }
         }
 

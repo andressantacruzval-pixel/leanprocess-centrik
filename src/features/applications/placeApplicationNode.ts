@@ -6,19 +6,24 @@ import type { BpmnModelerInstance, BpmnElement, BpmnElementRegistry, BpmnElement
 // visualmente de los activos de información. removeNode/renameNode se reutilizan
 // desde placeAssetNode (son genéricos).
 
-// Prefijo que marca un nodo como Aplicación (no confundir con activo de datos).
+// Prefijo LEGADO (nodos creados antes de la marca moddle). Se mantiene solo para
+// detectar y limpiar los nodos antiguos; los nuevos usan el atributo isApplication.
 export const APP_NODE_PREFIX = '🖥 '
+
+// businessObject mínimo con la marca de aplicación.
+interface AppBO { name?: string; isApplication?: boolean }
 
 function norm(s: string): string {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 }
 
-// ¿El nodo es de aplicación? (por el prefijo del nombre)
+// ¿El businessObject es de una APLICACIÓN? Por el atributo moddle (persistente e
+// independiente del nombre) o, para nodos antiguos, por el prefijo del nombre.
+export function isApplicationBO(bo: AppBO | undefined | null): boolean {
+  return !!bo && (bo.isApplication === true || (typeof bo.name === 'string' && bo.name.startsWith(APP_NODE_PREFIX)))
+}
 export function isAppNode(name: string | undefined | null): boolean {
   return (name ?? '').startsWith(APP_NODE_PREFIX)
-}
-export function appLabel(name: string): string {
-  return `${APP_NODE_PREFIX}${name}`.trim()
 }
 export function stripAppPrefix(name: string | undefined | null): string {
   return (name ?? '').replace(APP_NODE_PREFIX, '').trim()
@@ -56,7 +61,8 @@ export function placeApplicationNode(modeler: BpmnModelerInstance, activityName:
 
     const shape = factory.createShape({ type: 'bpmn:DataObjectReference', width: 46, height: 44 })
     const created = modeling.createShape(shape, pos, parent) || shape
-    if (appName) { try { modeling.updateProperties(created, { name: appLabel(appName) }) } catch { /* no-op */ } }
+    // Marca de aplicación (atributo moddle, persistente) + nombre limpio.
+    try { modeling.updateProperties(created, { isApplication: true, ...(appName ? { name: appName } : {}) }) } catch { /* no-op */ }
     if (anchor && /Task$/.test(anchor.type)) { try { modeling.connect(created, anchor) } catch { /* no-op */ } }
     return created?.id ?? null
   } catch (err) {

@@ -1,6 +1,6 @@
 import BaseRenderer from 'diagram-js/lib/draw/BaseRenderer'
 import { append as svgAppend, create as svgCreate, attr as svgAttr } from 'tiny-svg'
-import { APP_NODE_PREFIX } from '@/features/applications/placeApplicationNode'
+import { isApplicationBO } from '@/features/applications/placeApplicationNode'
 
 // Renderer custom: dibuja los nodos de APLICACIÓN como una COMPUTADORA (monitor),
 // para diferenciarlos del «Almacén de datos» (activos) y del «Objeto de datos»
@@ -9,11 +9,11 @@ import { APP_NODE_PREFIX } from '@/features/applications/placeApplicationNode'
 
 const HIGH_PRIORITY = 1500
 
-interface RShape { type?: string; width?: number; height?: number; x?: number; y?: number; businessObject?: { name?: string } }
+interface RShape { type?: string; width?: number; height?: number; x?: number; y?: number; businessObject?: { name?: string; isApplication?: boolean } }
 
 function isAppShape(el: unknown): el is RShape {
   const s = el as RShape
-  return s?.type === 'bpmn:DataObjectReference' && typeof s.businessObject?.name === 'string' && s.businessObject.name.startsWith(APP_NODE_PREFIX)
+  return s?.type === 'bpmn:DataObjectReference' && isApplicationBO(s.businessObject)
 }
 
 class AppNodeRenderer extends BaseRenderer {
