@@ -7,7 +7,7 @@ import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { parseBpmnXml } from '@/utils/bpmnParser'
 import { scaleToPeriod } from '@/utils/valueAnalysis'
 import { scaleDaily, PERIOD_LABELS, PERIOD_OPTIONS, type CargoPeriod } from '@/features/cargos/cargoData'
-import { techRisk, DEPLOYMENT_OPTIONS, type Application } from '@/types/application'
+import { techRisk, DEPLOYMENT_OPTIONS, type Application, type ApplicationUsage } from '@/types/application'
 import type { Process } from '@/types/process'
 import { Dashboard, Grid, Card, Stat, Donut, HBars, Insight, Badge, Th, Td, EmptyRow, TableWrap, type Datum } from '../components/reportUi'
 import { DataTable, type Column } from '../components/DataTable'
@@ -17,6 +17,8 @@ import { useOrgLabels } from '@/hooks/useOrgLabels'
 
 interface UsageDetail { activity: string; process: Process | undefined; path: string; cargo: string; dailyMinutes: number }
 interface CargoRow { app: Application; cargo: string; process: Process | undefined; activity: string; dailyMinutes: number }
+// Actividad conectada a un nodo de aplicación (por asociación del diagrama).
+interface ActDetail { key: string; name: string; cargo: string; dailyMinutes: number }
 
 const deployLabel = (v: string) => DEPLOYMENT_OPTIONS.find((o) => o.value === v)?.label ?? (v || '—')
 const ownLabel = (v: string) => (v === 'propia' ? 'Propia' : v === 'terceros' ? 'Terceros' : v === 'mixta' ? 'Mixta' : '—')
@@ -81,6 +83,7 @@ export function ApplicationsReport() {
   const laneByProc = useMemo(() => {
     const laneOf = new Map<string, Map<string, string>>()
     const adj = new Map<string, Map<string, string[]>>()
+    const actNames = new Map<string, Map<string, string>>()
     const procIds = new Set(usages.map((u) => u.process_id).filter(Boolean) as string[])
     for (const pid of procIds) {
       const xml = procById.get(pid)?.bpmn_xml
@@ -88,8 +91,13 @@ export function ApplicationsReport() {
       try {
         const parsed = parseBpmnXml(xml)
         const lm = new Map<string, string>()
-        parsed.activities.forEach((a) => { if (a.laneName) { lm.set(a.id, a.laneName); if (a.name) lm.set(a.name, a.laneName) } })
+        const nm = new Map<string, string>()
+        parsed.activities.forEach((a) => {
+          if (a.laneName) { lm.set(a.id, a.laneName); if (a.name) lm.set(a.name, a.laneName) }
+          nm.set(a.id, a.name || '')
+        })
         laneOf.set(pid, lm)
+        actNames.set(pid, nm)
         const am = new Map<string, string[]>()
         const link = (a?: string | null, b?: string | null) => { if (!a || !b) return; (am.get(a) ?? am.set(a, []).get(a))!.push(b); (am.get(b) ?? am.set(b, []).get(b))!.push(a) }
         const doc = new DOMParser().parseFromString(xml, 'application/xml')
@@ -103,7 +111,7 @@ export function ApplicationsReport() {
         adj.set(pid, am)
       } catch { /* no-op */ }
     }
-    return { laneOf, adj }
+    return { laneOf, adj, actNames }
   }, [usages, procById])
 
   // Cargo de un uso = lane de la actividad conectada al nodo (asociación), o por el
@@ -117,20 +125,53 @@ export function ApplicationsReport() {
     return (activityName && lm.get(activityName)) || ''
   }, [laneByProc])
 
-  const timeOf = (processId: string | null, nodeId: string | null) => {
+  const timeOf = useCallback((processId: string | null, nodeId: string | null) => {
     if (!processId || !nodeId) return 0
     return (analyses[processId] ?? []).find((v) => v.bpmnNodeId === nodeId)?.dailyMinutes ?? 0
-  }
+  }, [analyses])
+
+  // Un nodo de aplicación puede estar asociado a VARIAS actividades del mismo
+  // subproceso (varias flechas). El uso guarda solo el nodo de la app, así que las
+  // actividades reales se leen de la ADYACENCIA de asociaciones (nodo app ↔ tareas),
+  // igual que el cargo. Devuelve una entrada POR actividad conectada.
+  const connectedActivities = useCallback((u: ApplicationUsage): ActDetail[] => {
+    if (!u.process_id) return []
+    const lm = laneByProc.laneOf.get(u.process_id)
+    const am = laneByProc.adj.get(u.process_id)
+    const nm = laneByProc.actNames.get(u.process_id)
+    const neighbors = u.bpmn_element_id ? (am?.get(u.bpmn_element_id) ?? []) : []
+    const actNeighbors = neighbors.filter((n) => nm?.has(n))
+    if (actNeighbors.length) {
+      return actNeighbors.map((id) => ({
+        key: `${u.process_id}:${id}`,
+        name: nm?.get(id) || u.activity_name || '',
+        cargo: lm?.get(id) || '',
+        dailyMinutes: timeOf(u.process_id, id),
+      }))
+    }
+    // Sin asociación explícita a una actividad: se usa el ancla guardado en el uso
+    // (el nodo de la app). Sin nodo (uso a nivel de proceso) no hay actividad.
+    if (!u.bpmn_element_id) return []
+    return [{
+      key: `${u.process_id}:${u.bpmn_element_id}`,
+      name: u.activity_name || '',
+      cargo: cargoOf(u.process_id, u.bpmn_element_id, u.activity_name),
+      dailyMinutes: timeOf(u.process_id, u.bpmn_element_id),
+    }]
+  }, [laneByProc, cargoOf, timeOf])
 
   const rows = useMemo<AppRow[]>(() => dedupApps.map((app) => {
     const us = usages.filter((u) => (canonId.get(u.application_id) ?? u.application_id) === app.id)
     const processNames = [...new Set(us.map((u) => (u.process_id ? procById.get(u.process_id)?.name : null)).filter((n): n is string => !!n))]
-    const cargos = [...new Set(us.map((u) => cargoOf(u.process_id, u.bpmn_element_id, u.activity_name)).filter((c): c is string => !!c))]
-    const dailyMinutes = us.reduce((s, u) => s + timeOf(u.process_id, u.bpmn_element_id), 0)
-    const activities = us.filter((u) => u.bpmn_element_id).length
-    return { app, processNames, activities, cargos, dailyMinutes, risk: techRisk(app) }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [dedupApps, canonId, usages, procById, cargoOf, analyses])
+    // Actividades DISTINTAS conectadas a los nodos de la app (una app puede tocar
+    // varias actividades por subproceso). Se deduplica por clave proceso:actividad.
+    const acts = new Map<string, ActDetail>()
+    for (const u of us) for (const d of connectedActivities(u)) if (!acts.has(d.key)) acts.set(d.key, d)
+    const details = [...acts.values()]
+    const cargos = [...new Set(details.map((d) => d.cargo).filter((c): c is string => !!c))]
+    const dailyMinutes = details.reduce((s, d) => s + d.dailyMinutes, 0)
+    return { app, processNames, activities: details.length, cargos, dailyMinutes, risk: techRisk(app) }
+  }), [dedupApps, canonId, usages, procById, connectedActivities])
 
   // Vista «Por aplicación»: periodo/unidad configurables + detalle de actividades.
   const [open, setOpen] = useState<Set<string>>(new Set())
@@ -141,22 +182,34 @@ export function ApplicationsReport() {
   const unitLabel = `${unit === 'h' ? 'h' : 'min'}/${PERIOD_LABELS[period].toLowerCase()}`
 
   // Actividades (con su ruta jerárquica, CARGO y tiempo) por aplicación (canónica).
+  // Una fila POR actividad conectada al nodo de la app (no por uso): un nodo puede
+  // estar asociado a varias actividades del subproceso. Se deduplica por app+actividad.
   const usagesByApp = useMemo(() => {
     const m = new Map<string, UsageDetail[]>()
+    const seen = new Map<string, Set<string>>()
     for (const u of usages) {
       const key = canonId.get(u.application_id) ?? u.application_id
       const p = u.process_id ? procById.get(u.process_id) : undefined
       const h = resolveProcessHierarchy(p, macroMap, procById)
       const path = p ? [p.management, p.coordination, org.hasL2 ? p.operative : null, h.macro, h.proceso, h.subproceso].filter(Boolean).join(' › ') : '—'
-      const arrV = u.process_id ? (analyses[u.process_id] ?? []) : []
-      const dm = arrV.find((v) => v.bpmnNodeId === u.bpmn_element_id)?.dailyMinutes ?? 0
-      const cargo = cargoOf(u.process_id, u.bpmn_element_id, u.activity_name)
       const arr = m.get(key) ?? []
-      arr.push({ activity: u.activity_name || '', process: p, path, cargo, dailyMinutes: dm })
+      const seenSet = seen.get(key) ?? new Set<string>()
+      const dets = connectedActivities(u)
+      if (dets.length) {
+        for (const d of dets) {
+          if (seenSet.has(d.key)) continue
+          seenSet.add(d.key)
+          arr.push({ activity: d.name, process: p, path, cargo: d.cargo, dailyMinutes: d.dailyMinutes })
+        }
+      } else {
+        // Uso a nivel de proceso (sin nodo/actividad concreta).
+        arr.push({ activity: u.activity_name || '', process: p, path, cargo: '', dailyMinutes: 0 })
+      }
       m.set(key, arr)
+      seen.set(key, seenSet)
     }
     return m
-  }, [usages, canonId, procById, macroMap, org, analyses, cargoOf])
+  }, [usages, canonId, procById, macroMap, org, connectedActivities])
 
   const [q, setQ] = useState('')
   // Filtro por clic en los gráficos del resumen (despliegue, propiedad, riesgo,
