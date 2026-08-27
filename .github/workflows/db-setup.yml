@@ -105,3 +105,7 @@ jobs:
 
 # trigger migración aplicaciones (20260827000001): inventario de aplicaciones/
 # software (applications) + usos por actividad/proceso (application_usages) + RLS.
+
+# trigger migración logros activos/apps (20260827000002): seed de 8 logros nuevos
+# (first-asset, ten-assets, asset-personal-data, asset-classified, first-application,
+# ten-applications, app-with-api, app-mapped) en la tabla public.achievements.
