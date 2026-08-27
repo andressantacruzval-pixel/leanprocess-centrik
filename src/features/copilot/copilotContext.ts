@@ -18,11 +18,14 @@ import {
   resolveRisks,
   risksWithoutAdequateControl,
 } from './copilotData'
+import { techRisk } from '@/types/application'
+import { computeCargos } from '@/features/cargos/cargoData'
+import { STATUS_LABELS } from '@/types/improvement'
 
 // ── Panorama de la empresa (carril de datos, agregado) ─────────────────────
 
 export function buildOrgSnapshot(data: ScopedData): string {
-  const { processes, risks, indicators, procedures, analyses, improvements } = data
+  const { processes, risks, indicators, procedures, analyses, improvements, assets, applications } = data
   const procIds = new Set(processes.map((p) => p.id))
   const withRisk = new Set(risks.map((r) => r.process_id))
   const withKpi = new Set(indicators.map((i) => i.process_id))
@@ -35,7 +38,25 @@ export function buildOrgSnapshot(data: ScopedData): string {
   L.push(`Procesos: ${processes.length} (${critical} críticos, ${withBpmn} con flujograma)`)
   L.push(`Con procedimiento: ${withProc.size} · Con indicadores: ${withKpi.size} · Con riesgos: ${withRisk.size}`)
   L.push(`Riesgos: ${risks.length} en total, ${sinControl} SIN control adecuado`)
-  L.push(`Indicadores: ${indicators.length} · Mejoras registradas: ${improvements.length} · Análisis de valor: ${Object.keys(analyses).length} procesos`)
+  const abiertas = improvements.filter((o) => o.status !== 'cerrada' && o.status !== 'descartada').length
+  L.push(`Indicadores: ${indicators.length} · Oportunidades de mejora: ${improvements.length} (${abiertas} abiertas) · Análisis de valor: ${Object.keys(analyses).length} procesos`)
+
+  // Activos de información (ISO 27001) — datos personales y criticidad.
+  if (assets.length) {
+    const conDP = assets.filter((a) => a.has_personal_data).length
+    const critAlta = assets.filter((a) => (a.criticality ?? 0) >= 4).length
+    L.push(`Activos de información: ${assets.length} (${conDP} con datos personales, ${critAlta} de criticidad alta)`)
+  }
+  // Aplicaciones / software — API, nube y riesgo tecnológico.
+  if (applications.length) {
+    const conApi = applications.filter((a) => a.has_api).length
+    const cloud = applications.filter((a) => a.deployment?.startsWith('cloud')).length
+    const riesgoAlto = applications.filter((a) => { const r = techRisk(a); return r.level === 'alto' || r.level === 'critico' }).length
+    L.push(`Aplicaciones/software: ${applications.length} (${conApi} con API, ${cloud} en la nube, ${riesgoAlto} de riesgo tecnológico alto/crítico)`)
+  }
+  // Cargos derivados del lane del flujograma (los del manual de funciones).
+  const cargos = computeCargos(processes, analyses, []).cargos.filter((c) => c.activities.length > 0)
+  if (cargos.length) L.push(`Cargos identificados (por lane del flujograma): ${cargos.length}`)
   const sinRiesgo = processes.filter((p) => !withRisk.has(p.id) && procIds.has(p.id)).map((p) => p.name)
   if (sinRiesgo.length) L.push(`Procesos sin riesgos identificados: ${sinRiesgo.slice(0, 12).join(', ')}${sinRiesgo.length > 12 ? '…' : ''}`)
   const sinKpi = processes.filter((p) => !withKpi.has(p.id)).map((p) => p.name)
@@ -110,6 +131,18 @@ function processBlock(data: ScopedData, processId: string): string {
   if (improvements.length) {
     L.push('Mejoras: ' + improvements.map((o) => `${o.name} (${o.status})`).join('; '))
   }
+
+  // Activos de información de este proceso.
+  const assetsHere = data.assets.filter((a) => a.process_id === processId)
+  if (assetsHere.length) {
+    L.push('Activos de información: ' + assetsHere.map((a) => `${a.name}${a.has_personal_data ? ' (datos personales)' : ''}`).join('; '))
+  }
+  // Aplicaciones/software usadas en este proceso (por sus actividades diagramadas).
+  const usageHere = data.appUsages.filter((u) => u.process_id === processId)
+  if (usageHere.length) {
+    const appNames = [...new Set(usageHere.map((u) => data.applications.find((ap) => ap.id === u.application_id)?.name).filter((n): n is string => !!n))]
+    if (appNames.length) L.push('Aplicaciones usadas: ' + appNames.join('; '))
+  }
   return L.join('\n')
 }
 
@@ -170,6 +203,40 @@ export function buildGlobalIndex(data: ScopedData): string {
   L.push(`Procesos (${data.processes.length}) — nombre · macroproceso · área:`)
   data.processes.slice(0, 60).forEach((p) => L.push(`- ${p.name} · ${macroOf(p, macros)} · ${areaOf(p)}`))
   more(data.processes.length, 60)
+
+  if (data.assets.length) {
+    L.push(`Activos de información (${data.assets.length}) — nombre · tipo · proceso · datos personales:`)
+    data.assets.slice(0, 60).forEach((a) => {
+      const p = procs.get(a.process_id ?? '')
+      L.push(`- ${a.name} · ${a.asset_type || 'sin tipo'} · ${p?.name ?? 'sin proceso'}${a.has_personal_data ? ' · DATOS PERSONALES' : ''}`)
+    })
+    more(data.assets.length, 60)
+  }
+
+  if (data.applications.length) {
+    L.push(`Aplicaciones (${data.applications.length}) — nombre · categoría · API · riesgo tecnológico:`)
+    data.applications.slice(0, 60).forEach((a) => {
+      const r = techRisk(a)
+      L.push(`- ${a.name}${a.vendor ? ` (${a.vendor})` : ''} · ${a.category || 'sin categoría'} · ${a.has_api ? 'con API' : 'sin API'} · riesgo ${r.label}`)
+    })
+    more(data.applications.length, 60)
+  }
+
+  const cargos = computeCargos(data.processes, data.analyses, []).cargos.filter((c) => c.activities.length > 0)
+  if (cargos.length) {
+    L.push(`Cargos (${cargos.length}) — cargo · nº actividades · nº procesos:`)
+    cargos.slice(0, 40).forEach((c) => L.push(`- ${c.cargo} · ${c.activities.length} actividades · ${c.processes.size} procesos`))
+    more(cargos.length, 40)
+  }
+
+  if (data.improvements.length) {
+    L.push(`Oportunidades de mejora (${data.improvements.length}) — nombre · proceso · estado:`)
+    data.improvements.slice(0, 40).forEach((o) => {
+      const p = procs.get(o.processId)
+      L.push(`- ${o.name} · ${p?.name ?? '(proceso?)'} · ${STATUS_LABELS[o.status] ?? o.status}`)
+    })
+    more(data.improvements.length, 40)
+  }
 
   return L.join('\n')
 }

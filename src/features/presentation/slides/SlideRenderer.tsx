@@ -1,4 +1,4 @@
-import { ShieldAlert, TrendingUp, Activity, CheckSquare, BarChart3, Lightbulb, ClipboardCheck } from 'lucide-react'
+import { ShieldAlert, TrendingUp, Activity, CheckSquare, BarChart3, Lightbulb, ClipboardCheck, Database, MonitorSmartphone } from 'lucide-react'
 import type { Slide } from '../presentationTypes'
 import type { Macroprocess, Process } from '@/types/process'
 import type { RiskItem } from '@/types/risk'
@@ -10,6 +10,8 @@ import {
   IMPROVEMENT_TYPE_LABELS, IMPROVEMENT_TYPE_COLORS, IMPROVEMENT_TYPE_OPTIONS,
 } from '@/types/improvement'
 import type { ProcessHealthMap } from '@/hooks/useProcessHealth'
+import { type InformationAsset, assetLabel } from '@/types/asset'
+import { type Application, techRisk, DEPLOYMENT_OPTIONS } from '@/types/application'
 
 // ── Category display helpers ──────────────────────────────────────────────
 
@@ -44,11 +46,16 @@ export interface SlideRendererProps {
   improvements: ImprovementOpportunity[]
   procedures: unknown[]
   healthMap: ProcessHealthMap
+  assets: InformationAsset[]
+  applications: Application[]
 }
+
+const deployLabel = (v: string) => DEPLOYMENT_OPTIONS.find((o) => o.value === v)?.label ?? 'Sin definir'
+const APP_RISK_HEX: Record<string, string> = { bajo: '#10b981', medio: '#facc15', alto: '#f97316', critico: '#ef4444' }
 
 // ── Component ────────────────────────────────────────────────────────────
 
-export function SlideRenderer({ slide, macroprocesses, processes, risks, indicators, analyses, audits, improvements, procedures, healthMap }: SlideRendererProps) {
+export function SlideRenderer({ slide, macroprocesses, processes, risks, indicators, analyses, audits, improvements, procedures, healthMap, assets, applications }: SlideRendererProps) {
   switch (slide.type) {
     // ─── Title ─────────────────────────────────────────────────────
     case 'title':
@@ -554,6 +561,128 @@ export function SlideRenderer({ slide, macroprocesses, processes, risks, indicat
                 <span className="text-lg text-gray-400">{s.label}</span>
               </div>
             ))}
+          </div>
+        </div>
+      )
+    }
+
+    // ─── Activos de Información ──────────────────────────────────────
+    case 'assets-overview': {
+      const total = assets.length
+      const conDP = assets.filter((a) => a.has_personal_data).length
+      const critAlta = assets.filter((a) => (a.criticality ?? 0) >= 4).length
+      const conProceso = assets.filter((a) => a.process_id).length
+      const byType = new globalThis.Map<string, number>()
+      assets.forEach((a) => { const k = a.asset_type || 'Sin tipo'; byType.set(k, (byType.get(k) || 0) + 1) })
+      const typeRows = [...byType.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6)
+      const maxType = Math.max(1, ...typeRows.map(([, n]) => n))
+      const criticos = [...assets]
+        .sort((a, b) => (b.criticality ?? 0) - (a.criticality ?? 0))
+        .slice(0, 8)
+      return (
+        <div className="flex flex-col h-full px-6 lg:px-12 py-6 lg:py-10">
+          <div className="flex items-center gap-3 mb-8">
+            <Database className="w-8 h-8 text-sky-400" />
+            <h2 className="text-4xl font-bold text-white">Activos de Información</h2>
+          </div>
+          <div className="flex gap-6 mb-8">
+            <StatBox value={total} label="Activos" tone="text-sky-400" />
+            <StatBox value={conDP} label="Con datos personales" tone="text-red-400" />
+            <StatBox value={critAlta} label="Criticidad alta" tone="text-amber-400" />
+            <StatBox value={conProceso} label="Asignados a proceso" tone="text-emerald-400" />
+          </div>
+          <div className="flex-1 grid grid-cols-2 gap-10 min-h-0">
+            <div className="min-h-0 flex flex-col">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Por tipo de activo</h3>
+              <div className="space-y-2">
+                {typeRows.map(([name, n]) => (
+                  <div key={name} className="flex items-center gap-3">
+                    <span className="w-40 text-right text-sm text-gray-300 truncate">{name}</span>
+                    <span className="flex-1 h-5 rounded bg-white/5 overflow-hidden">
+                      <span className="h-full rounded bg-sky-400/80 flex items-center justify-end px-2" style={{ width: `${Math.max(8, n / maxType * 100)}%` }}>
+                        <span className="text-[11px] font-bold text-white">{n}</span>
+                      </span>
+                    </span>
+                  </div>
+                ))}
+                {!typeRows.length && <p className="text-sm text-gray-500">Sin activos registrados aun.</p>}
+              </div>
+            </div>
+            <div className="min-h-0 overflow-y-auto space-y-2">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Activos más críticos</h3>
+              {criticos.map((a) => (
+                <div key={a.id} className="rounded-lg border border-white/5 bg-white/[0.02] px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="flex-1 text-sm text-white truncate">{a.name}</span>
+                    {a.has_personal_data && <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0 bg-red-500/15 text-red-300">Datos personales</span>}
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">{a.asset_type || 'sin tipo'} · Confidencialidad: {assetLabel(a.confidentiality) || '—'}{a.criticality ? ` · Criticidad ${a.criticality}` : ''}</div>
+                </div>
+              ))}
+              {!criticos.length && <p className="text-sm text-gray-500">Sin activos registrados aun.</p>}
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // ─── Aplicaciones / Software ─────────────────────────────────────
+    case 'applications-overview': {
+      const total = applications.length
+      const conApi = applications.filter((a) => a.has_api).length
+      const cloud = applications.filter((a) => a.deployment?.startsWith('cloud')).length
+      const withRisk = applications.map((a) => ({ app: a, risk: techRisk(a) }))
+      const riesgoAlto = withRisk.filter((x) => x.risk.level === 'alto' || x.risk.level === 'critico').length
+      const byDeploy = new globalThis.Map<string, number>()
+      applications.forEach((a) => { const k = deployLabel(a.deployment); byDeploy.set(k, (byDeploy.get(k) || 0) + 1) })
+      const deployRows = [...byDeploy.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6)
+      const maxDeploy = Math.max(1, ...deployRows.map(([, n]) => n))
+      const riskOrder: Record<string, number> = { critico: 4, alto: 3, medio: 2, bajo: 1 }
+      const topRisk = [...withRisk]
+        .sort((a, b) => (riskOrder[b.risk.level] ?? 0) - (riskOrder[a.risk.level] ?? 0))
+        .slice(0, 8)
+      return (
+        <div className="flex flex-col h-full px-6 lg:px-12 py-6 lg:py-10">
+          <div className="flex items-center gap-3 mb-8">
+            <MonitorSmartphone className="w-8 h-8 text-indigo-400" />
+            <h2 className="text-4xl font-bold text-white">Aplicaciones y Software</h2>
+          </div>
+          <div className="flex gap-6 mb-8">
+            <StatBox value={total} label="Aplicaciones" tone="text-indigo-400" />
+            <StatBox value={conApi} label="Con API" tone="text-emerald-400" />
+            <StatBox value={cloud} label="En la nube" tone="text-cyan-400" />
+            <StatBox value={riesgoAlto} label="Riesgo alto/crítico" tone="text-red-400" />
+          </div>
+          <div className="flex-1 grid grid-cols-2 gap-10 min-h-0">
+            <div className="min-h-0 flex flex-col">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Por despliegue</h3>
+              <div className="space-y-2">
+                {deployRows.map(([name, n]) => (
+                  <div key={name} className="flex items-center gap-3">
+                    <span className="w-40 text-right text-sm text-gray-300 truncate">{name}</span>
+                    <span className="flex-1 h-5 rounded bg-white/5 overflow-hidden">
+                      <span className="h-full rounded bg-indigo-400/80 flex items-center justify-end px-2" style={{ width: `${Math.max(8, n / maxDeploy * 100)}%` }}>
+                        <span className="text-[11px] font-bold text-white">{n}</span>
+                      </span>
+                    </span>
+                  </div>
+                ))}
+                {!deployRows.length && <p className="text-sm text-gray-500">Sin aplicaciones registradas aun.</p>}
+              </div>
+            </div>
+            <div className="min-h-0 overflow-y-auto space-y-2">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-3">Mayor riesgo tecnológico</h3>
+              {topRisk.map(({ app, risk }) => (
+                <div key={app.id} className="rounded-lg border border-white/5 bg-white/[0.02] px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="flex-1 text-sm text-white truncate">{app.name}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0 text-white" style={{ background: APP_RISK_HEX[risk.level] ?? '#6b7280' }}>{risk.label}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">{app.category || 'sin categoría'}{app.vendor ? ` · ${app.vendor}` : ''} · {deployLabel(app.deployment)}{app.has_api ? ' · API' : ''}</div>
+                </div>
+              ))}
+              {!topRisk.length && <p className="text-sm text-gray-500">Sin aplicaciones registradas aun.</p>}
+            </div>
           </div>
         </div>
       )

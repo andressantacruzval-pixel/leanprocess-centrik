@@ -11,6 +11,8 @@ import {
   IMPROVEMENT_TYPE_LABELS, IMPROVEMENT_TYPE_OPTIONS,
 } from '@/types/improvement'
 import type { ProcessHealthMap } from '@/hooks/useProcessHealth'
+import { type InformationAsset, assetLabel } from '@/types/asset'
+import { type Application, techRisk, DEPLOYMENT_OPTIONS } from '@/types/application'
 
 interface PptxExportData {
   macroprocesses: Macroprocess[]
@@ -22,11 +24,16 @@ interface PptxExportData {
   improvements: ImprovementOpportunity[]
   procedures: unknown[]
   healthMap: ProcessHealthMap
+  assets: InformationAsset[]
+  applications: Application[]
 }
+
+const deployLabelPptx = (v: string) => DEPLOYMENT_OPTIONS.find((o) => o.value === v)?.label ?? 'Sin definir'
+const APP_RISK_HEX_PPTX: Record<string, string> = { bajo: '10B981', medio: 'F59E0B', alto: 'F97316', critico: 'DC2626' }
 
 export async function exportPresentationToPptx(
   slides: Slide[],
-  { macroprocesses, processes, risks, indicators, analyses, audits, improvements, procedures, healthMap }: PptxExportData,
+  { macroprocesses, processes, risks, indicators, analyses, audits, improvements, procedures, healthMap, assets, applications }: PptxExportData,
   companyName?: string,
 ): Promise<void> {
   const pptx = new pptxgen()
@@ -344,6 +351,67 @@ export async function exportPresentationToPptx(
             x: xPos, y: yPos + 1.2, w: 3.5, h: 0.5,
             fontSize: 16, fontFace: 'Arial', color: 'D1D5DB', align: 'center',
           })
+        })
+        break
+      }
+
+      case 'assets-overview': {
+        pptSlide.addText('Activos de Informacion', {
+          x: 0.5, y: 0.4, w: 12.33, h: 0.8,
+          fontSize: 32, fontFace: 'Arial', color: 'FFFFFF', bold: true,
+        })
+        const conDP = assets.filter((a) => a.has_personal_data).length
+        const critAlta = assets.filter((a) => (a.criticality ?? 0) >= 4).length
+        const conProceso = assets.filter((a) => a.process_id).length
+        pptSlide.addText(`${assets.length} activos · ${conDP} con datos personales · ${critAlta} de criticidad alta · ${conProceso} asignados a proceso`, {
+          x: 0.5, y: 1.3, w: 12.33, h: 0.5, fontSize: 14, fontFace: 'Arial', color: '6B7280',
+        })
+        const aHead: pptxgen.TableRow = ['Activo', 'Tipo', 'Confidencialidad', 'Criticidad', 'Datos personales'].map((t) => ({
+          text: t, options: { bold: true, color: '9CA3AF', fontSize: 11, align: 'center' as const },
+        }))
+        const topAssets = [...assets].sort((a, b) => (b.criticality ?? 0) - (a.criticality ?? 0)).slice(0, 14)
+        const aData: pptxgen.TableRow[] = topAssets.map((a) => [
+          { text: a.name, options: { color: 'FFFFFF', fontSize: 10 } },
+          { text: a.asset_type || '-', options: { color: 'D1D5DB', fontSize: 10 } },
+          { text: assetLabel(a.confidentiality) || '-', options: { color: 'D1D5DB', fontSize: 10, align: 'center' as const } },
+          { text: a.criticality ? `${a.criticality}` : '-', options: { color: '22D3EE', fontSize: 10, align: 'center' as const } },
+          { text: a.has_personal_data ? 'Si' : 'No', options: { color: a.has_personal_data ? 'F87171' : '6B7280', fontSize: 10, align: 'center' as const } },
+        ])
+        pptSlide.addTable([aHead, ...aData], {
+          x: 0.3, y: 2.0, w: 12.73, h: 5.0, border: { type: 'solid', pt: 0.5, color: '1F2937' },
+          colW: [4.0, 2.8, 2.4, 1.73, 1.8], rowH: 0.34, fontSize: 10, autoPage: false,
+        })
+        break
+      }
+
+      case 'applications-overview': {
+        pptSlide.addText('Aplicaciones y Software', {
+          x: 0.5, y: 0.4, w: 12.33, h: 0.8,
+          fontSize: 32, fontFace: 'Arial', color: 'FFFFFF', bold: true,
+        })
+        const conApi = applications.filter((a) => a.has_api).length
+        const cloud = applications.filter((a) => a.deployment?.startsWith('cloud')).length
+        const withRisk = applications.map((a) => ({ app: a, risk: techRisk(a) }))
+        const riesgoAlto = withRisk.filter((x) => x.risk.level === 'alto' || x.risk.level === 'critico').length
+        pptSlide.addText(`${applications.length} aplicaciones · ${conApi} con API · ${cloud} en la nube · ${riesgoAlto} de riesgo tecnologico alto/critico`, {
+          x: 0.5, y: 1.3, w: 12.33, h: 0.5, fontSize: 14, fontFace: 'Arial', color: '6B7280',
+        })
+        const pHead: pptxgen.TableRow = ['Aplicacion', 'Categoria', 'Proveedor', 'Despliegue', 'API', 'Riesgo'].map((t) => ({
+          text: t, options: { bold: true, color: '9CA3AF', fontSize: 11, align: 'center' as const },
+        }))
+        const riskOrder: Record<string, number> = { critico: 4, alto: 3, medio: 2, bajo: 1 }
+        const topApps = [...withRisk].sort((a, b) => (riskOrder[b.risk.level] ?? 0) - (riskOrder[a.risk.level] ?? 0)).slice(0, 14)
+        const pData: pptxgen.TableRow[] = topApps.map(({ app, risk }) => [
+          { text: app.name, options: { color: 'FFFFFF', fontSize: 10 } },
+          { text: app.category || '-', options: { color: 'D1D5DB', fontSize: 10 } },
+          { text: app.vendor || '-', options: { color: 'D1D5DB', fontSize: 10 } },
+          { text: deployLabelPptx(app.deployment), options: { color: 'D1D5DB', fontSize: 10, align: 'center' as const } },
+          { text: app.has_api ? 'Si' : 'No', options: { color: app.has_api ? '34D399' : '6B7280', fontSize: 10, align: 'center' as const } },
+          { text: risk.label, options: { fill: { color: APP_RISK_HEX_PPTX[risk.level] ?? '6B7280' }, color: 'FFFFFF', fontSize: 10, bold: true, align: 'center' as const } },
+        ])
+        pptSlide.addTable([pHead, ...pData], {
+          x: 0.3, y: 2.0, w: 12.73, h: 5.0, border: { type: 'solid', pt: 0.5, color: '1F2937' },
+          colW: [3.2, 2.4, 2.4, 2.0, 1.0, 1.73], rowH: 0.34, fontSize: 10, autoPage: false,
         })
         break
       }

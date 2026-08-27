@@ -33,6 +33,11 @@ import {
   Users,
   Lightbulb,
   Rocket,
+  Database,
+  Boxes,
+  MonitorSmartphone,
+  Network,
+  Zap,
   type LucideProps,
 } from 'lucide-react'
 import {
@@ -70,6 +75,11 @@ const ICON_MAP: Record<string, ComponentType<LucideProps>> = {
   Users,
   Lightbulb,
   Rocket,
+  Database,
+  Boxes,
+  MonitorSmartphone,
+  Network,
+  Zap,
 }
 
 // ── Tier colors ──────────────────────────────────────────────────────────

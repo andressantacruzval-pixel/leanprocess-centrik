@@ -12,6 +12,9 @@ import { useStreakStore } from '@/features/gamification/streakStore'
 import { useAnalyticsStore } from '@/stores/analyticsStore'
 import { useAchievementStore } from '@/features/gamification/achievementStore'
 import { useBillingStore } from '@/stores/billingStore'
+import { useAssetStore } from '@/stores/assetStore'
+import { useApplicationStore } from '@/stores/applicationStore'
+import { useWorkspaceStore } from '@/stores/workspaceStore'
 
 export interface AchievementProgress {
   current: number
@@ -31,6 +34,10 @@ export function useAchievementProgress(): Record<string, AchievementProgress> {
   const events = useAnalyticsStore((s) => s.events)
   const communityPosts = useAchievementStore((s) => s.communityPosts)
   const recentTransactions = useBillingStore((s) => s.recentTransactions)
+  const activeCompanyId = useWorkspaceStore((s) => s.activeCompanyId)
+  const allAssets = useAssetStore((s) => s.assets)
+  const allApplications = useApplicationStore((s) => s.applications)
+  const allAppUsages = useApplicationStore((s) => s.usages)
 
   return useMemo(() => {
     const processCount = processes.length
@@ -83,6 +90,17 @@ export function useAchievementProgress(): Record<string, AchievementProgress> {
 
     const communityCount = communityPosts.length
 
+    // Activos y aplicaciones de la empresa activa.
+    const assets = allAssets.filter((a) => a.company_id === activeCompanyId)
+    const applications = allApplications.filter((a) => a.company_id === activeCompanyId)
+    const appUsages = allAppUsages.filter((u) => u.company_id === activeCompanyId)
+    const assetCount = assets.length
+    const appCount = applications.length
+    const assetPersonalData = assets.some((a) => a.has_personal_data) ? 1 : 0
+    const assetClassified = assets.some((a) => a.criticality != null) ? 1 : 0
+    const appWithApi = applications.some((a) => a.has_api) ? 1 : 0
+    const appMapped = appUsages.some((u) => u.process_id) ? 1 : 0
+
     return {
       'first-process':       { current: Math.min(processCount, 1),  target: 1 },
       'five-processes':      { current: Math.min(processCount, 5),  target: 5 },
@@ -109,11 +127,20 @@ export function useAchievementProgress(): Record<string, AchievementProgress> {
       'lean-master':         { current: completedMilestones,         target: totalMilestones || 10 },
       'first-share':         { current: Math.min(communityCount, 1), target: 1 },
       'five-shares':         { current: Math.min(communityCount, 5), target: 5 },
+      'first-asset':         { current: Math.min(assetCount, 1),     target: 1 },
+      'ten-assets':          { current: Math.min(assetCount, 10),    target: 10 },
+      'asset-personal-data': { current: assetPersonalData,           target: 1 },
+      'asset-classified':    { current: assetClassified,             target: 1 },
+      'first-application':   { current: Math.min(appCount, 1),       target: 1 },
+      'ten-applications':    { current: Math.min(appCount, 10),      target: 10 },
+      'app-with-api':        { current: appWithApi,                  target: 1 },
+      'app-mapped':          { current: appMapped,                   target: 1 },
     }
   }, [
     // Arrays completos: la función accede a items individuales para detectar
     // qué procesos tienen BPMN, KPIs, etc. Los .length sólo no son suficientes.
     processes, risks, indicators, procedures, audits, analyses, events, communityPosts,
     recentTransactions, milestones, currentStreak,
+    allAssets, allApplications, allAppUsages, activeCompanyId,
   ])
 }

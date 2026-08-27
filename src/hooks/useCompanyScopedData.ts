@@ -17,6 +17,8 @@ import { useProcedureStore } from '@/stores/procedureStore'
 import { useAuditStore } from '@/stores/auditStore'
 import { useValueAnalysisStore } from '@/stores/valueAnalysisStore'
 import { useImprovementStore } from '@/stores/improvementStore'
+import { useAssetStore } from '@/stores/assetStore'
+import { useApplicationStore } from '@/stores/applicationStore'
 
 export function useCompanyScopedData() {
   const activeCompanyId = useWorkspaceStore((s) => s.activeCompanyId)
@@ -30,6 +32,9 @@ export function useCompanyScopedData() {
   const allAudits = useAuditStore((s) => s.audits)
   const allAnalyses = useValueAnalysisStore((s) => s.analyses)
   const allImprovements = useImprovementStore((s) => s.opportunities)
+  const allAssets = useAssetStore((s) => s.assets)
+  const allApplications = useApplicationStore((s) => s.applications)
+  const allAppUsages = useApplicationStore((s) => s.usages)
 
   // Company-scoped processes and macroprocesses
   const macroprocesses = useMemo(
@@ -92,6 +97,24 @@ export function useCompanyScopedData() {
     [allImprovements, processIds]
   )
 
+  // Activos de información — por company_id (pueden no tener proceso asignado)
+  const assets = useMemo(
+    () => allAssets.filter((a) => a.company_id === activeCompanyId),
+    [allAssets, activeCompanyId]
+  )
+
+  // Aplicaciones/software — inventario a nivel de empresa
+  const applications = useMemo(
+    () => allApplications.filter((a) => a.company_id === activeCompanyId),
+    [allApplications, activeCompanyId]
+  )
+
+  // Usos de aplicaciones (app ↔ proceso/actividad) de la empresa activa
+  const appUsages = useMemo(
+    () => allAppUsages.filter((u) => u.company_id === activeCompanyId),
+    [allAppUsages, activeCompanyId]
+  )
+
   return {
     activeCompanyId,
     macroprocesses,
@@ -103,5 +126,8 @@ export function useCompanyScopedData() {
     audits,
     analyses,
     improvements,
+    assets,
+    applications,
+    appUsages,
   }
 }

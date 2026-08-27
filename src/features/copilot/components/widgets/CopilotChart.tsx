@@ -7,9 +7,10 @@ import { computeChart, chartInsight, type ChartSpec, type ChartEntity, type Char
 // Paleta por defecto cuando el corte no trae color propio (p. ej. no es "level").
 const PALETTE = ['#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#14b8a6']
 
-const ENTITIES = new Set<ChartEntity>(['risks', 'processes', 'indicators', 'value', 'improvements'])
+const ENTITIES = new Set<ChartEntity>(['risks', 'processes', 'indicators', 'value', 'improvements', 'assets', 'applications', 'cargos'])
 const DEFAULT_GROUP: Record<ChartEntity, ChartGroupBy> = {
   risks: 'area', processes: 'macro', indicators: 'process', value: 'classification', improvements: 'status',
+  assets: 'criticality', applications: 'deployment', cargos: 'cargo',
 }
 
 function toSpec(params: Record<string, string>): ChartSpec | null {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Map as MapIcon, ShieldAlert, TrendingUp, BookOpen, Building2, X } from 'lucide-react'
+import { Search, Map as MapIcon, ShieldAlert, TrendingUp, BookOpen, Building2, Database, MonitorSmartphone, X } from 'lucide-react'
 import { useCompanyScopedData } from '@/hooks/useCompanyScopedData'
 import { useCompanyStore } from '@/stores/companyStore'
 import { useAnalyticsStore } from '@/stores/analyticsStore'
@@ -30,7 +30,7 @@ export function GlobalSearch() {
   const listRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
-  const { macroprocesses, processes, risks, indicators, procedures } = useCompanyScopedData()
+  const { macroprocesses, processes, risks, indicators, procedures, assets, applications } = useCompanyScopedData()
   const orgUnits = useCompanyStore((s) => s.orgUnits)
   const processLevelCount = useCompanyStore((s) => s.company?.process_level_count ?? 3)
   const analyticsEvents = useAnalyticsStore((s) => s.events)
@@ -220,6 +220,49 @@ export function GlobalSearch() {
       }
     }
 
+    for (const a of assets) {
+      const nameScore = fuzzyMatch(a.name, q)
+      const codeScore = a.code ? fuzzyMatch(a.code, q) : 0
+      const typeScore = a.asset_type ? fuzzyMatch(a.asset_type, q) * 0.5 : 0
+      const descScore = a.description ? fuzzyMatch(a.description, q) * 0.5 : 0
+      const best = Math.max(nameScore, codeScore, typeScore, descScore)
+      if (best > 0) {
+        scored.push({
+          result: {
+            id: a.id,
+            category: 'Activos de Información',
+            title: a.name,
+            description: [a.code, a.asset_type, a.label].filter(Boolean).join(' · '),
+            // Con proceso → su ficha (pestaña de activos); sin proceso → Data Journey.
+            path: a.process_id ? `/app/process/${a.process_id}/characterization` : '/app/data-journey',
+            icon: Database,
+          },
+          score: best,
+        })
+      }
+    }
+
+    for (const app of applications) {
+      const nameScore = fuzzyMatch(app.name, q)
+      const codeScore = app.code ? fuzzyMatch(app.code, q) : 0
+      const catScore = app.category ? fuzzyMatch(app.category, q) * 0.5 : 0
+      const vendorScore = app.vendor ? fuzzyMatch(app.vendor, q) * 0.5 : 0
+      const best = Math.max(nameScore, codeScore, catScore, vendorScore)
+      if (best > 0) {
+        scored.push({
+          result: {
+            id: app.id,
+            category: 'Aplicaciones',
+            title: app.name,
+            description: [app.code, app.category, app.vendor].filter(Boolean).join(' · '),
+            path: '/app/catalogs?tab=__applications__',
+            icon: MonitorSmartphone,
+          },
+          score: best,
+        })
+      }
+    }
+
     for (const unit of orgUnits) {
       const score = fuzzyMatch(unit.name, q)
       if (score > 0) {
@@ -239,7 +282,7 @@ export function GlobalSearch() {
 
     scored.sort((a, b) => b.score - a.score || a.result.title.localeCompare(b.result.title))
     return scored.slice(0, MAX_RESULTS).map((s) => s.result)
-  }, [debouncedQuery, processes, macroprocesses, risks, indicators, procedures, orgUnits, recentPages, frequentPages, processLevelCount])
+  }, [debouncedQuery, processes, macroprocesses, risks, indicators, procedures, assets, applications, orgUnits, recentPages, frequentPages, processLevelCount])
 
   // Reset del activeIndex cuando cambia la lista de resultados.
   // eslint-disable-next-line react-hooks/set-state-in-effect

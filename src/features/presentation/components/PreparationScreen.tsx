@@ -31,6 +31,8 @@ const typeBadge: Record<Slide['type'], string> = {
   improvements: 'Mejoras',
   coverage: 'Cobertura',
   'org-stats': 'Stats',
+  'assets-overview': 'Activos',
+  'applications-overview': 'Apps',
 }
 
 export function PreparationScreen({

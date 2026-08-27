@@ -11,11 +11,14 @@ const CHART_WORDS = /grafic|pastel|torta|circular|distribu|diagrama|barras?|\bch
 const HEATMAP_WORDS = /mapa de calor|matriz de riesgo|heatmap|heat map/
 const COMPANY_WORDS = /toda la empresa|de la empresa|empresa|general|todos|global/
 
-type Entity = 'risks' | 'processes' | 'indicators' | 'value' | 'improvements'
+type Entity = 'risks' | 'processes' | 'indicators' | 'value' | 'improvements' | 'assets' | 'applications' | 'cargos'
 
 function detectEntity(q: string): Entity {
   if (/riesg/.test(q)) return 'risks'
   if (/indicador|kpi|metric/.test(q)) return 'indicators'
+  if (/aplicaci|software|\bapp\b|aplicativo|herramienta tecnol/.test(q)) return 'applications'
+  if (/activo|información sensible|informacion sensible|dato personal|datos personales/.test(q)) return 'assets'
+  if (/\bcargo\b|cargos|puesto|\brol\b|\broles\b|perfil de/.test(q)) return 'cargos'
   if (/valor|desperdicio|\bnva\b|\bva\b/.test(q)) return 'value'
   if (/mejora|oportunidad/.test(q)) return 'improvements'
   if (/proceso|inventario|macro/.test(q)) return 'processes'
@@ -42,6 +45,15 @@ function detectGroupBy(q: string, entity: Entity): string {
   if (/prioridad/.test(q)) return 'priority'
   if (/con meta|sin meta|\bmeta\b/.test(q)) return 'meta'
   if (/frecuencia/.test(q)) return 'frequency'
+  // Cortes propios de activos / aplicaciones.
+  if (/criticidad/.test(q)) return 'criticality'
+  if (/tipo de activo/.test(q)) return 'asset_type'
+  if (/confidencial/.test(q)) return 'confidentiality'
+  if (/dato personal|datos personales|personales/.test(q)) return 'personal_data'
+  if (/despliegue|nube|cloud|on.?premise|on.?prem/.test(q)) return 'deployment'
+  if (/propiedad|propia|terceros/.test(q)) return 'ownership'
+  if (/riesgo tecnol/.test(q) || (entity === 'applications' && /riesgo/.test(q))) return 'risk'
+  if (/\bapi\b/.test(q)) return 'api'
   if (/por proceso/.test(q)) return 'process'
   // Por defecto, la agrupación más útil de cada entidad.
   switch (entity) {
@@ -49,6 +61,9 @@ function detectGroupBy(q: string, entity: Entity): string {
     case 'improvements': return 'status'
     case 'value': return 'classification'
     case 'indicators': return 'process'
+    case 'assets': return 'criticality'
+    case 'applications': return 'deployment'
+    case 'cargos': return 'cargo'
     default: return 'macro'
   }
 }
@@ -64,11 +79,15 @@ function detectProcess(query: string, data: ScopedData): string | undefined {
 
 const TITLES: Record<Entity, string> = {
   risks: 'Riesgos', processes: 'Procesos', indicators: 'Indicadores', value: 'Análisis de valor', improvements: 'Mejoras',
+  assets: 'Activos de información', applications: 'Aplicaciones', cargos: 'Cargos',
 }
 const GROUP_TITLES: Record<string, string> = {
   level: 'por nivel', category: 'por categoría', area: 'por área', macro: 'por macroproceso', process: 'por proceso',
   executor: 'por ejecutor', status: 'por estado', type: 'por tipo', priority: 'por prioridad', meta: 'con y sin meta',
   frequency: 'por frecuencia', classification: 'por clasificación (VA/NVA)',
+  criticality: 'por criticidad', asset_type: 'por tipo', confidentiality: 'por confidencialidad',
+  personal_data: 'con y sin datos personales', deployment: 'por despliegue', ownership: 'por propiedad',
+  risk: 'por riesgo tecnológico', api: 'con y sin API', cargo: 'por cargo',
 }
 
 export function detectVisual(query: string, data: ScopedData): CopilotWidget | null {

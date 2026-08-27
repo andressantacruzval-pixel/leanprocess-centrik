@@ -26,6 +26,8 @@ import {
   Activity,
   ClipboardCheck,
   Boxes,
+  Database,
+  MonitorSmartphone,
 } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────
@@ -39,6 +41,8 @@ export type ResultCategory =
   | 'Indicadores'
   | 'Procedimientos'
   | 'Unidades Organizacionales'
+  | 'Activos de Información'
+  | 'Aplicaciones'
 
 export interface SearchResult {
   id: string
@@ -67,6 +71,8 @@ export const CATEGORY_META: Record<ResultCategory, { icon: ElementType; color: s
   Indicadores: { icon: TrendingUp, color: 'text-emerald-400' },
   Procedimientos: { icon: BookOpen, color: 'text-amber-400' },
   'Unidades Organizacionales': { icon: Building2, color: 'text-violet-400' },
+  'Activos de Información': { icon: Database, color: 'text-sky-400' },
+  Aplicaciones: { icon: MonitorSmartphone, color: 'text-indigo-400' },
 }
 
 export const BADGE_COLORS: Record<ResultCategory, string> = {
@@ -78,6 +84,8 @@ export const BADGE_COLORS: Record<ResultCategory, string> = {
   Indicadores: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20',
   Procedimientos: 'bg-amber-500/10 text-amber-400 ring-amber-500/20',
   'Unidades Organizacionales': 'bg-violet-500/10 text-violet-400 ring-violet-500/20',
+  'Activos de Información': 'bg-sky-500/10 text-sky-400 ring-sky-500/20',
+  Aplicaciones: 'bg-indigo-500/10 text-indigo-400 ring-indigo-500/20',
 }
 
 // ── Path display names & icons ───────────────────────────────────────────
@@ -131,6 +139,10 @@ export const QUICK_ACTIONS: QuickAction[] = [
   { id: 'action-reporte-mejoras', label: 'Reporte de mejoras', path: '/app/reports?tab=mejoras', icon: Lightbulb },
   { id: 'action-reporte-cargos', label: 'Reporte de cargos', path: '/app/reports?tab=cargos', icon: UserCog },
   { id: 'action-manuales-cargo', label: 'Manuales de cargo', path: '/app/reports?tab=manuales', icon: IdCard },
+  { id: 'action-reporte-activos', label: 'Reporte de activos de información', path: '/app/reports?tab=activos', icon: Database },
+  { id: 'action-reporte-aplicaciones', label: 'Reporte de aplicaciones', path: '/app/reports?tab=aplicaciones', icon: MonitorSmartphone },
+  { id: 'action-data-journey', label: 'Data Journey (viaje del dato)', path: '/app/data-journey', icon: Network },
+  { id: 'action-inventario-apps', label: 'Inventario de aplicaciones', path: '/app/catalogs?tab=__applications__', icon: MonitorSmartphone },
   { id: 'action-ver-mapa-calor', label: 'Ver mapa de calor', path: '/app/heat-map', icon: Flame },
   { id: 'action-ver-indicadores', label: 'Ver indicadores', path: '/app/indicators', icon: TrendingUp },
   { id: 'action-estructura-organizacional', label: 'Estructura organizacional', path: '/app/org-structure', icon: Building2 },

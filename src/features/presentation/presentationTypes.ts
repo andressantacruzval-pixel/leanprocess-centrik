@@ -1,10 +1,10 @@
 import type { ElementType } from 'react'
-import { Presentation, Map, LayoutGrid, BarChart3, ShieldAlert, TrendingUp, Activity, CheckSquare, Lightbulb, ClipboardCheck } from 'lucide-react'
+import { Presentation, Map, LayoutGrid, BarChart3, ShieldAlert, TrendingUp, Activity, CheckSquare, Lightbulb, ClipboardCheck, Database, MonitorSmartphone } from 'lucide-react'
 
 // ── Slide type ────────────────────────────────────────────────────────────
 
 export interface Slide {
-  type: 'title' | 'map-overview' | 'macroprocess' | 'summary' | 'risk-heatmap' | 'kpi-dashboard' | 'value-analysis' | 'audit-program' | 'improvements' | 'coverage' | 'org-stats'
+  type: 'title' | 'map-overview' | 'macroprocess' | 'summary' | 'risk-heatmap' | 'kpi-dashboard' | 'value-analysis' | 'audit-program' | 'improvements' | 'coverage' | 'org-stats' | 'assets-overview' | 'applications-overview'
   title: string
   data?: unknown
 }
@@ -23,6 +23,8 @@ export const slideDescriptions: Record<Slide['type'], string> = {
   improvements: 'Oportunidades de mejora por tipo, estado y prioridad',
   coverage: 'Estado de documentacion de cada proceso',
   'org-stats': 'Metricas clave de la organizacion',
+  'assets-overview': 'Activos de informacion: criticidad, datos personales y tipos',
+  'applications-overview': 'Aplicaciones/software: despliegue, API y riesgo tecnologico',
 }
 
 export const slideIcons: Record<Slide['type'], ElementType> = {
@@ -37,4 +39,6 @@ export const slideIcons: Record<Slide['type'], ElementType> = {
   improvements: Lightbulb,
   coverage: CheckSquare,
   'org-stats': BarChart3,
+  'assets-overview': Database,
+  'applications-overview': MonitorSmartphone,
 }

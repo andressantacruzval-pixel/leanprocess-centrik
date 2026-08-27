@@ -14,7 +14,7 @@ import { useAnalyticsStore } from '@/stores/analyticsStore'
 import { useBillingStore } from '@/stores/billingStore'
 
 export function useAchievementTracker() {
-  const { processes, risks, indicators, procedures, audits, analyses, improvements } = useCompanyScopedData()
+  const { processes, risks, indicators, procedures, audits, analyses, improvements, assets, applications, appUsages } = useCompanyScopedData()
   const milestones = useOnboardingStore((s) => s.milestones)
   const streak = useStreakStore((s) => s.currentStreak)
   const events = useAnalyticsStore((s) => s.events)
@@ -120,6 +120,20 @@ export function useAchievementTracker() {
     if (closedImprovements >= 1 && !isUnlocked('first-improvement-closed')) unlock('first-improvement-closed')
     if (closedImprovements >= 5 && !isUnlocked('five-improvements-closed')) unlock('five-improvements-closed')
 
+    // Asset achievements (activos de información)
+    const assetCount = assets.length
+    if (assetCount >= 1 && !isUnlocked('first-asset')) unlock('first-asset')
+    if (assetCount >= 10 && !isUnlocked('ten-assets')) unlock('ten-assets')
+    if (assets.some((a) => a.has_personal_data) && !isUnlocked('asset-personal-data')) unlock('asset-personal-data')
+    if (assets.some((a) => a.criticality != null) && !isUnlocked('asset-classified')) unlock('asset-classified')
+
+    // Application achievements (aplicaciones / software)
+    const appCount = applications.length
+    if (appCount >= 1 && !isUnlocked('first-application')) unlock('first-application')
+    if (appCount >= 10 && !isUnlocked('ten-applications')) unlock('ten-applications')
+    if (applications.some((a) => a.has_api) && !isUnlocked('app-with-api')) unlock('app-with-api')
+    if (appUsages.some((u) => u.process_id) && !isUnlocked('app-mapped')) unlock('app-mapped')
+
     // Community shares
     const { communityPosts } = useAchievementStore.getState()
     if (communityPosts.length >= 1 && !isUnlocked('first-share')) unlock('first-share')
@@ -128,5 +142,5 @@ export function useAchievementTracker() {
     // dependencias largas son intencionales: aunque .length captura mucho,
     // el body inspecciona items individuales (procedures, indicators, risks).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processes.length, risks.length, indicators.length, procedures.length, improvements.length, auditKeyCount, analysisKeyCount, milestones, streak, events.length, achievementsLoaded])
+  }, [processes.length, risks.length, indicators.length, procedures.length, improvements.length, assets.length, applications.length, appUsages.length, auditKeyCount, analysisKeyCount, milestones, streak, events.length, achievementsLoaded])
 }

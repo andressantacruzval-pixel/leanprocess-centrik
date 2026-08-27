@@ -18,6 +18,7 @@ export interface WidgetSpec {
   basis?: string // inherent | residual
   level?: string
   process?: string
+  metric?: string // count | minutes (valor / cargos)
   title?: string
 }
 
@@ -62,7 +63,7 @@ export function extractPlan(buffer: string): { text: string; spec: WidgetSpec | 
   return { text: buffer.trim(), spec: null }
 }
 
-const CHART_ENTITIES = new Set(['risks', 'processes', 'indicators', 'value', 'improvements'])
+const CHART_ENTITIES = new Set(['risks', 'processes', 'indicators', 'value', 'improvements', 'assets', 'applications', 'cargos'])
 
 /** Convierte el spec del modelo en un widget concreto, validando y saneando. */
 export function specToWidget(spec: WidgetSpec | null, data: ScopedData): CopilotWidget | null {
@@ -88,6 +89,7 @@ export function specToWidget(spec: WidgetSpec | null, data: ScopedData): Copilot
       if (p(spec.category)) params.category = spec.category!
       if (p(spec.control)) params.control = spec.control!
       if (spec.basis === 'residual') params.basis = 'residual'
+      if (spec.metric === 'minutes') params.metric = 'minutes'
       if (p(spec.title)) params.title = spec.title!
       return { name: 'CHART', params }
     }

@@ -15,6 +15,9 @@ import { parseBpmnXml } from '@/utils/bpmnParser'
 import { norm } from '@/features/inventory/inventoryUtils'
 import { CLASSIFICATION_COLORS } from '@/utils/valueAnalysis'
 import { STATUS_LABELS, IMPROVEMENT_TYPE_LABELS, priorityScore, priorityLabel } from '@/types/improvement'
+import { techRisk, DEPLOYMENT_OPTIONS, OWNERSHIP_OPTIONS } from '@/types/application'
+import { assetLabel } from '@/types/asset'
+import { computeCargos } from '@/features/cargos/cargoData'
 
 export type ScopedData = ReturnType<typeof useCompanyScopedData>
 
@@ -119,10 +122,12 @@ export function risksWithoutAdequateControl(data: ScopedData): ResolvedRisk[] {
 
 // ── Motor de gráficos (agregación determinista) ───────────────────────────
 
-export type ChartEntity = 'risks' | 'processes' | 'indicators' | 'value' | 'improvements'
+export type ChartEntity = 'risks' | 'processes' | 'indicators' | 'value' | 'improvements' | 'assets' | 'applications' | 'cargos'
 export type ChartGroupBy =
   | 'area' | 'category' | 'level' | 'macro' | 'process' | 'executor'
   | 'classification' | 'status' | 'type' | 'priority' | 'meta' | 'frequency'
+  | 'criticality' | 'asset_type' | 'confidentiality' | 'personal_data'
+  | 'deployment' | 'ownership' | 'risk' | 'api' | 'cargo'
 export type ControlFilter = 'inadequate' | 'none' | 'any'
 
 export interface ChartSpec {
@@ -155,6 +160,17 @@ const LEVEL_HEX: Record<string, string> = {
   Alto: '#f97316',
   Moderado: '#facc15',
   Bajo: '#10b981',
+}
+
+const DEPLOY_LABEL = new Map<string, string>(DEPLOYMENT_OPTIONS.map((o) => [o.value, o.label]))
+const OWN_LABEL = new Map<string, string>(OWNERSHIP_OPTIONS.map((o) => [o.value, o.label]))
+
+// Bucket de criticidad del activo (criticality = máx de C·I·D, 1-5).
+function assetCritBucket(c: number | null): { key: string; hex?: string } {
+  if (!c) return { key: 'Sin clasificar', hex: '#6b7280' }
+  if (c >= 4) return { key: 'Alta', hex: '#ef4444' }
+  if (c >= 3) return { key: 'Media', hex: '#f59e0b' }
+  return { key: 'Baja', hex: '#10b981' }
 }
 
 function tally(rows: { key: string; hex?: string }[]): ChartDatum[] {
@@ -257,6 +273,46 @@ export function computeChart(data: ScopedData, spec: ChartSpec): ChartDatum[] {
           default: return { key: STATUS_LABELS[o.status] ?? o.status, hex: STATUS_HEX[o.status] }
         }
       }))
+    }
+
+    case 'assets': {
+      let rows = data.assets
+      if (spec.area) rows = rows.filter((a) => norm(areaOf(procs.get(a.process_id ?? ''))) === norm(spec.area!))
+      return tally(rows.map((a) => {
+        switch (spec.groupBy) {
+          case 'criticality': return assetCritBucket(a.criticality)
+          case 'confidentiality': return { key: assetLabel(a.confidentiality) || '(sin clasificar)' }
+          case 'personal_data': return a.has_personal_data
+            ? { key: 'Con datos personales', hex: '#ef4444' }
+            : { key: 'Sin datos personales', hex: '#10b981' }
+          case 'process': return { key: a.process_id ? procName(a.process_id) : '(sin proceso)' }
+          case 'area': return { key: areaOf(procs.get(a.process_id ?? '')) }
+          default: return { key: a.asset_type || '(sin tipo)' }
+        }
+      }))
+    }
+
+    case 'applications': {
+      const rows = data.applications
+      return tally(rows.map((a) => {
+        switch (spec.groupBy) {
+          case 'ownership': return { key: OWN_LABEL.get(a.ownership) || '(sin definir)' }
+          case 'risk': { const r = techRisk(a); return { key: r.label, hex: r.hex } }
+          case 'api': return a.has_api ? { key: 'Con API', hex: '#10b981' } : { key: 'Sin API', hex: '#f59e0b' }
+          case 'category': return { key: a.category || '(sin categoría)' }
+          case 'status': return { key: a.status || '(sin estado)' }
+          default: return { key: DEPLOY_LABEL.get(a.deployment) || '(sin despliegue)' }
+        }
+      }))
+    }
+
+    case 'cargos': {
+      const { cargos } = computeCargos(data.processes, data.analyses, [])
+      const minutes = spec.metric === 'minutes'
+      return cargos
+        .map((c) => ({ label: c.cargo, value: minutes ? Math.round(c.totalDaily) : c.activities.length }))
+        .filter((d) => d.value > 0)
+        .sort((a, b) => b.value - a.value)
     }
   }
 }

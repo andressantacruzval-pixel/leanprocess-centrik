@@ -10,6 +10,7 @@
  */
 
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { BookOpen, Plus, Trash2, Pencil, Check, X, EyeOff, Eye, MonitorSmartphone } from 'lucide-react'
 import { useCatalogStore, MANAGED_CATALOGS, type CatalogItem } from '@/features/catalog/catalogStore'
@@ -26,7 +27,12 @@ export default function CatalogsPage() {
   const updateCatalogItem = useCatalogStore((s) => s.updateCatalogItem)
   const deleteCatalogItem = useCatalogStore((s) => s.deleteCatalogItem)
 
-  const [activeType, setActiveType] = useState<string>(MANAGED_CATALOGS[0].type)
+  // La pestaña inicial puede venir del superbuscador vía ?tab= (deep-link).
+  const [searchParams, setSearchParams] = useSearchParams()
+  const paramTab = searchParams.get('tab')
+  const validTab = paramTab === APPS_TYPE || MANAGED_CATALOGS.some((c) => c.type === paramTab)
+  const [activeType, setActiveTypeRaw] = useState<string>(validTab ? paramTab! : MANAGED_CATALOGS[0].type)
+  const setActiveType = (t: string) => { setActiveTypeRaw(t); setSearchParams((prev) => { prev.set('tab', t); return prev }, { replace: true }) }
   const activeMeta = activeType === APPS_TYPE ? APPS_META : MANAGED_CATALOGS.find((c) => c.type === activeType)!
 
   const items = useMemo(
