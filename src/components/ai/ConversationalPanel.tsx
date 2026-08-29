@@ -208,7 +208,7 @@ export function ConversationalPanel({
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-gray-50">
         <div
-          className={`w-9 h-9 rounded-lg ring-1 flex items-center justify-center transition-all bg-primary-500 ${
+          className={`w-9 h-9 rounded-lg ring-1 flex items-center justify-center transition-all bg-primary-100 ${
             tts.speaking
               ? 'ring-primary-500 shadow-lg animate-pulse'
               : 'ring-primary-500'
@@ -476,8 +476,8 @@ function MessageBubble({ role, content, streaming }: BubbleProps) {
       <div
         className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${
           isUser
-            ? 'text-gray-600 border border-gray-200 bg-primary-500'
-            : 'ring-1 ring-primary-500 text-primary-700 bg-primary-500'
+            ? 'text-gray-600 border border-gray-200 bg-primary-50'
+            : 'ring-1 ring-primary-500 text-primary-700 bg-primary-100'
         }`}
       >
         {isUser ? <User size={14} /> : <Bot size={14} />}
@@ -489,7 +489,7 @@ function MessageBubble({ role, content, streaming }: BubbleProps) {
         <div
           className={`px-3.5 py-2.5 rounded-lg text-sm leading-relaxed ${
             isUser
-              ? 'text-white rounded-tr-sm border border-primary-300 bg-primary-500'
+              ? 'text-gray-900 rounded-tr-sm border border-primary-300 bg-primary-100'
               : 'bg-gray-50 text-gray-800 rounded-tl-sm border border-gray-200'
           }`}
         >

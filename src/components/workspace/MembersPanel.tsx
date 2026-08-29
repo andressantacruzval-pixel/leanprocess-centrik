@@ -120,7 +120,7 @@ export function MembersPanel() {
               key={m.id}
               className="rounded-lg border border-gray-100 bg-gray-50 p-3 flex items-center gap-3"
             >
-              <div className="w-9 h-9 rounded-full ring-1 ring-primary-500 flex items-center justify-center shrink-0 bg-primary-500">
+              <div className="w-9 h-9 rounded-full ring-1 ring-primary-500 flex items-center justify-center shrink-0 bg-primary-100">
                 {m.role === 'owner' ? (
                   <Shield size={14} className="text-primary-600" />
                 ) : (

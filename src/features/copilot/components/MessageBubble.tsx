@@ -40,7 +40,7 @@ function AssistantBubble({ message, streaming, isLastAssistant, onRegenerate }: 
 
   return (
     <div className="flex gap-2.5 copilot-fade">
-      <div className="w-7 h-7 rounded-full ring-1 ring-primary-500 flex items-center justify-center shrink-0 bg-primary-500">
+      <div className="w-7 h-7 rounded-full ring-1 ring-primary-500 flex items-center justify-center shrink-0 bg-primary-100">
         <Bot size={14} className="text-primary-600" />
       </div>
       <div className="min-w-0 flex-1">

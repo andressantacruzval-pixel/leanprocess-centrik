@@ -20,7 +20,7 @@ export function ProcedureEmptyState({
       {/* Loading state */}
       {generating && (
         <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="w-16 h-16 rounded-lg flex items-center justify-center bg-primary-500">
+          <div className="w-16 h-16 rounded-lg flex items-center justify-center bg-primary-100">
             <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
           </div>
           <p className="text-sm text-gray-600 animate-pulse">{loadingMessage}</p>

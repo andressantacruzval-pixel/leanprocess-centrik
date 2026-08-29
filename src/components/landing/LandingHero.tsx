@@ -20,7 +20,7 @@ export default function LandingHero() {
         className="mb-6 text-5xl font-bold leading-tight text-gray-900 md:text-7xl"
       >
         Gestión de procesos{' '}
-        <span className="text-primary-500">
+        <span className="text-primary-600">
           simplificada con IA
         </span>
       </h1>

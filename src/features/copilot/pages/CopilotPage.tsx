@@ -26,7 +26,7 @@ export default function CopilotPage() {
   return (
     <div className="h-[calc(100vh-7rem)] flex flex-col">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-lg ring-1 ring-primary-500 flex items-center justify-center bg-primary-500">
+        <div className="w-8 h-8 rounded-lg ring-1 ring-primary-500 flex items-center justify-center bg-primary-100">
           <Bot size={16} className="text-primary-600" />
         </div>
         <div className="flex-1 min-w-0">

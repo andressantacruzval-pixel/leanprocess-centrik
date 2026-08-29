@@ -80,7 +80,7 @@ export function WorkspaceSwitcher({ collapsed = false }: Props) {
           onClick={() => setOpen((v) => !v)}
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-50 border border-gray-100 transition-colors text-left"
         >
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center ring-1 ring-primary-500 shrink-0 bg-primary-500">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center ring-1 ring-primary-500 shrink-0 bg-primary-100">
             <Building2 size={14} className="text-primary-600" />
           </div>
           <div className="flex-1 min-w-0">

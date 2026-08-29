@@ -39,10 +39,10 @@ export function OnboardingChecklist() {
   if (dismissed) return null
   if (todoListo) {
     return (
-      <div className="rounded-lg border border-primary-200 p-5 bg-primary-500">
+      <div className="rounded-lg border border-primary-200 p-5 bg-primary-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-primary-500">
+            <div className="p-2.5 rounded-lg bg-primary-100">
               <Trophy className="text-primary-600" size={20} />
             </div>
             <div>

@@ -105,7 +105,7 @@ export function AiConsultantDrawer({
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-900/45">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary-500">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary-100">
                 <Sparkles size={16} className="text-primary-600" />
               </div>
               <div>
@@ -135,7 +135,7 @@ export function AiConsultantDrawer({
 
                 {/* Central icon */}
                 <div className="relative z-10">
-                  <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center ring-1 ring-primary-500 animate-pulse-glow bg-primary-500">
+                  <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center ring-1 ring-primary-500 animate-pulse-glow bg-primary-100">
                     <Mic size={36} className="text-primary-600" />
                   </div>
                   <h2 className="text-xl font-bold text-gray-900 mb-2">
@@ -308,7 +308,7 @@ export function AiConsultantDrawer({
                 </div>
 
                 <div className="relative z-10">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center animate-pulse-glow bg-primary-500">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center animate-pulse-glow bg-primary-100">
                     <Loader2 size={36} className="text-primary-600 animate-spin" />
                   </div>
                   <h2 className="text-xl font-bold text-gray-900 mb-2">Generando diagrama BPMN</h2>
@@ -338,7 +338,7 @@ export function AiConsultantDrawer({
                   <div className="w-48 h-48 rounded-full border border-emerald-200 animate-orbit" />
                 </div>
                 <div className="relative z-10">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center bg-primary-500">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center bg-primary-100">
                     <Sparkles size={36} className="text-emerald-600" />
                   </div>
                   <h2 className="text-xl font-bold text-gray-900 mb-2">Diagrama generado</h2>

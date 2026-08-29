@@ -83,6 +83,46 @@ es transaccional en Postgres). Nada persiste. Así se encontró el agujero de `b
 
 ---
 
+## Cambios recientes (2026-08-29) — La interfaz es Centrik
+
+> **Antes de tocar colores, tamaños o espaciados de cualquier pantalla, leer
+> `docs/App/centrik.md`.** Es el contrato; esto es solo el resumen.
+
+La app pertenece ahora a la **familia visual Centrik**: fondo `#f8f9fa`, tarjetas
+blancas, acento verde **`#10b981`**, tipografía **Geist**, raíz de **13 px**,
+controles de **32 px**, radios de 6-8 px. **Prohibidos** los degradados, el
+glassmorphism, los halos de neón y los radios de 16-32 px.
+
+Antes era una interfaz oscura (navy + cian + degradados) con una capa de ~250
+reglas `!important` debajo que la reconvertía a claro en caliente. Esa capa
+**desapareció**: se tradujo la FUENTE de 202 archivos con
+`scripts/centrik-codemod.mjs`.
+
+**Dónde se toca cada cosa:**
+
+| Quiero cambiar… | Voy a… |
+|---|---|
+| la escala, la paleta, los radios, las sombras | `src/styles/centrik-tokens.css` (bloque `@theme`) |
+| el lienzo, los controles nativos, las scrollbars | `src/styles/centrik-base.css` |
+| un botón, campo, tarjeta, tabla, badge o ítem de menú | `src/styles/centrik-components.css` (clases `.ck-*`) |
+| el diagramador BPMN | `src/features/bpmn/components/bpmn-centrik-theme.css` |
+
+⚠️ **`centrik-tokens.css` redefine el tema de Tailwind**, así que cambia lo que
+significan `text-sm`, `rounded-lg` o `shadow-lg` en TODA la app a la vez. Para
+ajustar la escala se toca ahí, nunca pantalla por pantalla.
+
+⚠️ **Toda pantalla nueva parte de los primitivos `.ck-*`.** Reinventar un botón
+con utilidades sueltas es cómo se desincronizan los estilos.
+
+⚠️ **El codemod NO es idempotente** (`bg-primary-50` volvería a salir
+`bg-primary-500`). Se ejecuta una sola vez sobre fuente sin convertir.
+
+⚠️ **Ya no hay tema oscuro ni conmutador.** Se retiraron el botón del Header, el
+campo `theme` del `uiStore` (migración v2), el efecto de `App.tsx` y el script
+anti-parpadeo de `index.html`.
+
+---
+
 ## CONTEXTO DEL PROYECTO
 
 **LeanProcess** es un SaaS B2C de gestión de procesos empresariales. Permite a empresas:

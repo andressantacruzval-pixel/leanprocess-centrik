@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
           <div className="w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center shadow-lg bg-primary-500">
             <Zap size={22} className="text-gray-900" />
           </div>
-          <h1 className="text-2xl font-bold mb-2 text-primary-500">
+          <h1 className="text-2xl font-bold mb-2 text-primary-600">
             Nueva contraseña
           </h1>
           <p className="text-gray-500">Elige una contraseña segura para tu cuenta</p>

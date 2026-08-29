@@ -60,7 +60,7 @@ export function EditCompanyModal({ open, company, onClose }: Props) {
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg ring-1 ring-primary-500 flex items-center justify-center bg-primary-500">
+            <div className="w-9 h-9 rounded-lg ring-1 ring-primary-500 flex items-center justify-center bg-primary-100">
               <Building2 size={16} className="text-primary-600" />
             </div>
             <div>

@@ -141,7 +141,7 @@ export function Header() {
      * antes que el <main> en el DOM y no tenía z-index propio, el contenido de la
      * página se pintaba encima. Mismo tropiezo que la capa de planes del Hub.
      */
-    <header className="relative z-50 h-14 bg-white border-b border-gray-100 grid grid-cols-[auto_1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center gap-2 lg:gap-4 px-4 lg:px-6">
+    <header className="relative z-50 h-14 bg-white border-b border-gray-200 grid grid-cols-[auto_1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center gap-2 lg:gap-4 px-4 lg:px-6">
       {/* En escritorio la izquierda queda libre a propósito: el logo vive en la barra
           lateral. En móvil esa barra sale del flujo, así que su único mando —la
           hamburguesa— tiene que vivir aquí; dentro del propio cajón no se alcanza. */}
@@ -301,7 +301,7 @@ export function Header() {
               className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-gray-50 transition-colors"
               title={nombre}
             >
-              <span className="w-7 h-7 rounded-full ring-1 ring-primary-500 flex items-center justify-center text-[11px] font-semibold text-primary-700 bg-primary-500">
+              <span className="w-7 h-7 rounded-full ring-1 ring-primary-500 flex items-center justify-center text-[11px] font-semibold text-primary-700 bg-primary-100">
                 {inicial}
               </span>
               <ChevronDown

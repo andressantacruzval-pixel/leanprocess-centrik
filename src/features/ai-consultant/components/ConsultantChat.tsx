@@ -66,7 +66,7 @@ export function ConsultantChat({
             <div
               className={`max-w-[75%] rounded-lg px-4 py-3 ${
                 msg.role === 'user'
-                  ? 'text-white rounded-br-sm border border-primary-200 bg-primary-500'
+                  ? 'text-gray-900 rounded-br-sm border border-primary-200 bg-primary-100'
                   : 'bg-gray-50 text-gray-900 rounded-bl-sm border border-gray-200'
               }`}
             >

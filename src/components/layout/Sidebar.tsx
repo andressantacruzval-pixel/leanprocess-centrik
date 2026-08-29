@@ -74,14 +74,14 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-full flex flex-col w-64 border-r border-gray-100 transition-all duration-300 z-40 lg:translate-x-0 bg-white ${
+      className={`fixed left-0 top-0 h-full flex flex-col w-64 border-r border-gray-200 transition-all duration-300 z-40 lg:translate-x-0 bg-white ${
         drawerOpen ? 'translate-x-0' : '-translate-x-full'
       } ${sidebarOpen ? 'lg:w-64' : 'lg:w-16'}`}
     >
       {/* Cabecera: solo el isotipo, centrado, en los dos estados. El nombre de marca
           salio de aqui — la barra ya dice de que producto es con el logo, y sin el
           texto el rail y el panel se leen igual, sin un salto de composicion. */}
-      <div className="relative flex items-center justify-center p-4 border-b border-gray-100 shrink-0">
+      <div className="relative flex items-center justify-center p-4 border-b border-gray-200 shrink-0">
         <img
           src="/logo.png"
           alt="Lean Process"
@@ -122,11 +122,11 @@ export function Sidebar() {
       </button>
 
       {/* Workspace switcher */}
-      <div className="py-3 border-b border-gray-100 shrink-0">
+      <div className="py-3 border-b border-gray-200 shrink-0">
         {IS_PHASE_1 ? (
           <div className={expandido ? 'px-3' : 'px-2'}>
             <div className={`flex items-center py-2 rounded-lg bg-gray-50 border border-gray-100 ${expandido ? 'gap-2 px-3' : 'justify-center'}`}>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center ring-1 ring-primary-500 shrink-0 bg-primary-500">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center ring-1 ring-primary-500 shrink-0 bg-primary-100">
                 <Building2 size={14} className="text-primary-600" />
               </div>
               {expandido && (
@@ -162,14 +162,10 @@ export function Sidebar() {
               // En el rail el titulo nativo sustituye al globo de antes: aquel vivia
               // fuera del ancho de la barra y ahora quedaria recortado.
               title={expandido ? undefined : item.label}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                isActive
-                  ? 'text-primary-600 border border-primary-200 shadow-sm bg-primary-500'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-              }`}
+              className={`ck-nav-item ${isActive ? 'is-active' : ''} ${expandido ? '' : 'justify-center'}`}
             >
-              <item.icon size={20} className="shrink-0" />
-              {expandido && <span className="text-sm font-medium truncate">{item.label}</span>}
+              <item.icon size={16} className="shrink-0" />
+              {expandido && <span className="truncate">{item.label}</span>}
             </Link>
           )
         })}
@@ -178,15 +174,13 @@ export function Sidebar() {
           <Link
             to="/app/admin"
             title={expandido ? undefined : 'Admin'}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-              location.pathname === '/app/admin'
-                ? 'text-primary-600 border border-primary-200 shadow-sm bg-primary-500'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            className={`ck-nav-item ${location.pathname === '/app/admin' ? 'is-active' : ''} ${
+              expandido ? '' : 'justify-center'
             }`}
           >
-            <Shield size={20} className="shrink-0" />
+            <Shield size={16} className="shrink-0" />
             {/* Antes miraba `sidebarOpen`: en el cajon movil se quedaba sin etiqueta. */}
-            {expandido && <span className="text-sm font-medium truncate">Admin</span>}
+            {expandido && <span className="truncate">Admin</span>}
           </Link>
         )}
       </nav>
@@ -198,20 +192,20 @@ export function Sidebar() {
           <button
             onClick={reopenOnboarding}
             title={expandido ? undefined : 'Guia de inicio'}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-gray-300 hover:text-primary-600 hover:bg-primary-50 transition-all"
+            className={`ck-nav-item w-full ${expandido ? '' : 'justify-center'}`}
           >
-            <GraduationCap size={18} className="shrink-0" />
-            {expandido && <span className="text-[11px] font-medium truncate">Guia de inicio</span>}
+            <GraduationCap size={16} className="shrink-0" />
+            {expandido && <span className="truncate">Guia de inicio</span>}
           </button>
         )}
         <SupportMenu collapsed={!expandido} />
         <a
           href={HUB_URL}
           title={expandido ? undefined : 'Salir'}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-gray-300 hover:text-gray-500 hover:bg-gray-50 transition-all"
+          className={`ck-nav-item w-full ${expandido ? '' : 'justify-center'}`}
         >
-          <LogOut size={18} className="shrink-0" />
-          {expandido && <span className="text-[11px] font-medium truncate">Salir</span>}
+          <LogOut size={16} className="shrink-0" />
+          {expandido && <span className="truncate">Salir</span>}
         </a>
         {expandido && (
           <div className="text-center">

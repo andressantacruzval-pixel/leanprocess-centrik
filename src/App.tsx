@@ -176,7 +176,6 @@ function ProtectedOnboarding({ children }: { children: React.ReactNode }) {
 
 function App() {
   const initializeAuth = useAuthStore((s) => s.initializeAuth)
-
   useEffect(() => {
     return initializeAuth()
   }, [initializeAuth])

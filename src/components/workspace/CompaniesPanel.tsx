@@ -131,7 +131,7 @@ export function CompaniesPanel() {
                   <div
                     className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                       isActive
-                        ? 'ring-1 ring-primary-500 bg-primary-500'
+                        ? 'ring-1 ring-primary-500 bg-primary-100'
                         : 'bg-gray-50'
                     }`}
                   >

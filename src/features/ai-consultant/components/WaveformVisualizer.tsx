@@ -200,7 +200,7 @@ export function WaveformVisualizer({ isActive }: WaveformVisualizerProps) {
   return (
     <div className="relative w-full">
       {/* Glow backdrop */}
-      <div className="absolute inset-0 rounded-lg blur-xl bg-primary-500" />
+      <div className="absolute inset-0 rounded-lg blur-xl bg-primary-50" />
       <canvas
         ref={canvasRef}
         className="relative w-full h-28 rounded-lg bg-gray-900/45 border border-gray-100"

@@ -79,17 +79,17 @@ export function BpmnReviewPanel({
     <div className="space-y-5">
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-lg p-3 text-center border border-primary-200 bg-primary-500">
+        <div className="rounded-lg p-3 text-center border border-primary-200 bg-primary-50">
           <Layers size={16} className="mx-auto text-primary-600 mb-1" />
           <p className="text-xl font-bold text-primary-700">{taskCount}</p>
           <p className="text-[10px] text-primary-600 uppercase tracking-wider">Tareas</p>
         </div>
-        <div className="rounded-lg p-3 text-center border border-primary-200 bg-primary-500">
+        <div className="rounded-lg p-3 text-center border border-primary-200 bg-primary-50">
           <GitBranch size={16} className="mx-auto text-primary-600 mb-1" />
           <p className="text-xl font-bold text-primary-700">{gatewayCount}</p>
           <p className="text-[10px] text-primary-600 uppercase tracking-wider">Compuertas</p>
         </div>
-        <div className="rounded-lg p-3 text-center border border-blue-200 bg-primary-500">
+        <div className="rounded-lg p-3 text-center border border-blue-200 bg-primary-50">
           <Code2 size={16} className="mx-auto text-blue-600 mb-1" />
           <p className="text-xl font-bold text-blue-700">{laneCount}</p>
           <p className="text-[10px] text-blue-600 uppercase tracking-wider">Carriles</p>

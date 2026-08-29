@@ -115,11 +115,22 @@ function colapsarDegradados(tokens) {
   const calido = /-(amber|yellow|orange)-/.test(texto)
   const rojo = /-(red|rose)-/.test(texto)
 
+  // Un degradado cuyas paradas son TODAS translúcidas no era un color: era un
+  // tinte sobre el panel oscuro —el fondo de un chip, de un icono o del ítem
+  // activo del menú—. Aplastarlo al 500 sólido convierte un fondo suave en un
+  // bloque saturado, y el texto que llevaba encima (`text-cyan-400`, pensado
+  // para leerse sobre el tinte) queda del mismo color que su propio fondo.
+  const alfas = paradas
+    .map((t) => /\/(\[[\d.]+\]|\d{1,3})$/.exec(partirVariantes(t).base))
+    .map((m) => (m ? alfa(m[1]) : null))
+  const esTinte = alfas.length > 0 && alfas.every((a) => a !== null)
+  const tono = esTinte ? (Math.max(...alfas) >= 20 ? 100 : 50) : 500
+
   let solido
   if (oscuro && !/-(cyan|blue|sky|teal|purple|violet|indigo|emerald|green)-/.test(texto)) solido = 'bg-white'
-  else if (rojo) solido = 'bg-red-500'
-  else if (calido) solido = 'bg-amber-500'
-  else solido = 'bg-primary-500'
+  else if (rojo) solido = `bg-red-${tono}`
+  else if (calido) solido = `bg-amber-${tono}`
+  else solido = `bg-primary-${tono}`
 
   // Título con degradado recortado sobre el texto → un verde plano.
   const esTextoDegradado = tokens.includes('bg-clip-text') && tokens.includes('text-transparent')
@@ -133,10 +144,12 @@ function colapsarDegradados(tokens) {
     salida.push(t)
   }
   if (esTextoDegradado) {
-    salida.push(solido === 'bg-white' ? 'text-gray-900' : `text-${solido.slice(3)}`)
+    salida.push(solido === 'bg-white' ? 'text-gray-900' : `text-${solido.slice(3).replace(/-\d+$/, '-600')}`)
   } else {
     salida.push(solido)
-    if (teniaHover && solido === 'bg-primary-500') salida.push('hover:bg-primary-600')
+    if (teniaHover && solido.startsWith('bg-primary-')) {
+      salida.push(esTinte ? 'hover:bg-primary-100' : 'hover:bg-primary-600')
+    }
   }
   return salida
 }

@@ -53,7 +53,7 @@ export function ChatThread({ conversation, isStreaming, isDeep, error, onSend, o
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5">
         {isEmpty ? (
           <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto">
-            <div className="w-14 h-14 rounded-lg ring-1 ring-primary-500 flex items-center justify-center mb-4 bg-primary-500">
+            <div className="w-14 h-14 rounded-lg ring-1 ring-primary-500 flex items-center justify-center mb-4 bg-primary-100">
               <Sparkles size={26} className="text-primary-600" />
             </div>
             <h2 className="text-lg font-bold text-gray-900">Tu copiloto de procesos</h2>
@@ -85,7 +85,7 @@ export function ChatThread({ conversation, isStreaming, isDeep, error, onSend, o
               if (streamingThis && showThinking) {
                 return (
                   <div key={m.id} className="flex gap-2.5 copilot-fade">
-                    <div className="w-7 h-7 rounded-full ring-1 ring-primary-500 flex items-center justify-center shrink-0 bg-primary-500">
+                    <div className="w-7 h-7 rounded-full ring-1 ring-primary-500 flex items-center justify-center shrink-0 bg-primary-100">
                       <Bot size={14} className="text-primary-600" />
                     </div>
                     <div className="rounded-lg rounded-tl-sm bg-gray-50 border border-gray-100 px-3.5 py-2.5 inline-flex items-center gap-2">
