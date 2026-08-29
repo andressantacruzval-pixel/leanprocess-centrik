@@ -13,6 +13,11 @@ name: Deploy to GitHub Pages
 # La base pública se deduce del nombre del repositorio, así que este archivo
 # funciona sin editar aunque el repo se llame de otra forma.
 #
+# REQUISITO ÚNICO, una sola vez: en Settings → Pages → Build and deployment,
+# dejar Source = «GitHub Actions». No se puede automatizar —activar Pages por
+# API pide permisos que el token del workflow no tiene— y sin eso el despliegue
+# se detiene con «Resource not accessible by integration».
+#
 # El backend es el proyecto de Supabase declarado en `.env.production`. Para
 # apuntar a otro proyecto se cambia ese archivo; las migraciones y el usuario
 # de prueba los deja listos `db-setup.yml`.
@@ -42,12 +47,6 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-
-      # Enciende Pages en el repo (origen = GitHub Actions) si aún no lo estaba.
-      - name: Configurar Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Instalar dependencias
         run: npm ci
