@@ -1,28 +1,26 @@
 name: Deploy to GitHub Pages
 
 # ═══════════════════════════════════════════════════════════════════════
-# Publica DOS aplicaciones en el mismo sitio de Pages:
+# Publica esta aplicación —la versión Centrik— en el GitHub Pages de SU
+# repositorio.
 #
-#   /Andr-s-Santacruz-Pruebas/            → la versión oscura (rama por defecto)
-#   /Andr-s-Santacruz-Pruebas/centrik/    → la versión Centrik (esta rama)
+# Está escrito para vivir en un repo PROPIO, separado del de la versión
+# oscura. Pages da un sitio por repositorio y `deploy-pages` sustituye el
+# artefacto entero: dos aplicaciones de verdad independientes necesitan dos
+# repos, no dos ramas. Así cada una se despliega sola y ninguna puede pisar
+# a la otra ni por accidente.
 #
-# ¿Por qué en un solo artefacto? Porque GitHub Pages da UN sitio por repo y
-# `actions/deploy-pages` reemplaza el artefacto entero: publicar solo esta
-# rama borraría la app oscura, que está en uso. Así conviven.
+# La base pública se deduce del nombre del repositorio, así que este archivo
+# funciona sin editar aunque el repo se llame de otra forma.
 #
-# La raíz se reconstruye desde la rama por defecto, no se toca a mano. El
-# build de Vite es reproducible: recompilar ese mismo commit devuelve los
-# mismos nombres de fichero con hash (`index-rcFh8yjL.js`, `index-5fuIFaBb.css`)
-# que ya están publicados, así que la app oscura queda idéntica, no «parecida».
-#
-# Ambas usan el MISMO backend de Supabase (el proyecto de pruebas declarado en
-# .env.production), que ya tiene las migraciones aplicadas y el usuario de
-# prueba creado por `db-setup.yml`. No hay nada que desplegar allí para esto.
+# El backend es el proyecto de Supabase declarado en `.env.production`. Para
+# apuntar a otro proyecto se cambia ese archivo; las migraciones y el usuario
+# de prueba los deja listos `db-setup.yml`.
 # ═══════════════════════════════════════════════════════════════════════
 
 on:
   push:
-    branches: [claude/transferir-diseno-lan-process-3qoioz]
+    branches: [main, claude/transferir-diseno-lan-process-3qoioz]
   workflow_dispatch:
 
 permissions:
@@ -34,114 +32,45 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
-env:
-  RAMA_OSCURA: claude/desplegar-app-local-j8wbqf
-  BASE_RAIZ: /Andr-s-Santacruz-Pruebas/
-  BASE_CENTRIK: /Andr-s-Santacruz-Pruebas/centrik/
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
 
-      # Deja el repo con Pages activo y servido por Actions si aún no lo estaba.
+      # Enciende Pages en el repo (origen = GitHub Actions) si aún no lo estaba.
       - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
 
-      # ── 1. La app oscura, tal cual está hoy, en la raíz ──────────────
-      - name: Descargar la rama por defecto
-        uses: actions/checkout@v4
-        with:
-          ref: claude/desplegar-app-local-j8wbqf
-          path: oscura
+      - name: Instalar dependencias
+        run: npm ci
 
-      - name: Compilar la app oscura
-        working-directory: oscura
+      - name: Compilar
         env:
-          VITE_BASE: /Andr-s-Santacruz-Pruebas/
+          # `/<nombre-del-repo>/`: donde Pages sirve los sitios de proyecto.
+          VITE_BASE: /${{ github.event.repository.name }}/
+          # La app resuelve su propio login, sin depender del Hub externo.
           VITE_STANDALONE_AUTH: '1'
-        run: npm ci && npm run build
+        run: npm run build
 
-      - name: Colocarla en la raíz del sitio
+      # Pages responde con 404.html en cualquier ruta que no sea un archivo. Al
+      # ser copia del index, la SPA arranca y el router resuelve la ruta; sin
+      # esto, recargar en /app/process-map daría el 404 de GitHub.
+      - name: Fallback de SPA
         run: |
-          mkdir -p sitio
-          cp -r oscura/dist/. sitio/
-
-      # ── 2. La app Centrik, bajo /centrik/ ────────────────────────────
-      - name: Descargar esta rama
-        uses: actions/checkout@v4
-        with:
-          path: centrik
-
-      - name: Compilar la app Centrik
-        working-directory: centrik
-        env:
-          VITE_BASE: /Andr-s-Santacruz-Pruebas/centrik/
-          VITE_STANDALONE_AUTH: '1'
-        run: npm ci && npm run build
-
-      - name: Colocarla bajo /centrik/
-        run: |
-          mkdir -p sitio/centrik
-          cp -r centrik/dist/. sitio/centrik/
-
-      # ── 3. Recarga en rutas profundas (fallback de SPA) ──────────────
-      # Pages sirve el 404.html de la RAÍZ para cualquier ruta inexistente
-      # del sitio, incluidas las de /centrik/. Ese 404 es el index de la app
-      # oscura —así sus rutas profundas siguen funcionando igual que hoy— con
-      # un guion delante que desvía las de Centrik a su propio index,
-      # guardando la ruta para restaurarla al arrancar. Sin esto, recargar en
-      # /centrik/app/process-map arrancaría la app equivocada.
-      - name: Fallback de SPA para las dos
-        run: |
-          cat > /tmp/desvio.html <<'HTML'
-          <script>
-          (function () {
-            var CENTRIK = '/Andr-s-Santacruz-Pruebas/centrik/'
-            var p = location.pathname
-            if (p.indexOf(CENTRIK) === 0 && p !== CENTRIK) {
-              try { sessionStorage.setItem('ck-ruta', p + location.search + location.hash) } catch (e) {}
-              location.replace(CENTRIK)
-            }
-          })()
-          </script>
-          HTML
-          cat /tmp/desvio.html oscura/dist/index.html > sitio/404.html
-
-          cat > /tmp/restaurar.html <<'HTML'
-          <script>
-          (function () {
-            try {
-              var r = sessionStorage.getItem('ck-ruta')
-              if (r) { sessionStorage.removeItem('ck-ruta'); history.replaceState(null, '', r) }
-            } catch (e) {}
-          })()
-          </script>
-          HTML
-          # El guion va ANTES del bundle: el router tiene que leer ya la URL buena.
-          python3 - <<'PY'
-          import pathlib
-          idx = pathlib.Path('sitio/centrik/index.html')
-          html = idx.read_text(encoding='utf-8')
-          restaurar = pathlib.Path('/tmp/restaurar.html').read_text(encoding='utf-8')
-          html = html.replace('</head>', restaurar + '</head>', 1)
-          idx.write_text(html, encoding='utf-8')
-          pathlib.Path('sitio/centrik/404.html').write_text(html, encoding='utf-8')
-          PY
-
-          touch sitio/.nojekyll
-          echo "── contenido publicado ──"
-          ls sitio | head
-          ls sitio/centrik | head
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: sitio
+          path: dist
 
   deploy:
     needs: build
