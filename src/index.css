@@ -1,4 +1,14 @@
 @import 'tailwindcss';
+
+/* Tailwind v4 rastrea el proyecto entero en busca de clases. `scripts/` y
+   `docs/` no son interfaz: citan clases dentro de comentarios y de prosa —el
+   codemod explica su propio mapeo con ejemplos como `ring-offset-[#070b14]`— y
+   eso bastaba para que se generara la utilidad correspondiente. Resultado: CSS
+   muerto que nadie aplica, con el navy antiguo dentro, apareciendo en cada
+   auditoría de color del build publicado. */
+@source not "../scripts";
+@source not "../docs";
+
 @import './styles/centrik-tokens.css';
 @import './styles/centrik-base.css';
 @import './styles/centrik-components.css';
