@@ -1,0 +1,92 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   CENTRIK — BASE
+   ───────────────────────────────────────────────────────────────────────
+   Lienzo, tipografía, controles nativos y barras de desplazamiento.
+   Lo que antes era navy #070b14 con scrollbars blancas aquí pasa a ser el
+   gris muy claro #f8f9fa del kit con scrollbars gris frío.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* El navegador propaga el fondo de `html` al lienzo, así que el rebote del
+   scroll (overscroll de macOS) asoma ESTE color y no un blanco suelto. */
+html {
+  background-color: #f8f9fa;
+  font-size: 13px;
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  line-height: 1.5;
+  color: #111827;
+  background-color: #f8f9fa;
+  font-family: Geist, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+code, kbd, pre, samp { font-family: 'Geist Mono', ui-monospace, SFMono-Regular, monospace; }
+
+/* ── Controles nativos ────────────────────────────────────────────────
+   El kit pide 32 px de alto, borde gris 300, radio 6 px y un anillo verde
+   de 1 px al enfocar. Se fija aquí una vez y no pantalla por pantalla.
+   `:where()` mantiene la especificidad en cero: cualquier clase de utilidad
+   en el propio campo sigue ganando, así que esto es un suelo, no un techo. */
+:where(input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']),
+       textarea,
+       select) {
+  background-color: #ffffff;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+:where(input, textarea, select)::placeholder { color: #9ca3af; }
+
+:where(input:not([type='checkbox']):not([type='radio']):not([type='range']),
+       textarea,
+       select):focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 1px #10b981;
+  outline: none;
+}
+
+/* Las casillas y radios heredan el verde de marca en lugar del azul del SO. */
+input[type='checkbox'], input[type='radio'] { accent-color: #10b981; }
+
+select option { background-color: #ffffff; color: #111827; }
+
+/* ── Barras de desplazamiento: delgadas y gris frío ─────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+*::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+.scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* ── Entrada estándar del kit: opacidad + 4 px de desplazamiento, 200 ms ── */
+@keyframes centrik-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.centrik-fade-in,
+.animate-fade-in { animation: centrik-fade-in 200ms ease-out; }
+
+/* Safari en iOS amplía la página al enfocar un control de menos de 16 px y
+   deja al usuario dentro de un formulario ampliado del que ha de salir a
+   mano. La app es compacta por diseño, así que se corrige bajo puntero
+   grueso; en escritorio los 32 px del kit se mantienen intactos. */
+@media (pointer: coarse) {
+  select, input, textarea { font-size: 16px; }
+  .react-flow__controls-button { width: 32px; height: 32px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .centrik-fade-in, .animate-fade-in { animation: none; }
+}

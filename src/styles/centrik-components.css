@@ -1,0 +1,225 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   CENTRIK — PRIMITIVOS DE COMPONENTE  (DESIGN_SYSTEM.md §7)
+   ───────────────────────────────────────────────────────────────────────
+   Botones, campos, tarjetas, tablas, badges, navegación y estados vacíos.
+   Se escriben en CSS plano —no con @apply— para que sigan siendo legibles
+   al lado del kit original y para que no dependan del orden de capas.
+
+   Regla de uso: toda pantalla NUEVA o reescrita parte de estas clases. El
+   remapeo de utilidades cubre lo heredado, pero no es donde se define el
+   lenguaje: aquí sí.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Botones ─────────────────────────────────────────────────────────
+   Alto 32 px, radio 6 px, peso 500, icono de 14-16 px antes del texto. */
+.ck-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 150ms, background-color 150ms, border-color 150ms;
+}
+.ck-btn:disabled { opacity: .5; cursor: not-allowed; }
+.ck-btn:focus-visible { outline: 2px solid #10b981; outline-offset: 1px; }
+
+.ck-btn--primary   { color: #fff; background: #10b981; }
+.ck-btn--primary:hover:not(:disabled)   { background: #059669; }
+
+.ck-btn--secondary { color: #374151; background: #fff; border-color: #d1d5db; }
+.ck-btn--secondary:hover:not(:disabled) { background: #f9fafb; }
+
+.ck-btn--ghost     { color: #4b5563; background: transparent; }
+.ck-btn--ghost:hover:not(:disabled)     { background: #f3f4f6; color: #111827; }
+
+/* Solo para acciones destructivas reales (borrar, revocar). */
+.ck-btn--danger    { color: #fff; background: #ef4444; }
+.ck-btn--danger:hover:not(:disabled)    { background: #dc2626; }
+
+/* El único control que el kit deja crecer a 36 px: el acceso. */
+.ck-btn--lg { height: 36px; padding: 0 16px; font-size: 13px; }
+.ck-btn--sm { height: 26px; padding: 0 8px; font-size: 11px; }
+
+/* ── Campos ──────────────────────────────────────────────────────────── */
+.ck-input,
+.ck-select,
+.ck-textarea {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  color: #111827;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.ck-textarea { height: auto; min-height: 64px; padding: 8px 10px; line-height: 1.5; }
+.ck-input:focus, .ck-select:focus, .ck-textarea:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 1px #10b981;
+}
+.ck-input:disabled, .ck-select:disabled, .ck-textarea:disabled {
+  background: #f3f4f6; color: #9ca3af; cursor: not-allowed;
+}
+.ck-input[aria-invalid='true'], .ck-input.is-error {
+  border-color: #ef4444;
+}
+.ck-input.is-error:focus { box-shadow: 0 0 0 1px #ef4444; }
+
+/* Etiqueta sobre el campo: 11-12 px, peso 500, gris 600-700. */
+.ck-label {
+  display: block;
+  margin-bottom: 4px;
+  color: #4b5563;
+  font-size: 11px;
+  font-weight: 500;
+}
+.ck-help  { margin-top: 4px; color: #6b7280; font-size: 11px; }
+.ck-error { margin-top: 4px; color: #dc2626; font-size: 11px; }
+
+/* ── Tarjetas ────────────────────────────────────────────────────────
+   No convertir cada fragmento de contenido en una tarjeta (§7). */
+.ck-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+}
+.ck-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.ck-card__title { color: #111827; font-size: 13px; font-weight: 600; }
+.ck-card__body  { padding: 16px; }
+
+/* ── Tablas ──────────────────────────────────────────────────────────
+   Cabecera gris 50 en mayúsculas de 11 px; filas separadas por gris 100. */
+.ck-table { width: 100%; border-collapse: collapse; background: #fff; }
+.ck-table th {
+  padding: 10px 12px;
+  color: #6b7280;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .025em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.ck-table td {
+  padding: 10px 12px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 12px;
+}
+.ck-table tbody tr:hover { background: #f9fafb; }
+.ck-table tbody tr:last-child td { border-bottom: 0; }
+/* Dato principal frente a metadato (§7). */
+.ck-table .ck-cell-strong { color: #111827; font-weight: 500; }
+.ck-table .ck-cell-meta   { color: #6b7280; }
+.ck-code { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; }
+
+/* ── Badges: píldoras de 11 px, fondo 100 y texto 700-800 ───────────── */
+.ck-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ck-badge--success { color: #166534; background: #dcfce7; }
+.ck-badge--info    { color: #1e40af; background: #dbeafe; }
+.ck-badge--warning { color: #92400e; background: #fef3c7; }
+.ck-badge--danger  { color: #991b1b; background: #fee2e2; }
+.ck-badge--neutral { color: #4b5563; background: #f3f4f6; }
+.ck-badge--brand   { color: #047857; background: #d1fae5; }
+
+/* ── Navegación lateral ──────────────────────────────────────────────
+   32-36 px de alto, icono de 16 px, activo en verde 50 / verde 700. */
+.ck-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: color 100ms, background-color 100ms;
+}
+.ck-nav-item:hover { background: #f3f4f6; color: #111827; }
+.ck-nav-item.is-active { background: #ecfdf5; color: #047857; }
+.ck-nav-item.is-active svg { color: #10b981; }
+.ck-nav-group {
+  padding: 0 10px;
+  margin: 12px 0 4px;
+  color: #9ca3af;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* ── Encabezado de página: título a la izquierda, acciones a la derecha ── */
+.ck-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.ck-page-title    { color: #111827; font-size: 17px; font-weight: 600; }
+.ck-page-subtitle { margin-top: 2px; color: #6b7280; font-size: 12px; }
+
+/* ── Métrica compacta (cuadrícula de 12 px entre tarjetas) ──────────── */
+.ck-stat { padding: 12px 14px; }
+.ck-stat__label { color: #6b7280; font-size: 11px; font-weight: 500; }
+.ck-stat__value { margin-top: 2px; color: #111827; font-size: 20px; font-weight: 700; line-height: 28px; }
+
+/* ── Estado vacío: icono lineal gris 300, mensaje breve, UNA acción ─── */
+.ck-empty { padding: 40px 24px; text-align: center; }
+.ck-empty svg { color: #d1d5db; margin: 0 auto 10px; }
+.ck-empty__title { color: #374151; font-size: 13px; font-weight: 500; }
+.ck-empty__text  { margin-top: 4px; color: #6b7280; font-size: 12px; }
+
+/* ── Modal: título arriba, cuerpo desplazable, acciones abajo a la derecha ── */
+.ck-modal {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.15);
+}
+.ck-modal__header { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; }
+.ck-modal__body   { padding: 16px; overflow-y: auto; }
+.ck-modal__footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  padding: 12px 16px; border-top: 1px solid #f3f4f6;
+}
+.ck-scrim { background: rgba(17,24,39,.45); }
+
+/* ── Barra de progreso compacta ─────────────────────────────────────── */
+.ck-progress { height: 6px; background: #e5e7eb; border-radius: 9999px; overflow: hidden; }
+.ck-progress__fill { height: 100%; background: #10b981; border-radius: 9999px; transition: width 300ms ease-out; }
+
+/* ── Separador de sección ───────────────────────────────────────────── */
+.ck-divider { height: 1px; background: #e5e7eb; border: 0; }

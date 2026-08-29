@@ -1,0 +1,90 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   CENTRIK — TOKENS DE MARCA (fuente de verdad: design-tokens.json)
+   ───────────────────────────────────────────────────────────────────────
+   Este bloque redefine el tema de Tailwind v4, así que NO es una hoja de
+   parches: cambia lo que significan `text-sm`, `rounded-lg` o `shadow-lg`
+   en las 201 pantallas a la vez. Por eso la densidad Centrik (13 px de
+   base, radios de 6-8 px, sombras de contacto) aparece sin tocarlas.
+
+   Las escalas siguen literalmente DESIGN_SYSTEM.md. No introducir aquí
+   valores «parecidos»: el kit exige el verde exacto #10b981 y la familia
+   Geist, y este archivo es donde se comprueba de un vistazo.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Tipografía ─────────────────────────────────────────────────────
+     Geist es obligatoria (el kit prohíbe sustituirla por Inter/Poppins).
+     Geist Mono queda para códigos e identificadores. */
+  --font-sans: Geist, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Escala de 8 pasos del kit. La raíz es 13 px, no 16: al redefinir
+     `--text-*` toda la app se compacta sin editar componentes. */
+  --text-xs: 11px;    --text-xs--line-height: 16px;
+  --text-sm: 12px;    --text-sm--line-height: 18px;
+  --text-base: 13px;  --text-base--line-height: 20px;
+  --text-md: 14px;    --text-md--line-height: 20px;
+  --text-lg: 15px;    --text-lg--line-height: 22px;
+  --text-xl: 17px;    --text-xl--line-height: 24px;
+  --text-2xl: 20px;   --text-2xl--line-height: 28px;
+  --text-3xl: 24px;   --text-3xl--line-height: 32px;
+  /* El kit se detiene en 3xl (24 px). Los pasos mayores existían para la
+     landing; se acotan para que ninguna pantalla quede tamaño valla. */
+  --text-4xl: 28px;   --text-4xl--line-height: 36px;
+  --text-5xl: 32px;   --text-5xl--line-height: 40px;
+  --text-6xl: 36px;   --text-6xl--line-height: 44px;
+  --text-7xl: 40px;   --text-7xl--line-height: 48px;
+
+  /* ── Marca: verde esmeralda. `500` es el color principal, `600` el
+     hover y `50` la selección suave. ──────────────────────────────── */
+  --color-primary-50:  #ecfdf5;
+  --color-primary-100: #d1fae5;
+  --color-primary-200: #a7f3d0;
+  --color-primary-300: #6ee7b7;
+  --color-primary-400: #34d399;
+  --color-primary-500: #10b981;
+  --color-primary-600: #059669;
+  --color-primary-700: #047857;
+  --color-primary-800: #065f46;
+  --color-primary-900: #064e3b;
+
+  /* ── Superficies y texto ────────────────────────────────────────── */
+  --color-surface-ground:  #f8f9fa;
+  --color-surface-card:    #ffffff;
+  --color-surface-section: #f3f4f6;
+  --color-surface-hover:   #f9fafb;
+  --color-surface-border:  #e5e7eb;
+
+  --color-ink:        #111827;
+  --color-ink-soft:   #374151;
+  --color-ink-muted:  #6b7280;
+
+  /* ── Forma: 6 px normal, 8 px tarjeta, 12 px solo casos de marca.
+     `2xl`/`3xl` se aplastan a propósito: el kit prohíbe radios de
+     16-32 px, y quedaban 140 usos de `rounded-2xl` en la app. ────── */
+  --radius-xs:  3px;
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  8px;
+  --radius-xl:  12px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+
+  /* ── Profundidad: sombras de contacto, nunca profundas. Redefinir
+     `shadow-lg`/`shadow-xl` aquí desactiva de golpe la elevación
+     exagerada heredada del tema oscuro. ──────────────────────────── */
+  --shadow-2xs: 0 1px 1px rgba(0,0,0,.04);
+  --shadow-xs:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-card: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-lg:  0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -1px rgba(0,0,0,.05);
+  --shadow-xl:  0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -2px rgba(0,0,0,.04);
+  --shadow-2xl: 0 20px 60px rgba(0,0,0,.15);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,.15);
+
+  /* ── Movimiento: 75-200 ms. Nada más largo. ─────────────────────── */
+  --centrik-motion-fast: 75ms;
+  --centrik-motion-base: 150ms;
+  --centrik-motion-entrance: 200ms;
+}
