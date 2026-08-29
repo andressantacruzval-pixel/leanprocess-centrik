@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { identityMigration } from '@/utils/storeUtils'
 
 /**
  * El muro de plan que ve el cliente al topar. Vive aqui y no en un store propio
@@ -31,15 +30,11 @@ interface UiState {
    * apareciera abierto al entrar.
    */
   drawerOpen: boolean
-  /** Tema de la interfaz. 'dark' (por defecto, versión tecnológica) o 'light'. */
-  theme: 'dark' | 'light'
   muro: MuroDePlan
   toggleSidebar: () => void
   setSidebarOpen: (value: boolean) => void
   toggleDrawer: () => void
   setDrawerOpen: (value: boolean) => void
-  toggleTheme: () => void
-  setTheme: (theme: 'dark' | 'light') => void
   abrirMuroDePlan: (nivel: number, cupo: number | null, motivo?: 'documentar' | 'crear') => void
   cerrarMuroDePlan: () => void
 }
@@ -49,21 +44,18 @@ export const useUiStore = create<UiState>()(
     (set) => ({
       sidebarOpen: true,
       drawerOpen: false,
-      theme: 'dark',
       muro: { abierto: false, nivel: 0, cupo: null, motivo: 'documentar' },
       toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
       setSidebarOpen: (value) => set({ sidebarOpen: value }),
       toggleDrawer: () => set((s) => ({ drawerOpen: !s.drawerOpen })),
       setDrawerOpen: (value) => set({ drawerOpen: value }),
-      toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
-      setTheme: (theme) => set({ theme }),
       abrirMuroDePlan: (nivel, cupo, motivo = 'documentar') =>
         set({ muro: { abierto: true, nivel, cupo, motivo } }),
       cerrarMuroDePlan: () => set((s) => ({ muro: { ...s.muro, abierto: false } })),
     }),
     {
       name: 'lean-process-ui',
-      version: 1,
+      version: 2,
       /**
        * Se guarda SOLO `sidebarOpen`, y los otros dos campos quedan fuera a proposito:
        *
@@ -75,8 +67,17 @@ export const useUiStore = create<UiState>()(
        * `darkMode` tampoco: hoy no lo lee nadie y persistir un ajuste muerto solo crea
        * una clave de localStorage que confunde el dia que se implemente de verdad.
        */
-      partialize: (state) => ({ sidebarOpen: state.sidebarOpen, theme: state.theme }),
-      migrate: identityMigration(),
+      partialize: (state) => ({ sidebarOpen: state.sidebarOpen }),
+      /**
+       * v2: se retira `theme`. La interfaz tiene un solo aspecto —el de la familia
+       * Centrik— asi que el conmutador claro/oscuro dejo de existir. Sin esto, quien
+       * ya tuviera 'dark' guardado arrastraria para siempre una clave que nadie lee.
+       */
+      migrate: (state, version) => {
+        const previo = (state ?? {}) as Record<string, unknown>
+        if (version < 2) delete previo.theme
+        return { sidebarOpen: previo.sidebarOpen !== false }
+      },
       merge: (persisted, current) => ({ ...current, ...(persisted as object) }),
     }
   )

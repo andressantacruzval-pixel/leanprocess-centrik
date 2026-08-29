@@ -4,7 +4,7 @@ import NavigatedViewer from 'bpmn-js/lib/NavigatedViewer'
 import 'bpmn-js/dist/assets/bpmn-js.css'
 import 'bpmn-js/dist/assets/diagram-js.css'
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css'
-import './bpmn-dark-theme.css'
+import './bpmn-centrik-theme.css'
 import type {
   BpmnElement,
   BpmnEvent,
@@ -18,7 +18,6 @@ import type {
 import { injectMissingBpmnEdges } from '@/lib/bpmnLayoutFix'
 import appNodeRendererModule from '../appNodeRenderer'
 import leanModdle from '../leanModdle'
-import { useUiStore } from '@/stores/uiStore'
 
 // Elimina waypoints con coordenadas NaN del XML antes de importar.
 function sanitizeBpmnXml(xml: string): string {
@@ -85,7 +84,6 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
   const xmlRef = useRef(xml)
   const [error, setError] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
-  const theme = useUiStore((s) => s.theme)
   const internalChangeRef = useRef(false)
   const handleChanged = useCallback(async () => {
     if (!modelerRef.current || !onXmlChange) return
@@ -476,7 +474,7 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
       <div
         ref={containerRef}
         className="w-full h-full overflow-hidden border border-gray-100"
-        style={{ background: theme === 'light' ? '#f7faff' : '#111827' }}
+        style={{ background: '#ffffff' }}
       />
 
 

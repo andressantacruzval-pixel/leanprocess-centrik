@@ -1,0 +1,286 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   bpmn-js con la piel de la familia Centrik
+   ───────────────────────────────────────────────────────────────────────
+   bpmn-js trae su propia hoja y la aplica al SVG del diagrama, que las
+   clases de utilidad no alcanzan: por eso el diagramador necesita su propio
+   archivo en lugar de heredar del resto de la app.
+
+   Traducción respecto de la versión oscura que había aquí: lienzo blanco,
+   trazos y rellenos en el verde #10b981 de la familia, texto en la escala
+   gris fría y sombras de contacto. Las compuertas dejan de ser moradas —el
+   kit no admite una segunda paleta dominante— y solo el rojo del evento de
+   fin se conserva, porque ahí el color significa algo.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Canvas background */
+/* Cuadrícula de PUNTOS, no de líneas: da referencia espacial sin ensuciar el
+   lienzo. Va en una sola declaración (color + imagen + tamaño) para ganarle a
+   la rejilla de líneas que el componente inyecta con menor especificidad. */
+.bjs-container {
+  background-color: #ffffff !important;
+  background-image: radial-gradient(#e5e7eb 1px, transparent 1.5px) !important;
+  background-size: 22px 22px !important;
+}
+
+/* SVG elements */
+.djs-visual > :not(defs) path,
+.djs-visual > :not(defs) rect,
+.djs-visual > :not(defs) circle,
+.djs-visual > :not(defs) polygon {
+  stroke: #10b981 !important;
+  fill: rgba(16, 185, 129, 0.05) !important;
+}
+
+/* Task/Activity boxes */
+.djs-visual rect[rx] {
+  fill: rgba(16, 185, 129, 0.08) !important;
+  stroke: #059669 !important;
+}
+
+/* Start event */
+.bpmn-icon-start-event-none ~ .djs-visual circle,
+.djs-visual > circle[r="18"] {
+  fill: rgba(16, 185, 129, 0.15) !important;
+  stroke: #059669 !important;
+}
+
+/* End event */
+.djs-visual > circle[stroke-width="4"] {
+  fill: rgba(239, 68, 68, 0.15) !important;
+  stroke: #ef4444 !important;
+}
+
+/* Gateway diamonds */
+.djs-visual > polygon {
+  fill: rgba(16, 185, 129, 0.1) !important;
+  stroke: #059669 !important;
+}
+
+/* Labels (nombres de formas y etiquetas en flechas) */
+.djs-label {
+  fill: #111827 !important;
+  color: #111827 !important;
+}
+
+/* Texto dentro de labels — más específico que .djs-group text */
+.djs-label .djs-visual text,
+.djs-label text {
+  fill: #111827 !important;
+  font-weight: 500 !important;
+}
+
+/* Etiqueta flotante en flechas de secuencia (Sí / No / condición) */
+.djs-connection + .djs-label .djs-visual text,
+[class*="connection"] .djs-label text {
+  fill: #059669 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+/* Editor inline al hacer doble clic en cualquier elemento */
+.djs-direct-editing-content {
+  color: #111827 !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  border: 1px solid rgba(16, 185, 129, 0.5) !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  min-width: 60px !important;
+}
+
+/* Resalta la caja de edición activa */
+.djs-direct-editing-parent {
+  outline: 2px solid rgba(16, 185, 129, 0.4) !important;
+  border-radius: 4px !important;
+}
+
+/* Sequence flow arrows */
+.djs-connection path {
+  stroke: #6b7280 !important;
+}
+
+.djs-connection marker path {
+  fill: #6b7280 !important;
+  stroke: #6b7280 !important;
+}
+
+/* Lane/Pool backgrounds */
+.djs-group [data-element-id*="Lane"] .djs-visual rect,
+.djs-group [data-element-id*="Participant"] .djs-visual rect {
+  fill: rgba(16, 185, 129, 0.02) !important;
+  stroke: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Lane header text */
+.djs-group text {
+  fill: #6b7280 !important;
+}
+
+/* Selection outline */
+.djs-outline {
+  stroke: #10b981 !important;
+  stroke-dasharray: 4 !important;
+}
+
+/* Hover */
+.djs-element.hover .djs-outline,
+.djs-element.selected .djs-outline {
+  stroke: #059669 !important;
+  stroke-width: 2px !important;
+}
+
+/* Palette (left panel) */
+.djs-palette {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .05) !important;
+  top: 12px !important;
+  left: 12px !important;
+}
+
+.djs-palette .entry {
+  color: #6b7280 !important;
+}
+
+.djs-palette .entry:hover {
+  color: #059669 !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+
+.djs-palette .separator {
+  border-color: #e5e7eb !important;
+}
+
+.djs-palette-toggle {
+  background: transparent !important;
+  color: #6b7280 !important;
+}
+
+/* Context pad (actions on hover) */
+.djs-context-pad {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .05) !important;
+}
+
+.djs-context-pad .entry {
+  color: #6b7280 !important;
+}
+
+.djs-context-pad .entry:hover {
+  color: #059669 !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Popup menu (create/change type) */
+.djs-popup {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .15) !important;
+  color: #374151 !important;
+}
+
+.djs-popup .entry {
+  color: #374151 !important;
+}
+
+.djs-popup .entry:hover,
+.djs-popup .entry.active,
+.djs-popup .entry.selected,
+.djs-popup .entry:focus {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #059669 !important;
+}
+/* La entrada resaltada por teclado (.selected) traía el fondo casi blanco por
+   defecto de bpmn-js — ilegible en oscuro. Forzamos también su texto claro. */
+.djs-popup .entry.selected *,
+.djs-popup .entry:hover * { color: #059669 !important; }
+
+.djs-popup .djs-popup-header {
+  background: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  color: #6b7280 !important;
+}
+
+.djs-popup input {
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  color: #111827 !important;
+  border-radius: 6px !important;
+}
+.djs-popup input:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 1px #10b981 !important;
+  outline: none !important;
+}
+
+/* Powered by bpmn.io badge */
+.bjs-powered-by {
+  display: none !important;
+}
+
+/* Minimap (if present) */
+.djs-minimap {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+}
+
+/* Scrollbars inside bpmn-js */
+.bjs-container ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.bjs-container ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.bjs-container ::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+/* ── Puntos de conexión: feedback visual al hover sobre nodo ── */
+.djs-element.connect-ok .djs-outline {
+  stroke: #059669 !important;
+  stroke-width: 3px !important;
+  fill: rgba(16, 185, 129, 0.08) !important;
+}
+
+.djs-element.connect-not-ok .djs-outline {
+  stroke: #ef4444 !important;
+  stroke-width: 2px !important;
+}
+
+/* ── Bendpoints: handles cyan sobre conexiones seleccionadas ── */
+.djs-bendpoint {
+  fill: #059669 !important;
+  stroke: #ffffff !important;
+  stroke-width: 1.5px !important;
+  opacity: 0.9 !important;
+}
+
+.djs-bendpoint:hover {
+  fill: #10b981 !important;
+  opacity: 1 !important;
+}
+
+/* ── Segment dragger: handle para mover segmentos completos ── */
+.djs-segment-dragger .djs-dragger {
+  fill: rgba(16, 185, 129, 0.15) !important;
+  stroke: rgba(16, 185, 129, 0.5) !important;
+  stroke-width: 1px !important;
+}
+
+.djs-segment-dragger:hover .djs-dragger {
+  fill: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* ── Preview de nueva conexión (mientras se arrastra desde un nodo) ── */
+.djs-connection-preview .djs-visual path {
+  stroke: #059669 !important;
+  stroke-dasharray: 5 3 !important;
+  stroke-width: 1.5px !important;
+  fill: none !important;
+}

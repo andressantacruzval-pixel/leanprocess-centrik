@@ -4,21 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Tema (claro/oscuro) aplicado antes del render para evitar parpadeo. -->
-    <script>
-      try {
-        var ui = JSON.parse(localStorage.getItem('lean-process-ui') || '{}');
-        var t = (ui && ui.state && ui.state.theme) || 'dark';
-        document.documentElement.setAttribute('data-theme', t);
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    </script>
-
     <!-- Branding -->
     <title>Lean Process — Gestión de Procesos con IA</title>
     <meta name="description" content="Modela, documenta y optimiza tus procesos de negocio con diagramas BPMN, procedimientos automáticos y análisis de indicadores impulsados por IA." />
-    <meta name="theme-color" content="#0a0f1a" />
+    <meta name="theme-color" content="#f8f9fa" />
     <!-- El .ico lleva dentro 16/32/48 px, asi que el navegador elige el que le sirve.
          Si aqui quedara ademas un `type="image/svg+xml"`, ganaria ese y el icono de
          marca no se veria nunca. -->
@@ -29,6 +18,15 @@
     <meta property="og:title" content="Lean Process — Gestión de Procesos con IA" />
     <meta property="og:description" content="Modela, documenta y optimiza tus procesos de negocio con BPMN e IA." />
     <meta property="og:type" content="website" />
+
+    <!-- Tipografia de la familia Centrik. El `preconnect` va antes que la hoja
+         para que la conexion a Google Fonts ya este abierta cuando se pida. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+    />
 
     <!-- Performance: pre-connect to external APIs -->
     <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin />
