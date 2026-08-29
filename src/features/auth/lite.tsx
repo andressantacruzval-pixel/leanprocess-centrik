@@ -38,8 +38,18 @@ export const LOCAL_AUTH = (EN_LOCAL || STANDALONE_AUTH) && !LITE_OVERRIDE
 const LITE_URL =
   LITE_OVERRIDE ?? (EN_LOCAL ? 'http://localhost:3000' : 'https://www.leanprocess.app')
 
-export const liteLoginUrl = LOCAL_AUTH ? '/login' : `${LITE_URL}/login`
-export const liteSignupUrl = LOCAL_AUTH ? '/register' : `${LITE_URL}/login?view=signup`
+/**
+ * La base pública. En un despliegue de proyecto de GitHub Pages la app NO vive en
+ * la raíz del dominio sino bajo `/<repo>/`, y estas dos rutas se consumen como
+ * `href` absolutos (`<a href={liteLoginUrl}>`), no como `<Link>`, así que nadie
+ * les aplica el `basename` del router: `/login` a pelo salía del despliegue y
+ * caía en el 404 de GitHub. Vite garantiza que `BASE_URL` acaba en '/', de modo
+ * que esto da `/login` en local y `/<repo>/login` publicado.
+ */
+const BASE = import.meta.env.BASE_URL
+
+export const liteLoginUrl = LOCAL_AUTH ? `${BASE}login` : `${LITE_URL}/login`
+export const liteSignupUrl = LOCAL_AUTH ? `${BASE}register` : `${LITE_URL}/login?view=signup`
 /** El Hub es dueño del plan, los tokens y la facturación: App enlaza, no duplica. */
 export const liteHubUrl = `${LITE_URL}/hub`
 
