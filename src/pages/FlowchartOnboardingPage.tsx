@@ -165,26 +165,26 @@ export default function FlowchartOnboardingPage() {
       <div className="flex items-center gap-3">
         <button
           onClick={handleBack}
-          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 transition-colors"
+          className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600 transition-colors"
         >
           <ArrowLeft size={14} />
         </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <Sparkles size={14} className="text-cyan-400" />
-            <h1 className="text-lg font-semibold text-white truncate">{pageTitle}</h1>
+            <Sparkles size={14} className="text-primary-600" />
+            <h1 className="text-lg font-semibold text-gray-900 truncate">{pageTitle}</h1>
           </div>
           {phase === 'select' && (
-            <p className="text-[11px] text-white/40">Elige cómo quieres crear tu diagrama BPMN</p>
+            <p className="text-[11px] text-gray-500">Elige cómo quieres crear tu diagrama BPMN</p>
           )}
           {phase === 'chat' && (
-            <p className="text-[11px] text-white/40">Habla o escribe — el flujograma se arma en vivo mientras conversas.</p>
+            <p className="text-[11px] text-gray-500">Habla o escribe — el flujograma se arma en vivo mientras conversas.</p>
           )}
           {phase === 'generating' && (
-            <p className="text-[11px] text-amber-400 animate-pulse">Generando diagrama con IA...</p>
+            <p className="text-[11px] text-amber-600 animate-pulse">Generando diagrama con IA...</p>
           )}
           {phase === 'preview' && (
-            <p className="text-[11px] text-white/40">Revisa el diagrama y guárdalo para abrirlo en el editor</p>
+            <p className="text-[11px] text-gray-500">Revisa el diagrama y guárdalo para abrirlo en el editor</p>
           )}
         </div>
       </div>
@@ -193,7 +193,7 @@ export default function FlowchartOnboardingPage() {
       {phase === 'select' && (
         <div className="flex-1 flex flex-col items-center justify-center gap-6">
           {/* Mode tabs */}
-          <div className="flex gap-2 p-1 rounded-xl bg-white/5 border border-white/10">
+          <div className="flex gap-2 p-1 rounded-lg bg-gray-50 border border-gray-200">
             {([
               ...(IS_PHASE_1 ? [] : [{ mode: 'chat' as Mode, icon: MessageSquare, label: 'Chat en vivo' }]),
               { mode: 'direct' as Mode, icon: Type, label: 'Prompt directo' },
@@ -204,8 +204,8 @@ export default function FlowchartOnboardingPage() {
                 onClick={() => setSelectedMode(mode)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   selectedMode === mode
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                    : 'text-white/50 hover:text-white/80 hover:bg-white/5'
+                    ? 'text-white shadow-lg bg-primary-500'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
                 }`}
               >
                 <Icon size={14} />
@@ -217,13 +217,13 @@ export default function FlowchartOnboardingPage() {
           {/* Mode content */}
           <div className="w-full max-w-xl">
             {selectedMode === 'chat' && (
-              <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-                <p className="text-white/70 text-sm">
+              <div className="flex flex-col gap-4 p-6 rounded-lg bg-gray-50 border border-gray-200">
+                <p className="text-gray-700 text-sm">
                   Conversa con el asistente y el diagrama BPMN se construye en vivo mientras describes el proceso.
                 </p>
                 <button
                   onClick={() => setPhase('chat')}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium transition-all"
+                  className="w-full py-3 rounded-lg text-white font-medium transition-all bg-primary-500 hover:bg-primary-600"
                 >
                   Iniciar chat
                 </button>
@@ -231,9 +231,9 @@ export default function FlowchartOnboardingPage() {
             )}
 
             {selectedMode === 'direct' && (
-              <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white/5 border border-white/10">
+              <div className="flex flex-col gap-4 p-6 rounded-lg bg-gray-50 border border-gray-200">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-white/70 text-sm">
+                  <p className="text-gray-700 text-sm">
                     Describe el proceso en texto libre —escríbelo o díctalo con el micrófono— y la IA generará el diagrama BPMN completo.
                   </p>
                   {dictado.supported && (
@@ -244,14 +244,14 @@ export default function FlowchartOnboardingPage() {
                       title={dictado.recording ? 'Detener y transcribir' : 'Dictar por voz'}
                       className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors disabled:opacity-60 ${
                         dictado.recording
-                          ? 'bg-red-500/15 text-red-300 border-red-500/30 hover:bg-red-500/25'
-                          : 'bg-white/5 text-cyan-300 border-cyan-500/25 hover:bg-cyan-500/10'
+                          ? 'bg-red-50 text-red-700 border-red-300 hover:bg-red-100'
+                          : 'bg-gray-50 text-primary-700 border-primary-200 hover:bg-primary-50'
                       }`}
                     >
                       {dictado.transcribing
                         ? (<><Loader2 size={14} className="animate-spin" /> Transcribiendo…</>)
                         : dictado.recording
-                        ? (<><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" /></span> Detener y transcribir</>)
+                        ? (<><span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" /></span> Detener y transcribir</>)
                         : (<><Mic size={14} /> Dictar por voz</>)}
                     </button>
                   )}
@@ -262,14 +262,14 @@ export default function FlowchartOnboardingPage() {
                     onChange={(e) => setDirectText(e.target.value)}
                     placeholder="Describe el proceso paso a paso: quién hace qué, cuándo, y qué decisiones se toman... o pulsa «Dictar por voz» y habla."
                     rows={6}
-                    className="w-full resize-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-cyan-500/50"
+                    className="w-full resize-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-primary-300"
                   />
                   {(dictado.recording || dictado.transcribing) && (
-                    <div className="mt-2 flex items-start gap-2 rounded-lg bg-cyan-500/[0.06] border border-cyan-500/20 px-3 py-2">
+                    <div className="mt-2 flex items-start gap-2 rounded-lg bg-primary-50 border border-primary-200 px-3 py-2">
                       {dictado.transcribing
-                        ? <Loader2 size={13} className="mt-0.5 shrink-0 text-cyan-300 animate-spin" />
-                        : <Mic size={13} className="mt-0.5 shrink-0 text-cyan-300 animate-pulse" />}
-                      <p className="text-[12px] leading-snug text-white/60">
+                        ? <Loader2 size={13} className="mt-0.5 shrink-0 text-primary-700 animate-spin" />
+                        : <Mic size={13} className="mt-0.5 shrink-0 text-primary-700 animate-pulse" />}
+                      <p className="text-[12px] leading-snug text-gray-600">
                         {dictado.transcribing
                           ? 'Transcribiendo tu voz…'
                           : 'Grabando… habla con naturalidad y pulsa «Detener y transcribir» cuando termines. El texto aparecerá arriba.'}
@@ -277,12 +277,12 @@ export default function FlowchartOnboardingPage() {
                     </div>
                   )}
                 </div>
-                {dictado.error && <p className="text-red-400 text-xs">{dictado.error}</p>}
-                {error && <p className="text-red-400 text-xs">{error}</p>}
+                {dictado.error && <p className="text-red-600 text-xs">{dictado.error}</p>}
+                {error && <p className="text-red-600 text-xs">{error}</p>}
                 <button
                   onClick={() => { dictado.stop(); setSelectedMode('direct'); handleGenerateDirect() }}
                   disabled={!directText.trim()}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="w-full py-3 rounded-lg text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all bg-primary-500 hover:bg-primary-600"
                 >
                   Generar diagrama
                 </button>
@@ -290,13 +290,13 @@ export default function FlowchartOnboardingPage() {
             )}
 
             {selectedMode === 'file' && (
-              <div className="flex flex-col gap-4 p-6 rounded-2xl bg-white/5 border border-white/10">
-                <p className="text-white/70 text-sm">
+              <div className="flex flex-col gap-4 p-6 rounded-lg bg-gray-50 border border-gray-200">
+                <p className="text-gray-700 text-sm">
                   Sube una imagen (JPG, PNG, WebP), PDF o documento Word con el proceso documentado y la IA generará el diagrama BPMN.
                 </p>
-                <label className="flex flex-col items-center justify-center gap-2 h-32 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-cyan-500/40 transition-colors">
-                  <FileUp size={24} className="text-white/30" />
-                  <span className="text-white/40 text-sm">
+                <label className="flex flex-col items-center justify-center gap-2 h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary-300 transition-colors">
+                  <FileUp size={24} className="text-gray-400" />
+                  <span className="text-gray-500 text-sm">
                     {fileRef ? fileRef.name : 'Haz clic o arrastra tu archivo aquí'}
                   </span>
                   <input
@@ -314,13 +314,13 @@ export default function FlowchartOnboardingPage() {
                   value={fileContext}
                   onChange={(e) => setFileContext(e.target.value)}
                   placeholder="Contexto adicional (opcional)"
-                  className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/30 text-sm focus:outline-none focus:border-cyan-500/50"
+                  className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-primary-300"
                 />
-                {error && <p className="text-red-400 text-xs">{error}</p>}
+                {error && <p className="text-red-600 text-xs">{error}</p>}
                 <button
                   onClick={() => { setSelectedMode('file'); handleGenerateFromFile() }}
                   disabled={!fileRef}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="w-full py-3 rounded-lg text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all bg-primary-500 hover:bg-primary-600"
                 >
                   Analizar y generar
                 </button>
@@ -342,24 +342,24 @@ export default function FlowchartOnboardingPage() {
       {/* Phase: generating */}
       {phase === 'generating' && (
         <div className="flex-1 flex flex-col items-center justify-center gap-4">
-          <div className="w-12 h-12 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin" />
-          <p className="text-white/60 text-sm">Generando tu diagrama BPMN con IA...</p>
-          <p className="text-white/30 text-xs">Esto puede tardar unos segundos</p>
+          <div className="w-12 h-12 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
+          <p className="text-gray-600 text-sm">Generando tu diagrama BPMN con IA...</p>
+          <p className="text-gray-400 text-xs">Esto puede tardar unos segundos</p>
         </div>
       )}
 
       {/* Phase: preview */}
       {phase === 'preview' && (
         <div className="flex-1 flex flex-col gap-3 min-h-0">
-          <div className="flex-1 bg-[#0a0f1a] border border-white/5 rounded-2xl overflow-hidden">
+          <div className="flex-1 bg-white border border-gray-100 rounded-lg overflow-hidden">
             <BpmnModeler xml={previewXml} readOnly hidePalette className="h-full" />
           </div>
           <div className="flex items-center justify-end gap-3">
-            {error && <p className="text-red-400 text-xs">{error}</p>}
+            {error && <p className="text-red-600 text-xs">{error}</p>}
             <button
               onClick={handleSavePreview}
               disabled={isSaving}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all bg-primary-500 hover:bg-primary-600"
             >
               <Check size={14} />
               {isSaving ? 'Guardando...' : 'Guardar y abrir editor'}

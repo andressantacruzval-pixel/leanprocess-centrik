@@ -46,26 +46,26 @@ export function InventoryWizard({ onClose }: Props) {
   )
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col bg-[#070b14]/95 backdrop-blur-md">
+    <div className="fixed inset-0 z-[60] flex flex-col bg-surface-ground">
       {/* Cabecera + progreso */}
-      <div className="shrink-0 border-b border-white/10 bg-[#0a0f1a]/80 backdrop-blur-xl">
+      <div className="shrink-0 border-b border-gray-200 bg-white">
         <div className="max-w-6xl mx-auto px-4 lg:px-6 py-3 flex items-center gap-4">
           <div className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 grid place-items-center text-white font-black text-sm shadow-lg shadow-cyan-500/30">I</div>
+            <div className="w-8 h-8 rounded-lg grid place-items-center text-white font-black text-sm shadow-lg bg-primary-500">I</div>
             <div className="hidden sm:block">
-              <div className="text-sm font-bold text-white leading-none">Inventario de Procesos</div>
-              <div className="text-[10px] text-white/40 mt-0.5">área → macroproceso → proceso → subproceso</div>
+              <div className="text-sm font-bold text-gray-900 leading-none">Inventario de Procesos</div>
+              <div className="text-[10px] text-gray-500 mt-0.5">área → macroproceso → proceso → subproceso</div>
             </div>
           </div>
           <div className="flex-1 flex items-center gap-1.5">
             {STEPS.map((s, i) => (
               <button key={s} onClick={() => setStep(i)} className="flex-1 group">
-                <div className={`h-1.5 rounded-full transition-all ${i <= step ? 'bg-gradient-to-r from-cyan-500 to-blue-500' : 'bg-white/10'}`} />
-                <div className={`text-[10px] mt-1 text-left ${i === step ? 'text-cyan-400 font-semibold' : 'text-white/30'}`}>{i + 1}. {s}</div>
+                <div className={`h-1.5 rounded-full transition-all ${i <= step ? 'bg-primary-500' : 'bg-gray-100'}`} />
+                <div className={`text-[10px] mt-1 text-left ${i === step ? 'text-primary-600 font-semibold' : 'text-gray-400'}`}>{i + 1}. {s}</div>
               </button>
             ))}
           </div>
-          <button onClick={onClose} className="shrink-0 p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/70 transition-colors" aria-label="Cerrar">
+          <button onClick={onClose} className="shrink-0 p-2 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors" aria-label="Cerrar">
             <X size={18} />
           </button>
         </div>

@@ -158,7 +158,7 @@ export default function ReportsPage() {
   }, [filteredProcesses, allImprovements])
   const processNameById = useMemo(() => new Map(processes.map((p) => [p.id, p.name])), [processes])
 
-  const fInput = 'appearance-none bg-white/[0.03] border border-white/5 rounded-lg pl-2 pr-6 py-1.5 text-[11px] text-white/60 outline-none cursor-pointer'
+  const fInput = 'appearance-none bg-gray-50 border border-gray-100 rounded-lg pl-2 pr-6 py-1.5 text-[11px] text-gray-600 outline-none cursor-pointer'
 
   return (
     <div className="space-y-4">
@@ -171,10 +171,10 @@ export default function ReportsPage() {
             {/* El Inventario y los Manuales de Cargo tienen su propia exportación
                 completa dentro del reporte; el export genérico solo aplica al resto. */}
             {activeTab !== 'inventario' && activeTab !== 'manuales' && (<>
-            <button onClick={() => handleExport('excel')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors ring-1 ring-emerald-500/20">
+            <button onClick={() => handleExport('excel')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors ring-1 ring-emerald-500">
               <Download size={13} /> Excel
             </button>
-            <button onClick={() => handleExport('pdf')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors ring-1 ring-red-500/20">
+            <button onClick={() => handleExport('pdf')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-colors ring-1 ring-red-500">
               <Download size={13} /> PDF
             </button>
             </>)}
@@ -183,17 +183,17 @@ export default function ReportsPage() {
       />
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-white/[0.02] rounded-xl p-1 border border-white/5 overflow-x-auto">
+      <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1 border border-gray-100 overflow-x-auto">
         {TABS.map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-all ${activeTab === tab.key ? 'bg-cyan-500/15 text-cyan-400 shadow-sm' : 'text-white/40 hover:text-white/60 hover:bg-white/5'}`}>
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium transition-all ${activeTab === tab.key ? 'bg-primary-50 text-primary-600 shadow-sm' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50'}`}>
             <tab.icon size={13} /> {tab.label}
           </button>
         ))}
       </div>
 
       {STANDALONE.includes(activeTab) ? (
-        <div className="bg-white/[0.02] rounded-2xl border border-white/5">
+        <div className="bg-gray-50 rounded-lg border border-gray-100">
           {activeTab === 'inventario' && <InventoryReportUnified />}
           {activeTab === 'aplicaciones' && <ApplicationsReport />}
           {activeTab === 'cargos' && <CargosReport />}
@@ -203,11 +203,11 @@ export default function ReportsPage() {
         <>
           {/* Filters */}
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 bg-white/[0.03] rounded-lg border border-white/5 px-3 py-1.5 flex-1 max-w-[200px]">
-              <Search size={13} className="text-white/20 shrink-0" />
+            <div className="flex items-center gap-1.5 bg-gray-50 rounded-lg border border-gray-100 px-3 py-1.5 flex-1 max-w-[200px]">
+              <Search size={13} className="text-gray-300 shrink-0" />
               <input type="text" placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="bg-transparent text-xs text-white placeholder-white/20 outline-none flex-1 min-w-0" />
-              {search && <button onClick={() => setSearch('')} className="text-white/20 hover:text-white/50"><X size={12} /></button>}
+                className="bg-transparent text-xs text-gray-900 placeholder-gray-400 outline-none flex-1 min-w-0" />
+              {search && <button onClick={() => setSearch('')} className="text-gray-300 hover:text-gray-500"><X size={12} /></button>}
             </div>
 
             <SelectFilter value={filterMacro} onChange={setFilterMacro} options={macroNames.map((m) => ({ value: m.id, label: m.name }))} placeholder="Macroproceso" className={fInput} />
@@ -218,26 +218,26 @@ export default function ReportsPage() {
 
             {hasFilters && (
               <button onClick={() => { setSearch(''); setFilterManagement(''); setFilterArea(''); setFilterOperative(''); setFilterMacro(''); setFilterLevel('') }}
-                className="text-[10px] text-white/30 hover:text-white/50 transition-colors">Limpiar</button>
+                className="text-[10px] text-gray-400 hover:text-gray-500 transition-colors">Limpiar</button>
             )}
 
             {activeTab === 'mejoras' && (
-              <div className="flex items-center gap-0.5 ml-auto rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
-                <button onClick={() => setMejorasView('tabla')} className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] transition-colors ${mejorasView === 'tabla' ? 'bg-cyan-500/20 text-cyan-300' : 'text-white/40 hover:text-white/70'}`}>
+              <div className="flex items-center gap-0.5 ml-auto rounded-lg border border-gray-200 bg-gray-50 p-0.5">
+                <button onClick={() => setMejorasView('tabla')} className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] transition-colors ${mejorasView === 'tabla' ? 'bg-primary-100 text-primary-700' : 'text-gray-500 hover:text-gray-700'}`}>
                   <List size={12} /> Tabla
                 </button>
-                <button onClick={() => setMejorasView('kanban')} className={`flex items-center gap-1 px-2 py-1 rounded text-[11px] transition-colors ${mejorasView === 'kanban' ? 'bg-cyan-500/20 text-cyan-300' : 'text-white/40 hover:text-white/70'}`}>
+                <button onClick={() => setMejorasView('kanban')} className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] transition-colors ${mejorasView === 'kanban' ? 'bg-primary-100 text-primary-700' : 'text-gray-500 hover:text-gray-700'}`}>
                   <LayoutGrid size={12} /> Vista Kanban
                 </button>
               </div>
             )}
 
-            <span className={`text-[10px] text-white/20 shrink-0 ${activeTab === 'mejoras' ? '' : 'ml-auto'}`}>{filteredProcesses.length} de {processes.length}</span>
+            <span className={`text-[10px] text-gray-300 shrink-0 ${activeTab === 'mejoras' ? '' : 'ml-auto'}`}>{filteredProcesses.length} de {processes.length}</span>
           </div>
 
           {/* Report Content */}
           {processes.length === 0 ? (
-            <div className="bg-white/[0.02] rounded-2xl border border-white/5">
+            <div className="bg-gray-50 rounded-lg border border-gray-100">
               <EmptyState
                 icon={BarChart3}
                 title="Genera datos para tus reportes"
@@ -247,7 +247,7 @@ export default function ReportsPage() {
               />
             </div>
           ) : (
-            <div className="bg-white/[0.02] rounded-2xl border border-white/5">
+            <div className="bg-gray-50 rounded-lg border border-gray-100">
               {activeTab === 'riesgos' && <RisksReport processes={filteredProcesses} allRisks={allRisks} macroMap={macroMap} processMap={processMap} />}
               {activeTab === 'kpis' && <KpisReport processes={filteredProcesses} allIndicators={allIndicators} macroMap={macroMap} processMap={processMap} />}
               {activeTab === 'valor' && <ValueReport processes={filteredProcesses} allAnalyses={allAnalyses} macroMap={macroMap} processMap={processMap} />}

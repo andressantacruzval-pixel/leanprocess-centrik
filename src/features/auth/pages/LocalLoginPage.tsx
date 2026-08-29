@@ -47,45 +47,45 @@ export default function LocalLoginPage({ signup = false }: { signup?: boolean })
   }
 
   return (
-    <div className="min-h-screen bg-[#070b14] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-surface-ground flex items-center justify-center px-4">
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary-50 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-primary-50 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative bg-white/[0.03] rounded-2xl border border-white/5 p-8 w-full max-w-md backdrop-blur-sm">
+      <div className="relative bg-gray-50 rounded-lg border border-gray-100 p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <Zap size={22} className="text-white" />
+          <div className="w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center shadow-lg bg-primary-500">
+            <Zap size={22} className="text-gray-900" />
           </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2">
+          <h1 className="text-2xl font-bold mb-2 text-primary-500">
             {mode === 'signup' ? 'Crear cuenta (local)' : 'Iniciar sesión (local)'}
           </h1>
-          <p className="text-white/40 text-sm">
+          <p className="text-gray-500 text-sm">
             Entorno de desarrollo — Supabase local, sin producción
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-red-500/10 text-red-400 p-3 rounded-xl text-sm border border-red-500/20">
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-200">
               {error}
             </div>
           )}
           {info && (
-            <div className="bg-cyan-500/10 text-cyan-300 p-3 rounded-xl text-sm border border-cyan-500/20">
+            <div className="bg-primary-50 text-primary-700 p-3 rounded-lg text-sm border border-primary-200">
               {info}
             </div>
           )}
 
           {mode === 'signup' && (
             <div>
-              <label className="block text-sm font-medium text-white/40 mb-1">Nombre completo</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">Nombre completo</label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500/30"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-300"
                 placeholder="Tu nombre"
                 required
               />
@@ -93,24 +93,24 @@ export default function LocalLoginPage({ signup = false }: { signup?: boolean })
           )}
 
           <div>
-            <label className="block text-sm font-medium text-white/40 mb-1">Correo electrónico</label>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Correo electrónico</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500/30"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-300"
               placeholder="tu@email.com"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white/40 mb-1">Contraseña</label>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Contraseña</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500/30"
+              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-300"
               placeholder="••••••••"
               minLength={6}
               required
@@ -120,7 +120,7 @@ export default function LocalLoginPage({ signup = false }: { signup?: boolean })
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-2.5 rounded-xl hover:from-cyan-500 hover:to-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/20"
+            className="w-full text-white py-2.5 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg bg-primary-500 hover:bg-primary-600"
           >
             {loading
               ? 'Procesando...'
@@ -130,14 +130,14 @@ export default function LocalLoginPage({ signup = false }: { signup?: boolean })
           </button>
         </form>
 
-        <p className="text-center text-sm text-white/30 mt-6">
+        <p className="text-center text-sm text-gray-400 mt-6">
           {mode === 'signup' ? (
             <>
               ¿Ya tienes cuenta?{' '}
               <button
                 type="button"
                 onClick={() => { setMode('signin'); setInfo(null) }}
-                className="text-cyan-400/70 hover:text-cyan-400 transition-colors"
+                className="text-primary-600 hover:text-primary-600 transition-colors"
               >
                 Inicia sesión
               </button>
@@ -148,7 +148,7 @@ export default function LocalLoginPage({ signup = false }: { signup?: boolean })
               <button
                 type="button"
                 onClick={() => { setMode('signup'); setInfo(null) }}
-                className="text-cyan-400/70 hover:text-cyan-400 transition-colors"
+                className="text-primary-600 hover:text-primary-600 transition-colors"
               >
                 Crear una
               </button>
@@ -156,8 +156,8 @@ export default function LocalLoginPage({ signup = false }: { signup?: boolean })
           )}
         </p>
 
-        <p className="text-center text-sm text-white/30 mt-3">
-          <Link to="/" className="text-white/30 hover:text-white/60 transition-colors">
+        <p className="text-center text-sm text-gray-400 mt-3">
+          <Link to="/" className="text-gray-400 hover:text-gray-600 transition-colors">
             ← Volver al inicio
           </Link>
         </p>

@@ -37,32 +37,32 @@ export default function ProcedurePage() {
 
   if (!process) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-white/30">
+      <div className="flex flex-col items-center justify-center py-20 text-gray-400">
         <p className="text-lg">Proceso no encontrado</p>
-        <button onClick={() => navigate(processMapUrl(process))} className="mt-4 text-cyan-400 hover:underline">Volver al mapa</button>
+        <button onClick={() => navigate(processMapUrl(process))} className="mt-4 text-primary-600 hover:underline">Volver al mapa</button>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)] -m-4 lg:-m-6 bg-[#070b14]">
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] -m-4 lg:-m-6 bg-surface-ground">
       {/* ═══ TOP BAR ═══ */}
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-[#0a0f1a] border-b border-white/5 shrink-0 overflow-x-auto">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-white border-b border-gray-100 shrink-0 overflow-x-auto">
         {/* Back */}
         <button
           onClick={() => navigate(`/app/process/${processId}`)}
-          className="p-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-white/60 transition-colors"
+          className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors"
         >
           <ArrowLeft size={16} />
         </button>
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-xs text-white/30 mr-3">
+        <div className="flex items-center gap-1.5 text-xs text-gray-400 mr-3">
           {hierarchy.macro && (<><span className="truncate max-w-[100px]">{hierarchy.macro.name}</span><ChevronRight size={10} /></>)}
           {hierarchy.parent && (<><span className="truncate max-w-[100px]">{hierarchy.parent.name}</span><ChevronRight size={10} /></>)}
-          <span className="text-white font-semibold truncate max-w-[200px]">{process.name}</span>
+          <span className="text-gray-900 font-semibold truncate max-w-[200px]">{process.name}</span>
           <ChevronRight size={10} />
-          <span className="text-purple-400 font-semibold">Procedimiento</span>
+          <span className="text-primary-600 font-semibold">Procedimiento</span>
         </div>
 
         <div className="flex-1" />
@@ -71,19 +71,19 @@ export default function ProcedurePage() {
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => navigate(`/app/process/${processId}`)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-white/40 hover:text-white/70 bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-all"
           >
             <Settings2 size={13} /> Ficha
           </button>
           <button
             onClick={() => navigate(`/app/process/${processId}/characterization`)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-white/40 hover:text-white/70 bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-all"
           >
             <GitBranch size={13} /> Diagramador
           </button>
           <button
             onClick={() => navigate(`/app/process/${processId}/indicators`)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-white/40 hover:text-white/70 bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-all"
           >
             <BarChart3 size={13} /> KPIs
           </button>
@@ -91,7 +91,7 @@ export default function ProcedurePage() {
       </div>
 
       {/* ═══ DOCUMENT AREA ═══ */}
-      <div className="flex-1 overflow-y-auto bg-[#0d1420]">
+      <div className="flex-1 overflow-y-auto bg-white">
         <div className="max-w-4xl mx-auto py-6 px-4">
           <ErrorBoundary>
             <ProcedureTab

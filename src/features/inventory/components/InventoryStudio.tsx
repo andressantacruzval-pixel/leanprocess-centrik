@@ -72,26 +72,26 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
   return (
     <div className="space-y-5">
       <header>
-        <div className="text-[11px] font-mono uppercase tracking-widest text-cyan-400 mb-1">Paso 2 · Estudio del inventario</div>
-        <h2 className="text-2xl font-bold text-white">Elige un macroproceso y levántalo</h2>
-        <p className="text-sm text-white/50 mt-1">Los grises aún no tienen procesos; los de color ya están levantados. Clic para trabajar en uno.</p>
-        <p className="mt-1.5 inline-flex items-center gap-1 text-[12px] text-amber-300/90">
-          <Zap size={12} className="fill-amber-300/80" /> Levantar cada macroproceso con IA consume <TokenCostBadge operationKey="inventory" /> tokens.
+        <div className="text-[11px] font-mono uppercase tracking-widest text-primary-600 mb-1">Paso 2 · Estudio del inventario</div>
+        <h2 className="text-2xl font-bold text-gray-900">Elige un macroproceso y levántalo</h2>
+        <p className="text-sm text-gray-500 mt-1">Los grises aún no tienen procesos; los de color ya están levantados. Clic para trabajar en uno.</p>
+        <p className="mt-1.5 inline-flex items-center gap-1 text-[12px] text-amber-700">
+          <Zap size={12} className="fill-amber-700" /> Levantar cada macroproceso con IA consume <TokenCostBadge operationKey="inventory" /> tokens.
         </p>
         {/* Conteo global de lo levantado */}
         <div className="flex flex-wrap items-center gap-2.5 mt-3">
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25 px-3 py-1.5 text-[13px] text-cyan-200">
-            <span className="text-lg font-bold text-cyan-300 leading-none">{G.P}</span> procesos
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary-50 border border-primary-200 px-3 py-1.5 text-[13px] text-primary-700">
+            <span className="text-lg font-bold text-primary-700 leading-none">{G.P}</span> procesos
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/25 px-3 py-1.5 text-[13px] text-blue-200">
-            <span className="text-lg font-bold text-blue-300 leading-none">{G.S}</span> subprocesos
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 border border-blue-200 px-3 py-1.5 text-[13px] text-blue-700">
+            <span className="text-lg font-bold text-blue-700 leading-none">{G.S}</span> subprocesos
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-[13px] text-white/60">
-            <span className="text-lg font-bold text-white/80 leading-none">{G.M}</span> macroprocesos
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-gray-50 border border-gray-200 px-3 py-1.5 text-[13px] text-gray-600">
+            <span className="text-lg font-bold text-gray-800 leading-none">{G.M}</span> macroprocesos
           </span>
           {G.ded > 0 && (
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/10 border border-amber-500/25 px-3 py-1.5 text-[13px] text-amber-200">
-              <span className="text-lg font-bold text-amber-300 leading-none">{G.ded}</span> por validar
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 border border-amber-200 px-3 py-1.5 text-[13px] text-amber-700">
+              <span className="text-lg font-bold text-amber-700 leading-none">{G.ded}</span> por validar
             </span>
           )}
         </div>
@@ -114,11 +114,11 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
                   const on = sel === i
                   return (
                     <button key={i} onClick={() => { setSel(i); setMode('none'); setErr('') }}
-                      className={`text-left rounded-xl border px-3 py-2 transition-all ${on ? 'ring-2 ring-cyan-500/60' : ''} ${levantado ? 'bg-white/5' : 'bg-white/[0.02] border-dashed'}`}
+                      className={`text-left rounded-lg border px-3 py-2 transition-all ${on ? 'ring-2 ring-primary-500' : ''} ${levantado ? 'bg-gray-50' : 'bg-gray-50 border-dashed'}`}
                       style={{ borderColor: on ? undefined : (levantado ? TIPO_COLOR[tipo] + '66' : 'rgba(255,255,255,0.08)') }}>
                       <div className="flex items-center gap-2">
                         <i className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: levantado ? TIPO_COLOR[tipo] : 'rgba(255,255,255,0.15)' }} />
-                        <span className={`text-[13px] font-medium ${levantado ? 'text-white' : 'text-white/35'}`}>{m.nombre}</span>
+                        <span className={`text-[13px] font-medium ${levantado ? 'text-gray-900' : 'text-gray-400'}`}>{m.nombre}</span>
                       </div>
                       <div className="text-[10px] mt-0.5 pl-4.5 ml-0.5" style={{ color: levantado ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.25)' }}>
                         {levantado ? `${st.S} subproc. · ${st.ded} por validar` : 'sin levantar'}
@@ -134,37 +134,37 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
 
       {/* Panel del macroproceso seleccionado */}
       {selMacro ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 space-y-4">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="w-2.5 h-2.5 rounded-full" style={{ background: TIPO_COLOR[selMacro.tipo] }} />
-            <h3 className="text-base font-bold text-white flex-1 min-w-0">{selMacro.nombre}</h3>
+            <h3 className="text-base font-bold text-gray-900 flex-1 min-w-0">{selMacro.nombre}</h3>
             {stats(selMacro).ded > 0 && (
-              <button onClick={() => acceptMacro(companyId, sel!)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[12px] hover:bg-emerald-500/15"><CheckCheck size={13} /> Aceptar todo</button>
+              <button onClick={() => acceptMacro(companyId, sel!)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-[12px] hover:bg-emerald-50"><CheckCheck size={13} /> Aceptar todo</button>
             )}
             {(() => { const n = pendientesDeVolcar(companyId, sel!); return n > 0 ? (
-              <button onClick={() => volcarGrupo(sel!)} disabled={volcando} title="Carga al mapa solo los subprocesos aceptados de ESTE macroproceso" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[12px] hover:bg-cyan-500/15 disabled:opacity-40">{volcando ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />} Volcar al mapa ({n})</button>
+              <button onClick={() => volcarGrupo(sel!)} disabled={volcando} title="Carga al mapa solo los subprocesos aceptados de ESTE macroproceso" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 border border-primary-300 text-primary-700 text-[12px] hover:bg-primary-50 disabled:opacity-40">{volcando ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />} Volcar al mapa ({n})</button>
             ) : null })()}
           </div>
 
           {/* Métodos */}
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={() => runBigBang(sel!)} disabled={busy} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-[13px] font-semibold shadow-lg shadow-cyan-500/30 disabled:opacity-50">
+            <button onClick={() => runBigBang(sel!)} disabled={busy} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-[13px] font-semibold shadow-lg disabled:opacity-50 bg-primary-500">
               {busy ? <Loader2 size={15} className="animate-spin" /> : <Zap size={15} />} {selMacro.procesos.length ? 'Regenerar con Big Bang' : 'Big Bang (auto)'}
-              <span className="text-white/90"><TokenCostBadge operationKey="inventory" className="text-white/90" /></span>
+              <span className="text-gray-800"><TokenCostBadge operationKey="inventory" className="text-gray-800" /></span>
             </button>
-            <button onClick={() => setMode(mode === 'chat' ? 'none' : 'chat')} disabled={busy} className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-[13px] font-semibold transition-all disabled:opacity-50 ${mode === 'chat' ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300' : 'border-white/15 text-white/70 hover:bg-white/5'}`}>
+            <button onClick={() => setMode(mode === 'chat' ? 'none' : 'chat')} disabled={busy} className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border text-[13px] font-semibold transition-all disabled:opacity-50 ${mode === 'chat' ? 'border-primary-300 bg-primary-50 text-primary-700' : 'border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
               <Target size={15} /> Incremental (chat)
               <TokenCostBadge operationKey="inventory" />
             </button>
-            {busy && <span className="text-[12px] text-cyan-300 inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Generando «{selMacro.nombre}»…</span>}
-            {err && <span className="text-[12px] text-red-300 inline-flex items-center gap-1.5"><AlertTriangle size={12} /> {err}</span>}
+            {busy && <span className="text-[12px] text-primary-700 inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Generando «{selMacro.nombre}»…</span>}
+            {err && <span className="text-[12px] text-red-700 inline-flex items-center gap-1.5"><AlertTriangle size={12} /> {err}</span>}
           </div>
 
           {/* Qué hace cada modo (para el usuario final) */}
-          <p className="text-[11.5px] text-white/45 leading-snug">
-            <b className="text-white/70">Big Bang (auto):</b> la IA genera de una vez todos los procesos y subprocesos de este macroproceso a partir de la información de tu empresa. Rápido para arrancar; luego ajustas.
+          <p className="text-[11.5px] text-gray-500 leading-snug">
+            <b className="text-gray-700">Big Bang (auto):</b> la IA genera de una vez todos los procesos y subprocesos de este macroproceso a partir de la información de tu empresa. Rápido para arrancar; luego ajustas.
             {'  ·  '}
-            <b className="text-white/70">Incremental (chat):</b> los construyes paso a paso conversando con la IA, guiando y validando cada parte. Ideal para casos complejos o cuando quieres control fino.
+            <b className="text-gray-700">Incremental (chat):</b> los construyes paso a paso conversando con la IA, guiando y validando cada parte. Ideal para casos complejos o cuando quieres control fino.
           </p>
 
           {/* Chat incremental acotado a este macro */}
@@ -174,24 +174,24 @@ export function InventoryStudio({ companyId, doc, onBack, onClose }: Props) {
           <InventoryMacroEditor companyId={companyId} macro={selMacro} mi={sel!} areas={areas} />
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-white/10 p-8 text-center">
-          <Sparkles size={24} className="mx-auto text-white/20 mb-2" />
-          <p className="text-sm text-white/50">Elige un macroproceso arriba para empezar a levantarlo.</p>
+        <div className="rounded-lg border border-dashed border-gray-200 p-8 text-center">
+          <Sparkles size={24} className="mx-auto text-gray-300 mb-2" />
+          <p className="text-sm text-gray-500">Elige un macroproceso arriba para empezar a levantarlo.</p>
         </div>
       )}
 
       {/* Barra inferior */}
       <div className="flex items-center gap-3 flex-wrap">
-        <button onClick={onBack} disabled={busy} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/15 text-white/70 text-sm hover:bg-white/5 disabled:opacity-40"><ArrowLeft size={15} /> Atrás</button>
-        <div className="hidden sm:flex items-center gap-2 text-[12px] text-white/50">
-          <span className="font-semibold text-cyan-400">{G.pct}%</span> · {G.S} subprocesos · {G.ded} por validar
+        <button onClick={onBack} disabled={busy} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-700 text-sm hover:bg-gray-50 disabled:opacity-40"><ArrowLeft size={15} /> Atrás</button>
+        <div className="hidden sm:flex items-center gap-2 text-[12px] text-gray-500">
+          <span className="font-semibold text-primary-600">{G.pct}%</span> · {G.S} subprocesos · {G.ded} por validar
         </div>
         <div className="flex-1" />
-        {volcadoMsg && <span className="text-[12px] text-emerald-300">{volcadoMsg}</span>}
-        <button onClick={volcarTodo} disabled={busy || volcando || !porVolcar} title={porVolcar ? 'Carga al mapa TODOS los subprocesos aceptados de todos los macroprocesos' : 'No hay subprocesos aceptados nuevos'} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[13px] hover:bg-emerald-500/15 disabled:opacity-40">{volcando ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />} Volcar todo lo aceptado{porVolcar ? ` (${porVolcar})` : ''}</button>
-        <button onClick={() => navigate('/app/reports?tab=inventario')} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[13px] hover:bg-cyan-500/15"><BarChart3 size={14} /> Reporte</button>
-        <button onClick={() => { if (!busy && confirm('¿Vaciar lo levantado? El mapa y las áreas se conservan.')) { reset(companyId); setSel(null) } }} disabled={busy} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-white/10 text-white/40 text-[13px] hover:text-red-300 disabled:opacity-40"><RotateCcw size={14} /> Reiniciar</button>
-        <button onClick={onClose} disabled={busy} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-semibold shadow-lg shadow-cyan-500/30 disabled:opacity-40">Cerrar</button>
+        {volcadoMsg && <span className="text-[12px] text-emerald-700">{volcadoMsg}</span>}
+        <button onClick={volcarTodo} disabled={busy || volcando || !porVolcar} title={porVolcar ? 'Carga al mapa TODOS los subprocesos aceptados de todos los macroprocesos' : 'No hay subprocesos aceptados nuevos'} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-[13px] hover:bg-emerald-50 disabled:opacity-40">{volcando ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />} Volcar todo lo aceptado{porVolcar ? ` (${porVolcar})` : ''}</button>
+        <button onClick={() => navigate('/app/reports?tab=inventario')} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-primary-50 border border-primary-200 text-primary-700 text-[13px] hover:bg-primary-50"><BarChart3 size={14} /> Reporte</button>
+        <button onClick={() => { if (!busy && confirm('¿Vaciar lo levantado? El mapa y las áreas se conservan.')) { reset(companyId); setSel(null) } }} disabled={busy} className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-200 text-gray-500 text-[13px] hover:text-red-700 disabled:opacity-40"><RotateCcw size={14} /> Reiniciar</button>
+        <button onClick={onClose} disabled={busy} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-sm font-semibold shadow-lg disabled:opacity-40 bg-primary-500">Cerrar</button>
       </div>
     </div>
   )

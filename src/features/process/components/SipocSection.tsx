@@ -34,7 +34,7 @@ export default function SipocSection({ processId }: { processId: string }) {
   const motivo = `Has llegado al límite de procesos documentados de tu ${planName(plan.level)}: ${plan.cap}. Puedes seguir editando los procesos que ya contaban.`
   // Clase literal, no interpolada: Tailwind no compila clases construidas con plantilla.
   const CLASE_BLOQUEADA =
-    'flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium bg-white/[0.02] text-white/25 border border-white/5 cursor-not-allowed'
+    'flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed'
 
   const suppliers = useCatalogStore((s) => s.suppliers)
   const customers = useCatalogStore((s) => s.customers)
@@ -144,17 +144,17 @@ export default function SipocSection({ processId }: { processId: string }) {
   }
 
   return (
-    <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-4 sm:p-6">
+    <div className="bg-gray-50 rounded-lg border border-gray-100 p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-teal-400">
+          <div className="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-primary-600">
               <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />
             </svg>
           </div>
           <div className="min-w-0">
-            <h2 className="text-base font-semibold text-white truncate">Analisis SIPOC</h2>
-            <p className="text-xs text-white/35">Proveedores, Entradas, Salidas y Clientes del proceso</p>
+            <h2 className="text-base font-semibold text-gray-900 truncate">Analisis SIPOC</h2>
+            <p className="text-xs text-gray-400">Proveedores, Entradas, Salidas y Clientes del proceso</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -164,7 +164,7 @@ export default function SipocSection({ processId }: { processId: string }) {
               setAiOpen((v) => !v)
             }}
             title={sinCupo ? motivo : 'Construir el SIPOC con ayuda de la IA'}
-            className={sinCupo ? CLASE_BLOQUEADA : `flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium border transition-colors ${aiOpen ? 'bg-purple-500/25 text-purple-100 border-purple-500/40' : 'bg-purple-500/10 text-purple-300 border-purple-500/25 hover:bg-purple-500/20'}`}
+            className={sinCupo ? CLASE_BLOQUEADA : `flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-medium border transition-colors ${aiOpen ? 'bg-primary-100 text-primary-700 border-primary-300' : 'bg-primary-50 text-primary-700 border-primary-200 hover:bg-primary-100'}`}
           >
             <Sparkles size={12} /> Construir con IA
             <TokenCostBadge operationKey="sipoc" />
@@ -175,7 +175,7 @@ export default function SipocSection({ processId }: { processId: string }) {
               setSipocLeftModal(true)
             }}
             title={sinCupo ? motivo : 'Agregar proveedor y entrada'}
-            className={sinCupo ? CLASE_BLOQUEADA : 'flex items-center gap-1.5 px-3 py-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[11px] font-medium hover:bg-red-500/20 transition-colors'}
+            className={sinCupo ? CLASE_BLOQUEADA : 'flex items-center gap-1.5 px-3 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg text-[11px] font-medium hover:bg-red-100 transition-colors'}
           >
             <Plus size={12} /> Proveedor / Entrada
           </button>
@@ -185,7 +185,7 @@ export default function SipocSection({ processId }: { processId: string }) {
               setSipocRightModal(true)
             }}
             title={sinCupo ? motivo : 'Agregar salida y cliente'}
-            className={sinCupo ? CLASE_BLOQUEADA : 'flex items-center gap-1.5 px-3 py-2 bg-teal-500/10 text-teal-400 border border-teal-500/20 rounded-lg text-[11px] font-medium hover:bg-teal-500/20 transition-colors'}
+            className={sinCupo ? CLASE_BLOQUEADA : 'flex items-center gap-1.5 px-3 py-2 bg-primary-50 text-primary-600 border border-primary-200 rounded-lg text-[11px] font-medium hover:bg-primary-100 transition-colors'}
           >
             <Plus size={12} /> Salida / Cliente
           </button>
@@ -199,43 +199,43 @@ export default function SipocSection({ processId }: { processId: string }) {
 
       {/* `overflow-x-auto` + `min-w`: son 4 columnas de texto libre y estaban dentro de
           un `overflow-hidden`, asi que se aplastaban sin escape posible. */}
-      <div className="rounded-lg border border-white/10 overflow-x-auto text-xs">
+      <div className="rounded-lg border border-gray-200 overflow-x-auto text-xs">
         <div className="min-w-[640px]">
         <div className="grid grid-cols-4">
-          <div className="bg-red-600/80 text-white text-center font-semibold py-2">Proveedores</div>
-          <div className="bg-gray-800 text-white text-center font-semibold py-2">Entradas</div>
-          <div className="bg-teal-600/80 text-white text-center font-semibold py-2">Salidas</div>
-          <div className="bg-blue-600/80 text-white text-center font-semibold py-2">Clientes</div>
+          <div className="bg-red-100 text-gray-900 text-center font-semibold py-2">Proveedores</div>
+          <div className="bg-white text-gray-900 text-center font-semibold py-2">Entradas</div>
+          <div className="bg-primary-100 text-gray-900 text-center font-semibold py-2">Salidas</div>
+          <div className="bg-blue-100 text-gray-900 text-center font-semibold py-2">Clientes</div>
         </div>
 
         {processSipoc.length === 0 ? (
-          <div className="text-center py-8 text-white/30 text-xs">No hay entradas SIPOC. Agrega proveedores/entradas y salidas/clientes.</div>
+          <div className="text-center py-8 text-gray-400 text-xs">No hay entradas SIPOC. Agrega proveedores/entradas y salidas/clientes.</div>
         ) : (
           processSipoc.map((entry) => (
-            <div key={entry.id} className={`grid grid-cols-4 border-t border-white/5 group hover:bg-white/[0.02] transition-colors duration-500 ${recentIds.has(entry.id) ? 'bg-purple-500/[0.10] ring-1 ring-inset ring-purple-400/40' : ''}`}>
-              <div className="px-3 py-2 text-white/70 bg-red-500/5">{entry.supplier_name}</div>
+            <div key={entry.id} className={`grid grid-cols-4 border-t border-gray-100 group hover:bg-gray-50 transition-colors duration-500 ${recentIds.has(entry.id) ? 'bg-primary-50 ring-1 ring-inset ring-primary-500' : ''}`}>
+              <div className="px-3 py-2 text-gray-700 bg-red-50">{entry.supplier_name}</div>
 
               {/* `pr-16` reserva el sitio de los botones: sin el, el texto pasaba por
                   debajo de ellos. Y los botones estan SIEMPRE en el DOM — ver
                   ACCIONES_AL_PASAR: eran la unica forma de editar o borrar una fila
                   SIPOC y no existian sin raton. */}
-              <div className="pl-3 pr-16 py-2 text-white/70 relative">
+              <div className="pl-3 pr-16 py-2 text-gray-700 relative">
                 <span>{entry.input_description}</span>
                 <div className={`absolute right-1 top-1/2 -translate-y-1/2 flex gap-0.5 ${ACCIONES_AL_PASAR}`}>
-                  <button onClick={() => setEditingInputEntry(entry)} title="Editar entrada" className="p-2 rounded hover:bg-white/10 text-white/30 hover:text-cyan-400 transition-all"><Pencil size={12} /></button>
-                  <button onClick={() => handleDeleteInput(entry)} title="Eliminar entrada" className="p-2 rounded hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-all"><Trash2 size={12} /></button>
+                  <button onClick={() => setEditingInputEntry(entry)} title="Editar entrada" className="p-2 rounded-md hover:bg-gray-100 text-gray-400 hover:text-primary-600 transition-all"><Pencil size={12} /></button>
+                  <button onClick={() => handleDeleteInput(entry)} title="Eliminar entrada" className="p-2 rounded-md hover:bg-red-100 text-gray-400 hover:text-red-600 transition-all"><Trash2 size={12} /></button>
                 </div>
               </div>
 
-              <div className="pl-3 pr-16 py-2 text-white/70 bg-teal-500/5 relative">
+              <div className="pl-3 pr-16 py-2 text-gray-700 bg-primary-50 relative">
                 <span>{entry.output_description}</span>
                 <div className={`absolute right-1 top-1/2 -translate-y-1/2 flex gap-0.5 ${ACCIONES_AL_PASAR}`}>
-                  <button onClick={() => setEditingOutputEntry(entry)} title="Editar salida" className="p-2 rounded hover:bg-white/10 text-white/30 hover:text-cyan-400 transition-all"><Pencil size={12} /></button>
-                  <button onClick={() => handleDeleteOutput(entry)} title="Eliminar salida" className="p-2 rounded hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-all"><Trash2 size={12} /></button>
+                  <button onClick={() => setEditingOutputEntry(entry)} title="Editar salida" className="p-2 rounded-md hover:bg-gray-100 text-gray-400 hover:text-primary-600 transition-all"><Pencil size={12} /></button>
+                  <button onClick={() => handleDeleteOutput(entry)} title="Eliminar salida" className="p-2 rounded-md hover:bg-red-100 text-gray-400 hover:text-red-600 transition-all"><Trash2 size={12} /></button>
                 </div>
               </div>
 
-              <div className="px-3 py-2 text-white/70 bg-blue-500/5">{entry.customer_name}</div>
+              <div className="px-3 py-2 text-gray-700 bg-blue-50">{entry.customer_name}</div>
             </div>
           ))
         )}

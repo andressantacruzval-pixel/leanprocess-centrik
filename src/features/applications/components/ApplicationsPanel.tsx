@@ -95,34 +95,34 @@ export function ApplicationsPanel({ modeler, processId, readOnly }: Props) {
 
   return (
     <>
-      <div className="absolute bottom-3 right-3 z-20 w-80 max-w-[calc(100%-1.5rem)] rounded-xl border border-sky-500/25 bg-[#0d1420]/95 backdrop-blur-sm shadow-xl shadow-black/40">
-        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-white/5">
-          <MonitorSmartphone size={14} className="text-sky-300 shrink-0" />
+      <div className="absolute bottom-3 right-3 z-20 w-80 max-w-[calc(100%-1.5rem)] rounded-lg border border-primary-200 bg-white shadow-xl">
+        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-gray-100">
+          <MonitorSmartphone size={14} className="text-primary-700 shrink-0" />
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold text-white truncate">App</p>
-            <p className="text-[10px] text-white/40 truncate">{app?.name || node.label}</p>
+            <p className="text-[12px] font-semibold text-gray-900 truncate">App</p>
+            <p className="text-[10px] text-gray-500 truncate">{app?.name || node.label}</p>
           </div>
           {!readOnly && app && (
-            <button onClick={() => setShowForm(true)} className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[10.5px] font-medium hover:bg-sky-500/25"><Pencil size={11} /> Editar</button>
+            <button onClick={() => setShowForm(true)} className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-primary-50 text-primary-700 border border-primary-300 text-[10.5px] font-medium hover:bg-primary-100"><Pencil size={11} /> Editar</button>
           )}
         </div>
 
         <div className="px-3 py-2.5">
           {!app ? (
             <div className="text-center py-2">
-              <p className="text-[11px] text-white/40 mb-2">Este nodo aún no está registrado como aplicación.</p>
-              {!readOnly && <button onClick={registerAndEdit} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[11px] font-medium hover:bg-sky-500/25"><Plus size={12} /> Registrar aplicación</button>}
+              <p className="text-[11px] text-gray-500 mb-2">Este nodo aún no está registrado como aplicación.</p>
+              {!readOnly && <button onClick={registerAndEdit} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 border border-primary-300 text-[11px] font-medium hover:bg-primary-100"><Plus size={12} /> Registrar aplicación</button>}
             </div>
           ) : (
-            <div className="rounded-lg border border-white/8 bg-white/[0.03] p-2.5">
-              <p className="text-[12.5px] font-medium text-white truncate">{app.name}</p>
-              {app.description && <p className="text-[10.5px] text-white/45 mt-0.5 line-clamp-2">{app.description}</p>}
+            <div className="rounded-lg border border-gray-100 bg-gray-50 p-2.5">
+              <p className="text-[12.5px] font-medium text-gray-900 truncate">{app.name}</p>
+              {app.description && <p className="text-[10.5px] text-gray-500 mt-0.5 line-clamp-2">{app.description}</p>}
               <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                {app.category && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{app.category}</span>}
-                {app.ownership && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{app.ownership === 'propia' ? 'Propia' : app.ownership === 'terceros' ? 'Terceros' : 'Mixta'}</span>}
-                {app.deployment && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/45">{deployLabel(app.deployment)}</span>}
-                {app.has_api && <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300">API</span>}
-                {risk && <span className="text-[9px] px-1.5 py-0.5 rounded text-white" style={{ background: risk.hex }}>Riesgo {risk.label}</span>}
+                {app.category && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{app.category}</span>}
+                {app.ownership && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{app.ownership === 'propia' ? 'Propia' : app.ownership === 'terceros' ? 'Terceros' : 'Mixta'}</span>}
+                {app.deployment && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{deployLabel(app.deployment)}</span>}
+                {app.has_api && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700">API</span>}
+                {risk && <span className="text-[9px] px-1.5 py-0.5 rounded-md text-gray-900" style={{ background: risk.hex }}>Riesgo {risk.label}</span>}
               </div>
             </div>
           )}

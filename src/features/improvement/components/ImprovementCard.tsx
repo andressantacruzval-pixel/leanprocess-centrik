@@ -15,9 +15,9 @@ interface Props {
 }
 
 const PRIORITY_TONE = {
-  high: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-  mid: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-  low: 'bg-red-500/15 text-red-400 border-red-500/30',
+  high: 'bg-emerald-50 text-emerald-600 border-emerald-300',
+  mid: 'bg-amber-50 text-amber-600 border-amber-300',
+  low: 'bg-red-50 text-red-600 border-red-300',
 } as const
 
 export function ImprovementCard({ opportunity: o, onChange, onDelete }: Props) {
@@ -35,24 +35,24 @@ export function ImprovementCard({ opportunity: o, onChange, onDelete }: Props) {
   const total = priorityScore(o)
   const prio = priorityLabel(total)
 
-  const inputCls = 'w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-cyan-500/40 focus:border-cyan-500/30 text-xs'
-  const labelCls = 'block text-[9px] uppercase tracking-wide text-white/30 mb-1'
+  const inputCls = 'w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-300 text-xs'
+  const labelCls = 'block text-[9px] uppercase tracking-wide text-gray-400 mb-1'
 
   return (
-    <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 space-y-3">
+    <div className="rounded-lg border border-gray-100 bg-gray-50 p-3 space-y-3">
       {/* Título + prioridad + borrar */}
       <div className="flex items-start gap-2">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           onBlur={() => name !== o.name && onChange({ name })}
-          className="flex-1 bg-transparent border-b border-white/10 focus:border-cyan-500/40 focus:outline-none text-sm font-semibold text-white pb-1"
+          className="flex-1 bg-transparent border-b border-gray-200 focus:border-primary-300 focus:outline-none text-sm font-semibold text-gray-900 pb-1"
           placeholder="Nombre de la oportunidad"
         />
-        <span className={`shrink-0 text-[9px] px-1.5 py-0.5 rounded border ${PRIORITY_TONE[prio.tone]}`}>
+        <span className={`shrink-0 text-[9px] px-1.5 py-0.5 rounded-md border ${PRIORITY_TONE[prio.tone]}`}>
           {prio.label} · {total}/15
         </span>
-        <button type="button" onClick={onDelete} title="Eliminar" className="shrink-0 p-1 rounded text-white/25 hover:text-red-400 hover:bg-red-500/10">
+        <button type="button" onClick={onDelete} title="Eliminar" className="shrink-0 p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50">
           <Trash2 size={13} />
         </button>
       </div>
@@ -79,7 +79,7 @@ export function ImprovementCard({ opportunity: o, onChange, onDelete }: Props) {
           className={inputCls}
         >
           {IMPROVEMENT_TYPE_OPTIONS.map((t) => (
-            <option key={t} value={t} className="bg-[#0a0f1a]">{IMPROVEMENT_TYPE_LABELS[t]}</option>
+            <option key={t} value={t} className="bg-white">{IMPROVEMENT_TYPE_LABELS[t]}</option>
           ))}
         </select>
       </div>
@@ -114,12 +114,12 @@ export function ImprovementCard({ opportunity: o, onChange, onDelete }: Props) {
         <div>
           <label className={labelCls}>Estado</label>
           <select value={o.status} onChange={(e) => onChange({ status: e.target.value as ImprovementStatus })} className={inputCls}>
-            {STATUS_OPTIONS.map((s) => <option key={s} value={s} className="bg-[#0a0f1a]">{STATUS_LABELS[s]}</option>)}
+            {STATUS_OPTIONS.map((s) => <option key={s} value={s} className="bg-white">{STATUS_LABELS[s]}</option>)}
           </select>
         </div>
         <div>
           <label className={labelCls}>Avance: {o.progressPct}%</label>
-          <input type="range" min={0} max={100} step={5} value={o.progressPct} onChange={(e) => onChange({ progressPct: Number(e.target.value) })} className="w-full accent-cyan-500 mt-2" />
+          <input type="range" min={0} max={100} step={5} value={o.progressPct} onChange={(e) => onChange({ progressPct: Number(e.target.value) })} className="w-full accent-primary-500 mt-2" />
         </div>
       </div>
 
@@ -143,7 +143,7 @@ export function ImprovementCard({ opportunity: o, onChange, onDelete }: Props) {
       </div>
 
       {/* Cierre */}
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/5">
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-100">
         <div className="flex items-center gap-2">
           <label className={labelCls + ' !mb-0'}>Cierre</label>
           <input type="date" value={o.closeDate ?? ''} onChange={(e) => onChange({ closeDate: e.target.value || null })} className={inputCls + ' !w-auto'} />
@@ -155,7 +155,7 @@ export function ImprovementCard({ opportunity: o, onChange, onDelete }: Props) {
             progressPct: 100,
             closeDate: o.closeDate ?? new Date().toISOString().slice(0, 10),
           })}
-          className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 text-[11px] font-medium"
+          className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 text-[11px] font-medium"
         >
           <CheckCircle2 size={12} /> Marcar cerrada
         </button>
@@ -172,7 +172,7 @@ function ScoreSelector({ label, kind, value, onSelect }: {
 }) {
   return (
     <div>
-      <label className="block text-[9px] uppercase tracking-wide text-white/30 mb-1">{label}</label>
+      <label className="block text-[9px] uppercase tracking-wide text-gray-400 mb-1">{label}</label>
       <div className="flex gap-1">
         {SCORE_VALUES.map((v) => (
           <button
@@ -180,17 +180,17 @@ function ScoreSelector({ label, kind, value, onSelect }: {
             type="button"
             onClick={() => onSelect(v)}
             title={SCORE_LABELS[kind][v]}
-            className={`flex-1 px-1 py-1 rounded text-[10px] font-medium border transition-colors ${
+            className={`flex-1 px-1 py-1 rounded-md text-[10px] font-medium border transition-colors ${
               value === v
-                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-                : 'bg-white/5 text-white/30 border-white/10 hover:bg-white/10'
+                ? 'bg-primary-100 text-primary-700 border-primary-300'
+                : 'bg-gray-50 text-gray-400 border-gray-200 hover:bg-gray-100'
             }`}
           >
             {v}
           </button>
         ))}
       </div>
-      <p className="text-[9px] text-white/35 mt-0.5 text-center">{SCORE_LABELS[kind][value]}</p>
+      <p className="text-[9px] text-gray-400 mt-0.5 text-center">{SCORE_LABELS[kind][value]}</p>
     </div>
   )
 }

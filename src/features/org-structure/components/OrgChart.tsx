@@ -137,7 +137,7 @@ export function OrgChart({ compact }: OrgChartProps) {
               nodeStrokeWidth={3}
               zoomable
               pannable
-              className="!hidden lg:!block !bg-[#0a0f1a] !border !border-white/10 !rounded-lg"
+              className="!hidden lg:!block !bg-white !border !border-gray-200 !rounded-lg"
               maskColor="rgba(7, 11, 20, 0.75)"
               nodeColor="#1e293b"
               nodeStrokeColor="#334155"

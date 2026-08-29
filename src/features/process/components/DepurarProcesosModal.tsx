@@ -99,25 +99,25 @@ export function DepurarProcesosModal({ open, onClose }: { open: boolean; onClose
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/45 p-4"
         onClick={onClose}
       >
         <div
-          className="bg-[#0d1424] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl"
+          className="bg-white border border-gray-200 rounded-lg w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-start justify-between gap-4 p-5 border-b border-white/5">
+          <div className="flex items-start justify-between gap-4 p-5 border-b border-gray-100">
             <div>
-              <h2 className="text-white font-semibold text-base">Depurar procesos</h2>
-              <p className="text-xs text-white/40 mt-1 leading-relaxed">
+              <h2 className="text-gray-900 font-semibold text-base">Depurar procesos</h2>
+              <p className="text-xs text-gray-500 mt-1 leading-relaxed">
                 {plan.cap !== null ? (
                   <>
-                    Tienes <b className="text-white/70">{total}</b> procesos y tu plan{' '}
-                    {planName(plan.level)} permite <b className="text-white/70">{plan.cap}</b>.
+                    Tienes <b className="text-gray-700">{total}</b> procesos y tu plan{' '}
+                    {planName(plan.level)} permite <b className="text-gray-700">{plan.cap}</b>.
                     {elegidos > 0 && (
                       <>
                         {' '}Si eliminas {elegidos}, te quedan{' '}
-                        <b className={quedarian > plan.cap ? 'text-amber-400' : 'text-emerald-400'}>
+                        <b className={quedarian > plan.cap ? 'text-amber-600' : 'text-emerald-600'}>
                           {quedarian}
                         </b>
                         .
@@ -131,7 +131,7 @@ export function DepurarProcesosModal({ open, onClose }: { open: boolean; onClose
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors shrink-0"
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors shrink-0"
             >
               <X size={16} />
             </button>
@@ -146,25 +146,25 @@ export function DepurarProcesosModal({ open, onClose }: { open: boolean; onClose
                   onClick={() => alternar(proceso.id)}
                   className={`${CLASE_FILA} ${
                     marcado
-                      ? 'bg-red-500/10 border-red-500/30'
-                      : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'
+                      ? 'bg-red-50 border-red-300'
+                      : 'bg-gray-50 border-gray-100 hover:bg-gray-50'
                   }`}
                 >
                   <span
                     className={`w-4 h-4 rounded border shrink-0 flex items-center justify-center ${
-                      marcado ? 'bg-red-500 border-red-500' : 'border-white/20'
+                      marcado ? 'bg-red-500 border-red-500' : 'border-gray-300'
                     }`}
                   >
-                    {marcado && <span className="text-[10px] text-white leading-none">✓</span>}
+                    {marcado && <span className="text-[10px] text-gray-900 leading-none">✓</span>}
                   </span>
                   <span className="flex-1 min-w-0">
-                    <span className="block text-xs text-white/85 truncate">{proceso.name}</span>
-                    <span className="block text-[10px] text-white/30 truncate">
+                    <span className="block text-xs text-gray-800 truncate">{proceso.name}</span>
+                    <span className="block text-[10px] text-gray-400 truncate">
                       {nombreMacro.get(proceso.macroprocess_id ?? '') ?? 'Sin macroproceso'}
                     </span>
                   </span>
                   {descendientes > 0 && (
-                    <span className="text-[10px] text-amber-400/80 shrink-0">
+                    <span className="text-[10px] text-amber-600 shrink-0">
                       +{descendientes} dentro
                     </span>
                   )}
@@ -172,7 +172,7 @@ export function DepurarProcesosModal({ open, onClose }: { open: boolean; onClose
                       que se decide si sobra o no */}
                   <span
                     className={`hidden sm:block text-[10px] shrink-0 w-24 text-right ${
-                      documentado ? 'text-white/50' : 'text-white/25'
+                      documentado ? 'text-gray-500' : 'text-gray-400'
                     }`}
                   >
                     {documentado ? `Documentado ${puntuacion}%` : 'Sin documentar'}
@@ -181,17 +181,17 @@ export function DepurarProcesosModal({ open, onClose }: { open: boolean; onClose
               )
             })}
             {total === 0 && (
-              <p className="text-xs text-white/30 text-center py-8">
+              <p className="text-xs text-gray-400 text-center py-8">
                 No hay procesos en el nivel más bajo.
               </p>
             )}
           </div>
 
-          <div className="p-4 border-t border-white/5 flex flex-wrap items-center justify-between gap-3">
-            <span className="text-xs text-white/40">
+          <div className="p-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs text-gray-500">
               {elegidos === 0 ? 'Ninguno seleccionado' : `${elegidos} seleccionado${elegidos === 1 ? '' : 's'}`}
               {conDocumentacion > 0 && (
-                <span className="ml-2 inline-flex items-center gap-1 text-amber-400/90">
+                <span className="ml-2 inline-flex items-center gap-1 text-amber-600">
                   <FileWarning size={11} />
                   {conDocumentacion} con documentación
                 </span>
@@ -200,8 +200,8 @@ export function DepurarProcesosModal({ open, onClose }: { open: boolean; onClose
             <button
               onClick={() => setConfirmando(true)}
               disabled={elegidos === 0}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-red-500/15 text-red-400
-                         border border-red-500/25 hover:bg-red-500/25 disabled:opacity-30 disabled:cursor-not-allowed
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium bg-red-50 text-red-600 border
+                         border-red-200 hover:bg-red-100 disabled:opacity-30 disabled:cursor-not-allowed
                          transition-colors"
             >
               <Trash2 size={13} />

@@ -24,7 +24,7 @@ const STATUS_COLOR: Record<ImprovementStatus, string> = {
   propuesta: '#64748b', aprobada: '#06b6d4', en_progreso: '#f59e0b', cerrada: '#10b981', descartada: '#ef4444',
 }
 const PRIO_HEX: Record<'high' | 'mid' | 'low', string> = { high: '#10b981', mid: '#f59e0b', low: '#ef4444' }
-const inputCls = 'bg-white/5 border border-white/10 rounded px-1.5 py-1 text-[11px] text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/40'
+const inputCls = 'bg-gray-50 border border-gray-200 rounded-md px-1.5 py-1 text-[11px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500'
 
 export function ImprovementsReport({
   processes, allImprovements, onUpdate, macroMap, processMap,
@@ -63,8 +63,8 @@ export function ImprovementsReport({
       ...resolveProcessHierarchy(r.process, macroMap, processMap),
     })),
     {
-      key: 'opp', header: 'Oportunidad', accessor: (r) => r.o.name || '', className: 'text-white font-medium max-w-[240px]',
-      cell: (r) => (<><div className="truncate" title={r.o.name}>{r.o.name}</div><div className="text-white/30 text-[10px] truncate" title={r.o.description}>{r.o.description}</div></>),
+      key: 'opp', header: 'Oportunidad', accessor: (r) => r.o.name || '', className: 'text-gray-900 font-medium max-w-[240px]',
+      cell: (r) => (<><div className="truncate" title={r.o.name}>{r.o.name}</div><div className="text-gray-400 text-[10px] truncate" title={r.o.description}>{r.o.description}</div></>),
     },
     { key: 'type', header: 'Tipo', accessor: (r) => IMPROVEMENT_TYPE_LABELS[r.o.type], cell: (r) => <Badge label={IMPROVEMENT_TYPE_LABELS[r.o.type]} hex={IMPROVEMENT_TYPE_COLORS[r.o.type]} /> },
     { key: 'prio', header: 'Prioridad', accessor: (r) => priorityScore(r.o), cell: (r) => { const total = priorityScore(r.o); const prio = priorityLabel(total); return <Badge label={`${total}/15 · ${prio.label}`} hex={PRIO_HEX[prio.tone]} /> } },
@@ -76,14 +76,14 @@ export function ImprovementsReport({
     { key: 'end', header: 'Fin', accessor: (r) => r.o.endDate || '', cell: (r) => r.o.endDate || '-' },
     {
       key: 'status', header: 'Estado', accessor: (r) => STATUS_LABELS[r.o.status],
-      cell: (r) => (<select value={r.o.status} onChange={(e) => onUpdate(r.o.id, { status: e.target.value as ImprovementStatus })} className={inputCls}>{STATUS_OPTIONS.map((s) => <option key={s} value={s} className="bg-[#0a0f1a]">{STATUS_LABELS[s]}</option>)}</select>),
+      cell: (r) => (<select value={r.o.status} onChange={(e) => onUpdate(r.o.id, { status: e.target.value as ImprovementStatus })} className={inputCls}>{STATUS_OPTIONS.map((s) => <option key={s} value={s} className="bg-white">{STATUS_LABELS[s]}</option>)}</select>),
     },
     {
       key: 'progress', header: 'Avance', accessor: (r) => r.o.progressPct || 0, filterable: false,
-      cell: (r) => (<><input type="number" min={0} max={100} step={5} defaultValue={r.o.progressPct} onBlur={(e) => { const v = Math.max(0, Math.min(100, Number(e.target.value) || 0)); if (v !== r.o.progressPct) onUpdate(r.o.id, { progressPct: v }) }} className={inputCls + ' w-14'} /><span className="text-white/30 text-[10px]">%</span></>),
+      cell: (r) => (<><input type="number" min={0} max={100} step={5} defaultValue={r.o.progressPct} onBlur={(e) => { const v = Math.max(0, Math.min(100, Number(e.target.value) || 0)); if (v !== r.o.progressPct) onUpdate(r.o.id, { progressPct: v }) }} className={inputCls + ' w-14'} /><span className="text-gray-400 text-[10px]">%</span></>),
     },
-    { key: 'milestones', header: 'Hitos', accessor: (r) => r.o.milestones.length, cell: (r) => r.o.milestones.length ? `${r.o.milestones.filter((m) => m.done).length}/${r.o.milestones.length}` : <span className="text-white/20">—</span> },
-    { key: 'notes', header: 'Notas', accessor: (r) => r.o.progressNotes || '', className: 'max-w-[200px]', cell: (r) => <div className="truncate" title={r.o.progressNotes}>{r.o.progressNotes || <span className="text-white/20">—</span>}</div> },
+    { key: 'milestones', header: 'Hitos', accessor: (r) => r.o.milestones.length, cell: (r) => r.o.milestones.length ? `${r.o.milestones.filter((m) => m.done).length}/${r.o.milestones.length}` : <span className="text-gray-300">—</span> },
+    { key: 'notes', header: 'Notas', accessor: (r) => r.o.progressNotes || '', className: 'max-w-[200px]', cell: (r) => <div className="truncate" title={r.o.progressNotes}>{r.o.progressNotes || <span className="text-gray-300">—</span>}</div> },
     {
       key: 'close', header: 'Cierre', accessor: (r) => r.o.closeDate || '', filterable: false,
       cell: (r) => <input type="date" value={r.o.closeDate ?? ''} onChange={(e) => onUpdate(r.o.id, { closeDate: e.target.value || null })} className={inputCls} />,
@@ -130,7 +130,7 @@ export function ImprovementsReport({
           <div className="mt-3 flex flex-wrap gap-1.5">
             {IMPROVEMENT_TYPE_OPTIONS.map((t) => (
               <button key={t} onClick={() => setFType(fType === t ? '' : t)}
-                className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${fType === t ? 'border-white/40 text-white' : 'border-white/10 text-white/50 hover:text-white/80'}`}>
+                className={`text-[10px] px-2 py-1 rounded-md border transition-colors ${fType === t ? 'border-gray-300 text-gray-900' : 'border-gray-200 text-gray-500 hover:text-gray-800'}`}>
                 {IMPROVEMENT_TYPE_LABELS[t]}
               </button>
             ))}
@@ -149,17 +149,17 @@ export function ImprovementsReport({
 
       {(fStatus || fPrio) && (
         <div className="flex items-center gap-2 flex-wrap -mb-1">
-          <span className="text-[11px] text-white/45">Tabla filtrada:</span>
+          <span className="text-[11px] text-gray-500">Tabla filtrada:</span>
           {fStatus && (
-            <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+            <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
               Estado: {statusActiveLabel}
-              <button onClick={() => setFStatus('')} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+              <button onClick={() => setFStatus('')} className="hover:text-gray-900" title="Quitar filtro"><X size={12} /></button>
             </span>
           )}
           {fPrio && (
-            <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+            <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
               Prioridad: {prioActiveLabel}
-              <button onClick={() => setFPrio('')} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+              <button onClick={() => setFPrio('')} className="hover:text-gray-900" title="Quitar filtro"><X size={12} /></button>
             </span>
           )}
         </div>

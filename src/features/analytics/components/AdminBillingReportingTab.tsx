@@ -94,16 +94,16 @@ export function AdminBillingReportingTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-white">Consumo de IA</h2>
-        <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
+        <h2 className="text-base font-semibold text-gray-900">Consumo de IA</h2>
+        <div className="flex gap-1 bg-gray-50 rounded-lg p-0.5">
           {RANGES.map((r) => (
             <button
               key={r.value}
               onClick={() => setRange(r.value)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                 range === r.value
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/20'
-                  : 'text-white/40 hover:text-white/70'
+                  ? 'bg-primary-100 text-primary-700 border border-primary-200'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               {r.label}
@@ -114,7 +114,7 @@ export function AdminBillingReportingTab() {
 
       {loading ? (
         <div className="flex justify-center py-8">
-          <Loader2 size={24} className="animate-spin text-cyan-400" />
+          <Loader2 size={24} className="animate-spin text-primary-600" />
         </div>
       ) : (
         <>
@@ -125,9 +125,9 @@ export function AdminBillingReportingTab() {
               { label: 'Tokens totales', value: totals.tokens.toLocaleString() },
               { label: 'Costo estimado', value: `$${totals.usd.toFixed(4)}` },
             ].map((m) => (
-              <div key={m.label} className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <p className="text-[10px] text-white/40 uppercase mb-1">{m.label}</p>
-                <p className="text-xl font-bold text-white tabular-nums">{m.value}</p>
+              <div key={m.label} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <p className="text-[10px] text-gray-500 uppercase mb-1">{m.label}</p>
+                <p className="text-xl font-bold text-gray-900 tabular-nums">{m.value}</p>
               </div>
             ))}
           </div>
@@ -135,11 +135,11 @@ export function AdminBillingReportingTab() {
           <div className="grid md:grid-cols-2 gap-6">
             {/* By feature */}
             <div>
-              <h3 className="text-sm font-medium text-white/70 mb-3">Por herramienta</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Por herramienta</h3>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[420px] text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 text-white/30 text-[10px] uppercase">
+                  <tr className="border-b border-gray-200 text-gray-400 text-[10px] uppercase">
                     <th className="text-left py-1.5 pr-3">Feature</th>
                     <th className="text-right py-1.5 pr-3">Llamadas</th>
                     <th className="text-right py-1.5 pr-3">Tokens</th>
@@ -148,15 +148,15 @@ export function AdminBillingReportingTab() {
                 </thead>
                 <tbody>
                   {sortedFeatures.map(([key, stat]) => (
-                    <tr key={key} className="border-b border-white/5 text-white/60 hover:bg-white/5">
+                    <tr key={key} className="border-b border-gray-100 text-gray-600 hover:bg-gray-50">
                       <td className="py-1.5 pr-3 font-mono text-[10px]">{key}</td>
                       <td className="py-1.5 pr-3 text-right tabular-nums">{stat.calls}</td>
                       <td className="py-1.5 pr-3 text-right tabular-nums">{stat.tokens.toLocaleString()}</td>
-                      <td className="py-1.5 text-right tabular-nums text-amber-400">${stat.usd.toFixed(4)}</td>
+                      <td className="py-1.5 text-right tabular-nums text-amber-600">${stat.usd.toFixed(4)}</td>
                     </tr>
                   ))}
                   {sortedFeatures.length === 0 && (
-                    <tr><td colSpan={4} className="py-4 text-center text-white/20">Sin datos en este periodo</td></tr>
+                    <tr><td colSpan={4} className="py-4 text-center text-gray-300">Sin datos en este periodo</td></tr>
                   )}
                 </tbody>
                 </table>
@@ -165,11 +165,11 @@ export function AdminBillingReportingTab() {
 
             {/* By model */}
             <div>
-              <h3 className="text-sm font-medium text-white/70 mb-3">Por modelo</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Por modelo</h3>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[420px] text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 text-white/30 text-[10px] uppercase">
+                  <tr className="border-b border-gray-200 text-gray-400 text-[10px] uppercase">
                     <th className="text-left py-1.5 pr-3">Modelo</th>
                     <th className="text-right py-1.5 pr-3">Llamadas</th>
                     <th className="text-right py-1.5 pr-3">Tokens</th>
@@ -178,15 +178,15 @@ export function AdminBillingReportingTab() {
                 </thead>
                 <tbody>
                   {sortedModels.map(([key, stat]) => (
-                    <tr key={key} className="border-b border-white/5 text-white/60 hover:bg-white/5">
+                    <tr key={key} className="border-b border-gray-100 text-gray-600 hover:bg-gray-50">
                       <td className="py-1.5 pr-3 font-mono text-[10px]">{key}</td>
                       <td className="py-1.5 pr-3 text-right tabular-nums">{stat.calls}</td>
                       <td className="py-1.5 pr-3 text-right tabular-nums">{stat.tokens.toLocaleString()}</td>
-                      <td className="py-1.5 text-right tabular-nums text-amber-400">${stat.usd.toFixed(4)}</td>
+                      <td className="py-1.5 text-right tabular-nums text-amber-600">${stat.usd.toFixed(4)}</td>
                     </tr>
                   ))}
                   {sortedModels.length === 0 && (
-                    <tr><td colSpan={4} className="py-4 text-center text-white/20">Sin datos en este periodo</td></tr>
+                    <tr><td colSpan={4} className="py-4 text-center text-gray-300">Sin datos en este periodo</td></tr>
                   )}
                 </tbody>
                 </table>
@@ -197,11 +197,11 @@ export function AdminBillingReportingTab() {
           {/* Daily trend */}
           {daily.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-white/70 mb-3">Tendencia diaria (últimos 14 días)</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Tendencia diaria (últimos 14 días)</h3>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[420px] text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 text-white/30 text-[10px] uppercase">
+                  <tr className="border-b border-gray-200 text-gray-400 text-[10px] uppercase">
                     <th className="text-left py-1.5 pr-3">Fecha</th>
                     <th className="text-right py-1.5 pr-3">Llamadas</th>
                     <th className="text-right py-1.5 pr-3">Tokens</th>
@@ -210,11 +210,11 @@ export function AdminBillingReportingTab() {
                 </thead>
                 <tbody>
                   {daily.map((d) => (
-                    <tr key={d.date} className="border-b border-white/5 text-white/60 hover:bg-white/5">
+                    <tr key={d.date} className="border-b border-gray-100 text-gray-600 hover:bg-gray-50">
                       <td className="py-1.5 pr-3 tabular-nums">{d.date}</td>
                       <td className="py-1.5 pr-3 text-right tabular-nums">{d.calls}</td>
                       <td className="py-1.5 pr-3 text-right tabular-nums">{d.tokens.toLocaleString()}</td>
-                      <td className="py-1.5 text-right tabular-nums text-amber-400">${d.usd.toFixed(4)}</td>
+                      <td className="py-1.5 text-right tabular-nums text-amber-600">${d.usd.toFixed(4)}</td>
                     </tr>
                   ))}
                 </tbody>

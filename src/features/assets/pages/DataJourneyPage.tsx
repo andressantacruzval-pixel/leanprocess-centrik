@@ -22,24 +22,24 @@ export default function DataJourneyPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-6 py-4 border-b border-white/5 bg-white/[0.03]">
+      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Route size={24} className="text-cyan-400" />
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Route size={24} className="text-primary-600" />
               Data Journey
             </h1>
-            <p className="text-white/40 mt-1">
+            <p className="text-gray-500 mt-1">
               {company?.name ? `${company.name} · ` : ''}Cómo viajan los activos de información entre tus procesos
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <div className="flex items-center gap-2 text-sm text-white/40">
-              <Database size={16} className="text-cyan-400" />
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Database size={16} className="text-primary-600" />
               <span className="font-semibold">{stats.assets}</span><span>activos</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-white/40">
-              <ArrowLeftRight size={16} className="text-cyan-400" />
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <ArrowLeftRight size={16} className="text-primary-600" />
               <span className="font-semibold">{stats.transfers}</span><span>transferencias</span>
             </div>
           </div>

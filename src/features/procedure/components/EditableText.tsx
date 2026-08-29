@@ -74,7 +74,7 @@ export function EditableText({
   return (
     <div
       onClick={() => setEditing(true)}
-      className={`cursor-text hover:bg-blue-50/5 rounded px-1 -mx-1 transition-colors min-h-[1.2em] ${className} ${!value ? 'text-gray-400 italic' : ''}`}
+      className={`cursor-text hover:bg-blue-50 rounded-md px-1 -mx-1 transition-colors min-h-[1.2em] ${className} ${!value ? 'text-gray-400 italic' : ''}`}
     >
       {value || placeholder}
     </div>

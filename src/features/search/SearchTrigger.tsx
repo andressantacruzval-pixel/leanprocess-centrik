@@ -25,14 +25,14 @@ export function SearchTrigger() {
   return (
     <button
       onClick={handleOpenSearch}
-      className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] hover:border-white/20 transition-colors group text-left"
+      className="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-lg bg-gray-50 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-colors group text-left"
       title="Buscar (Ctrl+K)"
     >
-      <Search size={16} className="text-white/35 group-hover:text-white/60 shrink-0" />
-      <span className="text-[13px] text-white/35 group-hover:text-white/60 truncate">
+      <Search size={16} className="text-gray-400 group-hover:text-gray-600 shrink-0" />
+      <span className="text-[13px] text-gray-400 group-hover:text-gray-600 truncate">
         Buscar procesos, riesgos, indicadores...
       </span>
-      <kbd className="hidden sm:flex ml-auto shrink-0 items-center gap-0.5 text-[10px] text-white/25 bg-white/5 border border-white/10 rounded px-1.5 py-0.5 font-mono">
+      <kbd className="hidden sm:flex ml-auto shrink-0 items-center gap-0.5 text-[10px] text-gray-400 bg-gray-50 border border-gray-200 rounded-md px-1.5 py-0.5 font-mono">
         {isMac ? <Command size={10} /> : 'Ctrl'}
         <span>K</span>
       </kbd>

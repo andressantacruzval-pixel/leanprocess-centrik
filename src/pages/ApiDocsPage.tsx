@@ -17,10 +17,10 @@ interface Endpoint {
 const BASE_URL = 'https://api.leanprocess.app/v1'
 
 const methodColors: Record<HttpMethod, string> = {
-  GET: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  POST: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  PUT: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-  DELETE: 'bg-red-500/20 text-red-400 border-red-500/30',
+  GET: 'bg-emerald-100 text-emerald-600 border-emerald-300',
+  POST: 'bg-blue-100 text-blue-600 border-blue-300',
+  PUT: 'bg-amber-100 text-amber-600 border-amber-300',
+  DELETE: 'bg-red-100 text-red-600 border-red-300',
 }
 
 const endpoints: Endpoint[] = [
@@ -160,13 +160,13 @@ function EndpointCard({ endpoint }: { endpoint: Endpoint }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] overflow-hidden">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/[0.03] transition text-left"
+        className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition text-left"
       >
         <span
-          className={`shrink-0 px-2.5 py-0.5 rounded text-xs font-bold border ${methodColors[endpoint.method]}`}
+          className={`shrink-0 px-2.5 py-0.5 rounded-md text-xs font-bold border ${methodColors[endpoint.method]}`}
         >
           {endpoint.method}
         </span>
@@ -175,13 +175,13 @@ function EndpointCard({ endpoint }: { endpoint: Endpoint }) {
       </button>
 
       {open && (
-        <div className="px-5 pb-5 space-y-4 border-t border-white/5">
+        <div className="px-5 pb-5 space-y-4 border-t border-gray-100">
           <p className="text-sm text-gray-400 pt-4">{endpoint.description}</p>
           <div>
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Ejemplo de respuesta
             </span>
-            <pre className="mt-2 p-4 rounded-lg bg-[#0a0f1a] text-xs text-gray-300 font-mono overflow-x-auto">
+            <pre className="mt-2 p-4 rounded-lg bg-white text-xs text-gray-300 font-mono overflow-x-auto">
               {endpoint.exampleResponse}
             </pre>
           </div>
@@ -199,9 +199,9 @@ export default function ApiDocsPage() {
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <Globe className="w-8 h-8 text-cyan-400" />
-          <h1 className="text-3xl font-bold text-white">API Publica de Lean Process</h1>
-          <span className="ml-2 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold border border-amber-500/30">
+          <Globe className="w-8 h-8 text-primary-600" />
+          <h1 className="text-3xl font-bold text-gray-900">API Publica de Lean Process</h1>
+          <span className="ml-2 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-600 text-xs font-semibold border border-amber-300">
             Coming Soon
           </span>
         </div>
@@ -213,24 +213,24 @@ export default function ApiDocsPage() {
       {/* Authentication */}
       <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <Key className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-xl font-semibold text-white">Autenticacion</h2>
+          <Key className="w-5 h-5 text-primary-600" />
+          <h2 className="text-xl font-semibold text-gray-900">Autenticacion</h2>
         </div>
         <p className="text-sm text-gray-400">
           Usa un API Key en el header de cada peticion:
         </p>
-        <pre className="p-4 rounded-lg bg-[#0a0f1a] text-sm text-gray-300 font-mono">
+        <pre className="p-4 rounded-lg bg-white text-sm text-gray-300 font-mono">
           Authorization: Bearer {'<api-key>'}
         </pre>
         <p className="text-xs text-gray-500">
-          Genera tu API Key en <span className="text-cyan-400">Configuracion &rarr; API Keys</span>.
+          Genera tu API Key en <span className="text-primary-600">Configuracion &rarr; API Keys</span>.
         </p>
       </section>
 
       {/* Base URL */}
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold text-white">Base URL</h2>
-        <pre className="p-4 rounded-lg bg-[#0a0f1a] text-sm text-cyan-400 font-mono">
+        <h2 className="text-xl font-semibold text-gray-900">Base URL</h2>
+        <pre className="p-4 rounded-lg bg-white text-sm text-primary-600 font-mono">
           {BASE_URL}
         </pre>
       </section>
@@ -238,8 +238,8 @@ export default function ApiDocsPage() {
       {/* Endpoints */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
-          <Code className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-xl font-semibold text-white">Endpoints</h2>
+          <Code className="w-5 h-5 text-primary-600" />
+          <h2 className="text-xl font-semibold text-gray-900">Endpoints</h2>
         </div>
         <div className="space-y-3">
           {endpoints.map((ep) => (
@@ -251,16 +251,16 @@ export default function ApiDocsPage() {
       {/* Webhooks */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
-          <Webhook className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-xl font-semibold text-white">Webhooks</h2>
+          <Webhook className="w-5 h-5 text-primary-600" />
+          <h2 className="text-xl font-semibold text-gray-900">Webhooks</h2>
         </div>
         <p className="text-sm text-gray-400">
           Configura webhooks para recibir notificaciones en tiempo real cuando ocurren eventos en tu workspace.
         </p>
-        <div className="rounded-xl border border-white/10 bg-white/[0.02] overflow-x-auto">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
             <thead>
-              <tr className="border-b border-white/5">
+              <tr className="border-b border-gray-100">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Evento
                 </th>
@@ -271,9 +271,9 @@ export default function ApiDocsPage() {
             </thead>
             <tbody>
               {webhookEvents.map((w) => (
-                <tr key={w.event} className="border-b border-white/5 last:border-0">
+                <tr key={w.event} className="border-b border-gray-100 last:border-0">
                   <td className="px-5 py-3">
-                    <code className="text-xs text-cyan-400 font-mono bg-cyan-500/10 px-2 py-0.5 rounded">
+                    <code className="text-xs text-primary-600 font-mono bg-primary-50 px-2 py-0.5 rounded-md">
                       {w.event}
                     </code>
                   </td>
@@ -287,19 +287,19 @@ export default function ApiDocsPage() {
 
       {/* Rate Limits */}
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold text-white">Rate Limits</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Rate Limits</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 text-center">
-            <p className="text-3xl font-bold text-white">100</p>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 text-center">
+            <p className="text-3xl font-bold text-gray-900">100</p>
             <p className="text-sm text-gray-400 mt-1">requests/minuto</p>
-            <span className="inline-block mt-2 px-2 py-0.5 rounded text-xs font-semibold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+            <span className="inline-block mt-2 px-2 py-0.5 rounded-md text-xs font-semibold bg-primary-100 text-primary-600 border border-primary-300">
               Plan Pro
             </span>
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 text-center">
-            <p className="text-3xl font-bold text-white">500</p>
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 text-center">
+            <p className="text-3xl font-bold text-gray-900">500</p>
             <p className="text-sm text-gray-400 mt-1">requests/minuto</p>
-            <span className="inline-block mt-2 px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <span className="inline-block mt-2 px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-600 border border-emerald-300">
               Plan Max
             </span>
           </div>
@@ -309,18 +309,18 @@ export default function ApiDocsPage() {
       {/* N8N Integration */}
       <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-xl font-semibold text-white">Integracion con N8N</h2>
+          <Zap className="w-5 h-5 text-primary-600" />
+          <h2 className="text-xl font-semibold text-gray-900">Integracion con N8N</h2>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 space-y-3">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-5 space-y-3">
           <p className="text-sm text-gray-400">
             Conecta Lean Process con N8N para automatizar flujos de trabajo. Usa los webhooks y la API REST para crear pipelines de automatizacion sin codigo.
           </p>
           <p className="text-sm text-gray-400">
             Configura el webhook URL en{' '}
-            <span className="text-cyan-400">Configuracion &rarr; Integraciones &rarr; N8N</span>.
+            <span className="text-primary-600">Configuracion &rarr; Integraciones &rarr; N8N</span>.
           </p>
-          <pre className="p-4 rounded-lg bg-[#0a0f1a] text-xs text-gray-300 font-mono">
+          <pre className="p-4 rounded-lg bg-white text-xs text-gray-300 font-mono">
 {`// Ejemplo: Trigger en N8N
 {
   "webhook_url": "https://n8n.your-server.com/webhook/lean-process",

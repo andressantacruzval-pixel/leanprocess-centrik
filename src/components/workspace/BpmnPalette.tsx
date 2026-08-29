@@ -71,23 +71,23 @@ const MiniIntermediateEvent = () => (
 );
 
 const MiniTimerEvent = () => (
-  <Clock size={18} className="text-blue-400" />
+  <Clock size={18} className="text-blue-600" />
 );
 
-// Nota: los trazos usan currentColor + text-white/50 para que el remapeo de tema
-// los oscurezca en claro (antes eran blanco fijo → invisibles sobre el lienzo blanco).
+// Nota: los trazos usan currentColor, no un color fijo, para que hereden el gris
+// del contenedor. Con el lienzo blanco de Centrik un blanco fijo seria invisible.
 const MiniTask = () => (
-  <svg width="22" height="16" viewBox="0 0 22 16" className="text-white/50">
+  <svg width="22" height="16" viewBox="0 0 22 16" className="text-gray-500">
     <rect x="1" y="1" width="20" height="14" rx="3" fill="none" stroke="currentColor" strokeWidth="1.5" />
   </svg>
 );
 
 const MiniUserTask = () => (
-  <User size={16} className="text-cyan-400" />
+  <User size={16} className="text-primary-600" />
 );
 
 const MiniServiceTask = () => (
-  <Settings size={16} className="text-cyan-400" />
+  <Settings size={16} className="text-primary-600" />
 );
 
 const MiniExclusiveGateway = () => (
@@ -112,11 +112,11 @@ const MiniInclusiveGateway = () => (
 );
 
 const MiniDataObject = () => (
-  <FileText size={16} className="text-white/50" />
+  <FileText size={16} className="text-gray-500" />
 );
 
 const MiniDataStore = () => (
-  <svg width="20" height="18" viewBox="0 0 20 18" className="text-white/50">
+  <svg width="20" height="18" viewBox="0 0 20 18" className="text-gray-500">
     <ellipse cx="10" cy="4" rx="8" ry="3" fill="none" stroke="currentColor" strokeWidth="1.3" />
     <line x1="2" y1="4" x2="2" y2="14" stroke="currentColor" strokeWidth="1.3" />
     <line x1="18" y1="4" x2="18" y2="14" stroke="currentColor" strokeWidth="1.3" />
@@ -138,14 +138,14 @@ const MiniComputer = () => (
 );
 
 const MiniLane = () => (
-  <svg width="24" height="14" viewBox="0 0 24 14" className="text-white/50">
+  <svg width="24" height="14" viewBox="0 0 24 14" className="text-gray-500">
     <rect x="1" y="1" width="22" height="12" rx="1" fill="none" stroke="currentColor" strokeWidth="1.3" />
     <line x1="1" y1="7" x2="23" y2="7" stroke="currentColor" strokeWidth="1.3" strokeDasharray="2 2" />
   </svg>
 );
 
 const MiniSubProcess = () => (
-  <svg width="22" height="16" viewBox="0 0 22 16" className="text-white/50">
+  <svg width="22" height="16" viewBox="0 0 22 16" className="text-gray-500">
     <rect x="1" y="1" width="20" height="14" rx="3" fill="none" stroke="currentColor" strokeWidth="1.5" />
     <rect x="8" y="11" width="6" height="4" rx="1" fill="none" stroke="currentColor" strokeWidth="1" />
     <line x1="11" y1="12" x2="11" y2="14" stroke="currentColor" strokeWidth="0.8" />
@@ -429,13 +429,11 @@ export default function BpmnPalette({ modeler }: BpmnPaletteProps) {
     return (
       <div
         className="
-          hidden lg:flex flex-col items-center justify-center gap-3
-          w-[200px] shrink-0 h-full
-          bg-[#0a0f1a] border-r border-white/5
-          text-white/30 text-xs select-none
+          hidden lg:flex flex-col items-center justify-center gap-3 w-[200px] shrink-0 h-full bg-white
+          border-r border-gray-100 text-gray-400 text-xs select-none
         "
       >
-        <Loader2 size={24} className="animate-spin text-cyan-500/40" />
+        <Loader2 size={24} className="animate-spin text-primary-600" />
         <span>Cargando paleta...</span>
       </div>
     );
@@ -447,16 +445,13 @@ export default function BpmnPalette({ modeler }: BpmnPaletteProps) {
   return (
     <div
       className="
-        hidden lg:flex flex-col
-        w-[180px] xl:w-[200px] shrink-0 h-full
-        bg-[#0a0f1a] border-r border-white/5
-        text-white/70 text-xs select-none
-        overflow-y-auto overflow-x-hidden
-        scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent
+        hidden lg:flex flex-col w-[180px] xl:w-[200px] shrink-0 h-full bg-white border-r border-gray-100
+        text-gray-700 text-xs select-none overflow-y-auto overflow-x-hidden scrollbar-thin
+        scrollbar-thumb-gray-300 scrollbar-track-transparent
       "
     >
       {/* Title */}
-      <div className="px-3 py-2.5 text-[10px] uppercase tracking-widest text-cyan-500/70 font-semibold border-b border-white/5">
+      <div className="px-3 py-2.5 text-[10px] uppercase tracking-widest text-primary-600 font-semibold border-b border-gray-100">
         Elementos BPMN
       </div>
 
@@ -465,25 +460,22 @@ export default function BpmnPalette({ modeler }: BpmnPaletteProps) {
         const isOpen = expanded[category.id] ?? true;
 
         return (
-          <div key={category.id} className="border-b border-white/5">
+          <div key={category.id} className="border-b border-gray-100">
             {/* Category header */}
             <button
               type="button"
               onClick={() => toggleCategory(category.id)}
               className="
-                flex items-center gap-2 w-full
-                px-3 py-2
-                text-left text-[11px] font-medium text-white/60
-                hover:text-white/90 hover:bg-white/[0.03]
-                transition-colors duration-150
+                flex items-center gap-2 w-full px-3 py-2 text-left text-[11px] font-medium text-gray-600
+                hover:text-gray-800 hover:bg-gray-50 transition-colors duration-150
               "
             >
-              <span className="text-cyan-500/60">{category.icon}</span>
+              <span className="text-primary-600">{category.icon}</span>
               <span className="flex-1">{category.label}</span>
               {isOpen ? (
-                <ChevronDown size={12} className="text-white/30" />
+                <ChevronDown size={12} className="text-gray-400" />
               ) : (
-                <ChevronRight size={12} className="text-white/30" />
+                <ChevronRight size={12} className="text-gray-400" />
               )}
             </button>
 
@@ -496,21 +488,18 @@ export default function BpmnPalette({ modeler }: BpmnPaletteProps) {
                     onMouseDown={(e) => handleElementMouseDown(e, element)}
                     title={element.isLane ? `${element.label} (click para agregar)` : element.label}
                     className={`
-                      flex flex-col items-center justify-center gap-1
-                      rounded-md py-2 px-1
-                      border border-transparent
-                      hover:bg-white/5 hover:border-cyan-500/20
-                      transition-all duration-150
+                      flex flex-col items-center justify-center gap-1 rounded-md py-2 px-1 border border-transparent
+                      hover:bg-gray-50 hover:border-primary-200 transition-all duration-150
                       ${element.isLane
-                        ? 'cursor-pointer active:bg-green-500/10 active:border-green-500/20'
-                        : 'cursor-grab active:cursor-grabbing active:bg-cyan-500/10'
+                        ? 'cursor-pointer active:bg-emerald-50 active:border-emerald-200'
+                        : 'cursor-grab active:cursor-grabbing active:bg-primary-50'
                       }
                     `}
                   >
                     <div className="flex items-center justify-center h-5">
                       {element.icon}
                     </div>
-                    <span className="text-[9px] text-white/50 text-center leading-tight truncate w-full">
+                    <span className="text-[9px] text-gray-500 text-center leading-tight truncate w-full">
                       {element.isLane ? `+ ${element.label}` : element.label}
                     </span>
                   </div>

@@ -75,7 +75,7 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
       return { management: p?.management, coordination: p?.coordination, operative: p?.operative, ...resolveProcessHierarchy(p, macroMap, processMap) }
     }),
     { key: 'code', header: 'Código', accessor: (a) => a.code || '' },
-    { key: 'name', header: 'Activo', accessor: (a) => a.name || '', className: 'text-white font-medium max-w-[200px]', cell: (a) => <div className="truncate" title={a.name}>{a.name}</div> },
+    { key: 'name', header: 'Activo', accessor: (a) => a.name || '', className: 'text-gray-900 font-medium max-w-[200px]', cell: (a) => <div className="truncate" title={a.name}>{a.name}</div> },
     { key: 'type', header: 'Tipo', accessor: (a) => a.asset_type || '' },
     { key: 'format', header: 'Formato', accessor: (a) => a.format || '' },
     { key: 'op', header: 'Operación', accessor: (a) => opByAsset.get(a.id) || '' },
@@ -90,10 +90,10 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
     { key: 'vuln', header: 'Vulnerabilidad', accessor: (a) => a.vulnerability || '', className: 'max-w-[160px]', cell: (a) => <div className="truncate" title={a.vulnerability}>{a.vulnerability || '-'}</div> },
     { key: 'prob', header: 'Prob.', accessor: (a) => a.probability ?? 0 },
     { key: 'nctrl', header: 'Controles', accessor: (a) => riskByAsset.get(a.id)?.controls ?? 0 },
-    { key: 'inh', header: 'Sev. inherente', accessor: (a) => { const r = riskByAsset.get(a.id); return r && r.inhProb && r.inhImp ? r.inhProb * r.inhImp : 0 }, cell: (a) => { const r = riskByAsset.get(a.id); if (!r || !r.inhProb || !r.inhImp) return <span className="text-white/30">-</span>; const l = getRiskLevel(r.inhProb, r.inhImp); return <Badge label={l.label} hex={l.hex} /> } },
-    { key: 'res', header: 'Sev. residual', accessor: (a) => { const r = riskByAsset.get(a.id); return r && r.resProb && r.resImp ? r.resProb * r.resImp : 0 }, cell: (a) => { const r = riskByAsset.get(a.id); if (!r || !r.resProb || !r.resImp) return <span className="text-white/30">-</span>; const l = getRiskLevel(r.resProb, r.resImp); return <Badge label={l.label} hex={l.hex} /> } },
+    { key: 'inh', header: 'Sev. inherente', accessor: (a) => { const r = riskByAsset.get(a.id); return r && r.inhProb && r.inhImp ? r.inhProb * r.inhImp : 0 }, cell: (a) => { const r = riskByAsset.get(a.id); if (!r || !r.inhProb || !r.inhImp) return <span className="text-gray-400">-</span>; const l = getRiskLevel(r.inhProb, r.inhImp); return <Badge label={l.label} hex={l.hex} /> } },
+    { key: 'res', header: 'Sev. residual', accessor: (a) => { const r = riskByAsset.get(a.id); return r && r.resProb && r.resImp ? r.resProb * r.resImp : 0 }, cell: (a) => { const r = riskByAsset.get(a.id); if (!r || !r.resProb || !r.resImp) return <span className="text-gray-400">-</span>; const l = getRiskLevel(r.resProb, r.resImp); return <Badge label={l.label} hex={l.hex} /> } },
     { key: 'label', header: 'Clasificación', accessor: (a) => a.label || '' },
-    { key: 'pd', header: 'Datos personales', accessor: (a) => (a.has_personal_data ? 'Sí' : 'No'), cell: (a) => a.has_personal_data ? <Badge label={a.personal_data_category || 'Sí'} hex="#d97706" /> : <span className="text-white/30">No</span> },
+    { key: 'pd', header: 'Datos personales', accessor: (a) => (a.has_personal_data ? 'Sí' : 'No'), cell: (a) => a.has_personal_data ? <Badge label={a.personal_data_category || 'Sí'} hex="#d97706" /> : <span className="text-gray-400">No</span> },
     { key: 'ret', header: 'Retención', accessor: (a) => a.retention_period || '' },
     { key: 'disp', header: 'Disposición', accessor: (a) => a.disposal_method || '' },
     { key: 'status', header: 'Estado', accessor: (a) => a.status || '' },
@@ -119,13 +119,13 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
   return (
     <Dashboard>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex rounded-xl border border-white/10 overflow-hidden">
-          <button onClick={() => setView('general')} className={`inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium ${view === 'general' ? 'bg-cyan-500/20 text-cyan-100' : 'text-white/55 hover:bg-white/5'}`}><LayoutDashboard size={14} /> Vista general</button>
-          <button onClick={() => setView('columns')} className={`inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium ${view === 'columns' ? 'bg-cyan-500/20 text-cyan-100' : 'text-white/55 hover:bg-white/5'}`}><Columns3 size={14} /> Por columnas</button>
+        <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+          <button onClick={() => setView('general')} className={`inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium ${view === 'general' ? 'bg-primary-100 text-primary-700' : 'text-gray-600 hover:bg-gray-50'}`}><LayoutDashboard size={14} /> Vista general</button>
+          <button onClick={() => setView('columns')} className={`inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium ${view === 'columns' ? 'bg-primary-100 text-primary-700' : 'text-gray-600 hover:bg-gray-50'}`}><Columns3 size={14} /> Por columnas</button>
         </div>
         <button
           onClick={() => navigate('/app/data-journey')}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 text-white text-[13px] font-medium hover:from-indigo-500 hover:to-cyan-500 transition-colors shadow-lg shadow-cyan-900/20"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-white text-[13px] font-medium transition-colors shadow-lg bg-primary-500 hover:bg-primary-600"
         >
           <Route size={15} /> Ver Data Journey (mapa interactivo)
         </button>
@@ -146,7 +146,7 @@ export function AssetsReport({ processes, assets, macroMap, processMap }: {
         <Card title="Criticidad (C·I·D)" sub="Mayor de las tres dimensiones. Clic para filtrar la tabla.">
           <Donut data={byBand} center={String(list.length)} unit="activos" onSlice={(l) => setFBand(fBand === l ? '' : l)} active={fBand} />
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {byBand.map((d) => <button key={d.label} onClick={() => setFBand(fBand === d.label ? '' : d.label)} className={`text-[10px] px-2 py-1 rounded-md border ${fBand === d.label ? 'border-white/40 text-white' : 'border-white/10 text-white/50'}`}>{d.label}</button>)}
+            {byBand.map((d) => <button key={d.label} onClick={() => setFBand(fBand === d.label ? '' : d.label)} className={`text-[10px] px-2 py-1 rounded-md border ${fBand === d.label ? 'border-gray-300 text-gray-900' : 'border-gray-200 text-gray-500'}`}>{d.label}</button>)}
           </div>
         </Card>
         <Card title="Por tipo de activo" sub="Clic para filtrar la tabla."><HBars data={byType} onBar={(l) => setFType(fType === l ? '' : l)} active={fType} /></Card>

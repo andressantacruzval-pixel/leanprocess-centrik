@@ -16,12 +16,12 @@ export function OrgToolbar({ onAddRoot, onAutoLayout }: OrgToolbarProps) {
   const usedLevels = new Set(orgUnits.map((u) => u.org_level_definition_id)).size
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-white/[0.03] border-b border-white/5">
+    <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-gray-50 border-b border-gray-100">
       <div className="flex items-center gap-2">
         {!hasRoot && (
           <button
             onClick={onAddRoot}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-cyan-500 hover:to-blue-500 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-white rounded-lg text-sm font-medium transition-colors bg-primary-500 hover:bg-primary-600"
           >
             <Plus size={14} />
             Agregar raiz
@@ -29,14 +29,14 @@ export function OrgToolbar({ onAddRoot, onAutoLayout }: OrgToolbarProps) {
         )}
         <button
           onClick={onAutoLayout}
-          className="flex items-center gap-1.5 px-3 py-1.5 border border-white/10 text-white/70 rounded-lg text-sm font-medium hover:bg-white/5 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
         >
           <LayoutGrid size={14} />
           Auto-layout
         </button>
       </div>
 
-      <div className="flex items-center gap-4 text-xs text-white/40">
+      <div className="flex items-center gap-4 text-xs text-gray-500">
         <span className="flex items-center gap-1">
           <Users size={14} />
           {orgUnits.length} unidades

@@ -31,15 +31,15 @@ export function Composer({ isStreaming, onSend, onStop, onDeepResearch }: {
   }, [value, isStreaming, deep, onSend, onDeepResearch, dictado])
 
   return (
-    <div className="border-t border-white/5 bg-[#0b111c] p-3">
+    <div className="border-t border-gray-100 bg-surface-ground p-3">
       {dictado.transcribing && (
-        <div className="mb-2 flex items-center gap-2 text-[11.5px] text-cyan-300">
+        <div className="mb-2 flex items-center gap-2 text-[11.5px] text-primary-700">
           <Loader2 size={13} className="animate-spin" /> Transcribiendo tu voz…
         </div>
       )}
       {dictado.recording && (
-        <div className="mb-2 flex items-center gap-2 text-[11.5px] text-cyan-300">
-          <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" /></span>
+        <div className="mb-2 flex items-center gap-2 text-[11.5px] text-primary-700">
+          <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" /></span>
           Grabando… pulsa el micrófono para transcribir.
         </div>
       )}
@@ -48,13 +48,13 @@ export function Composer({ isStreaming, onSend, onStop, onDeepResearch }: {
           onClick={() => setDeep((d) => !d)}
           title="Investigación profunda: analiza toda la empresa y entrega un informe"
           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11.5px] font-medium border transition-colors ${
-            deep ? 'bg-violet-500/15 text-violet-300 border-violet-500/30' : 'bg-white/5 text-white/45 border-white/10 hover:text-violet-300 hover:border-violet-500/30'
+            deep ? 'bg-primary-50 text-primary-700 border-primary-300' : 'bg-gray-50 text-gray-500 border-gray-200 hover:text-primary-700 hover:border-primary-300'
           }`}
         >
           <Microscope size={13} /> Investigación profunda {deep ? '· activada' : ''}
         </button>
-        {deep && <span className="text-[11px] text-white/35">Recorre todos tus procesos y arma un informe con gráficos.</span>}
-        <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-white/35">
+        {deep && <span className="text-[11px] text-gray-400">Recorre todos tus procesos y arma un informe con gráficos.</span>}
+        <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-gray-400">
           Cada consulta consume <TokenCostBadge operationKey="ai_consultant" />
         </span>
       </div>
@@ -65,22 +65,22 @@ export function Composer({ isStreaming, onSend, onStop, onDeepResearch }: {
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
           placeholder={deep ? 'Tema del informe (opcional): riesgos, cumplimiento, un área…' : 'Pregúntale al copiloto sobre tus procesos, riesgos, indicadores…'}
           rows={1}
-          className="flex-1 resize-none max-h-32 bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-[13.5px] text-white placeholder-white/25 focus:outline-none focus:border-cyan-500/50"
+          className="flex-1 resize-none max-h-32 bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-2.5 text-[13.5px] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-primary-300"
         />
         {dictado.supported && (
           <button
             onClick={dictado.toggle}
             disabled={dictado.transcribing}
             title={dictado.recording ? 'Detener y transcribir' : 'Dictar por voz'}
-            className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-xl border transition-colors disabled:opacity-60 ${
-              dictado.recording ? 'bg-red-500/15 text-red-300 border-red-500/30' : 'bg-white/5 text-white/50 border-white/10 hover:text-cyan-300 hover:border-cyan-500/30'
+            className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-lg border transition-colors disabled:opacity-60 ${
+              dictado.recording ? 'bg-red-50 text-red-700 border-red-300' : 'bg-gray-50 text-gray-500 border-gray-200 hover:text-primary-700 hover:border-primary-300'
             }`}
           >
             {dictado.transcribing ? <Loader2 size={16} className="animate-spin" /> : <Mic size={17} />}
           </button>
         )}
         {isStreaming ? (
-          <button onClick={onStop} title="Detener" className="shrink-0 h-10 w-10 flex items-center justify-center rounded-xl bg-white/10 text-white/70 hover:bg-white/15">
+          <button onClick={onStop} title="Detener" className="shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">
             <Square size={15} />
           </button>
         ) : (
@@ -88,7 +88,7 @@ export function Composer({ isStreaming, onSend, onStop, onDeepResearch }: {
             onClick={submit}
             disabled={!value.trim() && !deep}
             title={deep ? 'Generar informe' : 'Enviar'}
-            className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-xl text-white disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity ${deep ? 'bg-gradient-to-br from-violet-500 to-fuchsia-600' : 'bg-gradient-to-br from-cyan-500 to-blue-600'}`}
+            className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity ${deep ? 'bg-primary-500' : 'bg-primary-500'}`}
           >
             {isStreaming ? <Loader2 size={16} className="animate-spin" /> : deep ? <Microscope size={16} /> : <Send size={16} />}
           </button>

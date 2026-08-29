@@ -16,6 +16,7 @@
  * Uso:  node scripts/centrik-codemod.mjs [--dry] [ruta...]
  */
 import { readFileSync, writeFileSync } from 'node:fs'
+import ts from 'typescript'
 import { execSync } from 'node:child_process'
 
 const DRY = process.argv.includes('--dry')
@@ -65,7 +66,7 @@ const A_MARCA = new Set(['cyan', 'sky', 'teal', 'purple', 'violet', 'indigo', 'f
 const SEMANTICAS = { blue: 'blue', emerald: 'emerald', green: 'emerald', amber: 'amber', yellow: 'amber', orange: 'amber', red: 'red', rose: 'red' }
 
 /* Tonos claros del tema oscuro (300/400) → tonos legibles sobre blanco. */
-const TEXTO_TONO = { 100: 700, 200: 700, 300: 700, 400: 600, 500: 600, 600: 600, 700: 700, 800: 800, 900: 900 }
+const TEXTO_TONO = { 50: 700, 100: 700, 200: 700, 300: 700, 400: 600, 500: 600, 600: 600, 700: 700, 800: 800, 900: 900 }
 /* Fondos translúcidos → tintes sólidos 50/100. */
 const FONDO_TINTE = (a) => (a >= 20 ? 100 : 50)
 const BORDE_TINTE = (a) => (a >= 30 ? 300 : 200)
@@ -86,10 +87,14 @@ function partirVariantes(token) {
 }
 const unir = (variantes, base) => [...variantes, base].join(':')
 
-/** Separa el `/opacidad` final respetando corchetes. */
+/** Separa el `/opacidad` final. El '/' solo se ignora cuando cae DENTRO de un
+ *  valor arbitrario (`bg-[url(a/b)]`); si los corchetes ENVUELVEN la opacidad
+ *  —`bg-white/[0.03]`, 328 usos en la app— sí hay que separarlo. */
 function partirAlfa(base) {
   const i = base.lastIndexOf('/')
-  if (i === -1 || base.indexOf('[') > -1 && base.indexOf(']') > i) return { raiz: base, op: null }
+  if (i === -1) return { raiz: base, op: null }
+  const ab = base.indexOf('['), ce = base.indexOf(']')
+  if (ab !== -1 && ab < i && ce > i) return { raiz: base, op: null }
   return { raiz: base.slice(0, i), op: base.slice(i + 1) }
 }
 
@@ -144,7 +149,16 @@ function mapearBase(base) {
   const m = /^([a-z-]+?)-(.+)$/.exec(raiz)
   if (!m) return base
   const prop = m[1]
-  const valor = m[2]
+  let valor = m[2]
+
+  // `border-t-cyan-400` / `divide-y-white/10`: el lado va entre la propiedad y
+  // el color, así que hay que apartarlo antes de leer la escala.
+  let lado = ''
+  if (prop === 'border' || prop === 'divide') {
+    const L = /^(t|b|l|r|x|y|s|e|tl|tr|bl|br)-(.+)$/.exec(valor)
+    if (L) { lado = `-${L[1]}`; valor = L[2] }
+  }
+  const propLado = prop + lado
 
   /* — Hexadecimales arbitrarios — */
   const hex = /^\[(#[0-9a-fA-F]{3,8})\]$/.exec(valor)
@@ -155,20 +169,20 @@ function mapearBase(base) {
       if (ACCIONES[h]) return `bg-${ACCIONES[h]}`
     }
     if (prop === 'ring' && SUPERFICIES[h]) return 'ring-gray-200'
-    if (prop === 'border' && SUPERFICIES[h]) return 'border-gray-200'
+    if (prop === 'border' && SUPERFICIES[h]) return `${propLado}-gray-200`
     return base
   }
 
   /* — Blanco translúcido: el andamiaje del tema oscuro — */
   if (valor === 'white' || raiz === `${prop}-white`) {
     if (op === null) {
-      if (prop === 'border' || prop === 'divide') return `${prop}-gray-300`
+      if (prop === 'border' || prop === 'divide') return `${propLado}-gray-300`
       return base // `bg-white` y `text-white` se resuelven en la fase 3
     }
     if (prop === 'text') return `text-${TEXTO_BLANCO(op)}`
     if (prop === 'bg') return `bg-${FONDO_BLANCO(op)}`
-    if (prop === 'border') return `border-${BORDE_BLANCO(op)}`
-    if (prop === 'divide') return 'divide-gray-100'
+    if (prop === 'border') return `${propLado}-${BORDE_BLANCO(op)}`
+    if (prop === 'divide') return `${propLado}-gray-100`
     if (prop === 'placeholder') return 'placeholder-gray-400'
     if (prop === 'ring') return alfa(op) >= 60 ? 'ring-gray-400' : 'ring-gray-300'
     if (prop === 'from' || prop === 'to' || prop === 'via') return `${prop}-gray-50`
@@ -186,7 +200,7 @@ function mapearBase(base) {
 
   /* Grises muy oscuros: eran paneles del tema oscuro. */
   if (['gray', 'slate', 'zinc', 'neutral', 'stone'].includes(familia)) {
-    if (tono >= 800) {
+    if (tono >= 800 && op === null) {
       if (prop === 'bg') return 'bg-white'
       if (prop === 'text') return 'text-gray-900'
       if (prop === 'border') return 'border-gray-200'
@@ -205,11 +219,12 @@ function mapearBase(base) {
   }
   if (prop === 'bg') {
     if (translucido) return `bg-${destino}-${FONDO_TINTE(alfa(op))}`
+    if (tono <= 100) return `bg-${destino}-${tono}` // ya es un tinte claro
     return `bg-${destino}-${tono >= 600 ? 600 : 500}`
   }
   if (prop === 'border' || prop === 'divide' || prop === 'outline') {
-    if (translucido) return `${prop}-${destino}-${BORDE_TINTE(alfa(op))}`
-    return `${prop}-${destino}-500`
+    if (translucido) return `${propLado}-${destino}-${BORDE_TINTE(alfa(op))}`
+    return `${propLado}-${destino}-500`
   }
   if (prop === 'ring') return `ring-${destino}-500`
   if (prop === 'accent' || prop === 'caret') return `${prop}-${destino}-500`
@@ -238,9 +253,10 @@ function mapearForma(base) {
 const FONDO_SOLIDO = /^bg-(primary|blue|emerald|green|amber|orange|yellow|red|rose|purple|violet|indigo|teal|cyan|sky|pink|fuchsia)-(4|5|6|7|8|9)00$/
 
 function resolverContextuales(tokens, contexto = []) {
+  const limpio = (t) => t.replace(/^!/, '')
   const sobreAcento = [...tokens, ...contexto].some((t) => {
-    const { variantes, base } = partirVariantes(t)
-    return variantes.length === 0 && FONDO_SOLIDO.test(base)
+    const { variantes, base } = partirVariantes(limpio(t))
+    return variantes.length === 0 && FONDO_SOLIDO.test(limpio(base))
   })
   return tokens.map((t) => {
     const { variantes, base } = partirVariantes(t)
@@ -258,20 +274,23 @@ function resolverContextuales(tokens, contexto = []) {
    ═══════════════════════════════════════════════════════════════════════ */
 // Un literal se trata como lista de clases solo si contiene algo que sabemos
 // mapear. Así una frase en español nunca entra por accidente.
-const DISPARADOR = /(^|\s)(!?[a-z-]+:)*(bg|text|border|ring|divide|placeholder|from|to|via|shadow|fill|stroke|accent|outline|decoration|caret|rounded|backdrop)-/
+const DISPARADOR = /(^|\s)!?(?:[a-z-]+:)*!?(bg|text|border|ring|divide|placeholder|from|to|via|shadow|fill|stroke|accent|outline|decoration|caret|rounded|backdrop)-/
 
 /** Fases 1 y 2: todo lo que no depende de las clases hermanas. */
 function mapearTokens(entrada) {
   let tokens = colapsarDegradados(entrada)
 
   tokens = tokens.map((t) => {
-    const bang = t.startsWith('!') ? '!' : ''
-    const { variantes, base } = partirVariantes(bang ? t.slice(1) : t)
+    const externo = t.startsWith('!') ? '!' : ''
+    const { variantes, base: crudo } = partirVariantes(externo ? t.slice(1) : t)
+    const interno = crudo.startsWith('!') ? '!' : ''
+    const base = interno ? crudo.slice(1) : crudo
+    const bang = externo
     let nueva = mapearForma(base)
     if (nueva === null) return null
     nueva = mapearBase(nueva)
     if (nueva === null) return null
-    return bang + unir(variantes, nueva)
+    return bang + unir(variantes, interno + nueva)
   }).filter(Boolean)
 
   return tokens
@@ -290,107 +309,189 @@ function transformarLista(texto, contexto = []) {
   const vistos = new Set()
   tokens = tokens.filter((t) => (vistos.has(t) ? false : vistos.add(t)))
 
-  return sangria + tokens.join(' ') + cola
+  return sangria + reflujo(tokens, texto) + cola
 }
 
-/** Recorre los literales ('…', "…", `…`) y transforma los que parezcan clases.
- *  `contexto` son clases hermanas que vienen de FUERA del literal (el caso real:
- *  una plantilla cuyo fondo verde está en el tramo estático y cuyo `text-white`
- *  está dentro de un `${…}`). Sin él, cada mitad decidiría a ciegas. */
-function transformarArchivo(src, contexto = []) {
-  let salida = ''
-  let i = 0
-  while (i < src.length) {
-    const ch = src[i]
-    if (ch === '"' || ch === "'" || ch === '`') {
-      const cierre = ch
-      let j = i + 1
-      let cuerpo = ''
-      let ok = false
-      while (j < src.length) {
-        if (src[j] === '\\') { cuerpo += src.slice(j, j + 2); j += 2; continue }
-        if (src[j] === cierre) { ok = true; break }
-        if (cierre !== '`' && src[j] === '\n') break // cadena sin cerrar en la línea
-        cuerpo += src[j]; j++
-      }
-      if (!ok) { salida += ch; i++; continue }
-      salida += cierre + (cierre === '`' ? transformarPlantilla(cuerpo, contexto) : transformarSimple(cuerpo, contexto)) + cierre
-      i = j + 1
-      continue
-    }
-    // Comentarios: se copian tal cual para no reescribir la prosa del equipo.
-    if (ch === '/' && src[i + 1] === '/') { const f = src.indexOf('\n', i); const e = f === -1 ? src.length : f; salida += src.slice(i, e); i = e; continue }
-    if (ch === '/' && src[i + 1] === '*') { const f = src.indexOf('*/', i); const e = f === -1 ? src.length : f + 2; salida += src.slice(i, e); i = e; continue }
-    salida += ch; i++
+/** Un `className` repartido en varias líneas vuelve a repartirse: unir 20 clases
+ *  en un renglón de 400 caracteres deja el archivo ilegible, y este cambio ya
+ *  toca 200 pantallas. Se respeta la sangría que tenía la continuación. */
+function reflujo(tokens, original) {
+  const salto = original.indexOf('\n')
+  if (salto === -1) return tokens.join(' ')
+  const sangriaCont = (/\n([ \t]*)/.exec(original) ?? [, '  '])[1]
+  const lineas = []
+  let act = ''
+  for (const t of tokens) {
+    if (act && (act + ' ' + t).length > 96) { lineas.push(act); act = t } else act = act ? act + ' ' + t : t
   }
+  if (act) lineas.push(act)
+  return lineas.join('\n' + sangriaCont)
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Lectura del código — con el analizador de TypeScript
+   ───────────────────────────────────────────────────────────────────────
+   Aquí hubo antes un lector escrito a mano, y se equivocó dos veces de la
+   peor manera posible: en silencio. Primero tomó por plantilla la comilla
+   invertida que vivía dentro de una expresión regular; después leyó el '/'
+   de un `</span>` como el principio de otra regex. En ambos casos siguió
+   «leyendo» código creyendo que era texto y lo reescribió: se perdieron
+   palabras de la interfaz y se juntaron sentencias en una sola línea.
+
+   Distinguir una división de una regex, o un cierre de etiqueta JSX de un
+   comentario, es precisamente el trabajo de un analizador de verdad. El
+   proyecto ya trae TypeScript, así que se usa: se piden los nodos de tipo
+   cadena y solo se reescribe lo que hay DENTRO de ellos. El texto JSX, los
+   comentarios y las regex quedan fuera de alcance por construcción, no por
+   una heurística que haya que ir remendando.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const ES_CADENA = new Set([
+  ts.SyntaxKind.StringLiteral,
+  ts.SyntaxKind.NoSubstitutionTemplateLiteral,
+  ts.SyntaxKind.TemplateHead,
+  ts.SyntaxKind.TemplateMiddle,
+  ts.SyntaxKind.TemplateTail,
+])
+
+/** Tramo de código fuente ocupado por el CONTENIDO de la cadena, sin comillas
+ *  ni delimitadores de interpolación. */
+function tramoDeContenido(nodo) {
+  const ini = nodo.getStart()
+  const fin = nodo.getEnd()
+  switch (nodo.kind) {
+    case ts.SyntaxKind.StringLiteral:
+    case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+      return [ini + 1, fin - 1]           //  "…"   '…'   `…`
+    case ts.SyntaxKind.TemplateHead:
+    case ts.SyntaxKind.TemplateMiddle:
+      return [ini + 1, fin - 2]           //  `…${   }…${
+    default:
+      return [ini + 1, fin - 1]           //  }…`
+  }
+}
+
+/** Las clases hermanas solo importan dentro de un mismo `className`, así que
+ *  los literales se agrupan por el atributo JSX —o la plantilla— que los
+ *  contiene. Es lo que permite saber que un `text-white` de un ternario está
+ *  sobre el fondo verde que se declaró en el tramo estático. */
+function ancestroDeGrupo(nodo) {
+  for (let n = nodo.parent; n; n = n.parent) {
+    if (ts.isJsxAttribute(n)) return n
+    if (ts.isTemplateExpression(n)) return n
+    if (ts.isPropertyAssignment(n) || ts.isVariableDeclaration(n)) return n
+    if (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n) || ts.isStatement(n)) return null
+  }
+  return null
+}
+
+function transformarFuente(ruta, texto) {
+  const fuente = ts.createSourceFile(
+    ruta, texto, ts.ScriptTarget.Latest, true,
+    ruta.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  )
+
+  const grupos = new Map()
+  const recorrer = (nodo) => {
+    if (ES_CADENA.has(nodo.kind)) {
+      const clave = ancestroDeGrupo(nodo) ?? nodo
+      const lista = grupos.get(clave)
+      if (lista) lista.push(nodo); else grupos.set(clave, [nodo])
+    }
+    nodo.forEachChild(recorrer)
+  }
+  fuente.forEachChild(recorrer)
+
+  /** @type {{ini:number, fin:number, txt:string}[]} */
+  const parches = []
+  for (const nodos of grupos.values()) {
+    const tramos = nodos.map((n) => {
+      const [ini, fin] = tramoDeContenido(n)
+      return { ini, fin, txt: texto.slice(ini, fin) }
+    })
+    const todo = tramos.map((t) => t.txt).join(' ')
+    if (!DISPARADOR.test(todo)) continue
+
+    const contexto = mapearTokens(todo.split(/\s+/).filter(Boolean))
+    for (const t of tramos) {
+      if (!DISPARADOR.test(t.txt)) continue
+      const nuevo = transformarLista(t.txt, contexto)
+      if (nuevo !== t.txt) parches.push({ ini: t.ini, fin: t.fin, txt: nuevo })
+    }
+  }
+
+  if (!parches.length) return texto
+  parches.sort((a, b) => b.ini - a.ini)          // de atrás hacia delante
+  let salida = texto
+  for (const p of parches) salida = salida.slice(0, p.ini) + p.txt + salida.slice(p.fin)
   return salida
 }
 
-const transformarSimple = (cuerpo, contexto = []) =>
-  (DISPARADOR.test(cuerpo) ? transformarLista(cuerpo, contexto) : cuerpo)
-
-/** Parte una plantilla en tramos estáticos y expresiones `${…}`. */
-function partirPlantilla(cuerpo) {
+/* ═══════════════════════════════════════════════════════════════════════
+   Red de seguridad
+   ───────────────────────────────────────────────────────────────────────
+   Aunque el análisis ya sea correcto, se comprueba: se vuelve a analizar el
+   resultado y se exige que la lista de posiciones de cadena y el número de
+   nodos coincidan, y que fuera de las cadenas no haya cambiado ni un byte.
+   Un archivo que no lo cumpla no se escribe.
+   ═══════════════════════════════════════════════════════════════════════ */
+function fueraDeCadenas(ruta, texto) {
+  const fuente = ts.createSourceFile(
+    ruta, texto, ts.ScriptTarget.Latest, true,
+    ruta.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  )
   const tramos = []
-  let i = 0, act = ''
-  while (i < cuerpo.length) {
-    if (cuerpo[i] === '$' && cuerpo[i + 1] === '{') {
-      let j = i + 2, n = 1
-      while (j < cuerpo.length && n > 0) { if (cuerpo[j] === '{') n++; else if (cuerpo[j] === '}') n--; j++ }
-      tramos.push({ estatico: true, txt: act }); act = ''
-      tramos.push({ estatico: false, txt: cuerpo.slice(i, j) })
-      i = j; continue
-    }
-    act += cuerpo[i]; i++
+  const recorrer = (n) => {
+    if (ES_CADENA.has(n.kind)) tramos.push(tramoDeContenido(n))
+    n.forEachChild(recorrer)
   }
-  tramos.push({ estatico: true, txt: act })
-  return tramos
+  fuente.forEachChild(recorrer)
+  tramos.sort((a, b) => a[0] - b[0])
+  let salida = ''
+  let cursor = 0
+  for (const [ini, fin] of tramos) {
+    if (ini < cursor) continue
+    salida += texto.slice(cursor, ini) + ''
+    cursor = fin
+  }
+  return salida + texto.slice(cursor)
 }
 
-/** Extrae las clases candidatas de un trozo de código: las de los tramos
- *  estáticos y las de cualquier cadena incrustada en una expresión. */
-function clasesCandidatas(texto) {
-  const fuera = []
-  for (const m of texto.matchAll(/(['"`])((?:\\.|(?!\1)[^\\])*)\1/g)) fuera.push(m[2])
-  return fuera.join(' ').split(/\s+/).filter(Boolean)
-}
-
-/** En una plantilla se transforma cada tramo estático Y se recurre dentro de
- *  cada `${…}` — ahí viven los ternarios de estado, que son la mitad de las
- *  clases condicionales de esta app. El contexto se calcula antes sobre el
- *  conjunto ya mapeado, de modo que `text-white` ve el fondo aunque estén en
- *  tramos distintos. */
-function transformarPlantilla(cuerpo, contextoPadre = []) {
-  const tramos = partirPlantilla(cuerpo)
-  const estaticas = tramos.filter((t) => t.estatico).map((t) => t.txt).join(' ')
-  const incrustadas = tramos.filter((t) => !t.estatico).map((t) => clasesCandidatas(t.txt).join(' ')).join(' ')
-  const todo = `${estaticas} ${incrustadas}`
-  if (!DISPARADOR.test(todo)) {
-    // Aun sin clases propias puede contener literales anidados con ellas.
-    return tramos.map((t) => (t.estatico ? t.txt : transformarArchivo(t.txt, contextoPadre))).join('')
-  }
-  const contexto = [
-    ...contextoPadre,
-    ...mapearTokens(todo.split(/\s+/).filter(Boolean)),
-  ]
-  return tramos
-    .map((t) => (t.estatico ? transformarLista(t.txt, contexto) : transformarArchivo(t.txt, contexto)))
-    .join('')
+/** Un archivo con errores de sintaxis nunca debe salir de aquí. */
+function tieneErrores(ruta, texto) {
+  const fuente = ts.createSourceFile(
+    ruta, texto, ts.ScriptTarget.Latest, true,
+    ruta.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  )
+  return fuente.parseDiagnostics?.length > 0
 }
 
 /* ── Ejecución ───────────────────────────────────────────────────────── */
 const rutas = process.argv.slice(2).filter((a) => !a.startsWith('--'))
 const archivos = rutas.length
   ? rutas
-  : execSync('git ls-files "src/**/*.tsx"', { encoding: 'utf8' }).trim().split('\n').filter(Boolean)
+  : execSync('git ls-files -- "src/*.tsx" "src/**/*.tsx" "src/*.ts" "src/**/*.ts"', { encoding: 'utf8' })
+      .trim().split('\n').filter(Boolean)
+      .filter((f) => !/\.(test|spec)\.tsx?$/.test(f))
 
 let cambiados = 0
+const rechazados = []
 for (const f of archivos) {
   const antes = readFileSync(f, 'utf8')
-  const despues = transformarArchivo(antes)
-  if (antes !== despues) {
-    cambiados++
-    if (!DRY) writeFileSync(f, despues)
+  if (tieneErrores(f, antes)) { rechazados.push([f, 'ya venía con errores de sintaxis']); continue }
+  const despues = transformarFuente(f, antes)
+  if (antes === despues) continue
+  if (tieneErrores(f, despues)) { rechazados.push([f, 'el resultado no analiza']); continue }
+  if (fueraDeCadenas(f, antes) !== fueraDeCadenas(f, despues)) {
+    rechazados.push([f, 'cambió algo fuera de las cadenas'])
+    continue
   }
+  cambiados++
+  if (!DRY) writeFileSync(f, despues)
 }
 console.log(`${DRY ? '[simulación] ' : ''}${cambiados} de ${archivos.length} archivos modificados`)
+if (rechazados.length) {
+  console.error(`\n${rechazados.length} archivo(s) NO se tocaron. Revisar a mano:`)
+  for (const [f, motivo] of rechazados) console.error(`  · ${f} — ${motivo}`)
+  process.exitCode = 1
+}

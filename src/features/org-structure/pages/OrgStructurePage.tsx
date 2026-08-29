@@ -16,32 +16,32 @@ export default function OrgStructurePage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-white/5 bg-white/[0.03]">
+      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Building2 size={24} className="text-cyan-400" />
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Building2 size={24} className="text-primary-600" />
               Estructura Organizacional
             </h1>
             {company && (
-              <p className="text-white/40 mt-1">{company.name}</p>
+              <p className="text-gray-500 mt-1">{company.name}</p>
             )}
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <div className="flex items-center gap-2 text-sm text-white/40">
-              <Users size={16} className="text-cyan-400" />
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Users size={16} className="text-primary-600" />
               <span className="font-semibold">{orgUnits.length}</span>
               <span>unidades</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-white/40">
-              <Layers size={16} className="text-cyan-400" />
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Layers size={16} className="text-primary-600" />
               <span className="font-semibold">{usedLevels}</span>
               <span>de {orgLevelDefinitions.length} niveles</span>
             </div>
             <button
               onClick={() => setLevelManagerOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-white/10 text-white/70 rounded-lg text-sm hover:bg-white/5 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-50 transition-colors"
             >
               <Settings2 size={14} />
               Gestionar niveles

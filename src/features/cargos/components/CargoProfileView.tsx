@@ -28,9 +28,9 @@ export function CargoProfileView({ companyName, profile: p, metrics: m, editable
         <header className="flex items-start justify-between gap-4 pb-4 border-b-2" style={{ borderColor: ACCENT }}>
           <div className="min-w-0">
             <div className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: ACCENT }}>Manual de Cargo</div>
-            <Ed editable={editable} tag="h1" className="text-[26px] font-black text-slate-800 leading-tight mt-0.5" value={p.cargo} onCommit={(v) => onPatch?.({ cargo: v })} />
+            <Ed editable={editable} tag="h1" className="text-[26px] font-black text-gray-900 leading-tight mt-0.5" value={p.cargo} onCommit={(v) => onPatch?.({ cargo: v })} />
           </div>
-          <div className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center text-white" style={{ background: ACCENT }}>
+          <div className="shrink-0 w-14 h-14 rounded-lg flex items-center justify-center text-gray-900" style={{ background: ACCENT }}>
             <Briefcase size={26} />
           </div>
         </header>
@@ -103,7 +103,7 @@ export function CargoProfileView({ companyName, profile: p, metrics: m, editable
 
 function Page({ children }: { children: React.ReactNode }) {
   return (
-    <div className="cargo-page bg-white text-slate-800 shadow-lg rounded-sm" style={{ width: 794, minHeight: 1123, padding: 48, display: 'flex', flexDirection: 'column' }}>
+    <div className="cargo-page bg-white text-gray-900 shadow-lg rounded-sm" style={{ width: 794, minHeight: 1123, padding: 48, display: 'flex', flexDirection: 'column' }}>
       {children}
     </div>
   )
@@ -124,9 +124,9 @@ function Section({ icon: Icon, title, children }: { icon: React.ElementType; tit
 function Metric({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-      <div className="text-[9px] uppercase tracking-wide text-slate-400">{label}</div>
-      <div className="text-[20px] font-black text-slate-800 leading-none tabular-nums">{value}</div>
-      {sub && <div className="text-[9px] text-slate-400">{sub}</div>}
+      <div className="text-[9px] uppercase tracking-wide text-gray-500">{label}</div>
+      <div className="text-[20px] font-black text-gray-900 leading-none tabular-nums">{value}</div>
+      {sub && <div className="text-[9px] text-gray-500">{sub}</div>}
     </div>
   )
 }
@@ -134,7 +134,7 @@ function Metric({ label, value, sub }: { label: string; value: number | string; 
 function Footer({ companyName, n, generatedAt }: { companyName: string; n: number; generatedAt: string }) {
   const d = generatedAt ? generatedAt.slice(0, 10) : ''
   return (
-    <div className="mt-auto pt-4 flex items-center justify-between text-[10px] text-slate-400 border-t border-slate-200">
+    <div className="mt-auto pt-4 flex items-center justify-between text-[10px] text-gray-500 border-t border-slate-200">
       <span>{companyName}{d ? ` · ${d}` : ''}</span>
       <span>Página {n}/2 · LeanProcess</span>
     </div>
@@ -146,7 +146,7 @@ function Ed({ value, onCommit, className, tag = 'p', editable, inline }: { value
   const Tag = tag as React.ElementType
   return (
     <Tag
-      className={`${className ?? ''} ${editable ? 'outline-none focus:bg-cyan-50/60 rounded px-0.5 -mx-0.5' : ''}`}
+      className={`${className ?? ''} ${editable ? 'outline-none focus:bg-primary-100 rounded-md px-0.5 -mx-0.5' : ''}`}
       contentEditable={editable}
       suppressContentEditableWarning
       onBlur={editable ? (e: React.FocusEvent<HTMLElement>) => onCommit(e.currentTarget.textContent?.trim() ?? '') : undefined}
@@ -164,15 +164,15 @@ function EdList({ items, onChange, editable, ordered }: { items: string[]; onCha
       {items.map((it, i) => (
         <li key={i} className="flex items-start gap-2 text-[13px] text-slate-700 leading-relaxed group">
           <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ACCENT }}>{ordered ? '' : ''}</span>
-          <span className={`flex-1 ${editable ? 'outline-none focus:bg-cyan-50/60 rounded px-0.5' : ''}`} contentEditable={editable} suppressContentEditableWarning
+          <span className={`flex-1 ${editable ? 'outline-none focus:bg-primary-100 rounded-md px-0.5' : ''}`} contentEditable={editable} suppressContentEditableWarning
             onBlur={editable ? (e) => set(i, e.currentTarget.textContent?.trim() ?? '') : undefined}>{it}</span>
-          {editable && <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500"><X size={12} /></button>}
+          {editable && <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-600"><X size={12} /></button>}
         </li>
       ))}
       {editable && (
-        <li><button onClick={() => onChange([...items, 'Nuevo elemento'])} className="inline-flex items-center gap-1 text-[11px] text-cyan-700 hover:text-cyan-900"><Plus size={11} /> Agregar</button></li>
+        <li><button onClick={() => onChange([...items, 'Nuevo elemento'])} className="inline-flex items-center gap-1 text-[11px] text-primary-700 hover:text-primary-900"><Plus size={11} /> Agregar</button></li>
       )}
-      {!items.length && !editable && <li className="text-[12px] text-slate-300">—</li>}
+      {!items.length && !editable && <li className="text-[12px] text-gray-500">—</li>}
     </ul>
   )
 }
@@ -188,7 +188,7 @@ function Chips({ items, onChange, editable, tone }: { items: string[]; onChange:
         </span>
       ))}
       {editable && <button onClick={() => onChange([...items, 'nuevo'])} className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] border border-dashed" style={{ borderColor: `${tone}55`, color: tone }}><Plus size={10} /></button>}
-      {!items.length && !editable && <span className="text-[12px] text-slate-300">—</span>}
+      {!items.length && !editable && <span className="text-[12px] text-gray-500">—</span>}
     </div>
   )
 }

@@ -110,7 +110,7 @@ export function FieldHelpIcon({ text, position = 'top' }: FieldHelpIconProps) {
               width: TOOLTIP_W,
               visibility: coords ? 'visible' : 'hidden',
             }}
-            className="z-[1000] p-2 rounded-md bg-slate-900/95 border border-white/10 shadow-lg text-xs leading-snug text-white/80 whitespace-normal pointer-events-none"
+            className="z-[1000] p-2 rounded-md bg-slate-900/95 border border-gray-200 shadow-lg text-xs leading-snug text-gray-800 whitespace-normal pointer-events-none"
           >
             {text}
           </div>,
@@ -127,7 +127,7 @@ export function FieldHelpIcon({ text, position = 'top' }: FieldHelpIconProps) {
         aria-expanded={isOpen}
         onMouseEnter={handleMouseEnter}
         onClick={handleClick}
-        className="inline-flex items-center justify-center p-2 -m-2 text-white/40 hover:text-white/70 transition-colors cursor-help"
+        className="inline-flex items-center justify-center p-2 -m-2 text-gray-500 hover:text-gray-700 transition-colors cursor-help"
       >
         <Info className="w-3 h-3" />
       </button>

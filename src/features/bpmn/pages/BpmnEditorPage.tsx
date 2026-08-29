@@ -9,9 +9,9 @@ export default function BpmnEditorPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold text-white">Editor BPMN</h1>
-      <p className="text-white/40">Proximamente: Editor visual de diagramas de flujo BPMN 2.0.</p>
-      <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-12 text-center text-white/20">
+      <h1 className="text-2xl font-bold text-gray-900">Editor BPMN</h1>
+      <p className="text-gray-500">Proximamente: Editor visual de diagramas de flujo BPMN 2.0.</p>
+      <div className="bg-gray-50 rounded-lg border border-gray-100 p-12 text-center text-gray-300">
         Editor BPMN para el proceso {processId}
       </div>
     </div>

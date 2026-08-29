@@ -105,10 +105,10 @@ export function ComboboxSelect({
   }
 
   const triggerBase =
-    'w-full flex items-center justify-between border border-white/10 bg-white/5 text-sm focus:outline-none focus:border-cyan-500/40 cursor-pointer'
+    'w-full flex items-center justify-between border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-primary-300 cursor-pointer'
 
   const triggerClass = className
-    ? `${className} flex items-center justify-between focus:outline-none focus:border-cyan-500/40 cursor-pointer`
+    ? `${className} flex items-center justify-between focus:outline-none focus:border-primary-300 cursor-pointer`
     : `${triggerBase} px-3 py-2 rounded-lg`
 
   return (
@@ -119,20 +119,20 @@ export function ComboboxSelect({
         onClick={handleOpen}
         className={triggerClass}
       >
-        <span className={value ? 'text-white' : 'text-white/30'}>
+        <span className={value ? 'text-gray-900' : 'text-gray-400'}>
           {value || placeholder}
         </span>
-        <ChevronDown size={14} className="text-white/30 shrink-0 ml-2" />
+        <ChevronDown size={14} className="text-gray-400 shrink-0 ml-2" />
       </button>
 
       {open && (
         <div
           ref={dropdownRef}
           style={dropdownStyle}
-          className="bg-[#0d1420] border border-white/10 rounded-lg shadow-2xl overflow-hidden"
+          className="bg-white border border-gray-200 rounded-lg shadow-2xl overflow-hidden"
         >
-          <div className="p-2 border-b border-white/5 flex items-center gap-2 px-3">
-            <Search size={13} className="text-white/30 shrink-0" />
+          <div className="p-2 border-b border-gray-100 flex items-center gap-2 px-3">
+            <Search size={13} className="text-gray-400 shrink-0" />
             <input
               ref={inputRef}
               type="text"
@@ -140,7 +140,7 @@ export function ComboboxSelect({
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Buscar..."
-              className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 focus:outline-none"
+              className="flex-1 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
             />
           </div>
           <div className="overflow-y-auto max-h-52">
@@ -149,17 +149,17 @@ export function ComboboxSelect({
                 key={option}
                 type="button"
                 onClick={() => handleSelect(option)}
-                className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-white/5 ${
+                className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-gray-50 ${
                   option === value
-                    ? 'bg-cyan-500/10 text-cyan-400 font-medium'
-                    : 'text-white/70'
+                    ? 'bg-primary-50 text-primary-600 font-medium'
+                    : 'text-gray-700'
                 }`}
               >
                 {option}
               </button>
             ))}
             {filtered.length === 0 && (
-              <div className="px-3 py-3 text-sm text-white/30 text-center">
+              <div className="px-3 py-3 text-sm text-gray-400 text-center">
                 Sin resultados para tu búsqueda
               </div>
             )}

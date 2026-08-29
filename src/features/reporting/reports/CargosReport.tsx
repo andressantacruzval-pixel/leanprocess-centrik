@@ -48,9 +48,9 @@ export function CargosReport() {
   if (!cargos.length) {
     return (
       <div className="p-10 text-center">
-        <UserCog size={28} className="mx-auto text-white/20 mb-3" />
-        <h3 className="text-base font-semibold text-white">Aún no hay cargos</h3>
-        <p className="text-sm text-white/50 mt-1 max-w-md mx-auto">Los cargos salen de los <b className="text-white/70">lanes</b> de tus diagramas BPMN. Dibuja un flujograma con roles y aquí verás, por cargo, cuántos procesos y actividades tiene y su tiempo de valor.</p>
+        <UserCog size={28} className="mx-auto text-gray-300 mb-3" />
+        <h3 className="text-base font-semibold text-gray-900">Aún no hay cargos</h3>
+        <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">Los cargos salen de los <b className="text-gray-700">lanes</b> de tus diagramas BPMN. Dibuja un flujograma con roles y aquí verás, por cargo, cuántos procesos y actividades tiene y su tiempo de valor.</p>
       </div>
     )
   }
@@ -92,13 +92,13 @@ export function CargosReport() {
 
       {/* Filtros + periodo/unidad */}
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex items-center gap-1.5 bg-white/[0.03] rounded-lg border border-white/10 px-3 py-1.5 flex-1 max-w-[240px]">
-          <Search size={13} className="text-white/25 shrink-0" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cargo…" className="bg-transparent text-xs text-white placeholder-white/25 outline-none flex-1 min-w-0" />
-          {q && <button onClick={() => setQ('')} className="text-white/25 hover:text-white/50"><X size={12} /></button>}
+        <div className="flex items-center gap-1.5 bg-gray-50 rounded-lg border border-gray-200 px-3 py-1.5 flex-1 max-w-[240px]">
+          <Search size={13} className="text-gray-400 shrink-0" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cargo…" className="bg-transparent text-xs text-gray-900 placeholder-gray-400 outline-none flex-1 min-w-0" />
+          {q && <button onClick={() => setQ('')} className="text-gray-400 hover:text-gray-500"><X size={12} /></button>}
         </div>
-        <button onClick={() => setSoloSin((v) => !v)} className={`text-[11px] px-2.5 py-1.5 rounded-lg border transition-colors ${soloSin ? 'border-amber-500/40 bg-amber-500/10 text-amber-300' : 'border-white/10 text-white/50 hover:text-white/80'}`}>Solo sin catalogar</button>
-        {pickCargo && <button onClick={() => setPickCargo(null)} className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20">{pickCargo} <X size={12} /></button>}
+        <button onClick={() => setSoloSin((v) => !v)} className={`text-[11px] px-2.5 py-1.5 rounded-lg border transition-colors ${soloSin ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-gray-200 text-gray-500 hover:text-gray-800'}`}>Solo sin catalogar</button>
+        {pickCargo && <button onClick={() => setPickCargo(null)} className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg border border-primary-300 bg-primary-50 text-primary-700 hover:bg-primary-100">{pickCargo} <X size={12} /></button>}
         <div className="ml-auto flex items-center gap-2">
           <PeriodSel value={period} onChange={setPeriod} />
           <UnitSel value={unit} onChange={setUnit} />
@@ -107,7 +107,7 @@ export function CargosReport() {
 
       <TableWrap minWidth={1100}>
         <thead>
-          <tr className="bg-white/[0.03] border-b border-white/5">
+          <tr className="bg-gray-50 border-b border-gray-100">
             <Th> </Th><Th>Cargo</Th><Th>Catálogo</Th><Th>Procesos</Th><Th>Actividades</Th>
             <Th>{`VA ${unitLabel}`}</Th><Th>{`NVA ${unitLabel}`}</Th><Th>{`NVABN ${unitLabel}`}</Th><Th>% Valor</Th>
           </tr>
@@ -117,31 +117,31 @@ export function CargosReport() {
             const pv = c.totalDaily > 0 ? Math.round(c.vaDaily / c.totalDaily * 100) : null
             const isOpen = open.has(c.key)
             return [
-              <tr key={c.key} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+              <tr key={c.key} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <Td>
                   {c.activities.length > 0 && (
-                    <button onClick={() => toggle(c.key)} className="text-white/40 hover:text-white/80">
+                    <button onClick={() => toggle(c.key)} className="text-gray-500 hover:text-gray-800">
                       {isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                     </button>
                   )}
                 </Td>
-                <Td className="text-white font-medium">{c.cargo}</Td>
+                <Td className="text-gray-900 font-medium">{c.cargo}</Td>
                 <Td>
                   {c.inCatalog
                     ? <Badge label="En catálogo" hex="#10b981" />
                     : c.activities.length > 0
-                      ? <button onClick={() => addCatalogItem(CARGO_CATALOG, c.cargo)} className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-amber-500/12 text-amber-300 hover:bg-amber-500/20"><Plus size={10} /> Agregar</button>
-                      : <span className="text-white/25">—</span>}
+                      ? <button onClick={() => addCatalogItem(CARGO_CATALOG, c.cargo)} className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100"><Plus size={10} /> Agregar</button>
+                      : <span className="text-gray-400">—</span>}
                 </Td>
                 <Td className="tabular-nums">{c.processes.size}</Td>
-                <Td className="tabular-nums text-white/85">{c.activities.length}</Td>
+                <Td className="tabular-nums text-gray-800">{c.activities.length}</Td>
                 <Td className="tabular-nums"><span style={{ color: CLASSIFICATION_COLORS.VA.hex }}>{fmt(c.vaDaily)}</span></Td>
                 <Td className="tabular-nums"><span style={{ color: CLASSIFICATION_COLORS.NVA.hex }}>{fmt(c.nvaDaily)}</span></Td>
                 <Td className="tabular-nums"><span style={{ color: CLASSIFICATION_COLORS.NVABN.hex }}>{fmt(c.nvabnDaily)}</span></Td>
-                <Td>{pv == null ? <span className="text-white/25">s/valorar</span> : <span className={pv >= 60 ? 'text-emerald-400' : pv >= 30 ? 'text-amber-400' : 'text-red-400'}>{pv}%</span>}</Td>
+                <Td>{pv == null ? <span className="text-gray-400">s/valorar</span> : <span className={pv >= 60 ? 'text-emerald-600' : pv >= 30 ? 'text-amber-600' : 'text-red-600'}>{pv}%</span>}</Td>
               </tr>,
               isOpen && (
-                <tr key={c.key + '-d'} className="bg-black/20">
+                <tr key={c.key + '-d'} className="bg-gray-900/45">
                   <td colSpan={9} className="px-3 py-2">
                     <CargoDetail cargo={c} fmt={fmt} unitLabel={unitLabel} />
                   </td>
@@ -158,9 +158,9 @@ export function CargosReport() {
 
 function PeriodSel({ value, onChange }: { value: CargoPeriod; onChange: (v: CargoPeriod) => void }) {
   return (
-    <label className="inline-flex items-center gap-1.5 text-[11px] text-white/50">
+    <label className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">
       Periodo
-      <select value={value} onChange={(e) => onChange(e.target.value as CargoPeriod)} className="appearance-none bg-white/[0.03] border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white/80 outline-none cursor-pointer focus:ring-2 focus:ring-cyan-500/50">
+      <select value={value} onChange={(e) => onChange(e.target.value as CargoPeriod)} className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[11px] text-gray-800 outline-none cursor-pointer focus:ring-2 focus:ring-primary-500">
         {PERIOD_OPTIONS.map((p) => <option key={p} value={p}>{PERIOD_LABELS[p]}</option>)}
       </select>
     </label>
@@ -168,9 +168,9 @@ function PeriodSel({ value, onChange }: { value: CargoPeriod; onChange: (v: Carg
 }
 function UnitSel({ value, onChange }: { value: 'min' | 'h'; onChange: (v: 'min' | 'h') => void }) {
   return (
-    <div className="inline-flex rounded-lg border border-white/10 p-0.5">
+    <div className="inline-flex rounded-lg border border-gray-200 p-0.5">
       {(['min', 'h'] as const).map((u) => (
-        <button key={u} onClick={() => onChange(u)} className={`px-2 py-1 rounded text-[11px] ${value === u ? 'bg-cyan-500/20 text-cyan-300' : 'text-white/40 hover:text-white/70'}`}>{u === 'h' ? 'Horas' : 'Minutos'}</button>
+        <button key={u} onClick={() => onChange(u)} className={`px-2 py-1 rounded-md text-[11px] ${value === u ? 'bg-primary-100 text-primary-700' : 'text-gray-500 hover:text-gray-700'}`}>{u === 'h' ? 'Horas' : 'Minutos'}</button>
       ))}
     </div>
   )
@@ -178,8 +178,8 @@ function UnitSel({ value, onChange }: { value: 'min' | 'h'; onChange: (v: 'min' 
 
 function CargoDetail({ cargo, fmt, unitLabel }: { cargo: CargoAgg; fmt: (d: number) => string; unitLabel: string }) {
   return (
-    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5">
-      <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-white/35 mb-1.5">
+    <div className="rounded-lg border border-gray-100 bg-gray-50 p-2.5">
+      <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-gray-400 mb-1.5">
         <span>Actividades de «{cargo.cargo}» ({cargo.activities.length})</span>
         <span>{unitLabel}</span>
       </div>
@@ -190,10 +190,10 @@ function CargoDetail({ cargo, fmt, unitLabel }: { cargo: CargoAgg; fmt: (d: numb
             <div key={i} className="grid grid-cols-[1fr_auto_auto] items-center gap-3 text-[11px]">
               <span className="flex items-center gap-2 min-w-0">
                 <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: c ? c.hex : 'rgba(255,255,255,0.2)' }} />
-                <span className="text-white/75 truncate">{a.activityName}</span>
+                <span className="text-gray-700 truncate">{a.activityName}</span>
               </span>
-              <span className="text-white/35 truncate max-w-[160px] text-right">{a.processName}</span>
-              <span className="text-white/55 tabular-nums w-20 text-right">{fmt(a.dailyMinutes)}</span>
+              <span className="text-gray-400 truncate max-w-[160px] text-right">{a.processName}</span>
+              <span className="text-gray-600 tabular-nums w-20 text-right">{fmt(a.dailyMinutes)}</span>
             </div>
           )
         })}

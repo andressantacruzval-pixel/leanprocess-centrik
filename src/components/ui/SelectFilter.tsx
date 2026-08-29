@@ -24,19 +24,19 @@ export function SelectFilter({ value, onChange, options, placeholder, className 
           // El ancho intrinseco de un <select> lo fija su opcion mas larga, y aqui las
           // opciones son nombres de macroproceso: sin tope, un solo filtro empuja a
           // los demas fuera de la pantalla.
-          'appearance-none w-full max-w-[45vw] sm:max-w-[12rem] truncate pl-3 pr-7 py-1.5 rounded-lg text-[10px] font-medium bg-white/5 border border-white/10 text-white/60 hover:border-white/20 focus:border-cyan-500/30 focus:ring-1 focus:ring-cyan-500/20 transition-all cursor-pointer'
+          'appearance-none w-full max-w-[45vw] sm:max-w-[12rem] truncate pl-3 pr-7 py-1.5 rounded-lg text-[10px] font-medium bg-gray-50 border border-gray-200 text-gray-600 hover:border-gray-300 focus:border-primary-300 focus:ring-1 focus:ring-primary-500 transition-all cursor-pointer'
         }
       >
         {placeholder !== undefined && (
-          <option value="" className="bg-[#0b1020] text-white">{placeholder}</option>
+          <option value="" className="bg-surface-ground text-gray-900">{placeholder}</option>
         )}
         {options.map((o) => (
-          <option key={o.value} value={o.value} className="bg-[#0b1020] text-white">
+          <option key={o.value} value={o.value} className="bg-surface-ground text-gray-900">
             {o.label}
           </option>
         ))}
       </select>
-      <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+      <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
     </div>
   )
 }

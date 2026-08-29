@@ -125,19 +125,19 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
     onClose()
   }
 
-  const inp = 'w-full bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[13px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/50'
-  const lbl = 'block text-[10px] font-medium text-white/50 mb-1 uppercase tracking-wide'
+  const inp = 'w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500'
+  const lbl = 'block text-[10px] font-medium text-gray-500 mb-1 uppercase tracking-wide'
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed z-[71] inset-0 m-auto h-[90vh] w-[95vw] max-w-2xl bg-[#0a0f1a] rounded-2xl border border-white/10 flex flex-col shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-black/20 shrink-0">
+      <div className="fixed inset-0 z-[70] bg-gray-900/45" onClick={onClose} />
+      <div className="fixed z-[71] inset-0 m-auto h-[90vh] w-[95vw] max-w-2xl bg-white rounded-lg border border-gray-200 flex flex-col shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-900/45 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-indigo-500/15 flex items-center justify-center"><ShieldCheck size={15} className="text-indigo-400" /></div>
-            <h3 className="text-sm font-semibold text-white">{asset ? 'Editar activo de información' : 'Nuevo activo de información'}</h3>
+            <div className="w-7 h-7 rounded-lg bg-primary-50 flex items-center justify-center"><ShieldCheck size={15} className="text-primary-600" /></div>
+            <h3 className="text-sm font-semibold text-gray-900">{asset ? 'Editar activo de información' : 'Nuevo activo de información'}</h3>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-md text-white/40 hover:text-white/80 hover:bg-white/5"><X size={18} /></button>
+          <button onClick={onClose} className="p-1.5 rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-50"><X size={18} /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
@@ -147,7 +147,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
             <div><label className={lbl}>Código</label>
               <div className="flex gap-1.5">
                 <input className={inp} value={f.code} onChange={(e) => set('code', e.target.value)} placeholder={`${prefix}-ACT-001`} />
-                <button type="button" onClick={autoAssetCode} title="Generar código automático (organización · proceso · ACT)" className="shrink-0 inline-flex items-center gap-1 px-2 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10.5px] font-medium hover:bg-indigo-500/25"><Wand2 size={12} /></button>
+                <button type="button" onClick={autoAssetCode} title="Generar código automático (organización · proceso · ACT)" className="shrink-0 inline-flex items-center gap-1 px-2 rounded-lg bg-primary-50 text-primary-700 border border-primary-300 text-[10.5px] font-medium hover:bg-primary-100"><Wand2 size={12} /></button>
               </div>
             </div>
             <div><label className={lbl}>Tipo</label><CreatableSelect options={opts('asset_type')} value={f.asset_type} onChange={(v) => set('asset_type', v)} onCreateOption={(v) => addCatalogItem('asset_type', v)} placeholder="Tipo de activo…" /></div>
@@ -179,7 +179,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
 
           {/* Legal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label className="flex items-center gap-2 text-[12px] text-white/70 sm:col-span-2"><input type="checkbox" checked={f.has_personal_data} onChange={(e) => set('has_personal_data', e.target.checked)} className="accent-cyan-500" /> Contiene datos personales</label>
+            <label className="flex items-center gap-2 text-[12px] text-gray-700 sm:col-span-2"><input type="checkbox" checked={f.has_personal_data} onChange={(e) => set('has_personal_data', e.target.checked)} className="accent-primary-500" /> Contiene datos personales</label>
             {f.has_personal_data && <div className="sm:col-span-2"><label className={lbl}>Categoría de datos personales</label><CreatableSelect options={opts('personal_data_category')} value={f.personal_data_category} onChange={(v) => set('personal_data_category', v)} onCreateOption={(v) => addCatalogItem('personal_data_category', v)} placeholder="Sensibles, financieros…" /></div>}
             <div className="sm:col-span-2"><label className={lbl}>Requisitos legales / contractuales</label><input className={inp} value={f.legal_requirements} onChange={(e) => set('legal_requirements', e.target.value)} /></div>
             <div><label className={lbl}>Periodo de retención</label><CreatableSelect options={opts('retention_period')} value={f.retention_period} onChange={(v) => set('retention_period', v)} onCreateOption={(v) => addCatalogItem('retention_period', v)} placeholder="Mensual, Anual…" /></div>
@@ -189,7 +189,7 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
 
           {/* Trazabilidad (Data Journey): de qué procesos viene y a cuáles va */}
           <div>
-            <p className="text-[11px] font-semibold text-white/70 mb-2">Trazabilidad — Data Journey <span className="text-white/35 font-normal">(hacia dónde fluye este activo)</span></p>
+            <p className="text-[11px] font-semibold text-gray-700 mb-2">Trazabilidad — Data Journey <span className="text-gray-400 font-normal">(hacia dónde fluye este activo)</span></p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className={`${lbl} flex items-center gap-1`}><ArrowLeft size={11} /> Viene de los procesos</label>
@@ -203,9 +203,9 @@ export function AssetFormModal({ processId, bpmnElementId, asset, modeler, onClo
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/5 shrink-0">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-[12px] text-white/60 hover:text-white hover:bg-white/5 border border-white/10">Cancelar</button>
-          <button onClick={save} disabled={!f.name.trim()} className="px-4 py-2 rounded-lg text-[12px] font-medium bg-gradient-to-r from-indigo-600 to-cyan-600 text-white hover:from-indigo-500 hover:to-cyan-500 disabled:opacity-40">{asset ? 'Guardar cambios' : 'Crear activo'}</button>
+        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-gray-100 shrink-0">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-[12px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-gray-200">Cancelar</button>
+          <button onClick={save} disabled={!f.name.trim()} className="px-4 py-2 rounded-lg text-[12px] font-medium text-white disabled:opacity-40 bg-primary-500 hover:bg-primary-600">{asset ? 'Guardar cambios' : 'Crear activo'}</button>
         </div>
       </div>
 
@@ -236,20 +236,20 @@ function ProcessPicker({ processes, selected, onToggle, countOf }: {
   const [q, setQ] = useState('')
   const shown = q ? processes.filter((p) => p.name.toLowerCase().includes(q.toLowerCase())) : processes
   return (
-    <div className="border border-white/10 rounded-lg bg-white/[0.02]">
+    <div className="border border-gray-200 rounded-lg bg-gray-50">
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Buscar proceso…"
-        className="w-full bg-transparent border-b border-white/10 px-2.5 py-1.5 text-[12px] text-white placeholder-white/25 focus:outline-none"
+        className="w-full bg-transparent border-b border-gray-200 px-2.5 py-1.5 text-[12px] text-gray-900 placeholder-gray-400 focus:outline-none"
       />
       <div className="max-h-32 overflow-y-auto p-1.5 space-y-0.5">
-        {shown.length === 0 && <p className="text-[11px] text-white/30 px-1.5 py-2">Sin procesos.</p>}
+        {shown.length === 0 && <p className="text-[11px] text-gray-400 px-1.5 py-2">Sin procesos.</p>}
         {shown.map((p) => (
-          <label key={p.id} className="flex items-center gap-2 px-1.5 py-1 rounded hover:bg-white/5 cursor-pointer">
-            <input type="checkbox" checked={selected.includes(p.id)} onChange={() => onToggle(p.id)} className="accent-cyan-500 shrink-0" />
-            <span className="text-[12px] text-white/70 truncate flex-1">{p.name}</span>
-            {selected.includes(p.id) && <span className="text-[9px] text-cyan-300 shrink-0">{countOf?.(p.id) ?? 0} campos</span>}
+          <label key={p.id} className="flex items-center gap-2 px-1.5 py-1 rounded-md hover:bg-gray-50 cursor-pointer">
+            <input type="checkbox" checked={selected.includes(p.id)} onChange={() => onToggle(p.id)} className="accent-primary-500 shrink-0" />
+            <span className="text-[12px] text-gray-700 truncate flex-1">{p.name}</span>
+            {selected.includes(p.id) && <span className="text-[9px] text-primary-700 shrink-0">{countOf?.(p.id) ?? 0} campos</span>}
           </label>
         ))}
       </div>

@@ -25,10 +25,10 @@ const TABS: { id: ActiveTab; label: string; icon: React.ElementType; color: stri
 ]
 
 const TAB_COLORS: Record<ActiveTab, string> = {
-  conversation: 'from-cyan-600 to-blue-600',
-  interview:    'from-purple-600 to-cyan-600',
-  direct:       'from-blue-600 to-indigo-600',
-  file:         'from-amber-600 to-orange-600',
+  conversation: 'from-primary-500 to-blue-500',
+  interview:    'from-primary-500 to-primary-500',
+  direct:       'from-blue-500 to-primary-500',
+  file:         'from-amber-500 to-amber-500',
 }
 
 export default function AiConsultantPage() {
@@ -142,16 +142,16 @@ export default function AiConsultantPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Sparkles className="text-cyan-400" size={28} />
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Sparkles className="text-primary-600" size={28} />
             Consultor de Procesos IA
           </h1>
-          <p className="text-white/40 mt-1">Genera diagramas BPMN 2.0 profesionales con inteligencia artificial</p>
+          <p className="text-gray-500 mt-1">Genera diagramas BPMN 2.0 profesionales con inteligencia artificial</p>
         </div>
         {phase !== 'welcome' && (
           <button
             onClick={reset}
-            className="flex items-center gap-2 px-4 py-2 border border-white/10 rounded-xl text-sm font-medium text-white/60 bg-white/5 hover:bg-white/10 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors"
           >
             <RotateCcw size={16} />
             Nueva consulta
@@ -161,25 +161,25 @@ export default function AiConsultantPage() {
 
       {/* Error banner */}
       {error && (
-        <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-          <AlertCircle size={20} className="text-red-400 shrink-0" />
-          <p className="text-sm text-red-400">{error}</p>
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+          <AlertCircle size={20} className="text-red-600 shrink-0" />
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
       {/* Success banner */}
       {saveSuccess && (
-        <div className="flex items-center gap-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-4 py-3">
-          <Sparkles size={20} className="text-cyan-400 shrink-0" />
-          <p className="text-sm text-cyan-400">Diagrama guardado exitosamente!</p>
+        <div className="flex items-center gap-3 bg-primary-50 border border-primary-200 rounded-lg px-4 py-3">
+          <Sparkles size={20} className="text-primary-600 shrink-0" />
+          <p className="text-sm text-primary-600">Diagrama guardado exitosamente!</p>
         </div>
       )}
 
       {/* ─── WELCOME PHASE — selector de 4 modos ──────────────────────────── */}
       {phase === 'welcome' && (
-        <div className="bg-white/[0.03] rounded-2xl border border-white/5 overflow-hidden">
+        <div className="bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
           {/* Tab selector */}
-          <div className="flex border-b border-white/5">
+          <div className="flex border-b border-gray-100">
             {TABS.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id
@@ -189,8 +189,8 @@ export default function AiConsultantPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-4 text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-white/[0.05] text-white border-b-2 border-cyan-400'
-                      : 'text-white/40 hover:text-white/60 hover:bg-white/[0.02]'
+                      ? 'bg-gray-50 text-gray-900 border-b-2 border-primary-500'
+                      : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <Icon size={16} />
@@ -206,22 +206,22 @@ export default function AiConsultantPage() {
             {/* ── Tab 1: Conversación libre ── */}
             {activeTab === 'conversation' && (
               <div className="max-w-xl mx-auto text-center">
-                <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-cyan-500/10 flex items-center justify-center">
-                  <MessageSquare size={28} className="text-cyan-400" />
+                <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-primary-50 flex items-center justify-center">
+                  <MessageSquare size={28} className="text-primary-600" />
                 </div>
-                <h2 className="text-lg font-semibold text-white mb-2">Conversación libre</h2>
-                <p className="text-white/40 text-sm mb-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Conversación libre</h2>
+                <p className="text-gray-500 text-sm mb-6">
                   Describe tu proceso como quieras. La IA te hará preguntas de clarificación cuando lo necesite
                   y generará el diagrama cuando tenga suficiente información.
                 </p>
-                <div className="flex flex-wrap justify-center gap-2 mb-8 text-xs text-white/30">
-                  <span className="px-3 py-1 bg-white/5 rounded-full border border-white/5">Sin orden fijo</span>
-                  <span className="px-3 py-1 bg-white/5 rounded-full border border-white/5">Chat adaptativo</span>
-                  <span className="px-3 py-1 bg-white/5 rounded-full border border-white/5">Voz + texto</span>
+                <div className="flex flex-wrap justify-center gap-2 mb-8 text-xs text-gray-400">
+                  <span className="px-3 py-1 bg-gray-50 rounded-full border border-gray-100">Sin orden fijo</span>
+                  <span className="px-3 py-1 bg-gray-50 rounded-full border border-gray-100">Chat adaptativo</span>
+                  <span className="px-3 py-1 bg-gray-50 rounded-full border border-gray-100">Voz + texto</span>
                 </div>
                 <button
                   onClick={() => startInterview(undefined, 'conversation')}
-                  className={`inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r ${TAB_COLORS.conversation} text-white rounded-xl font-medium hover:opacity-90 transition-all shadow-lg shadow-cyan-500/20`}
+                  className={`inline-flex items-center gap-2 px-8 py-3 bg-primary-500 ${TAB_COLORS.conversation} text-white rounded-lg font-medium hover:opacity-90 transition-all shadow-lg`}
                 >
                   <MessageSquare size={18} />
                   Iniciar conversación
@@ -232,11 +232,11 @@ export default function AiConsultantPage() {
             {/* ── Tab 2: Entrevista guiada ── */}
             {activeTab === 'interview' && (
               <div className="max-w-xl mx-auto text-center">
-                <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-purple-500/10 flex items-center justify-center">
-                  <ListChecks size={28} className="text-purple-400" />
+                <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-primary-50 flex items-center justify-center">
+                  <ListChecks size={28} className="text-primary-600" />
                 </div>
-                <h2 className="text-lg font-semibold text-white mb-2">Entrevista guiada</h2>
-                <p className="text-white/40 text-sm mb-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Entrevista guiada</h2>
+                <p className="text-gray-500 text-sm mb-6">
                   La IA te hace preguntas una a una en orden lógico: nombre, objetivo, pasos, decisiones, roles y cierre.
                   Ideal para procesos que aún no tienes del todo definidos.
                 </p>
@@ -246,14 +246,14 @@ export default function AiConsultantPage() {
                     { step: '2', label: 'Generación', color: 'cyan' },
                     { step: '3', label: 'Revisión', color: 'blue' },
                   ].map(({ step, label, color }) => (
-                    <div key={step} className={`p-3 bg-${color}-500/10 border border-${color}-500/20 rounded-xl`}>
+                    <div key={step} className={`p-3 bg-${color}-500/10 border border-${color}-500/20 rounded-lg`}>
                       <p className={`font-semibold text-${color}-400 text-xs`}>{step}. {label}</p>
                     </div>
                   ))}
                 </div>
                 <button
                   onClick={() => startInterview(undefined, 'interview')}
-                  className={`inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r ${TAB_COLORS.interview} text-white rounded-xl font-medium hover:opacity-90 transition-all shadow-lg shadow-purple-500/20`}
+                  className={`inline-flex items-center gap-2 px-8 py-3 bg-primary-500 ${TAB_COLORS.interview} text-white rounded-lg font-medium hover:opacity-90 transition-all shadow-lg`}
                 >
                   <ListChecks size={18} />
                   Iniciar entrevista
@@ -265,11 +265,11 @@ export default function AiConsultantPage() {
             {activeTab === 'direct' && (
               <div className="max-w-2xl mx-auto">
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/10 flex items-center justify-center">
-                    <PenLine size={28} className="text-blue-400" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 flex items-center justify-center">
+                    <PenLine size={28} className="text-blue-600" />
                   </div>
-                  <h2 className="text-lg font-semibold text-white mb-1">Entrada directa</h2>
-                  <p className="text-white/40 text-sm">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-1">Entrada directa</h2>
+                  <p className="text-gray-500 text-sm">
                     Describe tu proceso completo en un solo bloque. Puedes dictarlo por voz.
                     La IA genera el diagrama sin preguntas adicionales.
                   </p>
@@ -281,12 +281,12 @@ export default function AiConsultantPage() {
                     onChange={(e) => setDirectDescription(e.target.value)}
                     placeholder="Describe el proceso completo aquí... Ej: 'El proceso de compras inicia cuando el área operativa solicita un material. El jefe de compras revisa la solicitud y si el monto es menor a $1000 aprueba directamente, si no, requiere autorización de gerencia. Una vez aprobado, compras contacta proveedores y genera la orden de compra...'"
                     rows={7}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 text-sm resize-none focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.07] transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 text-sm resize-none focus:outline-none focus:border-blue-300 focus:bg-gray-50 transition-all"
                   />
                   {isListening && (
-                    <div className="absolute bottom-3 right-3 flex items-center gap-2 px-3 py-1.5 bg-red-500/20 rounded-lg">
-                      <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-                      <span className="text-xs text-red-400">Escuchando...</span>
+                    <div className="absolute bottom-3 right-3 flex items-center gap-2 px-3 py-1.5 bg-red-100 rounded-lg">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                      <span className="text-xs text-red-600">Escuchando...</span>
                     </div>
                   )}
                 </div>
@@ -294,10 +294,10 @@ export default function AiConsultantPage() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleDirectVoice}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all border ${
                       isListening
-                        ? 'bg-red-500/20 border-red-500/30 text-red-400'
-                        : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80'
+                        ? 'bg-red-100 border-red-300 text-red-600'
+                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-800'
                     }`}
                   >
                     <Mic size={16} />
@@ -306,17 +306,17 @@ export default function AiConsultantPage() {
                   <button
                     onClick={handleGenerateDirect}
                     disabled={!directWithTranscript.trim() || isProcessing || interviewBudget.isConsuming}
-                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all shadow-lg ${
+                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg ${
                       directWithTranscript.trim() && !isProcessing
-                        ? `bg-gradient-to-r ${TAB_COLORS.direct} text-white hover:opacity-90 shadow-blue-500/20`
-                        : 'bg-white/5 text-white/30 cursor-not-allowed'
+                        ? `bg-primary-500 ${TAB_COLORS.direct} text-white hover:opacity-90`
+                        : 'bg-gray-50 text-gray-400 cursor-not-allowed'
                     }`}
                   >
                     {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                     Generar diagrama
                   </button>
                 </div>
-                <p className="text-xs text-white/20 mt-3 text-center">
+                <p className="text-xs text-gray-300 mt-3 text-center">
                   Tip: menciona roles, pasos en orden, puntos de decisión y cómo termina el proceso
                 </p>
               </div>
@@ -326,11 +326,11 @@ export default function AiConsultantPage() {
             {activeTab === 'file' && (
               <div className="max-w-2xl mx-auto">
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-500/10 flex items-center justify-center">
-                    <Paperclip size={28} className="text-amber-400" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-50 flex items-center justify-center">
+                    <Paperclip size={28} className="text-amber-600" />
                   </div>
-                  <h2 className="text-lg font-semibold text-white mb-1">Carga de archivo</h2>
-                  <p className="text-white/40 text-sm">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-1">Carga de archivo</h2>
+                  <p className="text-gray-500 text-sm">
                     Sube un PDF, imagen (pizarrón, flujograma), audio o video de tu proceso.
                     La IA lo analiza y genera el BPMN automáticamente.
                   </p>
@@ -341,10 +341,10 @@ export default function AiConsultantPage() {
                   onDrop={handleFileDrop}
                   onDragOver={(e) => e.preventDefault()}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`relative rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-all ${
+                  className={`relative rounded-lg border-2 border-dashed p-8 text-center cursor-pointer transition-all ${
                     selectedFile
-                      ? 'border-amber-500/40 bg-amber-500/5'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+                      ? 'border-amber-300 bg-amber-50'
+                      : 'border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-50'
                   }`}
                 >
                   <input
@@ -356,20 +356,20 @@ export default function AiConsultantPage() {
                   />
                   {selectedFile ? (
                     <div className="flex items-center justify-center gap-3">
-                      <Upload size={20} className="text-amber-400" />
-                      <span className="text-sm text-amber-400 font-medium">{selectedFile.name}</span>
+                      <Upload size={20} className="text-amber-600" />
+                      <span className="text-sm text-amber-600 font-medium">{selectedFile.name}</span>
                       <button
                         onClick={(e) => { e.stopPropagation(); setSelectedFile(null) }}
-                        className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                        className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                       >
-                        <X size={12} className="text-white/60" />
+                        <X size={12} className="text-gray-600" />
                       </button>
                     </div>
                   ) : (
                     <>
-                      <Upload size={32} className="mx-auto text-white/20 mb-3" />
-                      <p className="text-sm text-white/50">Arrastra tu archivo aquí o haz clic para seleccionar</p>
-                      <p className="text-xs text-white/20 mt-2">PDF, imágenes, audio o video — máximo 10 MB</p>
+                      <Upload size={32} className="mx-auto text-gray-300 mb-3" />
+                      <p className="text-sm text-gray-500">Arrastra tu archivo aquí o haz clic para seleccionar</p>
+                      <p className="text-xs text-gray-300 mt-2">PDF, imágenes, audio o video — máximo 10 MB</p>
                     </>
                   )}
                 </div>
@@ -381,17 +381,17 @@ export default function AiConsultantPage() {
                     value={fileDescription}
                     onChange={(e) => setFileDescription(e.target.value)}
                     placeholder="Contexto adicional (opcional): nombre del proceso, área, etc."
-                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 text-sm focus:outline-none focus:border-amber-500/50 transition-all"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-amber-300 transition-all"
                   />
                 </div>
 
                 <button
                   onClick={handleGenerateFromFile}
                   disabled={!selectedFile || isProcessing || interviewBudget.isConsuming}
-                  className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all shadow-lg ${
+                  className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-medium transition-all shadow-lg ${
                     selectedFile && !isProcessing
-                      ? `bg-gradient-to-r ${TAB_COLORS.file} text-white hover:opacity-90 shadow-amber-500/20`
-                      : 'bg-white/5 text-white/30 cursor-not-allowed'
+                      ? `bg-primary-500 ${TAB_COLORS.file} text-white hover:opacity-90`
+                      : 'bg-gray-50 text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
@@ -400,7 +400,7 @@ export default function AiConsultantPage() {
 
                 <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-3">
                   {['PDF', 'JPG / PNG', 'MP3 / WAV', 'MP4 / WebM'].map((type) => (
-                    <span key={type} className="text-xs text-white/20">{type}</span>
+                    <span key={type} className="text-xs text-gray-300">{type}</span>
                   ))}
                 </div>
               </div>
@@ -413,10 +413,10 @@ export default function AiConsultantPage() {
       {/* ─── CONSULTING PHASE (Tab 1 y Tab 2) ────────────────────────────── */}
       {phase === 'consulting' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white/[0.03] rounded-2xl border border-white/5 overflow-hidden flex flex-col h-[min(600px,70vh)] min-h-[360px]">
-            <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
-              <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-amber-400 animate-pulse' : 'bg-cyan-400'}`} />
-              <span className="text-sm font-medium text-white/60">
+          <div className="lg:col-span-2 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden flex flex-col h-[min(600px,70vh)] min-h-[360px]">
+            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-3">
+              <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-amber-500 animate-pulse' : 'bg-primary-500'}`} />
+              <span className="text-sm font-medium text-gray-600">
                 {isProcessing ? 'Procesando respuesta...' : isListening ? 'Escuchando...' : 'Consulta en curso'}
               </span>
             </div>
@@ -433,22 +433,22 @@ export default function AiConsultantPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">
-              <h3 className="text-sm font-medium text-white/40 mb-3">Visualizador de audio</h3>
+            <div className="bg-gray-50 rounded-lg border border-gray-100 p-6">
+              <h3 className="text-sm font-medium text-gray-500 mb-3">Visualizador de audio</h3>
               <WaveformVisualizer isActive={isListening} />
               {isListening && (
-                <p className="text-xs text-cyan-400 mt-2 text-center animate-pulse">
+                <p className="text-xs text-primary-600 mt-2 text-center animate-pulse">
                   Micrófono activo — habla ahora
                 </p>
               )}
             </div>
-            <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-4">
-              <h3 className="text-sm font-medium text-white/40 mb-2">Palabras clave del proceso</h3>
+            <div className="bg-gray-50 rounded-lg border border-gray-100 p-4">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Palabras clave del proceso</h3>
               <WordCloud words={allWords} />
             </div>
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4">
-              <h3 className="text-sm font-medium text-blue-400 mb-2">Consejos</h3>
-              <ul className="text-xs text-blue-400/70 space-y-1.5">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-blue-600 mb-2">Consejos</h3>
+              <ul className="text-xs text-blue-600 space-y-1.5">
                 <li>— Sé específico con las actividades y su orden</li>
                 <li>— Menciona quién es responsable de cada paso</li>
                 <li>— Indica las decisiones y sus posibles caminos</li>
@@ -461,18 +461,18 @@ export default function AiConsultantPage() {
 
       {/* ─── GENERATING PHASE ──────────────────────────────────────────────── */}
       {phase === 'generating' && (
-        <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-12 text-center">
-          <Loader2 size={48} className="mx-auto text-cyan-400 animate-spin mb-6" />
-          <h2 className="text-xl font-semibold text-white mb-2">Generando diagrama BPMN...</h2>
-          <p className="text-white/40">La IA está construyendo el XML con coordenadas precisas. Puede tomar unos segundos.</p>
+        <div className="bg-gray-50 rounded-lg border border-gray-100 p-12 text-center">
+          <Loader2 size={48} className="mx-auto text-primary-600 animate-spin mb-6" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Generando diagrama BPMN...</h2>
+          <p className="text-gray-500">La IA está construyendo el XML con coordenadas precisas. Puede tomar unos segundos.</p>
         </div>
       )}
 
       {/* ─── REVIEWING PHASE ───────────────────────────────────────────────── */}
       {phase === 'reviewing' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white/[0.03] rounded-2xl border border-white/5 p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Diagrama BPMN Generado</h2>
+          <div className="lg:col-span-2 bg-gray-50 rounded-lg border border-gray-100 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Diagrama BPMN Generado</h2>
             <BpmnReviewPanel
               bpmnXml={bpmnXml}
               isRefining={isRefining}
@@ -485,13 +485,13 @@ export default function AiConsultantPage() {
             />
           </div>
           <div className="space-y-4">
-            <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-4">
-              <h3 className="text-sm font-medium text-white/40 mb-2">Palabras clave identificadas</h3>
+            <div className="bg-gray-50 rounded-lg border border-gray-100 p-4">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Palabras clave identificadas</h3>
               <WordCloud words={allWords} />
             </div>
-            <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
-              <h3 className="text-sm font-medium text-purple-400 mb-2">Qué puedes hacer</h3>
-              <ul className="text-xs text-purple-400/70 space-y-1.5">
+            <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
+              <h3 className="text-sm font-medium text-primary-600 mb-2">Qué puedes hacer</h3>
+              <ul className="text-xs text-primary-600 space-y-1.5">
                 <li>— Refinar el diagrama con instrucciones de texto</li>
                 <li>— Exportar como archivo .bpmn compatible con Bizagi</li>
                 <li>— Guardar el diagrama en un proceso existente</li>

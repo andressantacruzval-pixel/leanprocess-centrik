@@ -22,9 +22,9 @@ export function InventoryMacroEditor({ companyId, macro, mi, areas }: Props) {
 
   if (!macro.procesos.length) {
     return (
-      <div className="rounded-xl border border-dashed border-white/10 p-5 text-center">
-        <p className="text-sm text-white/50">Este macroproceso aún no tiene procesos.</p>
-        <p className="text-xs text-white/30 mt-1">Usa Big Bang o Incremental arriba, o agrégalos a mano.</p>
+      <div className="rounded-lg border border-dashed border-gray-200 p-5 text-center">
+        <p className="text-sm text-gray-500">Este macroproceso aún no tiene procesos.</p>
+        <p className="text-xs text-gray-400 mt-1">Usa Big Bang o Incremental arriba, o agrégalos a mano.</p>
         <AddProcInput value={newProc} onChange={setNewProc} onAdd={() => { if (newProc.trim()) { addProceso(companyId, mi, newProc.trim()); setNewProc('') } }} />
       </div>
     )
@@ -44,8 +44,8 @@ function AddProcInput({ value, onChange, onAdd }: { value: string; onChange: (v:
   return (
     <div className="flex items-center gap-2 mt-2">
       <input value={value} onChange={(e) => onChange(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') onAdd() }}
-        placeholder="Nuevo proceso…" className="flex-1 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[13px] text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50" />
-      <button onClick={onAdd} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[12px] hover:bg-cyan-500/15"><Plus size={13} /> Proceso</button>
+        placeholder="Nuevo proceso…" className="flex-1 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-[13px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+      <button onClick={onAdd} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary-50 border border-primary-200 text-primary-700 text-[12px] hover:bg-primary-50"><Plus size={13} /> Proceso</button>
     </div>
   )
 }
@@ -58,17 +58,17 @@ function ProcCard({ companyId, mi, pi, nombre, subs, areas }: { companyId: strin
   const [name, setName] = useState(nombre)
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
       <div className="flex items-center gap-2 mb-2">
         {editing ? (
           <>
-            <input value={name} onChange={(e) => setName(e.target.value)} className="flex-1 px-2 py-1 rounded bg-white/5 border border-cyan-500/40 text-[13px] text-white focus:outline-none" autoFocus />
+            <input value={name} onChange={(e) => setName(e.target.value)} className="flex-1 px-2 py-1 rounded-md bg-gray-50 border border-primary-300 text-[13px] text-gray-900 focus:outline-none" autoFocus />
             <IconBtn title="Guardar" onClick={() => { editProceso(companyId, mi, pi, name.trim() || nombre); setEditing(false) }}><Check size={14} /></IconBtn>
             <IconBtn title="Cancelar" onClick={() => { setName(nombre); setEditing(false) }}><X size={14} /></IconBtn>
           </>
         ) : (
           <>
-            <div className="flex-1 text-[13px] font-medium text-cyan-300">{nombre}</div>
+            <div className="flex-1 text-[13px] font-medium text-primary-700">{nombre}</div>
             <IconBtn title="Editar proceso" onClick={() => setEditing(true)}><Pencil size={13} /></IconBtn>
             <IconBtn title="Eliminar proceso" danger onClick={() => { if (confirm(`¿Eliminar el proceso «${nombre}» y sus subprocesos?`)) removeProceso(companyId, mi, pi) }}><Trash2 size={13} /></IconBtn>
           </>
@@ -78,7 +78,7 @@ function ProcCard({ companyId, mi, pi, nombre, subs, areas }: { companyId: strin
         {subs.map((s, si) => <SubRow key={si} companyId={companyId} mi={mi} pi={pi} si={si} sub={s} areas={areas} />)}
       </div>
       <button onClick={() => addSub(companyId, mi, pi, { nombre: 'Nuevo subproceso', area: '', objetivo: '', origen: 'confirmado' })}
-        className="mt-2 inline-flex items-center gap-1 text-[11px] text-white/40 hover:text-cyan-300"><Plus size={12} /> Agregar subproceso</button>
+        className="mt-2 inline-flex items-center gap-1 text-[11px] text-gray-500 hover:text-primary-700"><Plus size={12} /> Agregar subproceso</button>
     </div>
   )
 }
@@ -98,26 +98,26 @@ function SubRow({ companyId, mi, pi, si, sub, areas }: { companyId: string; mi: 
 
   if (editing) {
     return (
-      <div className="rounded-lg bg-white/[0.04] border border-cyan-500/30 p-2.5 space-y-2">
+      <div className="rounded-lg bg-gray-50 border border-primary-300 p-2.5 space-y-2">
         <input value={draft.nombre} onChange={(e) => setDraft({ ...draft, nombre: e.target.value })} placeholder="Nombre del subproceso"
-          className="w-full px-2 py-1.5 rounded bg-white/5 border border-white/10 text-[12.5px] text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50" autoFocus />
+          className="w-full px-2 py-1.5 rounded-md bg-gray-50 border border-gray-200 text-[12.5px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500" autoFocus />
         <div className="flex gap-2">
           <select value={draft.area} onChange={(e) => setDraft({ ...draft, area: e.target.value })}
-            className="flex-1 px-2 py-1.5 rounded bg-white/5 border border-white/10 text-[12px] text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
+            className="flex-1 px-2 py-1.5 rounded-md bg-gray-50 border border-gray-200 text-[12px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
             <option value="">(sin área)</option>
             {areas.map((a) => <option key={a} value={a}>{a}</option>)}
           </select>
           <select value={draft.origen} onChange={(e) => setDraft({ ...draft, origen: e.target.value as InvSub['origen'] })}
-            className="px-2 py-1.5 rounded bg-white/5 border border-white/10 text-[12px] text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
+            className="px-2 py-1.5 rounded-md bg-gray-50 border border-gray-200 text-[12px] text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
             <option value="deducido">Deducido</option>
             <option value="confirmado">Aceptado</option>
           </select>
         </div>
         <textarea value={draft.objetivo} onChange={(e) => setDraft({ ...draft, objetivo: e.target.value })} placeholder="Objetivo (verbo + qué + para qué)" rows={2}
-          className="w-full px-2 py-1.5 rounded bg-white/5 border border-white/10 text-[12px] text-white resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500/50" />
+          className="w-full px-2 py-1.5 rounded-md bg-gray-50 border border-gray-200 text-[12px] text-gray-900 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500" />
         <div className="flex gap-2">
-          <button onClick={() => { editSub(companyId, mi, pi, si, draft); setEditing(false) }} className="inline-flex items-center gap-1 px-3 py-1 rounded bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[12px]"><Check size={13} /> Guardar</button>
-          <button onClick={() => { setDraft(sub); setEditing(false) }} className="inline-flex items-center gap-1 px-3 py-1 rounded border border-white/10 text-white/50 text-[12px]"><X size={13} /> Cancelar</button>
+          <button onClick={() => { editSub(companyId, mi, pi, si, draft); setEditing(false) }} className="inline-flex items-center gap-1 px-3 py-1 rounded-md bg-primary-50 border border-primary-300 text-primary-700 text-[12px]"><Check size={13} /> Guardar</button>
+          <button onClick={() => { setDraft(sub); setEditing(false) }} className="inline-flex items-center gap-1 px-3 py-1 rounded-md border border-gray-200 text-gray-500 text-[12px]"><X size={13} /> Cancelar</button>
         </div>
       </div>
     )
@@ -125,16 +125,16 @@ function SubRow({ companyId, mi, pi, si, sub, areas }: { companyId: string; mi: 
 
   const accepted = sub.origen === 'confirmado'
   return (
-    <div className="flex items-start gap-2 rounded-lg px-2.5 py-2 bg-white/[0.03] border border-white/5 group">
+    <div className="flex items-start gap-2 rounded-lg px-2.5 py-2 bg-gray-50 border border-gray-100 group">
       <button title={accepted ? 'Aceptado — clic para volver a deducido' : 'Deducido por IA — clic para aceptar'} onClick={() => editSub(companyId, mi, pi, si, { origen: accepted ? 'deducido' : 'confirmado' })} className="mt-0.5 shrink-0">
         <OriginBadge origen={sub.origen} />
       </button>
       <div className="min-w-0 flex-1">
-        <div className="text-[12.5px] text-white/85 leading-snug">{sub.nombre}</div>
-        {sub.objetivo && <div className="text-[11px] text-white/40 mt-0.5 leading-snug">{sub.objetivo}</div>}
+        <div className="text-[12.5px] text-gray-800 leading-snug">{sub.nombre}</div>
+        {sub.objetivo && <div className="text-[11px] text-gray-500 mt-0.5 leading-snug">{sub.objetivo}</div>}
       </div>
-      {sub.area && <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{sub.area}</span>}
-      {enMapa && <span title="Ya está en el mapa de procesos" className="shrink-0 inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"><MapPin size={10} /> en el mapa</span>}
+      {sub.area && <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 border border-primary-200">{sub.area}</span>}
+      {enMapa && <span title="Ya está en el mapa de procesos" className="shrink-0 inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"><MapPin size={10} /> en el mapa</span>}
       <div className="shrink-0 flex items-center gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
         {!accepted && <IconBtn title="Aceptar" onClick={() => editSub(companyId, mi, pi, si, { origen: 'confirmado' })}><CheckCheck size={13} /></IconBtn>}
         {accepted && !enMapa && (
@@ -151,6 +151,6 @@ function SubRow({ companyId, mi, pi, si, sub, areas }: { companyId: string; mi: 
 
 function IconBtn({ children, onClick, title, danger }: { children: React.ReactNode; onClick: () => void; title: string; danger?: boolean }) {
   return (
-    <button title={title} onClick={onClick} className={`shrink-0 p-1.5 rounded-md text-white/40 hover:bg-white/5 transition-colors ${danger ? 'hover:text-red-300' : 'hover:text-cyan-300'}`}>{children}</button>
+    <button title={title} onClick={onClick} className={`shrink-0 p-1.5 rounded-md text-gray-500 hover:bg-gray-50 transition-colors ${danger ? 'hover:text-red-700' : 'hover:text-primary-700'}`}>{children}</button>
   )
 }

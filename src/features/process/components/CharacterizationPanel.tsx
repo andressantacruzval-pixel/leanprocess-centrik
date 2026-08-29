@@ -12,11 +12,11 @@ function PanelField({ label, hint, helpText, children }: { label: string; hint?:
   return (
     <div>
       <span className="flex items-center gap-1 mb-0.5">
-        <label className="block text-[10px] font-medium text-white/50">{label}</label>
+        <label className="block text-[10px] font-medium text-gray-500">{label}</label>
         {helpText && <FieldHelpIcon text={helpText} />}
       </span>
       {children}
-      {hint && <p className="text-[9px] text-white/30 mt-0.5">{hint}</p>}
+      {hint && <p className="text-[9px] text-gray-400 mt-0.5">{hint}</p>}
     </div>
   )
 }
@@ -108,7 +108,7 @@ export function CharacterizationPanel({
   return (
     <div className="space-y-5">
       {readOnly && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-50 border border-primary-200 text-primary-700 text-xs">
           <Eye size={14} />
           Modo lectura — los campos no son editables
         </div>
@@ -118,14 +118,14 @@ export function CharacterizationPanel({
       <div>
         <div className="flex items-center justify-between mb-1">
           <span className="flex items-center gap-1">
-            <label className="block text-xs font-medium text-white/60">Objetivo / Descripcion</label>
+            <label className="block text-xs font-medium text-gray-600">Objetivo / Descripcion</label>
             <FieldHelpIcon text={CHARACTERIZATION_FIELD_HELP.description} />
           </span>
           <button
             type="button"
             onClick={onGenerateObjective}
             disabled={generatingObjective}
-            className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-cyan-400 bg-cyan-500/10 rounded hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors disabled:opacity-50"
           >
             {generatingObjective ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
             IA
@@ -136,7 +136,7 @@ export function CharacterizationPanel({
           onChange={(e) => updateField('description', e.target.value)}
           rows={3}
           readOnly={readOnly}
-          className="w-full px-3 py-2 border border-white/10 rounded-lg text-xs bg-white/5 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none"
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
           placeholder="Objetivo del proceso..."
         />
       </div>
@@ -149,7 +149,7 @@ export function CharacterizationPanel({
             value={(formData.update_date as string) || ''}
             readOnly
             disabled
-            className="w-full px-2 py-1.5 border border-white/10 rounded text-xs bg-white/[0.02] text-white/50 cursor-not-allowed"
+            className="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-gray-50 text-gray-500 cursor-not-allowed"
           />
         </PanelField>
         <PanelField label="Version" hint="Sube al aprobar y publicar" helpText={CHARACTERIZATION_FIELD_HELP.version}>
@@ -158,14 +158,14 @@ export function CharacterizationPanel({
             value={version}
             readOnly
             disabled
-            className="w-full px-2 py-1.5 border border-white/10 rounded text-xs bg-white/[0.02] text-white/50 cursor-not-allowed"
+            className="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-gray-50 text-gray-500 cursor-not-allowed"
           />
         </PanelField>
         <PanelField label="Entidad" helpText={CHARACTERIZATION_FIELD_HELP.entity}>
-          <input type="text" value={(formData.entity as string) || ''} readOnly disabled className="w-full px-2 py-1.5 border border-white/10 rounded text-xs bg-white/[0.02] text-white/50 cursor-not-allowed" />
+          <input type="text" value={(formData.entity as string) || ''} readOnly disabled className="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-gray-50 text-gray-500 cursor-not-allowed" />
         </PanelField>
         <PanelField label="Tipo de proceso" helpText={CHARACTERIZATION_FIELD_HELP.process_type}>
-          <input type="text" value={(formData.process_type as string) || ''} readOnly disabled className="w-full px-2 py-1.5 border border-white/10 rounded text-xs bg-white/[0.02] text-white/50 cursor-not-allowed" />
+          <input type="text" value={(formData.process_type as string) || ''} readOnly disabled className="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-gray-50 text-gray-500 cursor-not-allowed" />
         </PanelField>
         <PanelField label="Frecuencia" helpText={CHARACTERIZATION_FIELD_HELP.execution_frequency}>
           <CreatableSelect options={frequencyOptions} value={(formData.execution_frequency as string) || ''} onChange={(v) => updateField('execution_frequency', v)} onCreateOption={(v) => addCatalogItem('execution_frequency', v)} placeholder="Frecuencia..." />
@@ -245,18 +245,18 @@ export function CharacterizationPanel({
 
       {/* Toggles */}
       <div className={readOnly ? 'pointer-events-none opacity-70' : ''}>
-        <h3 className="text-xs font-medium text-white/60 mb-2">Atributos</h3>
+        <h3 className="text-xs font-medium text-gray-600 mb-2">Atributos</h3>
         <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-2">
           {TOGGLE_FIELDS.map(({ key, label }) => {
             const helpText = CHARACTERIZATION_FIELD_HELP[key as string]
             return (
-              <label key={key} className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg border border-white/10 hover:border-cyan-500/40 hover:bg-cyan-500/5 cursor-pointer transition-colors has-[:checked]:border-cyan-500/40 has-[:checked]:bg-cyan-500/[0.06]">
+              <label key={key} className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 cursor-pointer transition-colors has-[:checked]:border-primary-300 has-[:checked]:bg-primary-50">
                 <div className="relative shrink-0">
                   <input type="checkbox" checked={!!formData[key]} onChange={(e) => updateField(key, e.target.checked)} className="sr-only peer" />
-                  <div className="w-9 h-5 rounded-full bg-white/10 ring-1 ring-inset ring-white/20 peer-checked:ring-0 peer-checked:bg-gradient-to-r peer-checked:from-cyan-500 peer-checked:to-blue-500 peer-checked:shadow-[0_0_10px_rgba(6,182,212,0.55)] transition-all" />
+                  <div className="w-9 h-5 rounded-full bg-gray-100 ring-1 ring-inset ring-gray-300 peer-checked:ring-0 transition-all bg-primary-500" />
                   <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md peer-checked:translate-x-4 transition-transform" />
                 </div>
-                <span className="flex items-center gap-1 text-[11px] text-white/70 peer-checked:text-cyan-300">
+                <span className="flex items-center gap-1 text-[11px] text-gray-700 peer-checked:text-primary-700">
                   {label}
                   {helpText && <FieldHelpIcon text={helpText} />}
                 </span>
@@ -270,7 +270,7 @@ export function CharacterizationPanel({
       <button
         onClick={onSave}
         disabled={saving || readOnly}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-xs font-medium hover:from-cyan-500 hover:to-blue-500 transition-colors disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50 bg-primary-500 hover:bg-primary-600"
       >
         {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
         {readOnly ? 'Modo lectura' : 'Guardar Caracterizacion'}

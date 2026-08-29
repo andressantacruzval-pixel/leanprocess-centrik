@@ -18,18 +18,18 @@ export function EngagementTab({ metrics }: Props) {
 
       {/* KPIs procesos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-3">
-          <Layers size={18} className="text-emerald-400 shrink-0" />
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3">
+          <Layers size={18} className="text-emerald-600 shrink-0" />
           <div>
-            <p className="text-xs text-white/40 uppercase mb-0.5">Total procesos creados</p>
-            <p className="text-2xl font-bold text-white">{fmtNumber(totalProcesses)}</p>
+            <p className="text-xs text-gray-500 uppercase mb-0.5">Total procesos creados</p>
+            <p className="text-2xl font-bold text-gray-900">{fmtNumber(totalProcesses)}</p>
           </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-3">
-          <Brain size={18} className="text-cyan-400 shrink-0" />
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center gap-3">
+          <Brain size={18} className="text-primary-600 shrink-0" />
           <div>
-            <p className="text-xs text-white/40 uppercase mb-0.5">Promedio procesos / empresa</p>
-            <p className="text-2xl font-bold text-white">{metrics.avgProcessesPerCompany}</p>
+            <p className="text-xs text-gray-500 uppercase mb-0.5">Promedio procesos / empresa</p>
+            <p className="text-2xl font-bold text-gray-900">{metrics.avgProcessesPerCompany}</p>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@ export function EngagementTab({ metrics }: Props) {
           <div className="overflow-x-auto mt-3">
             <table className="w-full min-w-[480px] text-sm">
               <thead>
-                <tr className="text-white/30 text-xs uppercase border-b border-white/5">
+                <tr className="text-gray-400 text-xs uppercase border-b border-gray-100">
                   <th className="text-left py-2 pr-4">Feature</th>
                   <th className="text-right py-2 px-4">Tokens Totales</th>
                   <th className="text-right py-2 pl-4">Prom / Usuario</th>
@@ -86,16 +86,16 @@ export function EngagementTab({ metrics }: Props) {
               </thead>
               <tbody>
                 {metrics.aiUsage.map((a) => (
-                  <tr key={a.feature} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
-                    <td className="py-2.5 pr-4 text-white/80 flex items-center gap-2">
-                      <Brain size={13} className="text-purple-400" />
+                  <tr key={a.feature} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-2.5 pr-4 text-gray-800 flex items-center gap-2">
+                      <Brain size={13} className="text-primary-600" />
                       {a.feature}
                     </td>
-                    <td className="py-2.5 px-4 text-right text-white/60">{fmtNumber(a.totalTokens)}</td>
-                    <td className="py-2.5 pl-4 text-right text-white/60">{fmtNumber(a.avgPerUser)}</td>
+                    <td className="py-2.5 px-4 text-right text-gray-600">{fmtNumber(a.totalTokens)}</td>
+                    <td className="py-2.5 pl-4 text-right text-gray-600">{fmtNumber(a.avgPerUser)}</td>
                   </tr>
                 ))}
-                <tr className="text-white/40 font-medium">
+                <tr className="text-gray-500 font-medium">
                   <td className="py-2.5 pr-4">Total</td>
                   <td className="py-2.5 px-4 text-right">{fmtNumber(metrics.aiUsage.reduce((s, a) => s + a.totalTokens, 0))}</td>
                   <td className="py-2.5 pl-4 text-right">-</td>

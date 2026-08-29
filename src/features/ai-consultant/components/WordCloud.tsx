@@ -81,13 +81,13 @@ export function WordCloud({ words, maxWords = 25 }: WordCloudProps) {
 
   if (floatingWords.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-white/20 text-sm">
+      <div className="flex items-center justify-center h-full text-gray-300 text-sm">
         <div className="text-center space-y-2">
           <div className="flex gap-1 justify-center">
             {[0, 1, 2].map(i => (
               <div
                 key={i}
-                className="w-1.5 h-1.5 rounded-full bg-cyan-500/30 animate-pulse"
+                className="w-1.5 h-1.5 rounded-full bg-primary-100 animate-pulse"
                 style={{ animationDelay: `${i * 200}ms` }}
               />
             ))}

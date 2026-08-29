@@ -26,12 +26,12 @@ export function SupportMenu({ collapsed }: SupportMenuProps) {
   return (
     <div ref={containerRef} className="relative">
       {open && (
-        <div className="absolute bottom-full left-0 mb-2 w-52 rounded-xl bg-[#0d1420] border border-white/10 shadow-xl shadow-black/40 overflow-hidden">
-          <div className="flex items-center justify-between px-3 py-2 border-b border-white/5">
-            <span className="text-[10px] uppercase tracking-wider text-white/30">Soporte</span>
+        <div className="absolute bottom-full left-0 mb-2 w-52 rounded-lg bg-white border border-gray-200 shadow-xl overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+            <span className="text-[10px] uppercase tracking-wider text-gray-400">Soporte</span>
             <button
               onClick={() => setOpen(false)}
-              className="text-white/20 hover:text-white/50 transition-colors"
+              className="text-gray-300 hover:text-gray-500 transition-colors"
             >
               <X size={12} />
             </button>
@@ -42,7 +42,7 @@ export function SupportMenu({ collapsed }: SupportMenuProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-3 py-2.5 text-white/50 hover:text-green-400 hover:bg-green-500/5 transition-all"
+            className="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
           >
             <MessageCircle size={16} />
             <span className="text-sm font-medium">WhatsApp</span>
@@ -53,7 +53,7 @@ export function SupportMenu({ collapsed }: SupportMenuProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-3 py-2.5 text-white/50 hover:text-cyan-400 hover:bg-cyan-500/5 transition-all"
+            className="flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 transition-all"
           >
             <Calendar size={16} />
             <span className="text-sm font-medium">Agendar reunión</span>
@@ -64,7 +64,7 @@ export function SupportMenu({ collapsed }: SupportMenuProps) {
       <button
         onClick={() => setOpen((prev) => !prev)}
         title={collapsed ? 'Soporte' : undefined}
-        className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-white/20 hover:text-cyan-400 hover:bg-cyan-500/5 transition-all"
+        className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-gray-300 hover:text-primary-600 hover:bg-primary-50 transition-all"
       >
         <Headphones size={18} />
         {!collapsed && <span className="text-[11px] font-medium">Soporte</span>}

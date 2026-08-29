@@ -18,9 +18,9 @@ import type { ProcessHealthMap } from '@/hooks/useProcessHealth'
 // ── Constantes ─────────────────────────────────────────────────────────────
 
 const CATEGORY_STYLE: Record<string, string> = {
-  estrategico: 'bg-red-500/10 text-red-400',
-  productivo:  'bg-white/10 text-white/50',
-  apoyo:       'bg-violet-500/10 text-violet-400',
+  estrategico: 'bg-red-50 text-red-600',
+  productivo:  'bg-gray-100 text-gray-500',
+  apoyo:       'bg-primary-50 text-primary-600',
 }
 
 const CHECKS: { key: keyof ProcessHealthChecks; short: string; label: string }[] = [
@@ -42,13 +42,13 @@ const CHECKS: { key: keyof ProcessHealthChecks; short: string; label: string }[]
  * Clase literal, no interpolada: Tailwind no compila clases hechas con plantilla.
  */
 const CLASE_ENTRADA_BLOQUEADA =
-  'p-1 rounded text-white/10 cursor-not-allowed shrink-0'
+  'p-1 rounded-md text-gray-300 cursor-not-allowed shrink-0'
 
 function CandadoDeCupo({ motivo }: { motivo: string }) {
   return (
     <span
       title={motivo}
-      className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-amber-500/10 text-amber-400/80 border border-amber-500/20"
+      className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-medium bg-amber-50 text-amber-600 border border-amber-200"
     >
       <Lock size={8} />
       Sin cupo
@@ -66,13 +66,13 @@ const ANCHO_SALUD = 'w-20 sm:w-28'
 const HUECO_SALUD = <span className={`${ANCHO_SALUD} shrink-0`} />
 
 function HealthBar({ score }: { score: number }) {
-  const color = score >= 67 ? 'bg-emerald-400' : score >= 34 ? 'bg-amber-400' : 'bg-red-400'
+  const color = score >= 67 ? 'bg-emerald-500' : score >= 34 ? 'bg-amber-500' : 'bg-red-500'
   return (
     <div className={`flex items-center gap-2 shrink-0 ${ANCHO_SALUD}`}>
-      <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${score}%` }} />
       </div>
-      <span className="text-[10px] text-white/40 w-8 text-right">{score}%</span>
+      <span className="text-[10px] text-gray-500 w-8 text-right">{score}%</span>
     </div>
   )
 }
@@ -85,8 +85,8 @@ function CheckDots({ checks }: { checks: ProcessHealthChecks }) {
         <span
           key={c.key}
           title={c.label}
-          className={`text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded ${
-            checks[c.key] ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-white/20'
+          className={`text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-md ${
+            checks[c.key] ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-50 text-gray-300'
           }`}
         >
           {c.short}
@@ -108,18 +108,18 @@ interface MacroRowProps {
 }
 
 function MacroRow({ macro, isOpen, avgScore, childCount, levelName, onToggle }: MacroRowProps) {
-  const catStyle = CATEGORY_STYLE[macro.category] ?? 'bg-white/10 text-white/40'
+  const catStyle = CATEGORY_STYLE[macro.category] ?? 'bg-gray-100 text-gray-500'
   const catLabel = PROCESS_CATEGORIES[macro.category as keyof typeof PROCESS_CATEGORIES]?.label ?? macro.category
   return (
     <div
       onClick={onToggle}
-      className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 cursor-pointer hover:bg-white/[0.07] transition-all"
+      className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-50 transition-all"
     >
-      <ChevronDown size={14} className={`text-white/30 transition-transform shrink-0 ${isOpen ? '' : '-rotate-90'}`} />
-      <GitBranch size={15} className="text-blue-400 shrink-0" />
+      <ChevronDown size={14} className={`text-gray-400 transition-transform shrink-0 ${isOpen ? '' : '-rotate-90'}`} />
+      <GitBranch size={15} className="text-blue-600 shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white truncate">{macro.name}</p>
-        <p className="text-[10px] text-white/30">{childCount} {levelName.toLowerCase()}(s)</p>
+        <p className="text-sm font-semibold text-gray-900 truncate">{macro.name}</p>
+        <p className="text-[10px] text-gray-400">{childCount} {levelName.toLowerCase()}(s)</p>
       </div>
       <span className={`hidden sm:inline text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 ${catStyle}`}>{catLabel}</span>
       {avgScore !== null ? <HealthBar score={avgScore} /> : HUECO_SALUD}
@@ -148,13 +148,13 @@ function ProcessRow({ process, health, documentable, bloqueo, isOpen, onToggle, 
     <>
       <div
         onClick={onToggle}
-        className="flex items-center gap-2 pl-5 sm:pl-8 pr-3 py-2.5 rounded-lg bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 cursor-pointer transition-all"
+        className="flex items-center gap-2 pl-5 sm:pl-8 pr-3 py-2.5 rounded-lg bg-gray-50 hover:bg-gray-50 border border-gray-100 cursor-pointer transition-all"
       >
-        <ChevronDown size={12} className={`text-white/20 transition-transform shrink-0 ${isOpen ? '' : '-rotate-90'}`} />
+        <ChevronDown size={12} className={`text-gray-300 transition-transform shrink-0 ${isOpen ? '' : '-rotate-90'}`} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <p className="text-xs font-medium text-white truncate">{process.name}</p>
-            {process.is_critical && <AlertTriangle size={10} className="text-amber-400 shrink-0" />}
+            <p className="text-xs font-medium text-gray-900 truncate">{process.name}</p>
+            {process.is_critical && <AlertTriangle size={10} className="text-amber-600 shrink-0" />}
             {bloqueo && <CandadoDeCupo motivo={bloqueo} />}
           </div>
         </div>
@@ -162,7 +162,7 @@ function ProcessRow({ process, health, documentable, bloqueo, isOpen, onToggle, 
         {documentable && (
           <button
             onClick={(e) => { e.stopPropagation(); onNavigate() }}
-            className={bloqueo ? CLASE_ENTRADA_BLOQUEADA : 'p-1 rounded text-white/20 hover:text-white/70 hover:bg-white/10 transition-colors shrink-0'}
+            className={bloqueo ? CLASE_ENTRADA_BLOQUEADA : 'p-1 rounded-md text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0'}
             title={bloqueo ?? 'Ir al detalle'}
           >
             <ExternalLink size={12} />
@@ -170,7 +170,7 @@ function ProcessRow({ process, health, documentable, bloqueo, isOpen, onToggle, 
         )}
       </div>
       {isOpen && documentable && health && (
-        <div className="pl-8 sm:pl-12 pr-4 py-2 ml-5 sm:ml-8 border-l border-white/5">
+        <div className="pl-8 sm:pl-12 pr-4 py-2 ml-5 sm:ml-8 border-l border-gray-100">
           <CheckDots checks={health.checks} />
         </div>
       )}
@@ -190,9 +190,9 @@ function SubprocessRow({
   onNavigate: () => void
 }) {
   return (
-    <div className="flex items-center gap-2 pl-10 sm:pl-16 pr-3 py-2 rounded-lg hover:bg-white/[0.03] transition-all">
+    <div className="flex items-center gap-2 pl-10 sm:pl-16 pr-3 py-2 rounded-lg hover:bg-gray-50 transition-all">
       <div className="flex-1 min-w-0 flex items-center gap-1.5">
-        <p className="text-xs text-white/80 truncate">{process.name}</p>
+        <p className="text-xs text-gray-800 truncate">{process.name}</p>
         {bloqueo && <CandadoDeCupo motivo={bloqueo} />}
       </div>
       {health ? (
@@ -204,11 +204,11 @@ function SubprocessRow({
           <HealthBar score={health.score} />
         </>
       ) : (
-        <span className={`text-[10px] text-white/20 text-right shrink-0 ${ANCHO_SALUD}`}>Sin datos</span>
+        <span className={`text-[10px] text-gray-300 text-right shrink-0 ${ANCHO_SALUD}`}>Sin datos</span>
       )}
       <button
         onClick={onNavigate}
-        className={bloqueo ? CLASE_ENTRADA_BLOQUEADA : 'p-1 rounded text-white/20 hover:text-white/70 hover:bg-white/10 transition-colors shrink-0'}
+        className={bloqueo ? CLASE_ENTRADA_BLOQUEADA : 'p-1 rounded-md text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors shrink-0'}
         title={bloqueo ?? 'Ir al detalle'}
       >
         <ExternalLink size={11} />
@@ -289,8 +289,8 @@ export default function ProcessLevelsPage() {
 
       <PageHeader
         icon={Layers}
-        iconClass="bg-blue-500/10 border border-blue-500/20"
-        iconColor="text-blue-400"
+        iconClass="bg-blue-50 border border-blue-200"
+        iconColor="text-blue-600"
         title="Procesos por Niveles"
         subtitle={
           `${macroprocesses.length} ${getLevelName(1).toLowerCase()}(s) · ${level2.length} ${getLevelName(2).toLowerCase()}(s)` +
@@ -302,7 +302,7 @@ export default function ProcessLevelsPage() {
              informacion que hace falta para decidir cual sobra. */
           <button
             onClick={() => setDepurando(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors bg-white/[0.03] text-white/50 border-white/10 hover:bg-white/[0.07] hover:text-white/80"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-50 hover:text-gray-800"
             title="Eliminar varios procesos a la vez"
           >
             <Trash2 size={13} />
@@ -313,7 +313,7 @@ export default function ProcessLevelsPage() {
 
       <div className="space-y-2">
         {macroprocesses.length === 0 && (
-          <div className="py-16 text-center text-sm text-white/25 bg-white/[0.02] rounded-2xl border border-white/5">
+          <div className="py-16 text-center text-sm text-gray-400 bg-gray-50 rounded-lg border border-gray-100">
             No hay macroprocesos creados.
           </div>
         )}
@@ -333,7 +333,7 @@ export default function ProcessLevelsPage() {
               {isOpen && (
                 <div className="mt-1 space-y-1">
                   {macroChildren.length === 0 && (
-                    <p className="pl-10 py-3 text-[11px] text-white/25">
+                    <p className="pl-10 py-3 text-[11px] text-gray-400">
                       Sin {getLevelName(2).toLowerCase()}s en este {getLevelName(1).toLowerCase()}.
                     </p>
                   )}

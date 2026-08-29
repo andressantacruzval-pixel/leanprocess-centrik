@@ -445,9 +445,9 @@ export default function ProcessCharacterizationPage() {
   // ─── Not found ──────────────────────────────────────────────────────────
   if (!process) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-white/30">
+      <div className="flex flex-col items-center justify-center py-20 text-gray-400">
         <p className="text-lg">Proceso no encontrado</p>
-        <button onClick={() => navigate(processMapUrl(process))} className="mt-4 text-cyan-400 hover:underline">
+        <button onClick={() => navigate(processMapUrl(process))} className="mt-4 text-primary-600 hover:underline">
           Volver al mapa
         </button>
       </div>
@@ -458,35 +458,35 @@ export default function ProcessCharacterizationPage() {
 
   // ─── Main layout ────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)] -m-4 lg:-m-6 bg-[#070b14]">
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] -m-4 lg:-m-6 bg-surface-ground">
       {/* ═══ TOP TOOLBAR ═══
           `overflow-x-auto` + `shrink-0` en los bloques: son 14 controles y la cadena de
           padres es `overflow-hidden`, asi que «Guardar» y «Asistente IA» se recortaban
           sin scroll posible. Ahora la barra se desplaza en vez de comerse sus botones. */}
-      <div className="flex items-center gap-2 px-4 py-2 bg-[#0a0f1a] border-b border-white/5 shrink-0 overflow-x-auto">
-        <button onClick={() => navigate(processMapUrl(process))} className="shrink-0 p-2.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-white/60 transition-colors">
+      <div className="flex items-center gap-2 px-4 py-2 bg-white border-b border-gray-100 shrink-0 overflow-x-auto">
+        <button onClick={() => navigate(processMapUrl(process))} className="shrink-0 p-2.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors">
           <ArrowLeft size={16} />
         </button>
 
         <div className="flex items-center gap-0.5 mr-1 shrink-0">
-          <button onClick={handleUndo} disabled={!modelerInstance || readOnly} className="p-2.5 rounded-md text-white/20 hover:text-white/60 hover:bg-white/5 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white/20" title="Deshacer (Ctrl+Z)">
+          <button onClick={handleUndo} disabled={!modelerInstance || readOnly} className="p-2.5 rounded-md text-gray-300 hover:text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-300" title="Deshacer (Ctrl+Z)">
             <Undo2 size={14} />
           </button>
-          <button onClick={handleRedo} disabled={!modelerInstance || readOnly} className="p-2.5 rounded-md text-white/20 hover:text-white/60 hover:bg-white/5 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-white/20" title="Rehacer (Ctrl+Y)">
+          <button onClick={handleRedo} disabled={!modelerInstance || readOnly} className="p-2.5 rounded-md text-gray-300 hover:text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-300" title="Rehacer (Ctrl+Y)">
             <Redo2 size={14} />
           </button>
         </div>
 
         <div className="hidden 2xl:flex items-center gap-2 mr-auto shrink-0">
-          {formData.management && <span className="px-2 py-0.5 bg-white/5 rounded text-[10px] text-white/40 border border-white/5">Gerencia: {formData.management as string}</span>}
-          {formData.coordination && <span className="px-2 py-0.5 bg-white/5 rounded text-[10px] text-white/40 border border-white/5">Area: {formData.coordination as string}</span>}
-          <span className="px-2 py-0.5 bg-cyan-500/10 rounded text-[10px] text-cyan-400/60 border border-cyan-500/10">v{process.version ?? '1.0'}</span>
+          {formData.management && <span className="px-2 py-0.5 bg-gray-50 rounded-md text-[10px] text-gray-500 border border-gray-100">Gerencia: {formData.management as string}</span>}
+          {formData.coordination && <span className="px-2 py-0.5 bg-gray-50 rounded-md text-[10px] text-gray-500 border border-gray-100">Area: {formData.coordination as string}</span>}
+          <span className="px-2 py-0.5 bg-primary-50 rounded-md text-[10px] text-primary-600 border border-primary-200">v{process.version ?? '1.0'}</span>
         </div>
 
         <div className="flex-1 2xl:flex-none" />
 
         {/* Module tabs */}
-        <div className="flex items-center bg-white/5 rounded-lg p-0.5 border border-white/5 shrink-0">
+        <div className="flex items-center bg-gray-50 rounded-lg p-0.5 border border-gray-100 shrink-0">
           {TOOLBAR_TABS.map((tab) => {
             const Icon = tab.icon
             const isActive = rightPanel === tab.key
@@ -508,9 +508,9 @@ export default function ProcessCharacterizationPage() {
                   }
                   aria-disabled={isBlocked}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all ${
-                    isBlocked ? 'text-white/15 hover:text-white/30'
-                    : isActive ? 'bg-cyan-600/20 text-cyan-300 shadow-sm'
-                    : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                    isBlocked ? 'text-gray-300 hover:text-gray-400'
+                    : isActive ? 'bg-primary-100 text-primary-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                   }`}
                   title={isBlocked ? tab.requiresMessage : tab.label}
                 >
@@ -530,8 +530,8 @@ export default function ProcessCharacterizationPage() {
               onClick={() => setReadOnly((v) => !v)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${
                 readOnly
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                  : 'bg-white/5 text-white/40 hover:text-white/70 hover:bg-white/10 border border-white/5'
+                  ? 'bg-primary-100 text-primary-700 border border-primary-300'
+                  : 'bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-100'
               }`}
             >
               {readOnly ? <EyeOff size={12} /> : <Eye size={12} />}
@@ -539,15 +539,15 @@ export default function ProcessCharacterizationPage() {
             </button>
           )}
 
-          {autoSaveStatus === 'pending' && <span className="text-[11px] text-amber-400 animate-pulse">Guardando...</span>}
-          {autoSaveStatus === 'saved' && <span className="text-[11px] text-emerald-400">Guardado automaticamente</span>}
-          {autoSaveStatus === 'error' && <span className="text-[11px] text-red-400" title="No se pudo guardar el diagrama en la nube. Revisa tu conexion e intenta editar para reintentar.">Error al guardar</span>}
+          {autoSaveStatus === 'pending' && <span className="text-[11px] text-amber-600 animate-pulse">Guardando...</span>}
+          {autoSaveStatus === 'saved' && <span className="text-[11px] text-emerald-600">Guardado automaticamente</span>}
+          {autoSaveStatus === 'error' && <span className="text-[11px] text-red-600" title="No se pudo guardar el diagrama en la nube. Revisa tu conexion e intenta editar para reintentar.">Error al guardar</span>}
 
           <div className="relative">
             <button
               ref={exportBtnRef}
               onClick={abrirMenuExportar}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-white/40 hover:text-white/70 bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-all"
             >
               <Download size={13} />
               <span className="hidden md:inline">Descargar</span>
@@ -562,16 +562,16 @@ export default function ProcessCharacterizationPage() {
                 <div className="fixed inset-0 z-[999]" onClick={() => setShowExportMenu(false)} />
                 <div
                   style={{ position: 'fixed', top: exportCoords.top, left: exportCoords.left }}
-                  className="z-[1000] w-[240px] bg-[#0d1420] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+                  className="z-[1000] w-[240px] bg-white border border-gray-200 rounded-lg shadow-2xl overflow-hidden"
                 >
-                  <button onClick={handleExportBpmn} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-xs text-white/70 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors">
+                  <button onClick={handleExportBpmn} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-xs text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
                     <FileText size={14} />
-                    <div><div className="font-medium">Bizagi (.bpmn)</div><div className="text-[10px] text-white/30">Compatible con Bizagi, Camunda</div></div>
+                    <div><div className="font-medium">Bizagi (.bpmn)</div><div className="text-[10px] text-gray-400">Compatible con Bizagi, Camunda</div></div>
                   </button>
-                  <div className="border-t border-white/5" />
-                  <button onClick={handleExportPdf} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-xs text-white/70 hover:bg-purple-500/10 hover:text-purple-400 transition-colors">
+                  <div className="border-t border-gray-100" />
+                  <button onClick={handleExportPdf} className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-xs text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors">
                     <Download size={14} />
-                    <div><div className="font-medium">Imagen HD (.png)</div><div className="text-[10px] text-white/30">Formato A4 horizontal, alta calidad</div></div>
+                    <div><div className="font-medium">Imagen HD (.png)</div><div className="text-[10px] text-gray-400">Formato A4 horizontal, alta calidad</div></div>
                   </button>
                 </div>
               </>,
@@ -583,7 +583,7 @@ export default function ProcessCharacterizationPage() {
             <button
               onClick={handleSave}
               disabled={saving || readOnly}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-medium bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-500 hover:to-blue-500 transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-medium text-white transition-all disabled:opacity-50 bg-primary-500 hover:bg-primary-600"
             >
               {saving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
               <span className="hidden md:inline">{readOnly ? 'Modo lectura' : 'Guardar'}</span>
@@ -594,7 +594,7 @@ export default function ProcessCharacterizationPage() {
           {published ? (
             <>
               <span
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-300"
                 title={`Publicado el ${formatDate(process.published_at as string)}`}
               >
                 <BadgeCheck size={12} />
@@ -602,7 +602,7 @@ export default function ProcessCharacterizationPage() {
               </span>
               <button
                 onClick={unlock}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-medium bg-white/5 text-white/70 hover:text-white hover:bg-white/10 border border-white/10 transition-all"
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-medium bg-gray-50 text-gray-700 hover:text-gray-900 hover:bg-gray-100 border border-gray-200 transition-all"
                 title="Vuelve a borrador para poder editarlo. Al publicar de nuevo sube la version."
               >
                 <Pencil size={13} />
@@ -613,7 +613,7 @@ export default function ProcessCharacterizationPage() {
             <button
               onClick={publish}
               disabled={saving || readOnly}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-medium bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-500 hover:to-teal-500 transition-all disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-medium text-white transition-all disabled:opacity-50 bg-primary-500 hover:bg-primary-600"
               title="Cierra esta version del documento y la deja en solo lectura."
             >
               <BadgeCheck size={13} />
@@ -623,7 +623,7 @@ export default function ProcessCharacterizationPage() {
 
           <button
             onClick={() => navigate(`/app/process/${process.id}/flowchart/onboarding`)}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-medium bg-gradient-to-r from-purple-600 to-cyan-600 text-white hover:from-purple-500 hover:to-cyan-500 transition-all shadow-lg shadow-purple-500/15"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-medium text-white transition-all shadow-lg bg-primary-500 hover:bg-primary-600"
           >
             <Bot size={14} />
             <span className="hidden md:inline">Asistente IA</span>
@@ -650,18 +650,18 @@ export default function ProcessCharacterizationPage() {
         <div className="hidden md:block flex-1 min-w-0 overflow-hidden relative">
           {/* Process header overlay */}
           <div className="absolute top-3 left-3 right-3 z-10 pointer-events-none flex items-start justify-between gap-3">
-            <div className="pointer-events-auto inline-flex max-w-full flex-wrap items-center gap-x-4 gap-y-1 bg-[#0d1420]/90 backdrop-blur-sm rounded-xl border border-white/5 px-4 py-2">
+            <div className="pointer-events-auto inline-flex max-w-full flex-wrap items-center gap-x-4 gap-y-1 bg-white rounded-lg border border-gray-100 px-4 py-2">
               <div className="min-w-0">
-                <h2 className="text-sm font-bold text-white truncate">{process.name}</h2>
-                <p className="text-[11px] text-white/35 truncate">
+                <h2 className="text-sm font-bold text-gray-900 truncate">{process.name}</h2>
+                <p className="text-[11px] text-gray-400 truncate">
                   {hierarchy.macro?.name}{hierarchy.parent && ` > ${hierarchy.parent.name}`} | {company?.name || ''}
                 </p>
               </div>
-              <div className="hidden sm:block h-8 w-px bg-white/10" />
-              <div className="hidden sm:flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-white/40">
-                {formData.management && <span>Gerencia: <span className="text-white/60">{formData.management as string}</span></span>}
-                {formData.coordination && <span>Area: <span className="text-white/60">{formData.coordination as string}</span></span>}
-                {formData.responsible && <span>Resp: <span className="text-white/60">{formData.responsible as string}</span></span>}
+              <div className="hidden sm:block h-8 w-px bg-gray-100" />
+              <div className="hidden sm:flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500">
+                {formData.management && <span>Gerencia: <span className="text-gray-600">{formData.management as string}</span></span>}
+                {formData.coordination && <span>Area: <span className="text-gray-600">{formData.coordination as string}</span></span>}
+                {formData.responsible && <span>Resp: <span className="text-gray-600">{formData.responsible as string}</span></span>}
               </div>
             </div>
           </div>
@@ -694,7 +694,7 @@ export default function ProcessCharacterizationPage() {
         {rightPanel && (
           <>
             {panelExpanded && (
-              <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200" />
+              <div className="fixed inset-0 z-40 bg-gray-900/45 animate-in fade-in duration-200" />
             )}
             {/* Bajo `lg` el panel se superpone en vez de repartirse la fila. Con
                 `min-w-[420px]` en el flujo, el lienzo —que es `flex-1 min-w-0`— era
@@ -702,16 +702,16 @@ export default function ProcessCharacterizationPage() {
             {!panelExpanded && (
               <div
                 onClick={() => setRightPanel(null)}
-                className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+                className="fixed inset-0 z-30 bg-gray-900/45 lg:hidden"
                 aria-hidden
               />
             )}
             <div className={panelExpanded
-              ? 'fixed z-50 inset-0 m-auto h-[90vh] w-[90vw] max-w-5xl bg-[#0a0f1a] rounded-2xl border border-white/10 flex flex-col shadow-[0_8px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-in zoom-in-95 fade-in duration-200'
-              : 'fixed top-14 bottom-0 right-0 z-40 w-full max-w-[420px] shadow-2xl lg:static lg:z-auto lg:w-[420px] lg:max-w-none lg:shrink-0 lg:shadow-none border-l border-white/5 bg-[#0a0f1a] flex flex-col overflow-hidden animate-in slide-in-from-right-4 duration-200'
+              ? 'fixed z-50 inset-0 m-auto h-[90vh] w-[90vw] max-w-5xl bg-white rounded-lg border border-gray-200 flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-200'
+              : 'fixed top-14 bottom-0 right-0 z-40 w-full max-w-[420px] shadow-2xl lg:static lg:z-auto lg:w-[420px] lg:max-w-none lg:shrink-0 lg:shadow-none border-l border-gray-100 bg-white flex flex-col overflow-hidden animate-in slide-in-from-right-4 duration-200'
             }>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-black/20 shrink-0">
-              <h3 className={`font-semibold text-white ${panelExpanded ? 'text-base' : 'text-sm'}`}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-900/45 shrink-0">
+              <h3 className={`font-semibold text-gray-900 ${panelExpanded ? 'text-base' : 'text-sm'}`}>
                 {rightPanel === 'info'         && 'Caracterizacion'}
                 {rightPanel === 'procedimiento' && 'Procedimiento'}
                 {rightPanel === 'indicadores'  && 'Indicadores KPI'}
@@ -724,11 +724,11 @@ export default function ProcessCharacterizationPage() {
               </h3>
               <div className="flex items-center gap-1">
                 {rightPanel !== 'info' && (
-                  <button onClick={() => setPanelExpanded(!panelExpanded)} className="p-1 rounded hover:bg-white/5 text-white/30 hover:text-white/60">
+                  <button onClick={() => setPanelExpanded(!panelExpanded)} className="p-1 rounded-md hover:bg-gray-50 text-gray-400 hover:text-gray-600">
                     {panelExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
                   </button>
                 )}
-                <button onClick={() => { setRightPanel(null); setPanelExpanded(false) }} className="p-1 rounded hover:bg-white/5 text-white/30 hover:text-white/60">
+                <button onClick={() => { setRightPanel(null); setPanelExpanded(false) }} className="p-1 rounded-md hover:bg-gray-50 text-gray-400 hover:text-gray-600">
                   <X size={16} />
                 </button>
               </div>

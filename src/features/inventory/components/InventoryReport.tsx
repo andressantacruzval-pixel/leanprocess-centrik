@@ -69,8 +69,8 @@ export function InventoryReport() {
       management: s.gerencia, coordination: s.coordinacion, operative: s.operativo,
       macro: s.macro, proceso: s.proceso, subproceso: s.nombre,
     })),
-    { key: 'area', header: 'Área', width: 120, accessor: (s) => s.area || '', cell: (s) => <div className="truncate text-white/70">{s.area || '—'}</div> },
-    { key: 'objetivo', header: 'Objetivo', width: 220, accessor: (s) => s.objetivo || '', cell: (s) => <div className="truncate text-white/50" title={s.objetivo}>{s.objetivo || '—'}</div> },
+    { key: 'area', header: 'Área', width: 120, accessor: (s) => s.area || '', cell: (s) => <div className="truncate text-gray-700">{s.area || '—'}</div> },
+    { key: 'objetivo', header: 'Objetivo', width: 220, accessor: (s) => s.objetivo || '', cell: (s) => <div className="truncate text-gray-500" title={s.objetivo}>{s.objetivo || '—'}</div> },
     { key: 'responsable', header: 'Responsable', width: 140, accessor: (s) => s.responsable || '', cell: (s) => <div className="truncate">{s.responsable || '—'}</div> },
     { key: 'critico', header: 'Crítico', width: 80, accessor: (s) => boolTxt(s.critico), cell: (s) => <Bool v={s.critico} yes="Sí" danger /> },
     { key: 'efectivo', header: 'Mov. efectivo', width: 100, accessor: (s) => boolTxt(s.efectivo), cell: (s) => <Bool v={s.efectivo} yes="Sí" /> },
@@ -81,10 +81,10 @@ export function InventoryReport() {
     { key: 'medio', header: 'Medio entrega', width: 130, accessor: (s) => s.medioEntrega || '', cell: (s) => <div className="truncate">{s.medioEntrega || '—'}</div> },
     { key: 'supervision', header: 'Supervisión', width: 120, accessor: (s) => s.supervision || '', cell: (s) => <div className="truncate">{s.supervision || '—'}</div> },
     { key: 'banderas', header: 'Banderas', width: 170, accessor: (s) => banderasTxt(s), cell: (s) => <Banderas row={s} /> },
-    { key: 'proveedores', header: 'Proveedores', width: 180, accessor: (s) => s.proveedores || '', cell: (s) => <div className="truncate text-white/55" title={s.proveedores}>{s.proveedores || '—'}</div> },
-    { key: 'entradas', header: 'Entradas', width: 180, accessor: (s) => s.entradas || '', cell: (s) => <div className="truncate text-white/55" title={s.entradas}>{s.entradas || '—'}</div> },
-    { key: 'salidas', header: 'Salidas', width: 180, accessor: (s) => s.salidas || '', cell: (s) => <div className="truncate text-white/55" title={s.salidas}>{s.salidas || '—'}</div> },
-    { key: 'clientes', header: 'Clientes', width: 180, accessor: (s) => s.clientes || '', cell: (s) => <div className="truncate text-white/55" title={s.clientes}>{s.clientes || '—'}</div> },
+    { key: 'proveedores', header: 'Proveedores', width: 180, accessor: (s) => s.proveedores || '', cell: (s) => <div className="truncate text-gray-600" title={s.proveedores}>{s.proveedores || '—'}</div> },
+    { key: 'entradas', header: 'Entradas', width: 180, accessor: (s) => s.entradas || '', cell: (s) => <div className="truncate text-gray-600" title={s.entradas}>{s.entradas || '—'}</div> },
+    { key: 'salidas', header: 'Salidas', width: 180, accessor: (s) => s.salidas || '', cell: (s) => <div className="truncate text-gray-600" title={s.salidas}>{s.salidas || '—'}</div> },
+    { key: 'clientes', header: 'Clientes', width: 180, accessor: (s) => s.clientes || '', cell: (s) => <div className="truncate text-gray-600" title={s.clientes}>{s.clientes || '—'}</div> },
     {
       key: 'estado', header: 'Estado', width: 120, accessor: (s) => (s.origen === 'confirmado' ? 'Aceptado' : 'Deducido'),
       cell: (s) => (
@@ -94,7 +94,7 @@ export function InventoryReport() {
           className="inline-flex items-center gap-1.5 hover:opacity-80"
         >
           <OriginBadge origen={s.origen} />
-          <span className="text-[11px] text-white/50">{s.origen === 'confirmado' ? 'Aceptado' : 'Deducido'}</span>
+          <span className="text-[11px] text-gray-500">{s.origen === 'confirmado' ? 'Aceptado' : 'Deducido'}</span>
         </button>
       ),
     },
@@ -103,9 +103,9 @@ export function InventoryReport() {
   if (!all.length) {
     return (
       <div className="p-10 text-center">
-        <Map size={28} className="mx-auto text-white/20 mb-3" />
-        <h3 className="text-base font-semibold text-white">Aún no hay inventario</h3>
-        <p className="text-sm text-white/50 mt-1 max-w-md mx-auto">Abre el <b className="text-white/70">Mapa de Procesos</b> y pulsa <b className="text-white/70">Inventario de Procesos IA</b> para generarlo. Aquí verás la tabla, los gráficos y los hallazgos.</p>
+        <Map size={28} className="mx-auto text-gray-300 mb-3" />
+        <h3 className="text-base font-semibold text-gray-900">Aún no hay inventario</h3>
+        <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">Abre el <b className="text-gray-700">Mapa de Procesos</b> y pulsa <b className="text-gray-700">Inventario de Procesos IA</b> para generarlo. Aquí verás la tabla, los gráficos y los hallazgos.</p>
       </div>
     )
   }
@@ -121,7 +121,7 @@ export function InventoryReport() {
   const F = findings(macros, areas)
 
   return (
-    <div className="p-3 sm:p-4 flex flex-col lg:flex-row gap-4 text-white/80">
+    <div className="p-3 sm:p-4 flex flex-col lg:flex-row gap-4 text-gray-800">
       <InventoryReportSidebar macros={macros} hojas={hojas} niveles={niveles} gerencias={gerencias} gerenciaLabel={org.l0}
         frecuencias={frecuencias} tiposProceso={tiposProceso}
         f={f} set={set} clear={() => setF(EMPTY_FILTERS)} shown={subs.length} total={all.length} />
@@ -129,7 +129,7 @@ export function InventoryReport() {
       <div className="min-w-0 flex-1 space-y-5">
         <div className="flex justify-end">
           <button onClick={() => exportInventoryExcel(subs, companyName, org)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/15 transition-colors">
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-50 transition-colors">
             <FileSpreadsheet size={13} /> Exportar Excel (todas las columnas)
           </button>
         </div>
@@ -181,9 +181,9 @@ export function InventoryReport() {
 }
 
 function Bool({ v, yes, danger }: { v: boolean | null; yes: string; danger?: boolean }) {
-  if (v == null) return <span className="text-white/20">—</span>
-  if (!v) return <span className="text-white/30">No</span>
-  return <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${danger ? 'bg-red-500/15 text-red-300' : 'bg-emerald-500/15 text-emerald-300'}`}>{yes}</span>
+  if (v == null) return <span className="text-gray-300">—</span>
+  if (!v) return <span className="text-gray-400">No</span>
+  return <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${danger ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}>{yes}</span>
 }
 
 // Chips compactos con las banderas de cumplimiento/continuidad activas.
@@ -192,11 +192,11 @@ const BANDERA_SHORT: Record<string, string> = {
 }
 function Banderas({ row }: { row: InvReportRow }) {
   const activas = BANDERAS.filter((b) => row[b.key] === true)
-  if (!activas.length) return <span className="text-white/20">—</span>
+  if (!activas.length) return <span className="text-gray-300">—</span>
   return (
     <div className="flex flex-wrap gap-1 max-w-[190px]">
       {activas.map((b) => (
-        <span key={b.key} title={b.label} className="inline-flex items-center rounded bg-amber-500/12 text-amber-300 px-1.5 py-0.5 text-[9px] font-semibold whitespace-nowrap">
+        <span key={b.key} title={b.label} className="inline-flex items-center rounded-md bg-amber-50 text-amber-700 px-1.5 py-0.5 text-[9px] font-semibold whitespace-nowrap">
           {BANDERA_SHORT[b.key as string]}
         </span>
       ))}
@@ -213,15 +213,15 @@ function PlanUsageBanner({ documented, cap, level, reached, hasNext }: { documen
   const near = !reached && documented >= cap * 0.8
   const barColor = reached ? '#d03b3b' : near ? '#f59e0b' : '#06b6d4'
   return (
-    <div className={`rounded-2xl border p-4 ${reached ? 'border-red-500/30 bg-red-500/[0.06]' : near ? 'border-amber-500/30 bg-amber-500/[0.06]' : 'border-cyan-500/25 bg-cyan-500/[0.05]'}`}>
+    <div className={`rounded-lg border p-4 ${reached ? 'border-red-300 bg-red-50' : near ? 'border-amber-300 bg-amber-50' : 'border-primary-200 bg-primary-50'}`}>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <div className="text-[10px] uppercase tracking-wide text-white/40">Documentación de tu {planName(level)}</div>
-          <div className="text-2xl font-black mt-0.5 leading-none tabular-nums text-white">
-            {documented} <span className="text-white/40 text-lg font-bold">/ {cap}</span>
-            <span className="text-[12px] font-medium text-white/50 ml-2">procesos documentados</span>
+          <div className="text-[10px] uppercase tracking-wide text-gray-500">Documentación de tu {planName(level)}</div>
+          <div className="text-2xl font-black mt-0.5 leading-none tabular-nums text-gray-900">
+            {documented} <span className="text-gray-500 text-lg font-bold">/ {cap}</span>
+            <span className="text-[12px] font-medium text-gray-500 ml-2">procesos documentados</span>
           </div>
-          <div className="text-[11px] mt-1 text-white/45">
+          <div className="text-[11px] mt-1 text-gray-500">
             {reached
               ? 'Has usado todo el cupo de documentación de tu plan. Puedes seguir armando el mapa; para documentar más, amplía tu plan.'
               : `Te quedan ${restantes} proceso${restantes === 1 ? '' : 's'} por documentar en tu plan. Crear la tarjeta del proceso es libre.`}
@@ -230,13 +230,13 @@ function PlanUsageBanner({ documented, cap, level, reached, hasNext }: { documen
         {hasNext && (
           <button onClick={() => avisarSiSinCupo(true, level, cap)}
             className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold border transition-colors ${
-              reached ? 'bg-red-500/15 text-red-300 border-red-500/25 hover:bg-red-500/25' : 'bg-white/5 text-cyan-300 border-cyan-500/25 hover:bg-cyan-500/10'
+              reached ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' : 'bg-gray-50 text-primary-700 border-primary-200 hover:bg-primary-50'
             }`}>
             Ampliar plan
           </button>
         )}
       </div>
-      <div className="mt-3 h-2 rounded-full bg-white/8 overflow-hidden">
+      <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
         <div className="h-full rounded-full transition-all" style={{ width: `${Math.max(3, pct)}%`, background: barColor }} />
       </div>
     </div>
@@ -245,19 +245,19 @@ function PlanUsageBanner({ documented, cap, level, reached, hasNext }: { documen
 
 function Kpi({ label, value, sub, accent }: { label: string; value: number | string; sub: string; accent?: boolean }) {
   return (
-    <div className={`rounded-2xl border p-4 ${accent ? 'border-cyan-500/30 bg-cyan-500/[0.06]' : 'border-white/10 bg-white/5'}`}>
-      <div className="text-[10px] uppercase tracking-wide text-white/40">{label}</div>
-      <div className={`text-2xl font-black mt-1 leading-none tabular-nums ${accent ? 'text-cyan-400' : 'text-white'}`}>{value}</div>
-      <div className="text-[10px] text-white/35 mt-1">{sub}</div>
+    <div className={`rounded-lg border p-4 ${accent ? 'border-primary-300 bg-primary-50' : 'border-gray-200 bg-gray-50'}`}>
+      <div className="text-[10px] uppercase tracking-wide text-gray-500">{label}</div>
+      <div className={`text-2xl font-black mt-1 leading-none tabular-nums ${accent ? 'text-primary-600' : 'text-gray-900'}`}>{value}</div>
+      <div className="text-[10px] text-gray-400 mt-1">{sub}</div>
     </div>
   )
 }
 
 function Card({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-      <h4 className="text-sm font-semibold text-white">{title}</h4>
-      {sub && <p className="text-[12px] text-white/40 mt-0.5 mb-3">{sub}</p>}
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
+      <h4 className="text-sm font-semibold text-gray-900">{title}</h4>
+      {sub && <p className="text-[12px] text-gray-500 mt-0.5 mb-3">{sub}</p>}
       {children}
     </div>
   )
@@ -266,10 +266,10 @@ function Card({ title, sub, children }: { title: string; sub?: string; children:
 function BarRow({ label, value, max, color, onClick }: { label: string; value: number; max: number; color: string; onClick?: () => void }) {
   return (
     <button onClick={onClick} className="w-full flex items-center gap-3 group text-left">
-      <span className="w-36 shrink-0 text-[12px] text-white/60 truncate text-right group-hover:text-white/90">{label}</span>
-      <span className="flex-1 h-5 rounded-md bg-white/5 overflow-hidden">
+      <span className="w-36 shrink-0 text-[12px] text-gray-600 truncate text-right group-hover:text-gray-800">{label}</span>
+      <span className="flex-1 h-5 rounded-md bg-gray-50 overflow-hidden">
         <span className="h-full rounded-md flex items-center justify-end px-2" style={{ width: `${Math.max(6, value / max * 100)}%`, background: color }}>
-          <span className="text-[10px] font-bold text-white/90">{value}</span>
+          <span className="text-[10px] font-bold text-gray-800">{value}</span>
         </span>
       </span>
     </button>
@@ -286,9 +286,9 @@ const F_ICON: Record<FindingLevel, { icon: typeof XCircle; color: string }> = {
 function FindingRow({ lvl, text }: { lvl: FindingLevel; text: string }) {
   const { icon: Icon, color } = F_ICON[lvl]
   return (
-    <div className="flex items-start gap-2.5 rounded-xl bg-white/[0.03] border border-white/5 px-3 py-2.5">
+    <div className="flex items-start gap-2.5 rounded-lg bg-gray-50 border border-gray-100 px-3 py-2.5">
       <Icon size={15} className="mt-0.5 shrink-0" style={{ color }} />
-      <p className="text-[12.5px] text-white/70 leading-snug">{text}</p>
+      <p className="text-[12.5px] text-gray-700 leading-snug">{text}</p>
     </div>
   )
 }

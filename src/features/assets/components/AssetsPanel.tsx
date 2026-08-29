@@ -102,17 +102,17 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
 
   return (
     <>
-      <div className="absolute bottom-3 right-3 z-20 w-80 max-w-[calc(100%-1.5rem)] rounded-xl border border-indigo-500/25 bg-[#0d1420]/95 backdrop-blur-sm shadow-xl shadow-black/40">
-        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-white/5">
-          <Database size={14} className="text-indigo-300 shrink-0" />
+      <div className="absolute bottom-3 right-3 z-20 w-80 max-w-[calc(100%-1.5rem)] rounded-lg border border-primary-200 bg-white shadow-xl">
+        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-gray-100">
+          <Database size={14} className="text-primary-700 shrink-0" />
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold text-white truncate">Activos de información</p>
-            <p className="text-[10px] text-white/40 truncate">{node.label}</p>
+            <p className="text-[12px] font-semibold text-gray-900 truncate">Activos de información</p>
+            <p className="text-[10px] text-gray-500 truncate">{node.label}</p>
           </div>
           {!readOnly && (
             <button
               onClick={() => { setEditing(null); setShowForm(true) }}
-              className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10.5px] font-medium hover:bg-indigo-500/25"
+              className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-primary-50 text-primary-700 border border-primary-300 text-[10.5px] font-medium hover:bg-primary-100"
             >
               <Plus size={11} /> Activo
             </button>
@@ -121,28 +121,28 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
 
         <div className="px-3 py-2.5 space-y-2 max-h-[42vh] overflow-y-auto">
           {nodeAssets.length === 0 ? (
-            <p className="text-[11px] text-white/35 py-3 text-center">Sin activos en este nodo. Pulsa «＋ Activo» para registrar uno.</p>
+            <p className="text-[11px] text-gray-400 py-3 text-center">Sin activos en este nodo. Pulsa «＋ Activo» para registrar uno.</p>
           ) : nodeAssets.map((a) => {
             const crit = a.criticality || 0
             const lvl = crit ? getRiskLevel(crit, crit) : null
             const op = getOperation(a.id, processId)?.operation
             return (
-              <div key={a.id} className="group rounded-lg border border-white/8 bg-white/[0.03] p-2.5">
+              <div key={a.id} className="group rounded-lg border border-gray-100 bg-gray-50 p-2.5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-[12px] font-medium text-white truncate flex items-center gap-1.5"><ShieldCheck size={11} className="text-indigo-300 shrink-0" />{a.name}</p>
+                    <p className="text-[12px] font-medium text-gray-900 truncate flex items-center gap-1.5"><ShieldCheck size={11} className="text-primary-700 shrink-0" />{a.name}</p>
                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                      {a.asset_type && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{a.asset_type}</span>}
-                      {op && <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300">{op}</span>}
-                      {a.label && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{a.label}</span>}
-                      {lvl && <span className={`text-[9px] px-1.5 py-0.5 rounded text-white ${lvl.color}`} title="Criticidad C·I·D">C·I·D {crit}</span>}
+                      {a.asset_type && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{a.asset_type}</span>}
+                      {op && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-primary-50 text-primary-700">{op}</span>}
+                      {a.label && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{a.label}</span>}
+                      {lvl && <span className={`text-[9px] px-1.5 py-0.5 rounded-md text-gray-900 ${lvl.color}`} title="Criticidad C·I·D">C·I·D {crit}</span>}
                     </div>
                   </div>
                   {!readOnly && (
                     <div className="flex flex-col gap-0.5 shrink-0">
-                      <button onClick={() => { setEditing(a); setShowForm(true) }} title="Editar" className="p-1.5 rounded text-white/30 hover:text-cyan-400 hover:bg-white/5"><Pencil size={12} /></button>
-                      <button onClick={() => { if (confirm(`¿Desvincular «${a.name}» de este nodo? El activo se conserva en el catálogo.`)) { unlinkAsset(a.id) } }} title="Desvincular del nodo (conserva el activo)" className="p-1.5 rounded text-white/30 hover:text-amber-400 hover:bg-amber-500/10"><Unlink size={12} /></button>
-                      <button onClick={() => { if (confirm(`¿Eliminar el activo «${a.name}»? Se quita del catálogo y del diagrama.`)) { deleteAsset(a.id); if (modeler && a.bpmn_element_id) removeNode(modeler, a.bpmn_element_id) } }} title="Eliminar activo" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={12} /></button>
+                      <button onClick={() => { setEditing(a); setShowForm(true) }} title="Editar" className="p-1.5 rounded-md text-gray-400 hover:text-primary-600 hover:bg-gray-50"><Pencil size={12} /></button>
+                      <button onClick={() => { if (confirm(`¿Desvincular «${a.name}» de este nodo? El activo se conserva en el catálogo.`)) { unlinkAsset(a.id) } }} title="Desvincular del nodo (conserva el activo)" className="p-1.5 rounded-md text-gray-400 hover:text-amber-600 hover:bg-amber-50"><Unlink size={12} /></button>
+                      <button onClick={() => { if (confirm(`¿Eliminar el activo «${a.name}»? Se quita del catálogo y del diagrama.`)) { deleteAsset(a.id); if (modeler && a.bpmn_element_id) removeNode(modeler, a.bpmn_element_id) } }} title="Eliminar activo" className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50"><Trash2 size={12} /></button>
                     </div>
                   )}
                 </div>
@@ -155,28 +155,28 @@ export function AssetsPanel({ modeler, processId, readOnly }: Props) {
               {!showLink ? (
                 <button
                   onClick={() => setShowLink(true)}
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-white/[0.03] text-white/50 border border-dashed border-white/10 text-[10.5px] font-medium hover:text-cyan-300 hover:border-cyan-500/30"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-gray-50 text-gray-500 border border-dashed border-gray-200 text-[10.5px] font-medium hover:text-primary-700 hover:border-primary-300"
                 >
                   <Link2 size={11} /> Vincular activo existente
                 </button>
               ) : (
-                <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/[0.04] p-2">
-                  <p className="text-[10px] text-white/45 mb-1.5 px-0.5">Elige un activo del catálogo para anclarlo a este nodo:</p>
+                <div className="rounded-lg border border-primary-200 bg-primary-50 p-2">
+                  <p className="text-[10px] text-gray-500 mb-1.5 px-0.5">Elige un activo del catálogo para anclarlo a este nodo:</p>
                   <div className="space-y-1 max-h-40 overflow-y-auto">
                     {linkable.map((a) => (
                       <button
                         key={a.id}
                         onClick={() => handleLink(a)}
-                        className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded text-left text-[11px] text-white/70 hover:bg-white/5"
+                        className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md text-left text-[11px] text-gray-700 hover:bg-gray-50"
                         title="Vincular a este nodo"
                       >
-                        <Link2 size={10} className="text-cyan-300 shrink-0" />
+                        <Link2 size={10} className="text-primary-700 shrink-0" />
                         <span className="truncate flex-1">{a.name}</span>
-                        {a.asset_type && <span className="text-[8.5px] px-1 py-0.5 rounded bg-white/5 text-white/40 shrink-0">{a.asset_type}</span>}
+                        {a.asset_type && <span className="text-[8.5px] px-1 py-0.5 rounded-md bg-gray-50 text-gray-500 shrink-0">{a.asset_type}</span>}
                       </button>
                     ))}
                   </div>
-                  <button onClick={() => setShowLink(false)} className="mt-1.5 text-[10px] text-white/30 hover:text-white/50 px-0.5">Cancelar</button>
+                  <button onClick={() => setShowLink(false)} className="mt-1.5 text-[10px] text-gray-400 hover:text-gray-500 px-0.5">Cancelar</button>
                 </div>
               )}
             </div>

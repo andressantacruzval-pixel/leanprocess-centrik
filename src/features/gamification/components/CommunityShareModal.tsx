@@ -46,10 +46,10 @@ const TYPE_LABELS: Record<ShareData['type'], string> = {
 }
 
 const TYPE_COLORS: Record<ShareData['type'], string> = {
-  achievement: 'bg-amber-500/20 text-amber-300',
-  report: 'bg-cyan-500/20 text-cyan-300',
-  process: 'bg-emerald-500/20 text-emerald-300',
-  benchmark: 'bg-purple-500/20 text-purple-300',
+  achievement: 'bg-amber-100 text-amber-700',
+  report: 'bg-primary-100 text-primary-700',
+  process: 'bg-emerald-100 text-emerald-700',
+  benchmark: 'bg-primary-100 text-primary-700',
 }
 
 // ── Helper: build formatted text for clipboard ───────────────────────────
@@ -125,29 +125,29 @@ export function CommunityShareModal({
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-gray-900/45"
         onClick={onClose}
       />
 
       {/* Modal — con `p-4` en el fondo y tope de alto: sin ellos iba de borde a borde
           y, con una descripcion larga, el boton de compartir quedaba inalcanzable. */}
-      <div className="relative z-10 w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#0c1220] p-6 shadow-2xl">
+      <div className="relative z-10 w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-lg border border-gray-200 bg-white p-6 shadow-2xl">
         {/* Close button */}
         <button
           onClick={onClose}
           aria-label="Cerrar"
-          className="absolute right-3 top-3 rounded-lg p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+          className="absolute right-3 top-3 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
         >
           <X className="h-5 w-5" />
         </button>
 
         {/* Header */}
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10">
-            <Users className="h-5 w-5 text-cyan-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
+            <Users className="h-5 w-5 text-primary-600" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white">
+            <h2 className="text-lg font-bold text-gray-900">
               Compartir en Process Masters
             </h2>
             <p className="text-xs text-gray-400">
@@ -157,7 +157,7 @@ export function CommunityShareModal({
         </div>
 
         {/* Preview card */}
-        <div className="mb-6 rounded-xl border border-white/10 bg-white/5 p-4">
+        <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
           <div className="mb-2 flex items-center gap-2">
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${TYPE_COLORS[shareData.type]}`}
@@ -165,7 +165,7 @@ export function CommunityShareModal({
               {TYPE_LABELS[shareData.type]}
             </span>
           </div>
-          <h3 className="text-sm font-semibold text-white">
+          <h3 className="text-sm font-semibold text-gray-900">
             {shareData.title}
           </h3>
           <p className="mt-1 text-xs text-gray-400">{shareData.description}</p>
@@ -176,7 +176,7 @@ export function CommunityShareModal({
                 .map(([key, value]) => (
                   <span
                     key={key}
-                    className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] text-gray-400"
+                    className="rounded-md bg-gray-50 px-2 py-0.5 text-[10px] text-gray-400"
                   >
                     {key}: {String(value)}
                   </span>
@@ -191,10 +191,10 @@ export function CommunityShareModal({
           <button
             onClick={handlePublish}
             disabled={published}
-            className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
+            className={`flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all ${
               published
-                ? 'bg-emerald-500/20 text-emerald-300 cursor-default'
-                : 'bg-cyan-500 text-white hover:bg-cyan-600 active:scale-[0.98]'
+                ? 'bg-emerald-100 text-emerald-700 cursor-default'
+                : 'bg-primary-500 text-white hover:bg-primary-600 active:scale-[0.98]'
             }`}
           >
             {published ? (
@@ -216,12 +216,12 @@ export function CommunityShareModal({
             {/* Copy to clipboard */}
             <button
               onClick={handleCopy}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-medium text-gray-300 transition-colors hover:bg-white/10"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-medium text-gray-300 transition-colors hover:bg-gray-100"
             >
               {copied ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-emerald-400">Copiado!</span>
+                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                  <span className="text-emerald-600">Copiado!</span>
                 </>
               ) : (
                 <>
@@ -234,12 +234,12 @@ export function CommunityShareModal({
             {/* Export image placeholder */}
             <button
               disabled
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 text-xs font-medium text-gray-600 cursor-not-allowed"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-4 py-2.5 text-xs font-medium text-gray-600 cursor-not-allowed"
               title="Proximamente"
             >
               <Image className="h-3.5 w-3.5" />
               Exportar imagen
-              <span className="rounded bg-white/5 px-1 py-0.5 text-[9px]">
+              <span className="rounded-md bg-gray-50 px-1 py-0.5 text-[9px]">
                 Pronto
               </span>
             </button>
@@ -247,8 +247,8 @@ export function CommunityShareModal({
         </div>
 
         {/* N8N webhook info */}
-        <div className="mt-5 flex items-center gap-2 rounded-lg bg-white/[0.02] px-3 py-2">
-          <Webhook className="h-3.5 w-3.5 shrink-0 text-purple-400/60" />
+        <div className="mt-5 flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
+          <Webhook className="h-3.5 w-3.5 shrink-0 text-primary-600" />
           <span className="text-[10px] text-gray-500">
             Integracion N8N: Los eventos se registran automaticamente para
             sincronizacion

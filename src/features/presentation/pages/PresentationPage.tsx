@@ -184,7 +184,7 @@ export default function PresentationPage() {
   const slide = slides[current]
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#070b14] select-none overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-surface-ground select-none overflow-hidden">
       <div className="md:hidden h-full">
         <PantallaEstrecha
           que="La presentacion"
@@ -196,7 +196,7 @@ export default function PresentationPage() {
       {/* ESC hint */}
       <button
         onClick={(e) => { e.stopPropagation(); setPreparing(true) }}
-        className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition text-sm"
+        className="absolute top-4 right-4 z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition text-sm"
       >
         <X className="w-4 h-4" />
         ESC
@@ -206,7 +206,7 @@ export default function PresentationPage() {
       {hayPantallaCompleta && (
       <button
         onClick={(e) => { e.stopPropagation(); toggleFullscreen() }}
-        className="absolute top-4 right-28 z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition text-sm"
+        className="absolute top-4 right-28 z-10 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition text-sm"
       >
         <Maximize className="w-4 h-4" />
       </button>
@@ -216,7 +216,7 @@ export default function PresentationPage() {
       {current > 0 && (
         <button
           onClick={(e) => { e.stopPropagation(); prev() }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-gray-50 text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
@@ -226,7 +226,7 @@ export default function PresentationPage() {
       {current < total - 1 && (
         <button
           onClick={(e) => { e.stopPropagation(); next() }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-gray-50 text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
@@ -262,9 +262,9 @@ export default function PresentationPage() {
             {current + 1} / {total}
           </span>
         </div>
-        <div className="h-1 bg-white/5">
+        <div className="h-1 bg-gray-50">
           <div
-            className="h-full bg-cyan-500 transition-all duration-300"
+            className="h-full bg-primary-500 transition-all duration-300"
             style={{ width: `${((current + 1) / total) * 100}%` }}
           />
         </div>

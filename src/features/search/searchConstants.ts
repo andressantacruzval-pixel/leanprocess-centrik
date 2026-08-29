@@ -63,29 +63,29 @@ export interface QuickAction {
 // ── Category metadata ────────────────────────────────────────────────────
 
 export const CATEGORY_META: Record<ResultCategory, { icon: ElementType; color: string }> = {
-  Acciones: { icon: Command, color: 'text-blue-400' },
-  Recientes: { icon: Clock, color: 'text-orange-400' },
-  Frecuentes: { icon: Star, color: 'text-yellow-400' },
-  Procesos: { icon: MapIcon, color: 'text-cyan-400' },
-  Riesgos: { icon: ShieldAlert, color: 'text-rose-400' },
-  Indicadores: { icon: TrendingUp, color: 'text-emerald-400' },
-  Procedimientos: { icon: BookOpen, color: 'text-amber-400' },
-  'Unidades Organizacionales': { icon: Building2, color: 'text-violet-400' },
-  'Activos de Información': { icon: Database, color: 'text-sky-400' },
-  Aplicaciones: { icon: MonitorSmartphone, color: 'text-indigo-400' },
+  Acciones: { icon: Command, color: 'text-blue-600' },
+  Recientes: { icon: Clock, color: 'text-amber-600' },
+  Frecuentes: { icon: Star, color: 'text-amber-600' },
+  Procesos: { icon: MapIcon, color: 'text-primary-600' },
+  Riesgos: { icon: ShieldAlert, color: 'text-red-600' },
+  Indicadores: { icon: TrendingUp, color: 'text-emerald-600' },
+  Procedimientos: { icon: BookOpen, color: 'text-amber-600' },
+  'Unidades Organizacionales': { icon: Building2, color: 'text-primary-600' },
+  'Activos de Información': { icon: Database, color: 'text-primary-600' },
+  Aplicaciones: { icon: MonitorSmartphone, color: 'text-primary-600' },
 }
 
 export const BADGE_COLORS: Record<ResultCategory, string> = {
-  Acciones: 'bg-blue-500/10 text-blue-400 ring-blue-500/20',
-  Recientes: 'bg-orange-500/10 text-orange-400 ring-orange-500/20',
-  Frecuentes: 'bg-yellow-500/10 text-yellow-400 ring-yellow-500/20',
-  Procesos: 'bg-cyan-500/10 text-cyan-400 ring-cyan-500/20',
-  Riesgos: 'bg-rose-500/10 text-rose-400 ring-rose-500/20',
-  Indicadores: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20',
-  Procedimientos: 'bg-amber-500/10 text-amber-400 ring-amber-500/20',
-  'Unidades Organizacionales': 'bg-violet-500/10 text-violet-400 ring-violet-500/20',
-  'Activos de Información': 'bg-sky-500/10 text-sky-400 ring-sky-500/20',
-  Aplicaciones: 'bg-indigo-500/10 text-indigo-400 ring-indigo-500/20',
+  Acciones: 'bg-blue-50 text-blue-600 ring-blue-500',
+  Recientes: 'bg-amber-50 text-amber-600 ring-amber-500',
+  Frecuentes: 'bg-amber-50 text-amber-600 ring-amber-500',
+  Procesos: 'bg-primary-50 text-primary-600 ring-primary-500',
+  Riesgos: 'bg-red-50 text-red-600 ring-red-500',
+  Indicadores: 'bg-emerald-50 text-emerald-600 ring-emerald-500',
+  Procedimientos: 'bg-amber-50 text-amber-600 ring-amber-500',
+  'Unidades Organizacionales': 'bg-primary-50 text-primary-600 ring-primary-500',
+  'Activos de Información': 'bg-primary-50 text-primary-600 ring-primary-500',
+  Aplicaciones: 'bg-primary-50 text-primary-600 ring-primary-500',
 }
 
 // ── Path display names & icons ───────────────────────────────────────────

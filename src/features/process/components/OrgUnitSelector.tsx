@@ -98,32 +98,32 @@ export function OrgUnitSelector({ open, onClose, onSelect, currentOrgUnitId, lea
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-[#0d1420] border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col overflow-hidden">
+      <div className="absolute inset-0 bg-gray-900/45" onClick={onClose} />
+      <div className="relative bg-white border border-gray-200 rounded-lg shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
-          <h3 className="text-lg font-semibold text-white">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900">
             {leafOnly ? 'Asignar área responsable' : 'Seleccionar area organizacional'}
           </h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-white/40 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-500 transition-colors"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Search */}
-        <div className="px-6 py-3 border-b border-white/5">
+        <div className="px-6 py-3 border-b border-gray-100">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar area..."
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-white/10 bg-white/[0.03] text-white text-sm
-                         focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 placeholder:text-white/30"
+              className="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 text-sm
+                         focus:ring-2 focus:ring-primary-500 focus:border-primary-300 placeholder:text-gray-400"
               autoFocus
             />
           </div>
@@ -133,13 +133,13 @@ export function OrgUnitSelector({ open, onClose, onSelect, currentOrgUnitId, lea
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {leafOnly ? (
             orgUnits.length === 0 || [...leafIds].length === 0 ? (
-              <div className="text-center py-8 text-white/30 text-sm">
+              <div className="text-center py-8 text-gray-400 text-sm">
                 No hay áreas disponibles.
                 <br />
                 Crea áreas en la estructura organizacional.
               </div>
             ) : filteredLeafUnits.length === 0 ? (
-              <div className="text-center py-8 text-white/30 text-sm">
+              <div className="text-center py-8 text-gray-400 text-sm">
                 No se encontraron resultados para &quot;{search}&quot;
               </div>
             ) : (
@@ -156,24 +156,24 @@ export function OrgUnitSelector({ open, onClose, onSelect, currentOrgUnitId, lea
                       }}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                         isSelected
-                          ? 'bg-cyan-500/10 border border-cyan-500/20'
-                          : 'hover:bg-white/5 border border-transparent'
+                          ? 'bg-primary-50 border border-primary-200'
+                          : 'hover:bg-gray-50 border border-transparent'
                       }`}
                     >
                       <Building2
                         size={16}
-                        className={isSelected ? 'text-cyan-400' : 'text-white/30'}
+                        className={isSelected ? 'text-primary-600' : 'text-gray-400'}
                       />
                       <div className="flex-1 min-w-0">
                         <span
                           className={`text-sm font-medium truncate block ${
-                            isSelected ? 'text-cyan-400' : 'text-white/70'
+                            isSelected ? 'text-primary-600' : 'text-gray-700'
                           }`}
                         >
                           {unit.name}
                         </span>
                         {path !== unit.name && (
-                          <div className="flex items-center gap-0.5 text-[11px] text-white/30 mt-0.5 truncate">
+                          <div className="flex items-center gap-0.5 text-[11px] text-gray-400 mt-0.5 truncate">
                             {path.split(' > ').map((seg, i, arr) => (
                               <span key={i} className="flex items-center gap-0.5">
                                 {i > 0 && <ChevronRight size={10} className="flex-shrink-0" />}
@@ -189,19 +189,19 @@ export function OrgUnitSelector({ open, onClose, onSelect, currentOrgUnitId, lea
               </div>
             )
           ) : orgUnits.length === 0 ? (
-            <div className="text-center py-8 text-white/30 text-sm">
+            <div className="text-center py-8 text-gray-400 text-sm">
               No hay areas organizacionales configuradas.
               <br />
               Configuralas en el onboarding o ajustes.
             </div>
           ) : filteredGroups.length === 0 ? (
-            <div className="text-center py-8 text-white/30 text-sm">
+            <div className="text-center py-8 text-gray-400 text-sm">
               No se encontraron resultados para &quot;{search}&quot;
             </div>
           ) : (
             filteredGroups.map((group) => (
               <div key={group.levelNumber}>
-                <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2 px-1">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-1">
                   {group.levelName}
                 </h4>
                 <div className="space-y-1">
@@ -219,31 +219,31 @@ export function OrgUnitSelector({ open, onClose, onSelect, currentOrgUnitId, lea
                         }}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                           isSelected
-                            ? 'bg-cyan-500/10 border border-cyan-500/20'
-                            : 'hover:bg-white/5 border border-transparent'
+                            ? 'bg-primary-50 border border-primary-200'
+                            : 'hover:bg-gray-50 border border-transparent'
                         }`}
                       >
                         <Building2
                           size={16}
-                          className={isSelected ? 'text-cyan-400' : 'text-white/30'}
+                          className={isSelected ? 'text-primary-600' : 'text-gray-400'}
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span
                               className={`text-sm font-medium truncate ${
-                                isSelected ? 'text-cyan-400' : 'text-white/70'
+                                isSelected ? 'text-primary-600' : 'text-gray-700'
                               }`}
                             >
                               {unit.name}
                             </span>
                             {isLeaf && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-400 font-medium flex-shrink-0">
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary-50 text-primary-600 font-medium flex-shrink-0">
                                 Hoja
                               </span>
                             )}
                           </div>
                           {path !== unit.name && (
-                            <div className="flex items-center gap-0.5 text-[11px] text-white/30 mt-0.5 truncate">
+                            <div className="flex items-center gap-0.5 text-[11px] text-gray-400 mt-0.5 truncate">
                               {path.split(' > ').map((seg, i, arr) => (
                                 <span key={i} className="flex items-center gap-0.5">
                                   {i > 0 && <ChevronRight size={10} className="flex-shrink-0" />}
@@ -266,13 +266,13 @@ export function OrgUnitSelector({ open, onClose, onSelect, currentOrgUnitId, lea
 
         {/* Clear assignment */}
         {currentOrgUnitId && (
-          <div className="px-6 py-3 border-t border-white/5">
+          <div className="px-6 py-3 border-t border-gray-100">
             <button
               onClick={() => {
                 onSelect(null)
                 onClose()
               }}
-              className="w-full py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+              className="w-full py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
             >
               Quitar asignacion
             </button>

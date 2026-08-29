@@ -1,521 +1,129 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import './styles/centrik-tokens.css';
+@import './styles/centrik-base.css';
+@import './styles/centrik-components.css';
 
-/* El fondo oscuro se pintaba en un div dentro de #root, asi que al rebotar el scroll
-   (el overscroll de macOS, arriba o de lado) asomaba el lienzo del navegador en blanco.
-   El fondo de `html` es el que el navegador propaga al lienzo: aqui se ve una sola vez. */
-html {
-  background-color: #070b14;
-}
+/* ═══════════════════════════════════════════════════════════════════════
+   Lean Process — hoja de entrada
+   ───────────────────────────────────────────────────────────────────────
+   La identidad visual es la de la familia Centrik y vive en `styles/`:
 
-/* Copiloto: entrada suave de burbujas y widgets (aparecer + subir levemente). */
+     · centrik-tokens.css      la paleta, la escala y la forma (bloque @theme)
+     · centrik-base.css        lienzo, tipografía, controles y scrollbars
+     · centrik-components.css  botones, campos, tablas, badges, navegación
+
+   Aquí solo queda lo que es de ESTA aplicación y de ningún kit: las
+   animaciones concretas de sus modales, avisos y copiloto, y los ajustes
+   que necesitan bpmn-js y ReactFlow, que traen su propio CSS.
+
+   Lo que había antes —un tema oscuro navy con acento cian y, debajo, una
+   capa de ~250 reglas `!important` que lo reconvertía a claro— desapareció:
+   las pantallas ya declaran colores claros por sí mismas, así que no queda
+   nada que reconvertir. Ver `docs/App/centrik.md`.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Copiloto: entrada suave de burbujas y widgets ────────────────────── */
 @keyframes copilot-fade-up {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.copilot-fade {
-  animation: copilot-fade-up 0.28s ease-out both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .copilot-fade { animation: none; }
-}
+.copilot-fade { animation: copilot-fade-up 200ms ease-out both; }
 
-/* Floating word cloud animation */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) translateX(0);
-  }
-  25% {
-    transform: translateY(-8px) translateX(4px);
-  }
-  50% {
-    transform: translateY(4px) translateX(-6px);
-  }
-  75% {
-    transform: translateY(-4px) translateX(3px);
-  }
-}
-
-.animate-float {
-  animation: float 8s ease-in-out infinite;
-}
-
-/* Orbital ring animation */
-@keyframes orbit {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-orbit {
-  animation: orbit 20s linear infinite;
-}
-
-.animate-orbit-reverse {
-  animation: orbit 15s linear infinite reverse;
-}
-
-/* Pulse glow */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(0, 212, 255, 0.25);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* Toast slide-in animation */
+/* ── Avisos (toasts) ─────────────────────────────────────────────────── */
 @keyframes toast-slide-in {
-  0% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
+.animate-toast-slide-in { animation: toast-slide-in 200ms ease-out; }
 
-.animate-toast-slide-in {
-  animation: toast-slide-in 0.3s ease-out;
-}
-
-/* Entrada de un modal: el fondo se funde y la lámina sube un poco al aparecer.
-   Van SEPARADAS porque tienen ritmos distintos — el fondo se limita a apagar lo
-   de detrás y la lámina es lo que hay que mirar, así que llega con una curva de
-   salida marcada y un desplazamiento corto. Solo `opacity` y `transform`: nada
-   que obligue al navegador a recalcular el diseño. */
-@keyframes modal-fondo {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
+/* ── Modales ──────────────────────────────────────────────────────────
+   Van SEPARADAS porque tienen ritmos distintos: el velo se limita a apagar
+   lo de detrás y la lámina es lo que hay que mirar. Solo `opacity` y
+   `transform`: nada que obligue al navegador a recalcular el diseño. */
+@keyframes modal-fondo  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes modal-lamina {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.animate-modal-fondo  { animation: modal-fondo 150ms ease-out both; }
+.animate-modal-lamina { animation: modal-lamina 200ms ease-out both; }
 
-.animate-modal-fondo {
-  animation: modal-fondo 180ms ease-out both;
+/* ── Decoración de fondo de la portada y del consultor ────────────────
+   El kit acota el movimiento a 75-200 ms para los CONTROLES; estos dos son
+   ambientales y de baja amplitud, así que se conservan sin el resplandor de
+   neón que tenían (§2: nada de glows). */
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25%      { transform: translateY(-8px) translateX(4px); }
+  50%      { transform: translateY(4px) translateX(-6px); }
+  75%      { transform: translateY(-4px) translateX(3px); }
 }
+.animate-float { animation: float 8s ease-in-out infinite; }
 
-.animate-modal-lamina {
-  animation: modal-lamina 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+@keyframes orbit { to { transform: rotate(360deg); } }
+.animate-orbit         { animation: orbit 20s linear infinite; }
+.animate-orbit-reverse { animation: orbit 15s linear infinite reverse; }
+
+/* Antes era un halo cian de 40 px. En una interfaz clara y sobria basta con
+   que el borde respire. */
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, .18); }
+  50%      { box-shadow: 0 0 0 4px rgba(16, 185, 129, .10); }
 }
+.animate-pulse-glow { animation: pulse-ring 3s ease-in-out infinite; }
 
-/* Quien pide menos movimiento no lo pide por gusto: para algunas personas una
-   animación de entrada provoca mareo. Se conserva el fundido, que no desplaza
-   nada, y desaparece el movimiento. */
+/* Quien pide menos movimiento no lo pide por gusto: para algunas personas
+   una animación de entrada provoca mareo. Se conserva el fundido, que no
+   desplaza nada, y desaparece el desplazamiento. */
 @media (prefers-reduced-motion: reduce) {
-  .animate-modal-lamina {
-    animation: modal-fondo 120ms ease-out both;
-  }
-  .animate-toast-slide-in {
-    animation: modal-fondo 120ms ease-out both;
-  }
+  .copilot-fade,
+  .animate-modal-lamina,
+  .animate-toast-slide-in { animation: modal-fondo 120ms ease-out both; }
+  .animate-float,
+  .animate-orbit,
+  .animate-orbit-reverse,
+  .animate-pulse-glow { animation: none; }
 }
 
-/* Safari en iOS hace zoom sobre la página al enfocar un control con fuente < 16px, y
-   deja al usuario dentro de un formulario ampliado del que tiene que salir a mano. La
-   app usa tamaños pequeños en los filtros y en casi todos sus formularios, así que se
-   arregla una vez aquí y no pantalla por pantalla. Solo bajo puntero grueso: en
-   escritorio los tamaños compactos se quedan como están. */
-@media (pointer: coarse) {
-  select,
-  input,
-  textarea {
-    font-size: 16px;
-  }
-
-  /* Los botones de zoom de ReactFlow miden 26px por CSS de la librería, y en el
-     organigrama son el único modo de acercar o encuadrar con el dedo. */
-  .react-flow__controls-button {
-    width: 32px;
-    height: 32px;
-  }
-}
-
-/* Custom scrollbar for dark panels */
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* Scrollbar oscuro global — aplica a todos los elementos scrollables del sistema */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
-}
-
-*::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-*::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 3px;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
-}
-
-/* Dark theme for native select options */
-select option {
-  background-color: #0b1020;
-  color: white;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   TEMA CLARO  (data-theme="light")  — PREMIUM, con profundidad
-   ───────────────────────────────────────────────────────────────────────
-   El diseño es dark-first (text/bg/border-white/… + fondos navy). Aquí se
-   remapea SIN tocar componentes buscando la MISMA sensación premium que el
-   oscuro: no gris plano, sino superficies BLANCAS que flotan sobre un lienzo
-   con un leve tinte azul de marca, elevadas por SOMBRAS suaves en capas y con
-   texto en negro-azulado profundo. Las señales premium del oscuro (degradados
-   cian/azul, glows, cristal esmerilado) se conservan.
-     · Lienzo:  near-white azulado + foco de luz superior
-     · Paneles: #ffffff con sombra fría en capas (flotan, no “cajas grises”)
-     · Texto:   negro-azulado 950→400 (nunca translúcido)
-     · Bordes:  hairline azul-frío (no gris neutro)
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Fondo de los chips/badges de los nodos del Data Journey (MACROPROCESO,
-   Recibido…). Se fija por variable para que los estilos INLINE de esos nodos
-   —que el remapeo de clases no alcanza— cambien con el tema. */
-:root{ --lp-node-chip-bg: #0b1220; }
-
-:root[data-theme="light"]{
-  color-scheme: light;
-  --lp-node-chip-bg: #eef4fc;
-  /* Sombras FRÍAS (azul-navy) en capas: lo que hace que una superficie clara
-     se sienta cara. Una capa de contacto fina + una capa ambiental difusa. */
-  --lp-sh-sm:   0 1px 2px rgba(20,40,90,.06);
-  --lp-sh-card: 0 1px 2px rgba(20,40,90,.05), 0 8px 20px -10px rgba(20,40,90,.14);
-  --lp-sh-md:   0 2px 6px -1px rgba(20,40,90,.07), 0 14px 32px -12px rgba(20,40,90,.18);
-  --lp-sh-lg:   0 10px 24px -8px rgba(20,40,90,.12), 0 30px 60px -18px rgba(20,40,90,.26);
-}
-
-/* ── Lienzo: near-white azulado con un foco de luz arriba (no gris) ───── */
-html[data-theme="light"]{ background-color:#e9eff8; }
-:root[data-theme="light"] body{
-  color:#0b1220;
-  background:
-    radial-gradient(1200px 560px at 50% -12%, #ffffff 0%, rgba(255,255,255,0) 60%),
-    linear-gradient(180deg, #f2f6fd 0%, #e8eff8 100%);
-  background-attachment: fixed;
-}
-:root[data-theme="light"] .bg-\[\#070b14\],
-:root[data-theme="light"] .bg-\[\#0b1020\]{
-  background:
-    radial-gradient(1200px 560px at 50% -12%, #ffffff 0%, rgba(255,255,255,0) 60%),
-    linear-gradient(180deg, #f2f6fd 0%, #e8eff8 100%) !important;
-  background-attachment: fixed !important;
-}
-
-/* ── Texto: escala negro-azulado sólida (profunda arriba, legible) ────── */
-:root[data-theme="light"] .text-white{color:#0b1220 !important}
-:root[data-theme="light"] .text-white\/95{color:#141c30 !important}
-:root[data-theme="light"] .text-white\/90{color:#1a2540 !important}
-:root[data-theme="light"] .text-white\/85{color:#1a2540 !important}
-:root[data-theme="light"] .text-white\/80{color:#22304c !important}
-:root[data-theme="light"] .text-white\/75{color:#2b3852 !important}
-:root[data-theme="light"] .text-white\/70{color:#33415e !important}
-:root[data-theme="light"] .text-white\/65{color:#3d4b68 !important}
-:root[data-theme="light"] .text-white\/60{color:#475572 !important}
-:root[data-theme="light"] .text-white\/55{color:#4f5d7a !important}
-:root[data-theme="light"] .text-white\/50{color:#5c6a86 !important}
-:root[data-theme="light"] .text-white\/45{color:#63718d !important}
-:root[data-theme="light"] .text-white\/40{color:#6b7994 !important}
-:root[data-theme="light"] .text-white\/35{color:#76839d !important}
-:root[data-theme="light"] .text-white\/30{color:#8794ac !important}
-:root[data-theme="light"] .text-white\/25{color:#96a2b8 !important}
-:root[data-theme="light"] .text-white\/20{color:#a6b1c5 !important}
-:root[data-theme="light"] .text-white\/15{color:#b3bcce !important}
-:root[data-theme="light"] .text-white\/10{color:#c2cad9 !important}
-
-/* ── Superficies (overlays) → blanco / azul-frío MUY claro (no gris) ─── */
-:root[data-theme="light"] .bg-white{background-color:#ffffff !important}
-:root[data-theme="light"] .bg-white\/20{background-color:#c8d4e7 !important}
-:root[data-theme="light"] .bg-white\/10{background-color:#dde6f3 !important}
-:root[data-theme="light"] .bg-white\/5{background-color:#eef4fe !important}
-:root[data-theme="light"] .bg-white\/\[0\.08\]{background-color:#eef4fc !important}
-:root[data-theme="light"] .bg-white\/\[0\.07\]{background-color:#eef4fc !important}
-:root[data-theme="light"] .bg-white\/\[0\.06\]{background-color:#f3f7fd !important}
-:root[data-theme="light"] .bg-white\/\[0\.05\]{background-color:#f3f7fd !important}
-:root[data-theme="light"] .bg-white\/\[0\.04\]{background-color:#f7fafe !important}
-:root[data-theme="light"] .bg-white\/\[0\.03\]{background-color:#f7fafe !important}
-:root[data-theme="light"] .bg-white\/\[0\.02\]{background-color:#fafcff !important}
-:root[data-theme="light"] .bg-white\/\[0\.015\]{background-color:#fafcff !important}
-:root[data-theme="light"] .bg-white\/\[0\.01\]{background-color:#fafcff !important}
-
-/* ── Bordes → hairline azul-frío (aporta “marca”, no gris muerto) ────── */
-:root[data-theme="light"] .border-white\/20{border-color:#ccd8ea !important}
-:root[data-theme="light"] .border-white\/15{border-color:#d6e0ef !important}
-:root[data-theme="light"] .border-white\/10{border-color:#cdd9ef !important}
-:root[data-theme="light"] .border-white\/8{border-color:#e6edf7 !important}
-:root[data-theme="light"] .border-white\/5{border-color:#eef3fb !important}
-:root[data-theme="light"] .border-white\/\[0\.12\]{border-color:#d6e0ef !important}
-:root[data-theme="light"] .border-white\/\[0\.07\]{border-color:#e6edf7 !important}
-:root[data-theme="light"] .border-white\/\[0\.06\]{border-color:#e9f0f8 !important}
-:root[data-theme="light"] .border-white\/\[0\.04\]{border-color:#eef3fb !important}
-:root[data-theme="light"] .border-white\/\[0\.03\]{border-color:#eef3fb !important}
-
-/* ── Placeholders y rings ────────────────────────────────────────────── */
-:root[data-theme="light"] .placeholder-white\/30::placeholder{color:#96a2b8 !important}
-:root[data-theme="light"] .placeholder-white\/25::placeholder{color:#96a2b8 !important}
-:root[data-theme="light"] .placeholder-white\/20::placeholder{color:#a6b1c5 !important}
-:root[data-theme="light"] .ring-white\/80{--tw-ring-color:#0b1220cc !important}
-:root[data-theme="light"] .ring-white\/60{--tw-ring-color:#0b122099 !important}
-:root[data-theme="light"] .ring-white\/20{--tw-ring-color:#ccd8ea !important}
-:root[data-theme="light"] .ring-white\/5{--tw-ring-color:#eef3fb !important}
-
-/* ── Fondo de página (shell) navy → lienzo con foco de luz (arriba) ──── */
-:root[data-theme="light"] .bg-\[\#16223a\]{background-color:#eef4fc !important}
-
-/* ── Paneles / tarjetas navy → BLANCO que FLOTA (sombra fría en capas) ─ */
-:root[data-theme="light"] .bg-\[\#0a0f1a\],
-:root[data-theme="light"] .bg-\[\#0d1420\],
-:root[data-theme="light"] .bg-\[\#0d1424\],
-:root[data-theme="light"] .bg-\[\#0d1320\],
-:root[data-theme="light"] .bg-\[\#0d1117\],
-:root[data-theme="light"] .bg-\[\#0f1629\],
-:root[data-theme="light"] .bg-\[\#0c1322\],
-:root[data-theme="light"] .bg-\[\#0c1220\],
-:root[data-theme="light"] .bg-\[\#0f1117\],
-:root[data-theme="light"] .bg-\[\#111827\],
-:root[data-theme="light"] .bg-\[\#111a28\],
-:root[data-theme="light"] .bg-\[\#0c172b\],
-:root[data-theme="light"] .bg-\[\#071c27\]{
-  background-color:#ffffff !important;
-  box-shadow: var(--lp-sh-card);
-}
-:root[data-theme="light"] .bg-\[\#17122b\]{background-color:#f6f4ff !important; box-shadow: var(--lp-sh-card);}
-
-/* ── Variantes navy con opacidad (barras con blur) → cristal blanco ──── */
-:root[data-theme="light"] .bg-\[\#0a0f1a\]\/80{background-color:rgba(255,255,255,.72) !important}
-:root[data-theme="light"] .bg-\[\#0c1322\]\/90,
-:root[data-theme="light"] .bg-\[\#0d1420\]\/90{background-color:rgba(255,255,255,.85) !important}
-:root[data-theme="light"] .bg-\[\#070b14\]\/95{background-color:rgba(242,246,253,.9) !important}
-:root[data-theme="light"] .bg-\[\#070b14\]\/80{background-color:rgba(242,246,253,.8) !important}
-/* Paneles flotantes del diagramador (Activos, Apps, Cargos) y superficies del
-   Data Journey: usan /95 y navys que faltaban en el remapeo → salían oscuros. */
-:root[data-theme="light"] .bg-\[\#0d1420\]\/95,
-:root[data-theme="light"] .bg-\[\#0c1322\]\/95{background-color:rgba(255,255,255,.94) !important; box-shadow: var(--lp-sh-card);}
-:root[data-theme="light"] .bg-\[\#0b1220\]{background-color:#ffffff !important; box-shadow: var(--lp-sh-card);}
-:root[data-theme="light"] .bg-\[\#0a1018\]{background-color:#f3f7fd !important}
-/* MiniMap del Data Journey (ReactFlow): usa la clase !bg-[#0a0f1a] y props inline
-   (maskColor/nodeColor) que el remapeo no alcanza. Se aclara por sus clases. */
-:root[data-theme="light"] .react-flow__minimap{background:#ffffff !important; border-color:#e2e8f0 !important}
-:root[data-theme="light"] .react-flow__minimap-mask{fill:rgba(226,232,240,.55) !important}
-:root[data-theme="light"] .react-flow__minimap-node{fill:#cbd5e1 !important; stroke:#94a3b8 !important}
-
-/* ── Stops de gradiente navy (sidebar, cabeceras) → blanco→azul suave ── */
-:root[data-theme="light"] .from-\[\#0a0f1a\]{--tw-gradient-from:#ffffff !important}
-:root[data-theme="light"] .to-\[\#0d1420\]{--tw-gradient-to:#eef4fd !important}
-:root[data-theme="light"] .to-\[\#0d1117\]{--tw-gradient-to:#eef4fd !important}
-:root[data-theme="light"] .via-\[\#0a1628\]{--tw-gradient-via:#f2f6fd !important}
-
-/* ── Sombras: negro plano → sombras FRÍAS en capas (clave de lo premium)
-   Se definen DESPUÉS de los paneles para que un modal con shadow-2xl gane. ── */
-:root[data-theme="light"] .shadow-sm{box-shadow: var(--lp-sh-sm) !important}
-:root[data-theme="light"] .shadow-md{box-shadow: var(--lp-sh-card) !important}
-:root[data-theme="light"] .shadow-lg{box-shadow: var(--lp-sh-md) !important}
-:root[data-theme="light"] .shadow-xl{box-shadow: var(--lp-sh-md) !important}
-:root[data-theme="light"] .shadow-2xl{box-shadow: var(--lp-sh-lg) !important}
-:root[data-theme="light"] .shadow-\[0_8px_60px_rgba\(0\,0\,0\,0\.8\)\]{box-shadow: var(--lp-sh-lg) !important}
-:root[data-theme="light"] .shadow-\[0_8px_20px_-6px_rgba\(0\,0\,0\,0\.6\)\]{box-shadow: 0 8px 22px -8px rgba(20,40,90,.28) !important}
-:root[data-theme="light"] .shadow-black\/40,
-:root[data-theme="light"] .shadow-black\/50,
-:root[data-theme="light"] .shadow-black\/60{--tw-shadow-color:rgba(20,40,90,.18) !important}
-
-/* ── Elevación de las superficies estructurales (barra lateral y cabecera)
-   No tienen clase única: se elevan por elemento para separarlas del lienzo. ── */
-:root[data-theme="light"] aside{ box-shadow: 6px 0 28px -18px rgba(20,40,90,.35), 1px 0 0 rgba(20,40,90,.05); }
-:root[data-theme="light"] header{ box-shadow: 0 1px 0 rgba(20,40,90,.05), 0 8px 24px -16px rgba(20,40,90,.30); }
-
-/* ── Campos de formulario: marcos con VIDA (tinte azul) + foco cian ──────
-   No blanco/gris plano: relleno azul muy suave y borde azul definido, con un
-   glow cian al enfocar. Cubre inputs/textarea/select nativos y el disparador
-   de CreatableSelect (que usa bg-white/5 + border-white/10, ya azulados). ── */
-:root[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-:root[data-theme="light"] textarea,
-:root[data-theme="light"] select{
-  background-color:#f5f9ff !important;
-  border-color:#cbd8ef !important;
-}
-:root[data-theme="light"] input::placeholder,
-:root[data-theme="light"] textarea::placeholder{ color:#9aa6bc !important }
-:root[data-theme="light"] input:focus,
-:root[data-theme="light"] input:focus-visible,
-:root[data-theme="light"] textarea:focus,
-:root[data-theme="light"] select:focus{
-  border-color:#06b6d4 !important;
-  box-shadow:0 0 0 3px rgba(6,182,212,.16) !important;
-  outline:none !important;
-}
-/* Disparador de CreatableSelect y campos con bg-white/5: foco cian por teclado */
-:root[data-theme="light"] button.w-full:focus-visible{
-  box-shadow:0 0 0 3px rgba(6,182,212,.16) !important;
-  outline:none !important;
-}
-
-/* ── Scrollbars: en oscuro son blancas (invisibles en claro) → slate frío ── */
-:root[data-theme="light"] *{ scrollbar-color:#c4cfe0 transparent; }
-:root[data-theme="light"] *::-webkit-scrollbar-thumb{ background:#c4cfe0; }
-:root[data-theme="light"] *::-webkit-scrollbar-thumb:hover{ background:#a9b6cd; }
-:root[data-theme="light"] .scrollbar-thin::-webkit-scrollbar-thumb{ background:#ccd7e6; }
-:root[data-theme="light"] .scrollbar-thin::-webkit-scrollbar-thumb:hover{ background:#b3c0d5; }
-
-/* ── Velo (scrim) de modales: negro puro → navy suave ────────────────── */
-:root[data-theme="light"] .bg-black\/60{background-color:rgba(11,18,32,.42) !important}
-:root[data-theme="light"] .bg-black\/50{background-color:rgba(11,18,32,.38) !important}
-:root[data-theme="light"] .bg-black\/40{background-color:rgba(11,18,32,.30) !important}
-
-/* ── <select> options en claro ───────────────────────────────────────── */
-:root[data-theme="light"] select option{background-color:#ffffff;color:#0b1220}
-
-/* El lienzo premium del diagramador (near-white + cuadrícula de puntos azul)
-   vive en bpmn-dark-theme.css para no competir con el `background` shorthand
-   que esa hoja aplica a `.bjs-container`. */
-
-/* ── Acentos de texto: tonos 300/400 → 600/700 en claro (contraste AA) ── */
-:root[data-theme="light"] .text-cyan-400{color:#0891b2 !important}
-:root[data-theme="light"] .text-cyan-300{color:#0e7490 !important}
-:root[data-theme="light"] .text-red-400{color:#dc2626 !important}
-:root[data-theme="light"] .text-red-300{color:#dc2626 !important}
-:root[data-theme="light"] .text-amber-400{color:#d97706 !important}
-:root[data-theme="light"] .text-amber-300{color:#b45309 !important}
-:root[data-theme="light"] .text-emerald-400{color:#059669 !important}
-:root[data-theme="light"] .text-emerald-300{color:#047857 !important}
-:root[data-theme="light"] .text-green-400{color:#16a34a !important}
-:root[data-theme="light"] .text-blue-400{color:#2563eb !important}
-:root[data-theme="light"] .text-blue-300{color:#1d4ed8 !important}
-:root[data-theme="light"] .text-purple-400{color:#7c3aed !important}
-:root[data-theme="light"] .text-purple-300{color:#6d28d9 !important}
-:root[data-theme="light"] .text-violet-400{color:#7c3aed !important}
-:root[data-theme="light"] .text-orange-400{color:#ea580c !important}
-:root[data-theme="light"] .text-teal-400{color:#0d9488 !important}
-:root[data-theme="light"] .text-rose-400{color:#e11d48 !important}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   ACENTOS FUERTES (cian de marca ProcessUp) — que se sienta "top", no lavado
-   ───────────────────────────────────────────────────────────────────────
-   Los tintes cian/azul a baja opacidad se volvían casi blancos sobre el
-   lienzo claro (bg-cyan-500/10 se usa 73 veces: estados activos, chips,
-   badges). Aquí se remapean a tintes cian CLAROS pero SATURADOS, con bordes
-   cian visibles y un GLOW cian en los botones primarios — el mismo lenguaje
-   bold de los toggles/botones, ahora en toda la app.
-   Los glows se definen DESPUÉS de las utilidades shadow-* para ganarles.
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* ── Tintes de fondo cian → claros pero saturados (activos/chips/badges) ── */
-:root[data-theme="light"] .bg-cyan-500\/5,
-:root[data-theme="light"] .bg-cyan-500\/\[0\.06\]{background-color:#e6f6fb !important}
-:root[data-theme="light"] .bg-cyan-500\/\[0\.04\]{background-color:#ecf8fc !important}
-:root[data-theme="light"] .bg-cyan-500\/\[0\.03\]{background-color:#f1fafd !important}
-:root[data-theme="light"] .bg-cyan-400\/\[0\.05\]{background-color:#e9f7fb !important}
-:root[data-theme="light"] .bg-cyan-500\/10{background-color:#d3eff7 !important}
-:root[data-theme="light"] .bg-cyan-500\/15{background-color:#bfe8f3 !important}
-:root[data-theme="light"] .bg-cyan-500\/20,
-:root[data-theme="light"] .bg-cyan-600\/20{background-color:#a9e0ef !important}
-:root[data-theme="light"] .bg-cyan-500\/25{background-color:#96d8eb !important}
-:root[data-theme="light"] .bg-cyan-400\/30{background-color:#8bd6ea !important}
-:root[data-theme="light"] .bg-cyan-500\/30,
-:root[data-theme="light"] .bg-cyan-600\/30{background-color:#7fcfe6 !important}
-:root[data-theme="light"] .bg-cyan-500\/60{background-color:#1fc2dc !important}
-
-/* ── Tintes azul → saturados ─────────────────────────────────────────── */
-:root[data-theme="light"] .bg-blue-500\/5,
-:root[data-theme="light"] .bg-blue-500\/\[0\.05\]{background-color:#edf3fe !important}
-:root[data-theme="light"] .bg-blue-500\/10{background-color:#dae7fd !important}
-:root[data-theme="light"] .bg-blue-500\/15{background-color:#c8ddfc !important}
-:root[data-theme="light"] .bg-blue-500\/20{background-color:#b5d2fb !important}
-
-/* ── Tintes teal → saturados ─────────────────────────────────────────── */
-:root[data-theme="light"] .bg-teal-500\/10{background-color:#d1efeb !important}
-:root[data-theme="light"] .bg-teal-500\/20{background-color:#a7e1d9 !important}
-
-/* ── Bordes cian/azul → visibles, con carácter de marca ──────────────── */
-:root[data-theme="light"] .border-cyan-500\/10{border-color:#cceaf3 !important}
-:root[data-theme="light"] .border-cyan-500\/20{border-color:#a3daeb !important}
-:root[data-theme="light"] .border-cyan-500\/25{border-color:#8ed3e7 !important}
-:root[data-theme="light"] .border-cyan-500\/30{border-color:#79cce4 !important}
-:root[data-theme="light"] .border-cyan-500\/40{border-color:#45bed9 !important}
-:root[data-theme="light"] .border-cyan-500\/50{border-color:#1fb0d2 !important}
-:root[data-theme="light"] .border-cyan-400\/60{border-color:#38bed8 !important}
-:root[data-theme="light"] .border-cyan-400\/50{border-color:#57c6dd !important}
-:root[data-theme="light"] .border-cyan-400\/40{border-color:#76cfe2 !important}
-:root[data-theme="light"] .border-blue-500\/20{border-color:#b5d2fb !important}
-:root[data-theme="light"] .border-blue-500\/30{border-color:#9bc1f8 !important}
-:root[data-theme="light"] .border-blue-400\/30{border-color:#a6caf7 !important}
-
-/* ── Focos (rings) cian → vívidos (feedback premium al enfocar) ──────── */
-:root[data-theme="light"] .ring-cyan-500\/50{--tw-ring-color:rgba(6,182,212,.60) !important}
-:root[data-theme="light"] .ring-cyan-500\/40{--tw-ring-color:rgba(6,182,212,.50) !important}
-:root[data-theme="light"] .ring-cyan-500\/30{--tw-ring-color:rgba(6,182,212,.42) !important}
-:root[data-theme="light"] .ring-cyan-500\/20{--tw-ring-color:rgba(6,182,212,.34) !important}
-
-/* ── GLOW cian en botones primarios (shadow-cyan-*): el “pop” premium.
-   Definido al final para ganar a los shadow-* generales. ─────────────── */
-:root[data-theme="light"] .shadow-cyan-500\/5{box-shadow:0 3px 12px -3px rgba(6,182,212,.22) !important}
-:root[data-theme="light"] .shadow-cyan-500\/10{box-shadow:0 4px 16px -4px rgba(6,182,212,.30) !important}
-:root[data-theme="light"] .shadow-cyan-500\/20{box-shadow:0 6px 20px -4px rgba(6,182,212,.40) !important}
-:root[data-theme="light"] .shadow-cyan-500\/25{box-shadow:0 6px 22px -4px rgba(6,182,212,.44) !important}
-:root[data-theme="light"] .shadow-cyan-500\/30{box-shadow:0 8px 24px -5px rgba(6,182,212,.48) !important}
-:root[data-theme="light"] .shadow-cyan-500\/40{box-shadow:0 8px 26px -5px rgba(6,182,212,.52) !important}
-:root[data-theme="light"] .shadow-cyan-500\/50{box-shadow:0 10px 30px -6px rgba(6,182,212,.56) !important}
-:root[data-theme="light"] .shadow-purple-500\/15{box-shadow:0 5px 18px -4px rgba(124,58,237,.28) !important}
-:root[data-theme="light"] .shadow-purple-500\/20{box-shadow:0 6px 20px -4px rgba(124,58,237,.34) !important}
-:root[data-theme="light"] .shadow-purple-500\/30{box-shadow:0 8px 24px -5px rgba(124,58,237,.42) !important}
-:root[data-theme="light"] .shadow-emerald-500\/20{box-shadow:0 6px 20px -4px rgba(16,185,129,.34) !important}
-:root[data-theme="light"] .shadow-blue-500\/20{box-shadow:0 6px 20px -4px rgba(37,99,235,.34) !important}
-:root[data-theme="light"] .shadow-amber-500\/20{box-shadow:0 6px 20px -4px rgba(217,119,6,.32) !important}
-
-/* ── bpmn-js: acotar sus UI flotantes por debajo de los modales de la app ──
-   El context pad (z-index 100), la paleta y los popups (z-200) de diagram-js se
-   sobreponían a las ventanas emergentes (que usan z-50..z-1000 y se portan al
-   body). Al acotarlos por debajo, ningún nodo del diagramador vuelve a quedar
-   sobre una pestaña/modal. Siguen por encima del lienzo, que basta para editar. */
+/* ── bpmn-js: acotar sus UI flotantes por debajo de los modales ────────
+   El context pad (z-index 100), la paleta y los popups (z-200) de diagram-js
+   se sobreponían a las ventanas emergentes de la app (z-50..z-1000, que se
+   portan al body). Acotados aquí, ningún nodo del diagramador vuelve a
+   quedar sobre una pestaña o un modal; siguen por encima del lienzo, que es
+   lo único que hace falta para editar. */
 .djs-context-pad,
 .djs-palette,
 .djs-popup,
 .djs-popup-backdrop,
 .djs-tooltip-container { z-index: 30 !important; }
 
-/* ── Activo de información «encendido»: al pulsar un activo en el panel derecho
-   se resalta su nodo Almacén de datos en el diagrama (canvas.addMarker). ────── */
+/* ── Activo de información «encendido» ────────────────────────────────
+   Al pulsar un activo en el panel derecho se resalta su nodo Almacén de
+   datos en el diagrama (canvas.addMarker). El ámbar es deliberado: es una
+   señal temporal de localización, no un color de marca. */
 .djs-element.asset-lit .djs-visual > :first-child,
-.djs-element.app-lit .djs-visual > :first-child {
+.djs-element.app-lit   .djs-visual > :first-child {
   stroke: #f59e0b !important;
-  stroke-width: 4px !important;
-  fill: rgba(245, 158, 11, 0.18) !important;
-  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 1)) drop-shadow(0 0 22px rgba(245, 158, 11, 0.75));
+  stroke-width: 3px !important;
+  fill: rgba(245, 158, 11, .14) !important;
   animation: lp-lit-pulse 1.2s ease-in-out infinite;
 }
 @keyframes lp-lit-pulse {
-  0%, 100% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 1)) drop-shadow(0 0 22px rgba(245, 158, 11, 0.75)); }
-  50%      { filter: drop-shadow(0 0 16px rgba(245, 158, 11, 1)) drop-shadow(0 0 34px rgba(245, 158, 11, 0.9)); }
+  0%, 100% { stroke-opacity: 1; }
+  50%      { stroke-opacity: .55; }
 }
+@media (prefers-reduced-motion: reduce) {
+  .djs-element.asset-lit .djs-visual > :first-child,
+  .djs-element.app-lit   .djs-visual > :first-child { animation: none; }
+}
+
+/* ── ReactFlow: el minimapa y los controles traen fondo propio ────────── */
+.react-flow__minimap { background: #ffffff !important; border: 1px solid #e5e7eb !important; }
+.react-flow__minimap-mask { fill: rgba(243, 244, 246, .6) !important; }
+.react-flow__minimap-node { fill: #d1d5db !important; stroke: #9ca3af !important; }
+.react-flow__controls-button {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  color: #4b5563;
+}
+.react-flow__controls-button:hover { background: #f9fafb; }

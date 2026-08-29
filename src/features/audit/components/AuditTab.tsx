@@ -81,19 +81,19 @@ export function AuditTab({ processId, processName, bpmnXml, isExpanded }: AuditT
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <ClipboardCheck size={isExpanded ? 16 : 14} className="text-violet-400" />
-          <span className={`font-semibold text-white ${isExpanded ? 'text-sm' : 'text-xs'}`}>Programa de Auditoria</span>
+          <ClipboardCheck size={isExpanded ? 16 : 14} className="text-primary-600" />
+          <span className={`font-semibold text-gray-900 ${isExpanded ? 'text-sm' : 'text-xs'}`}>Programa de Auditoria</span>
           {auditItems.length > 0 && (
-            <span className="text-[9px] bg-white/10 px-1.5 py-0.5 rounded text-white/50">{auditItems.length}</span>
+            <span className="text-[9px] bg-gray-100 px-1.5 py-0.5 rounded-md text-gray-500">{auditItems.length}</span>
           )}
         </div>
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="p-1.5 rounded-md text-white/40 hover:text-white/70 hover:bg-white/10 border border-white/10 transition-colors"
+            className="p-1.5 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200 transition-colors"
             title="Agregar ítem de auditoría"
           >
             <Plus size={13} />
@@ -102,7 +102,7 @@ export function AuditTab({ processId, processName, bpmnXml, isExpanded }: AuditT
             type="button"
             onClick={handleGenerate}
             disabled={!bpmnXml || isGenerating || auditBudget.isConsuming}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 text-[11px] font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200 text-[11px] font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {(isGenerating || auditBudget.isConsuming) ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
             {(isGenerating || auditBudget.isConsuming) ? 'Generando...' : auditItems.length > 0 ? 'Regenerar' : 'Generar con IA'}
@@ -115,9 +115,9 @@ export function AuditTab({ processId, processName, bpmnXml, isExpanded }: AuditT
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         {!isGenerating && auditItems.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <ClipboardCheck size={24} className="text-white/10 mb-3" />
-            <p className="text-xs text-white/30 mb-1">Sin programa de auditoria</p>
-            <p className="text-[10px] text-white/20 mb-4">
+            <ClipboardCheck size={24} className="text-gray-300 mb-3" />
+            <p className="text-xs text-gray-400 mb-1">Sin programa de auditoria</p>
+            <p className="text-[10px] text-gray-300 mb-4">
               {bpmnXml
                 ? 'Genera recomendaciones de auditoria basadas en el flujograma y riesgos, o agrega ítems manualmente.'
                 : 'Necesitas un diagrama BPMN primero, o agrega ítems manualmente.'}
@@ -131,16 +131,16 @@ export function AuditTab({ processId, processName, bpmnXml, isExpanded }: AuditT
               <div
                 key={i}
                 onClick={() => handleOpenEdit(item, i)}
-                className="rounded-lg border border-white/5 bg-white/[0.02] p-3 space-y-2 group cursor-pointer hover:border-white/10 hover:bg-white/[0.04] transition-all"
+                className="rounded-lg border border-gray-100 bg-gray-50 p-3 space-y-2 group cursor-pointer hover:border-gray-200 hover:bg-gray-50 transition-all"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
-                    <p className={`font-medium text-white ${isExpanded ? 'text-xs' : 'text-[11px]'}`}>{item.queAuditar}</p>
-                    <p className={`text-violet-400/60 mt-0.5 ${isExpanded ? 'text-[10px]' : 'text-[9px]'}`}>{item.actividad}</p>
+                    <p className={`font-medium text-gray-900 ${isExpanded ? 'text-xs' : 'text-[11px]'}`}>{item.queAuditar}</p>
+                    <p className={`text-primary-600 mt-0.5 ${isExpanded ? 'text-[10px]' : 'text-[9px]'}`}>{item.actividad}</p>
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteTarget(i) }}
-                    className="p-0.5 text-white/20 opacity-30 group-hover:opacity-100 group-hover:text-red-500 transition-all"
+                    className="p-0.5 text-gray-300 opacity-30 group-hover:opacity-100 group-hover:text-red-600 transition-all"
                   >
                     <Trash2 size={11} />
                   </button>
@@ -148,20 +148,20 @@ export function AuditTab({ processId, processName, bpmnXml, isExpanded }: AuditT
 
                 <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-x-3 gap-y-1">
                   <div>
-                    <span className="text-[10px] text-white/30 uppercase">Criterio</span>
-                    <p className="text-xs text-white/70">{item.criterio}</p>
+                    <span className="text-[10px] text-gray-400 uppercase">Criterio</span>
+                    <p className="text-xs text-gray-700">{item.criterio}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] text-white/30 uppercase">Evidencia</span>
-                    <p className="text-xs text-white/70">{item.evidencia}</p>
+                    <span className="text-[10px] text-gray-400 uppercase">Evidencia</span>
+                    <p className="text-xs text-gray-700">{item.evidencia}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] text-white/30 uppercase">Frecuencia</span>
-                    <p className="text-xs text-white/70">{item.frecuencia}</p>
+                    <span className="text-[10px] text-gray-400 uppercase">Frecuencia</span>
+                    <p className="text-xs text-gray-700">{item.frecuencia}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] text-white/30 uppercase">Responsable</span>
-                    <p className="text-xs text-white/70">{item.responsable}</p>
+                    <span className="text-[10px] text-gray-400 uppercase">Responsable</span>
+                    <p className="text-xs text-gray-700">{item.responsable}</p>
                   </div>
                 </div>
               </div>

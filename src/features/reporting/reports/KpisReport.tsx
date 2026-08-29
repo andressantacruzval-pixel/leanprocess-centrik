@@ -36,16 +36,16 @@ export function KpisReport({ processes, allIndicators, macroMap, processMap }: {
       const p = processMap.get(i.process_id)
       return { management: p?.management, coordination: p?.coordination, operative: p?.operative, ...resolveProcessHierarchy(p, macroMap, processMap) }
     }),
-    { key: 'ind', header: 'Indicador', accessor: (i) => i.name || '', className: 'text-white font-medium max-w-[160px]', cell: (i) => <div className="truncate" title={i.name}>{i.name}</div> },
+    { key: 'ind', header: 'Indicador', accessor: (i) => i.name || '', className: 'text-gray-900 font-medium max-w-[160px]', cell: (i) => <div className="truncate" title={i.name}>{i.name}</div> },
     { key: 'obj', header: 'Objetivo', accessor: (i) => i.description || '', className: 'max-w-[200px]', cell: (i) => <div className="truncate" title={i.description}>{i.description || '-'}</div> },
     { key: 'form', header: 'Fórmula', accessor: (i) => i.formula || '', className: 'max-w-[160px]', cell: (i) => <div className="truncate" title={i.formula}>{i.formula || '-'}</div> },
     { key: 'src', header: 'Fuente', accessor: (i) => i.data_source || '', className: 'max-w-[140px]', cell: (i) => <div className="truncate" title={i.data_source}>{i.data_source || '-'}</div> },
     { key: 'unit', header: 'Unidad', accessor: (i) => i.unit || '' },
     { key: 'freq', header: 'Frecuencia', accessor: (i) => i.frequency || '' },
-    { key: 'meta', header: 'Meta', accessor: (i) => i.target_value || '', className: 'text-white/85' },
-    { key: 'green', header: 'Verde', accessor: (i) => range(i.threshold_green_min, i.threshold_green_max), cell: (i) => <span className="text-emerald-400">{range(i.threshold_green_min, i.threshold_green_max)}</span> },
-    { key: 'yellow', header: 'Amarillo', accessor: (i) => range(i.threshold_yellow_min, i.threshold_yellow_max), cell: (i) => <span className="text-amber-400">{range(i.threshold_yellow_min, i.threshold_yellow_max)}</span> },
-    { key: 'red', header: 'Rojo', accessor: (i) => range(i.threshold_red_min, i.threshold_red_max), cell: (i) => <span className="text-red-400">{range(i.threshold_red_min, i.threshold_red_max)}</span> },
+    { key: 'meta', header: 'Meta', accessor: (i) => i.target_value || '', className: 'text-gray-800' },
+    { key: 'green', header: 'Verde', accessor: (i) => range(i.threshold_green_min, i.threshold_green_max), cell: (i) => <span className="text-emerald-600">{range(i.threshold_green_min, i.threshold_green_max)}</span> },
+    { key: 'yellow', header: 'Amarillo', accessor: (i) => range(i.threshold_yellow_min, i.threshold_yellow_max), cell: (i) => <span className="text-amber-600">{range(i.threshold_yellow_min, i.threshold_yellow_max)}</span> },
+    { key: 'red', header: 'Rojo', accessor: (i) => range(i.threshold_red_min, i.threshold_red_max), cell: (i) => <span className="text-red-600">{range(i.threshold_red_min, i.threshold_red_max)}</span> },
     { key: 'owner', header: 'Resp. reporte', accessor: (i) => i.owner || '', className: 'max-w-[120px]', cell: (i) => <div className="truncate">{i.owner || '-'}</div> },
     { key: 'reporter', header: 'Resp. monitoreo', accessor: (i) => i.reporter || '', className: 'max-w-[120px]', cell: (i) => <div className="truncate">{i.reporter || '-'}</div> },
   ], [org, processMap, macroMap])
@@ -97,10 +97,10 @@ export function KpisReport({ processes, allIndicators, macroMap, processMap }: {
 
       {freqFilter && (
         <div className="flex items-center gap-2 -mb-1">
-          <span className="text-[11px] text-white/45">Tabla filtrada por frecuencia:</span>
-          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+          <span className="text-[11px] text-gray-500">Tabla filtrada por frecuencia:</span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
             {freqFilter}
-            <button onClick={() => setFreqFilter('')} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+            <button onClick={() => setFreqFilter('')} className="hover:text-gray-900" title="Quitar filtro"><X size={12} /></button>
           </span>
         </div>
       )}

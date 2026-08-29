@@ -26,22 +26,22 @@ export default function LandingValues() {
   return (
     <section aria-labelledby="values-title" className="mx-auto max-w-6xl px-6 py-20">
       <div className="mb-14 text-center">
-        <h2 id="values-title" className="mb-4 text-3xl font-bold text-white md:text-4xl">
+        <h2 id="values-title" className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
           Nuestro compromiso con la excelencia
         </h2>
-        <p className="mx-auto max-w-lg text-white/50">
+        <p className="mx-auto max-w-lg text-gray-500">
           Construimos LeanProcess con un propósito claro, con integridad y orientados al cliente.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {values.map(({ icon: Icon, title, description }) => (
-          <article key={title} className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-8">
-            <div className="mb-4 w-fit rounded-xl bg-cyan-500/10 p-2.5">
-              <Icon className="text-cyan-400" size={22} aria-hidden="true" />
+          <article key={title} className="rounded-lg border border-gray-100 bg-gray-50 p-8">
+            <div className="mb-4 w-fit rounded-lg bg-primary-50 p-2.5">
+              <Icon className="text-primary-600" size={22} aria-hidden="true" />
             </div>
-            <h3 className="mb-3 text-xl font-semibold text-white">{title}</h3>
-            <p className="leading-relaxed text-white/50">{description}</p>
+            <h3 className="mb-3 text-xl font-semibold text-gray-900">{title}</h3>
+            <p className="leading-relaxed text-gray-500">{description}</p>
           </article>
         ))}
       </div>

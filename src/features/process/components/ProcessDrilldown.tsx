@@ -146,9 +146,9 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
 
   if (!macro) {
     return (
-      <div className="text-center py-12 text-white/30">
+      <div className="text-center py-12 text-gray-400">
         Macroproceso no encontrado.
-        <button onClick={onBack} className="ml-2 text-cyan-400 hover:underline">
+        <button onClick={onBack} className="ml-2 text-primary-600 hover:underline">
           Volver
         </button>
       </div>
@@ -161,20 +161,20 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-white/40 hover:text-cyan-400 transition-colors"
+          className="flex items-center gap-1.5 text-gray-500 hover:text-primary-600 transition-colors"
         >
           <ArrowLeft size={16} />
           <span>Mapa de Procesos</span>
         </button>
 
-        <ChevronRight size={14} className="text-white/30" />
+        <ChevronRight size={14} className="text-gray-400" />
 
         <button
           onClick={() => handleBreadcrumbClick(-1)}
           className={`font-medium transition-colors ${
             breadcrumb.length === 0
-              ? 'text-white'
-              : 'text-white/40 hover:text-cyan-400'
+              ? 'text-gray-900'
+              : 'text-gray-500 hover:text-primary-600'
           }`}
         >
           {macro.name}
@@ -182,13 +182,13 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
 
         {breadcrumb.map((crumb, i) => (
           <span key={crumb.id} className="flex items-center gap-2">
-            <ChevronRight size={14} className="text-white/30" />
+            <ChevronRight size={14} className="text-gray-400" />
             <button
               onClick={() => handleBreadcrumbClick(i)}
               className={`font-medium transition-colors ${
                 i === breadcrumb.length - 1
-                  ? 'text-white'
-                  : 'text-white/40 hover:text-cyan-400'
+                  ? 'text-gray-900'
+                  : 'text-gray-500 hover:text-primary-600'
               }`}
             >
               {crumb.name}
@@ -200,12 +200,12 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
       {/* Title area */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <div className="min-w-0">
-          <h2 className="text-lg sm:text-xl font-bold text-white">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">
             {breadcrumb.length > 0
               ? breadcrumb[breadcrumb.length - 1].name
               : macro.name}
           </h2>
-          <p className="text-sm text-white/40 mt-0.5">
+          <p className="text-sm text-gray-500 mt-0.5">
             {currentProcesses.length} {currentLevelName.toLowerCase()}
             {currentProcesses.length !== 1 ? 's' : ''}
           </p>
@@ -216,10 +216,10 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
             title={docReached ? `Documentar uno nuevo requiere ampliar tu ${planName(plan.level)}` : `Has documentado ${docCount} de ${subLimit} procesos que incluye tu ${planName(plan.level)}`}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium border transition-colors ${
               docReached
-                ? 'bg-red-500/15 text-red-400 border-red-500/20 hover:bg-red-500/25'
+                ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
                 : docCount >= subLimit * 0.8
-                ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
-                : 'bg-white/5 text-white/40 border-white/10'
+                ? 'bg-amber-50 text-amber-600 border-amber-200'
+                : 'bg-gray-50 text-gray-500 border-gray-200'
             }`}>
             {docCount} / {subLimit} documentados{docReached ? ' · ampliar' : ''}
           </button>
@@ -271,11 +271,11 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
                 className={`transition-all duration-200 ${
                   draggedId === process.id ? 'opacity-40 scale-95' : ''
                 } ${
-                  dragOverId === process.id ? 'ring-2 ring-cyan-500/50 ring-offset-2 ring-offset-[#070b14] rounded-xl' : ''
+                  dragOverId === process.id ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-[#070b14] rounded-lg' : ''
                 }`}
               >
                 {isEditing ? (
-                  <div className="bg-[#0d1420] rounded-xl border border-cyan-500/20 shadow-sm p-4">
+                  <div className="bg-white rounded-lg border border-primary-200 shadow-sm p-4">
                     <input
                       type="text"
                       value={editName}
@@ -284,19 +284,19 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
                         if (e.key === 'Enter') handleEditSave(process.id)
                         if (e.key === 'Escape') setEditingId(null)
                       }}
-                      className="w-full px-2.5 py-1.5 rounded border border-white/10 bg-white/[0.03] text-white text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+                      className="w-full px-2.5 py-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                       autoFocus
                     />
                     <div className="flex gap-2 mt-2">
                       <button
                         onClick={() => handleEditSave(process.id)}
-                        className="px-3 py-1 text-xs font-medium text-white bg-gradient-to-r from-cyan-600 to-blue-600 rounded hover:from-cyan-500 hover:to-blue-500"
+                        className="px-3 py-1 text-xs font-medium text-white rounded-md bg-primary-500 hover:bg-primary-600"
                       >
                         Guardar
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="px-3 py-1 text-xs font-medium text-white/40 hover:text-white/70"
+                        className="px-3 py-1 text-xs font-medium text-gray-500 hover:text-gray-700"
                       >
                         Cancelar
                       </button>
@@ -367,11 +367,11 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
               className={`transition-all duration-200 ${
                 draggedId === process.id ? 'opacity-40 scale-95' : ''
               } ${
-                dragOverId === process.id ? 'ring-2 ring-cyan-500/50 ring-offset-2 ring-offset-[#070b14] rounded-xl' : ''
+                dragOverId === process.id ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-[#070b14] rounded-lg' : ''
               }`}
             >
               {isEditing ? (
-                <div className="bg-[#0d1420] rounded-xl border border-cyan-500/20 shadow-sm p-4">
+                <div className="bg-white rounded-lg border border-primary-200 shadow-sm p-4">
                   <input
                     type="text"
                     value={editName}
@@ -380,19 +380,19 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
                       if (e.key === 'Enter') handleEditSave(process.id)
                       if (e.key === 'Escape') setEditingId(null)
                     }}
-                    className="w-full px-2.5 py-1.5 rounded border border-white/10 bg-white/[0.03] text-white text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+                    className="w-full px-2.5 py-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
                     autoFocus
                   />
                   <div className="flex gap-2 mt-2">
                     <button
                       onClick={() => handleEditSave(process.id)}
-                      className="px-3 py-1 text-xs font-medium text-white bg-gradient-to-r from-cyan-600 to-blue-600 rounded hover:from-cyan-500 hover:to-blue-500"
+                      className="px-3 py-1 text-xs font-medium text-white rounded-md bg-primary-500 hover:bg-primary-600"
                     >
                       Guardar
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
-                      className="px-3 py-1 text-xs font-medium text-white/40 hover:text-white/70"
+                      className="px-3 py-1 text-xs font-medium text-gray-500 hover:text-gray-700"
                     >
                       Cancelar
                     </button>
@@ -417,7 +417,7 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
 
         {/* Add new card */}
         {addingNew ? (
-          <div className="bg-[#0d1420] rounded-xl border border-cyan-500/20 shadow-sm p-4">
+          <div className="bg-white rounded-lg border border-primary-200 shadow-sm p-4">
             <input
               type="text"
               value={newName}
@@ -430,13 +430,13 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
                 }
               }}
               placeholder={`Nombre del ${currentLevelName.toLowerCase()}`}
-              className="w-full px-2.5 py-1.5 rounded border border-white/10 bg-white/[0.03] text-white text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 placeholder:text-white/30"
+              className="w-full px-2.5 py-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-900 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-300 placeholder:text-gray-400"
               autoFocus
             />
             <div className="flex gap-2 mt-2">
               <button
                 onClick={handleAdd}
-                className="px-3 py-1 text-xs font-medium text-white bg-gradient-to-r from-cyan-600 to-blue-600 rounded hover:from-cyan-500 hover:to-blue-500"
+                className="px-3 py-1 text-xs font-medium text-white rounded-md bg-primary-500 hover:bg-primary-600"
               >
                 Crear
               </button>
@@ -445,7 +445,7 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
                   setAddingNew(false)
                   setNewName('')
                 }}
-                className="px-3 py-1 text-xs font-medium text-white/40 hover:text-white/70"
+                className="px-3 py-1 text-xs font-medium text-gray-500 hover:text-gray-700"
               >
                 Cancelar
               </button>
@@ -454,11 +454,11 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
         ) : (
           <button
             onClick={() => setAddingNew(true)}
-            className="min-h-[100px] rounded-xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-1.5
-                       hover:border-cyan-500 hover:bg-cyan-500/10 transition-colors group"
+            className="min-h-[100px] rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center
+                       justify-center gap-1.5 hover:border-primary-500 hover:bg-primary-50 transition-colors group"
           >
-            <Plus size={20} className="text-white/30 group-hover:text-cyan-400 transition-colors" />
-            <span className="text-xs text-white/30 group-hover:text-cyan-400 transition-colors">
+            <Plus size={20} className="text-gray-400 group-hover:text-primary-600 transition-colors" />
+            <span className="text-xs text-gray-400 group-hover:text-primary-600 transition-colors">
               Agregar {currentLevelName.toLowerCase()}
             </span>
           </button>
@@ -534,7 +534,7 @@ function ProcessDrillCard({
       // Solo resetea la confirmacion de borrado. En tactil no se dispara, pero el
       // temporizador de 3 s la deshace igual.
       onMouseLeave={() => setConfirmDelete(false)}
-      className="relative bg-white/[0.03] hover:bg-white/5 rounded-xl shadow-sm border border-white/5 cursor-pointer transition-all duration-200 p-4 group"
+      className="relative bg-gray-50 hover:bg-gray-50 rounded-lg shadow-sm border border-gray-100 cursor-pointer transition-all duration-200 p-4 group"
     >
       <div className={`absolute top-2 right-2 flex gap-0.5 z-10 ${ACCIONES_AL_PASAR}`}>
         <button
@@ -543,7 +543,7 @@ function ProcessDrillCard({
             onEdit()
           }}
           title="Editar"
-          className="p-2 rounded-md bg-white/[0.03] hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600 text-white/30 hover:text-white transition-colors"
+          className="p-2 rounded-md bg-gray-50 text-gray-400 hover:text-white transition-colors bg-primary-500 hover:bg-primary-600"
         >
           <Pencil size={13} />
         </button>
@@ -561,21 +561,21 @@ function ProcessDrillCard({
           className={`p-2 rounded-md transition-colors ${
             confirmDelete
               ? 'bg-red-600 text-white'
-              : 'bg-white/[0.03] hover:bg-red-600 text-white/30 hover:text-white'
+              : 'bg-gray-50 hover:bg-red-600 text-gray-400 hover:text-white'
           }`}
         >
           <Trash2 size={13} />
         </button>
       </div>
 
-      <h4 className="text-sm font-semibold text-white leading-tight line-clamp-2 pr-12">
+      <h4 className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 pr-12">
         {process.name}
       </h4>
       <div className="mt-3 flex items-center justify-between">
-        <span className="text-xs text-white/30">
+        <span className="text-xs text-gray-400">
           {childCount} {nextLevelName.toLowerCase()}{childCount !== 1 ? 's' : ''}
         </span>
-        <ChevronRight size={14} className="text-white/40 group-hover:text-cyan-400 transition-colors" />
+        <ChevronRight size={14} className="text-gray-500 group-hover:text-primary-600 transition-colors" />
       </div>
     </div>
   )

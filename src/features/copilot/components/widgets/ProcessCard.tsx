@@ -11,7 +11,7 @@ export function ProcessCard({ params }: { params: Record<string, string> }) {
 
   if (!p) {
     return (
-      <div className="text-[12px] text-white/35 border border-white/10 rounded-xl px-3 py-2">
+      <div className="text-[12px] text-gray-400 border border-gray-200 rounded-lg px-3 py-2">
         Proceso «{params.name}» no encontrado.
       </div>
     )
@@ -24,14 +24,14 @@ export function ProcessCard({ params }: { params: Record<string, string> }) {
   const hasProc = data.procedures.some((pr) => pr.process_id === p.id)
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
       <div className="flex items-center gap-2">
-        <Workflow size={15} className="text-cyan-400 shrink-0" />
-        <span className="text-[13px] font-semibold text-white truncate">{p.name}</span>
-        {p.is_critical && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-300">CRÍTICO</span>}
+        <Workflow size={15} className="text-primary-600 shrink-0" />
+        <span className="text-[13px] font-semibold text-gray-900 truncate">{p.name}</span>
+        {p.is_critical && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-red-50 text-red-700">CRÍTICO</span>}
       </div>
-      <div className="text-[11px] text-white/45 mt-0.5">{macroOf(p, macros)} · {areaOf(p)}</div>
-      {p.description && <p className="text-[12px] text-white/60 mt-1.5 leading-snug line-clamp-2">{p.description}</p>}
+      <div className="text-[11px] text-gray-500 mt-0.5">{macroOf(p, macros)} · {areaOf(p)}</div>
+      {p.description && <p className="text-[12px] text-gray-600 mt-1.5 leading-snug line-clamp-2">{p.description}</p>}
 
       <div className="flex flex-wrap gap-1.5 mt-2 text-[10.5px]">
         <Chip label={`${risks.length} riesgos`} />
@@ -42,11 +42,11 @@ export function ProcessCard({ params }: { params: Record<string, string> }) {
       </div>
 
       <div className="flex flex-wrap gap-2 mt-2.5">
-        <Link to={docPath('characterization', p.id)} className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:underline">
+        <Link to={docPath('characterization', p.id)} className="inline-flex items-center gap-1 text-[11px] text-primary-700 hover:underline">
           Abrir caracterización <ArrowRight size={11} />
         </Link>
         {p.bpmn_xml && (
-          <Link to={docPath('flowchart', p.id)} className="inline-flex items-center gap-1 text-[11px] text-white/50 hover:text-cyan-300">
+          <Link to={docPath('flowchart', p.id)} className="inline-flex items-center gap-1 text-[11px] text-gray-500 hover:text-primary-700">
             Flujograma <ArrowRight size={11} />
           </Link>
         )}
@@ -58,7 +58,7 @@ export function ProcessCard({ params }: { params: Record<string, string> }) {
 function Chip({ label, danger, muted }: { label: string; danger?: boolean; muted?: boolean }) {
   return (
     <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border ${
-      danger ? 'bg-red-500/12 text-red-300 border-red-500/20' : muted ? 'bg-white/[0.03] text-white/30 border-white/10' : 'bg-white/5 text-white/55 border-white/10'
+      danger ? 'bg-red-50 text-red-700 border-red-200' : muted ? 'bg-gray-50 text-gray-400 border-gray-200' : 'bg-gray-50 text-gray-600 border-gray-200'
     }`}>
       {danger && <AlertTriangle size={9} />}{label}
     </span>

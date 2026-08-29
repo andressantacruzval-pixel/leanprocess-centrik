@@ -246,16 +246,16 @@ export function BenchmarkCard() {
   const industry = company?.industry || 'General'
 
   return (
-    <div className="bg-white/[0.03] rounded-2xl border border-white/5 overflow-hidden">
+    <div className="bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
       {/* Header with maturity score */}
-      <div className="p-5 border-b border-white/5">
+      <div className="p-5 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <BarChart3 size={16} className="text-cyan-400" />
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+              <BarChart3 size={16} className="text-primary-600" />
               Benchmarking — {industry}
             </h3>
-            <p className="text-[10px] text-white/30 mt-0.5">Comparacion anonima con el promedio de tu industria</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">Comparacion anonima con el promedio de tu industria</p>
           </div>
           <div className="text-center">
             <div className="relative w-16 h-16">
@@ -272,10 +272,10 @@ export function BenchmarkCard() {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-lg font-bold text-white">{maturityScore}</span>
+                <span className="text-lg font-bold text-gray-900">{maturityScore}</span>
               </div>
             </div>
-            <p className="text-[9px] text-white/30 mt-1">Score Madurez</p>
+            <p className="text-[9px] text-gray-400 mt-1">Score Madurez</p>
 
             {/* Sparkline trend */}
             {scoreHistory.length >= 2 && (
@@ -285,10 +285,10 @@ export function BenchmarkCard() {
                   <span
                     className={`text-[9px] mt-0.5 ${
                       trendDelta.diff > 0
-                        ? 'text-emerald-400'
+                        ? 'text-emerald-600'
                         : trendDelta.diff < 0
-                        ? 'text-red-400'
-                        : 'text-white/30'
+                        ? 'text-red-600'
+                        : 'text-gray-400'
                     }`}
                   >
                     {trendDelta.diff > 0
@@ -316,32 +316,32 @@ export function BenchmarkCard() {
           return (
             <div key={m.label} className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] text-white/50">{m.label}</span>
+                <span className="text-[11px] text-gray-500">{m.label}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-white">
+                  <span className="text-[11px] font-bold text-gray-900">
                     {m.userValue}{m.unit}
                   </span>
                   {isEqual ? (
-                    <Minus size={12} className="text-white/20" />
+                    <Minus size={12} className="text-gray-300" />
                   ) : isAbove ? (
-                    <TrendingUp size={12} className="text-emerald-400" />
+                    <TrendingUp size={12} className="text-emerald-600" />
                   ) : (
-                    <TrendingDown size={12} className="text-red-400" />
+                    <TrendingDown size={12} className="text-red-600" />
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-gray-50 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-700 ${
-                      isAbove ? 'bg-gradient-to-r from-emerald-600 to-emerald-400'
-                        : isEqual ? 'bg-gradient-to-r from-amber-600 to-amber-400'
-                        : 'bg-gradient-to-r from-red-600 to-red-400'
+                      isAbove ? 'bg-primary-500'
+                        : isEqual ? 'bg-amber-500'
+                        : 'bg-red-500'
                     }`}
                     style={{ width: `${Math.min(100, m.userValue)}%` }}
                   />
                 </div>
-                <span className="text-[9px] text-white/20 w-16 text-right">
+                <span className="text-[9px] text-gray-300 w-16 text-right">
                   Ind: {m.industryAvg}{m.unit}
                 </span>
               </div>
@@ -349,7 +349,7 @@ export function BenchmarkCard() {
               {rec && (
                 <Link
                   to={rec.to}
-                  className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors mt-0.5"
+                  className="inline-flex items-center gap-1 text-[10px] text-primary-600 hover:text-primary-700 transition-colors mt-0.5"
                 >
                   {rec.text}
                   <ArrowRight size={10} />
@@ -362,9 +362,9 @@ export function BenchmarkCard() {
 
       {/* Footer */}
       <div className="px-4 pb-3">
-        <div className="flex items-start gap-1.5 bg-white/[0.02] rounded-lg p-2">
-          <Info size={12} className="text-white/15 mt-0.5 shrink-0" />
-          <p className="text-[9px] text-white/20 leading-relaxed">
+        <div className="flex items-start gap-1.5 bg-gray-50 rounded-lg p-2">
+          <Info size={12} className="text-gray-300 mt-0.5 shrink-0" />
+          <p className="text-[9px] text-gray-300 leading-relaxed">
             Datos anonimizados de organizaciones similares en tu industria. Actualizado mensualmente.
           </p>
         </div>

@@ -4,24 +4,24 @@ export function KpiCard({ icon: Icon, label, value, sub, color }: {
   icon: React.ElementType; label: string; value: string | number; sub?: string; color: string
 }) {
   return (
-    <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-5 flex flex-col gap-1">
-      <div className="flex items-center gap-2 text-white/40 text-xs font-medium uppercase tracking-wider">
+    <div className="bg-gray-50 border border-gray-100 rounded-lg p-5 flex flex-col gap-1">
+      <div className="flex items-center gap-2 text-gray-500 text-xs font-medium uppercase tracking-wider">
         <Icon size={14} style={{ color }} />
         {label}
       </div>
-      <span className="text-3xl font-bold text-white" style={{ color }}>{value}</span>
-      {sub && <span className="text-xs text-white/30">{sub}</span>}
+      <span className="text-3xl font-bold text-gray-900" style={{ color }}>{value}</span>
+      {sub && <span className="text-xs text-gray-400">{sub}</span>}
     </div>
   )
 }
 
 export function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-sm font-semibold text-white/50 uppercase tracking-wider">{children}</h3>
+  return <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{children}</h3>
 }
 
 export function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white/[0.03] border border-white/5 rounded-2xl p-5 ${className}`}>
+    <div className={`bg-gray-50 border border-gray-100 rounded-lg p-5 ${className}`}>
       {children}
     </div>
   )
@@ -33,10 +33,10 @@ export function AlertBanner({ variant, message, onDismiss }: {
   onDismiss: () => void
 }) {
   const colors = variant === 'red'
-    ? 'bg-red-500/10 border-red-500/20 text-red-400'
-    : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+    ? 'bg-red-50 border-red-200 text-red-600'
+    : 'bg-amber-50 border-amber-200 text-amber-600'
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${colors}`}>
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border ${colors}`}>
       <AlertTriangle size={16} className="shrink-0" />
       <span className="text-sm flex-1">{message}</span>
       <button onClick={onDismiss} className="hover:opacity-70 transition-opacity shrink-0">

@@ -38,7 +38,7 @@ export function ValueReport({ processes, allAnalyses, macroMap, processMap }: { 
       management: r.process.management, coordination: r.process.coordination, operative: r.process.operative,
       ...resolveProcessHierarchy(r.process, macroMap, processMap),
     })),
-    { key: 'act', header: 'Actividad', accessor: (r) => r.activity.name || '', className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.activity.name}>{r.activity.name}</div> },
+    { key: 'act', header: 'Actividad', accessor: (r) => r.activity.name || '', className: 'text-gray-900 font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.activity.name}>{r.activity.name}</div> },
     { key: 'resp', header: 'Responsable', accessor: (r) => r.activity.laneName || '', className: 'max-w-[120px]', cell: (r) => <div className="truncate">{r.activity.laneName || '-'}</div> },
     {
       key: 'cls', header: 'Clasificación', accessor: (r) => r.activity.classification || '',
@@ -93,10 +93,10 @@ export function ValueReport({ processes, allAnalyses, macroMap, processMap }: { 
 
       {clsFilter && (
         <div className="flex items-center gap-2 -mb-1">
-          <span className="text-[11px] text-white/45">Tabla filtrada por clasificación:</span>
-          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+          <span className="text-[11px] text-gray-500">Tabla filtrada por clasificación:</span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
             {clsActiveLabel}
-            <button onClick={() => setClsFilter('')} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+            <button onClick={() => setClsFilter('')} className="hover:text-gray-900" title="Quitar filtro"><X size={12} /></button>
           </span>
         </div>
       )}

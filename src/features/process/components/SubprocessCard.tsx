@@ -59,7 +59,7 @@ export function SubprocessCard({
   // Clase literal, no interpolada: Tailwind escanea el fuente y una clase construida
   // con plantilla (`bg-${color}-500`) nunca llega al CSS compilado.
   const CLASE_BLOQUEADA =
-    'flex-1 min-w-[7rem] flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium bg-white/[0.02] text-white/25 border border-white/5 cursor-not-allowed'
+    'flex-1 min-w-[7rem] flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed'
 
   const handleDeleteRequest = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -69,7 +69,7 @@ export function SubprocessCard({
   return (
     <>
       <div
-        className="group relative bg-white/[0.03] rounded-xl border border-white/5 shadow-sm hover:shadow-md transition-all duration-200 p-4 cursor-pointer"
+        className="group relative bg-gray-50 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 p-4 cursor-pointer"
         onDoubleClick={() => {
           // El doble clic tambien respeta el bloqueo — antes entraba igual. Y en vez de
           // no hacer nada, explica: un doble clic que no responde se lee como un fallo.
@@ -84,14 +84,14 @@ export function SubprocessCard({
               e.stopPropagation()
               onEdit()
             }}
-            className="p-2 rounded-md bg-white/5 hover:bg-cyan-500/15 text-white/40 hover:text-cyan-400 transition-colors"
+            className="p-2 rounded-md bg-gray-50 hover:bg-primary-50 text-gray-500 hover:text-primary-600 transition-colors"
             title="Editar"
           >
             <Pencil size={13} />
           </button>
           <button
             onClick={handleDeleteRequest}
-            className="p-2 rounded-md bg-white/5 hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-colors"
+            className="p-2 rounded-md bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
             title="Eliminar"
           >
             <Trash2 size={13} />
@@ -99,20 +99,20 @@ export function SubprocessCard({
         </div>
 
         <div className="flex items-start justify-between pr-20">
-          <h4 className="text-sm font-semibold text-white/70 leading-tight line-clamp-2">
+          <h4 className="text-sm font-semibold text-gray-700 leading-tight line-clamp-2">
             {process.name}
           </h4>
           {healthScore !== undefined && (
             <span className="flex items-center gap-1 shrink-0 ml-2">
               <span className={`w-1.5 h-1.5 rounded-full ${
-                healthScore >= 67 ? 'bg-emerald-400' :
-                healthScore >= 33 ? 'bg-amber-400' :
-                'bg-red-400'
+                healthScore >= 67 ? 'bg-emerald-500' :
+                healthScore >= 33 ? 'bg-amber-500' :
+                'bg-red-500'
               }`} />
               <span className={`text-[9px] font-medium ${
-                healthScore >= 67 ? 'text-emerald-400/70' :
-                healthScore >= 33 ? 'text-amber-400/70' :
-                'text-red-400/70'
+                healthScore >= 67 ? 'text-emerald-600' :
+                healthScore >= 33 ? 'text-amber-600' :
+                'text-red-600'
               }`}>{healthScore}%</span>
             </span>
           )}
@@ -126,8 +126,8 @@ export function SubprocessCard({
                 e.stopPropagation()
                 onAssignOrg()
               }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
-                         bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/15 transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-50
+                         text-primary-600 border border-primary-200 hover:bg-primary-50 transition-colors"
               title={orgUnitPath}
             >
               <Building2 size={12} />
@@ -139,9 +139,9 @@ export function SubprocessCard({
                 e.stopPropagation()
                 onAssignOrg()
               }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
-                         bg-white/[0.02] text-white/40 border border-white/5 hover:bg-cyan-500/10 hover:text-cyan-400
-                         hover:border-cyan-500/20 transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50
+                         text-gray-500 border border-gray-100 hover:bg-primary-50 hover:text-primary-600
+                         hover:border-primary-200 transition-colors"
             >
               <Link size={12} />
               Asignar area
@@ -150,7 +150,7 @@ export function SubprocessCard({
         </div>
 
         {/* Quick-access buttons */}
-        <div className="mt-3 flex flex-wrap gap-2 border-t border-white/5 pt-3">
+        <div className="mt-3 flex flex-wrap gap-2 border-t border-gray-100 pt-3">
           {onGoToCharacterization && (
             <button
               onClick={(e) => {
@@ -161,9 +161,9 @@ export function SubprocessCard({
               className={
                 bloqueado
                   ? CLASE_BLOQUEADA
-                  : `flex-1 min-w-[7rem] flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium
-                         bg-cyan-500/5 text-cyan-400/60 border border-cyan-500/10 hover:bg-cyan-500/15 hover:text-cyan-400
-                         hover:border-cyan-500/30 transition-all`
+                  : `flex-1 min-w-[7rem] flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px]
+                         font-medium bg-primary-50 text-primary-600 border border-primary-200 hover:bg-primary-50
+                         hover:text-primary-600 hover:border-primary-300 transition-all`
               }
               title={documentacionBloqueada ?? 'Caracterizacion'}
             >
@@ -181,9 +181,9 @@ export function SubprocessCard({
               className={
                 bloqueado
                   ? CLASE_BLOQUEADA
-                  : `flex-1 min-w-[7rem] flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium
-                         bg-purple-500/5 text-purple-400/60 border border-purple-500/10 hover:bg-purple-500/15 hover:text-purple-400
-                         hover:border-purple-500/30 transition-all`
+                  : `flex-1 min-w-[7rem] flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px]
+                         font-medium bg-primary-50 text-primary-600 border border-primary-200 hover:bg-primary-50
+                         hover:text-primary-600 hover:border-primary-300 transition-all`
               }
               title={documentacionBloqueada ?? 'Indicadores'}
             >
@@ -201,9 +201,9 @@ export function SubprocessCard({
               className={
                 bloqueado
                   ? CLASE_BLOQUEADA
-                  : `flex-1 min-w-[7rem] flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium
-                         bg-blue-500/5 text-blue-400/60 border border-blue-500/10 hover:bg-blue-500/15 hover:text-blue-400
-                         hover:border-blue-500/30 transition-all`
+                  : `flex-1 min-w-[7rem] flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px]
+                         font-medium bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-50 hover:text-blue-600
+                         hover:border-blue-300 transition-all`
               }
               title={documentacionBloqueada ?? 'Flujograma BPMN'}
             >

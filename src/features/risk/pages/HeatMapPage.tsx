@@ -129,20 +129,20 @@ export default function HeatMapPage() {
     <div className="space-y-6">
       <PageHeader
         icon={Shield}
-        iconClass="bg-red-500/15 border border-red-500/20"
-        iconColor="text-red-400"
+        iconClass="bg-red-50 border border-red-200"
+        iconColor="text-red-600"
         title="Mapa de Calor de Riesgos"
         subtitle="Vision global de riesgos por probabilidad e impacto"
         actions={
-          <div className="flex items-center bg-white/5 rounded-lg p-0.5 border border-white/5">
+          <div className="flex items-center bg-gray-50 rounded-lg p-0.5 border border-gray-100">
             {(['inherent', 'residual'] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setViewType(t)}
                 className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${
                   viewType === t
-                    ? 'bg-cyan-600/20 text-cyan-300 shadow-sm'
-                    : 'text-white/40 hover:text-white/70'
+                    ? 'bg-primary-100 text-primary-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 {t === 'inherent' ? 'Inherente' : 'Residual'}
@@ -155,14 +155,14 @@ export default function HeatMapPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
-          { label: 'Total', value: stats.total, color: 'text-white', bg: 'bg-white/5' },
-          { label: 'Extremo', value: stats.critical, color: 'text-red-400', bg: 'bg-red-500/10' },
-          { label: 'Alto', value: stats.high, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-          { label: 'Moderado', value: stats.moderate, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-          { label: 'Bajo', value: stats.low, color: 'text-green-400', bg: 'bg-green-500/10' },
+          { label: 'Total', value: stats.total, color: 'text-gray-900', bg: 'bg-gray-50' },
+          { label: 'Extremo', value: stats.critical, color: 'text-red-600', bg: 'bg-red-50' },
+          { label: 'Alto', value: stats.high, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Moderado', value: stats.moderate, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Bajo', value: stats.low, color: 'text-emerald-600', bg: 'bg-emerald-50' },
         ].map((s) => (
-          <div key={s.label} className={`${s.bg} rounded-xl p-3 border border-white/5`}>
-            <span className="text-[10px] text-white/40 uppercase tracking-wider">{s.label}</span>
+          <div key={s.label} className={`${s.bg} rounded-lg p-3 border border-gray-100`}>
+            <span className="text-[10px] text-gray-500 uppercase tracking-wider">{s.label}</span>
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -170,7 +170,7 @@ export default function HeatMapPage() {
 
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-1.5 text-white/40">
+        <div className="flex items-center gap-1.5 text-gray-500">
           <Filter size={14} />
           <span className="text-[10px] font-medium uppercase tracking-wider">Filtros</span>
         </div>
@@ -206,7 +206,7 @@ export default function HeatMapPage() {
         {(filterCategory || filterMacro || filterProcess || filterArea) && (
           <button
             onClick={() => { setFilterCategory(''); setFilterMacro(''); setFilterProcess(''); setFilterArea('') }}
-            className="px-3 py-1.5 text-[10px] text-red-400 hover:text-red-300 bg-red-500/10 rounded-lg border border-red-500/20 transition-colors"
+            className="px-3 py-1.5 text-[10px] text-red-600 hover:text-red-700 bg-red-50 rounded-lg border border-red-200 transition-colors"
           >
             Limpiar filtros
           </button>
@@ -216,7 +216,7 @@ export default function HeatMapPage() {
       {/* Main content: Heat Map + Detail */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Heat Map */}
-        <div className="lg:col-span-2 bg-[#0d1420] rounded-2xl border border-white/5 p-4 sm:p-6">
+        <div className="lg:col-span-2 bg-white rounded-lg border border-gray-100 p-4 sm:p-6">
           {/*
            * Las etiquetas de los ejes son celdas de la rejilla, no hijos absolutos de
            * los botones. Antes vivian DENTRO de cada celda con `-left-8` / `-bottom-5`:
@@ -234,7 +234,7 @@ export default function HeatMapPage() {
             <div className="min-w-[24rem] max-w-[34rem] mx-auto grid grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-1.5">
               {PROB_ROWS.map((p) => (
                 <Fragment key={p}>
-                  <span className="pr-1 self-center text-right text-[10px] leading-tight text-white/35">
+                  <span className="pr-1 self-center text-right text-[10px] leading-tight text-gray-400">
                     {PROBABILITY_LABELS[p]}
                   </span>
                   {IMP_COLS.map((i) => {
@@ -248,13 +248,13 @@ export default function HeatMapPage() {
                         onClick={() => setSelectedCell(count > 0 ? { p, i } : null)}
                         title={`${PROBABILITY_LABELS[p]} · ${IMPACT_LABELS[i]}`}
                         className={`aspect-square rounded-lg flex flex-col items-center justify-center transition-all ${heatMapCellColor(p, i)} ${
-                          isSelected ? 'ring-2 ring-white/60 scale-105' : ''
+                          isSelected ? 'ring-2 ring-gray-400 scale-105' : ''
                         } ${count > 0 ? 'shadow-lg' : 'opacity-70'}`}
                       >
                         {count > 0 && (
                           <>
-                            <span className="text-xl sm:text-2xl font-bold text-white">{count}</span>
-                            <span className="text-[8px] text-white/60 mt-0.5">
+                            <span className="text-xl sm:text-2xl font-bold text-gray-900">{count}</span>
+                            <span className="text-[8px] text-gray-600 mt-0.5">
                               {count === 1 ? 'riesgo' : 'riesgos'}
                             </span>
                           </>
@@ -268,14 +268,14 @@ export default function HeatMapPage() {
               {/* Fila de etiquetas de impacto, con la esquina vacia bajo el eje Y */}
               <span />
               {IMP_COLS.map((i) => (
-                <span key={i} className="pt-1 text-center text-[10px] leading-tight text-white/35">
+                <span key={i} className="pt-1 text-center text-[10px] leading-tight text-gray-400">
                   {IMPACT_LABELS[i]}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[10px] text-white/35">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[10px] text-gray-400">
             <span>↑ Probabilidad</span>
             <span>Impacto →</span>
           </div>
@@ -283,14 +283,14 @@ export default function HeatMapPage() {
           {/* Legend */}
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mt-4">
             {[
-              { label: 'Bajo', color: 'bg-green-600' },
-              { label: 'Moderado', color: 'bg-yellow-600' },
-              { label: 'Alto', color: 'bg-orange-600' },
+              { label: 'Bajo', color: 'bg-emerald-600' },
+              { label: 'Moderado', color: 'bg-amber-600' },
+              { label: 'Alto', color: 'bg-amber-600' },
               { label: 'Extremo', color: 'bg-red-600' },
             ].map((l) => (
               <div key={l.label} className="flex items-center gap-1.5">
                 <div className={`w-3 h-3 rounded ${l.color}`} />
-                <span className="text-[10px] text-white/40">{l.label}</span>
+                <span className="text-[10px] text-gray-500">{l.label}</span>
               </div>
             ))}
           </div>
@@ -299,14 +299,14 @@ export default function HeatMapPage() {
         {/* Detail panel */}
         {/* Tope de altura solo en escritorio: bajo `lg` este panel cae debajo del mapa
             y un scroll propio dentro del scroll de la pagina no ayuda a nadie. */}
-        <div className="bg-[#0d1420] rounded-2xl border border-white/5 p-4 lg:overflow-y-auto lg:max-h-[600px]">
+        <div className="bg-white rounded-lg border border-gray-100 p-4 lg:overflow-y-auto lg:max-h-[600px]">
           {selectedCell ? (
             <>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-white">
+                <h3 className="text-sm font-semibold text-gray-900">
                   P={selectedCell.p}, I={selectedCell.i}
                 </h3>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${getRiskLevel(selectedCell.p, selectedCell.i).color} text-white`}>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${getRiskLevel(selectedCell.p, selectedCell.i).color} text-gray-900`}>
                   {getRiskLevel(selectedCell.p, selectedCell.i).label}
                 </span>
               </div>
@@ -318,25 +318,25 @@ export default function HeatMapPage() {
                     <button
                       key={risk.id}
                       onClick={() => setSelectedRisk(risk)}
-                      className="w-full text-left p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.07] hover:border-amber-500/20 transition-all cursor-pointer group"
+                      className="w-full text-left p-3 rounded-lg bg-gray-50 border border-gray-100 hover:bg-gray-50 hover:border-amber-200 transition-all cursor-pointer group"
                     >
-                      <p className="text-xs font-medium text-white group-hover:text-amber-300 transition-colors">{risk.title}</p>
-                      <p className="text-[10px] text-white/40 mt-1 line-clamp-2">{risk.riskEvent || risk.description}</p>
+                      <p className="text-xs font-medium text-gray-900 group-hover:text-amber-700 transition-colors">{risk.title}</p>
+                      <p className="text-[10px] text-gray-500 mt-1 line-clamp-2">{risk.riskEvent || risk.description}</p>
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 border border-primary-200">
                           {risk.category}
                         </span>
                         {proc && (
-                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/5 text-white/40 border border-white/5">
+                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-gray-50 text-gray-500 border border-gray-100">
                             {proc.name}
                           </span>
                         )}
                         {macro && (
-                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                          <span className="text-[9px] px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 border border-primary-200">
                             {macro.name}
                           </span>
                         )}
-                        <span className="text-[9px] text-white/30">
+                        <span className="text-[9px] text-gray-400">
                           {risk.controls.length} control{risk.controls.length !== 1 ? 'es' : ''}
                         </span>
                       </div>
@@ -346,7 +346,7 @@ export default function HeatMapPage() {
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-white/20 py-20">
+            <div className="flex flex-col items-center justify-center h-full text-gray-300 py-20">
               <Shield size={32} className="mb-3" />
               <p className="text-xs text-center">Selecciona una celda del mapa<br />para ver los riesgos</p>
             </div>
@@ -356,9 +356,9 @@ export default function HeatMapPage() {
 
       {/* Risk table */}
       {filteredRisks.length > 0 && (
-        <div className="bg-[#0d1420] rounded-2xl border border-white/5 overflow-hidden">
-          <div className="px-5 py-3 border-b border-white/5">
-            <h3 className="text-sm font-semibold text-white">
+        <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+          <div className="px-5 py-3 border-b border-gray-100">
+            <h3 className="text-sm font-semibold text-gray-900">
               Listado de Riesgos ({filteredRisks.length})
             </h3>
           </div>
@@ -367,7 +367,7 @@ export default function HeatMapPage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-xs">
               <thead>
-                <tr className="text-white/40 border-b border-white/5">
+                <tr className="text-gray-500 border-b border-gray-100">
                   <th className="text-left px-4 py-2 font-medium">Riesgo</th>
                   <th className="text-left px-4 py-2 font-medium">Categoria</th>
                   <th className="text-left px-4 py-2 font-medium">Proceso</th>
@@ -384,25 +384,25 @@ export default function HeatMapPage() {
                   const i = viewType === 'inherent' ? risk.inherentImpact : risk.residualImpact
                   const level = getRiskLevel(p, i)
                   return (
-                    <tr key={risk.id} onClick={() => setSelectedRisk(risk)} className="border-b border-white/5 hover:bg-white/[0.04] cursor-pointer">
+                    <tr key={risk.id} onClick={() => setSelectedRisk(risk)} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
                       <td className="px-4 py-2.5">
-                        <p className="text-white font-medium">{risk.title}</p>
-                        <p className="text-white/30 text-[10px] mt-0.5 truncate max-w-[250px]">{risk.riskEvent}</p>
+                        <p className="text-gray-900 font-medium">{risk.title}</p>
+                        <p className="text-gray-400 text-[10px] mt-0.5 truncate max-w-[250px]">{risk.riskEvent}</p>
                       </td>
                       <td className="px-4 py-2.5">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-white/50 border border-white/5">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-50 text-gray-500 border border-gray-100">
                           {risk.category}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-white/50">{proc?.name ?? '—'}</td>
-                      <td className="text-center px-4 py-2.5 text-white/60">{p}</td>
-                      <td className="text-center px-4 py-2.5 text-white/60">{i}</td>
+                      <td className="px-4 py-2.5 text-gray-500">{proc?.name ?? '—'}</td>
+                      <td className="text-center px-4 py-2.5 text-gray-600">{p}</td>
+                      <td className="text-center px-4 py-2.5 text-gray-600">{i}</td>
                       <td className="text-center px-4 py-2.5">
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${level.color} text-white`}>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${level.color} text-gray-900`}>
                           {level.label}
                         </span>
                       </td>
-                      <td className="text-center px-4 py-2.5 text-white/50">{risk.controls.length}</td>
+                      <td className="text-center px-4 py-2.5 text-gray-500">{risk.controls.length}</td>
                     </tr>
                   )
                 })}

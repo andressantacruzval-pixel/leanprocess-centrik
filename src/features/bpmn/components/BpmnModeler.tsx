@@ -296,18 +296,13 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
             position: { top: -4, left: -4 },
             html: `<div style="
               position:absolute; top:0; left:0;
-              width:${(element.width ?? 0) + 8}px; height:${(element.height ?? 0) + 8}px;
-              border: 2px solid #22d3ee; border-radius: 14px;
-              pointer-events: none; opacity: 0.7;
-            "></div>`,
+              width:${(element.width ?? 0) + 8}px; height:${(element.height ?? 0) + 8}px; border: 2px solid #22d3ee; border-radius: 14px; pointer-events: none; opacity: 0.7; "></div>`,
           })
           overlays.add(element.id, 'risk-control-badge', {
             position: { top: -8, right: -8 },
-            html: `<div style="
-              width:16px; height:16px; border-radius:50%;
-              background:#22d3ee; display:flex; align-items:center; justify-content:center;
-              font-size:9px; color:#0a0f1a; font-weight:bold;
-            ">C</div>`,
+            html: `<div style=" width:16px; height:16px; border-radius:50%; background:#22d3ee; display:flex;
+              align-items:center; justify-content:center; font-size:9px; color:#0a0f1a; font-weight:bold;
+              ">C</div>`,
           })
         } catch { /* overlay may already exist */ }
       }
@@ -316,11 +311,9 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
         try {
           overlays.add(element.id, 'risk-marker', {
             position: { top: -8, left: -8 },
-            html: `<div style="
-              width:16px; height:16px; border-radius:50%;
-              background:#f87171; display:flex; align-items:center; justify-content:center;
-              font-size:10px; color:white; font-weight:bold;
-            ">!</div>`,
+            html: `<div style=" width:16px; height:16px; border-radius:50%; background:#f87171; display:flex;
+              align-items:center; justify-content:center; font-size:10px; color:white; font-weight:bold;
+              ">!</div>`,
           })
         } catch { /* overlay may already exist */ }
       }
@@ -451,10 +444,10 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
       `}</style>
 
       {error && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 rounded-2xl">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/45 rounded-lg">
           <div className="text-center p-6 max-w-sm">
-            <p className="text-red-400 text-sm mb-2 font-medium">Error al cargar el diagrama</p>
-            <p className="text-white/30 text-xs mb-4">{error}</p>
+            <p className="text-red-600 text-sm mb-2 font-medium">Error al cargar el diagrama</p>
+            <p className="text-gray-400 text-xs mb-4">{error}</p>
             <button
               onClick={() => {
                 if (modelerRef.current) {
@@ -463,7 +456,7 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
                   })
                 }
               }}
-              className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-all"
+              className="px-4 py-2 text-white text-xs rounded-lg transition-all bg-primary-500 hover:bg-primary-600"
             >
               Crear diagrama nuevo
             </button>
@@ -472,9 +465,9 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
       )}
 
       {!ready && !error && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#0d1420] rounded-2xl">
-          <div className="flex items-center gap-2 text-white/30 text-sm">
-            <div className="w-4 h-4 border-2 border-cyan-400/40 border-t-cyan-400 rounded-full animate-spin" />
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white rounded-lg">
+          <div className="flex items-center gap-2 text-gray-400 text-sm">
+            <div className="w-4 h-4 border-2 border-primary-300 border-t-primary-500 rounded-full animate-spin" />
             Cargando editor BPMN...
           </div>
         </div>
@@ -482,7 +475,7 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
 
       <div
         ref={containerRef}
-        className="w-full h-full overflow-hidden border border-white/5"
+        className="w-full h-full overflow-hidden border border-gray-100"
         style={{ background: theme === 'light' ? '#f7faff' : '#111827' }}
       />
 
@@ -490,9 +483,9 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
       {/* Pista de interacción — visible solo cuando el editor está listo y no es solo lectura */}
       {ready && !readOnly && !error && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
-          <div className="flex items-center gap-3 px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full border border-white/5 text-[10px] text-white/30">
+          <div className="flex items-center gap-3 px-3 py-1.5 bg-gray-900/45 rounded-full border border-gray-100 text-[10px] text-gray-400">
             <span>Doble clic en flecha → agregar texto (Sí / No)</span>
-            <span className="w-px h-3 bg-white/10" />
+            <span className="w-px h-3 bg-gray-100" />
             <span>Doble clic en forma → renombrar</span>
           </div>
         </div>

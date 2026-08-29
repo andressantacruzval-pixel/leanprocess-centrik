@@ -110,11 +110,11 @@ export function DateRangePicker({ range, customFrom, customTo, onSelect }: Props
       {/* Trigger */}
       <button
         onClick={() => setOpen(o => !o)}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-          border whitespace-nowrap
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border
+          whitespace-nowrap
           ${open || range === 'custom'
-            ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-            : 'text-white/50 bg-white/[0.03] border-white/8 hover:text-white/70 hover:bg-white/[0.06]'
+            ? 'bg-primary-50 text-primary-600 border-primary-200'
+            : 'text-gray-500 bg-gray-50 border-gray-100 hover:text-gray-700 hover:bg-gray-50'
           }`}
       >
         <CalendarRange size={13} />
@@ -124,17 +124,17 @@ export function DateRangePicker({ range, customFrom, customTo, onSelect }: Props
       {/* Popover — `w-44` + `w-64` + padding sumaban ~448px anclados a la derecha: en
           una pantalla de 375px se salian 73px por la izquierda. Apilado en movil. */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 z-50 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-[#0d1117] shadow-2xl shadow-black/50 flex flex-col sm:flex-row overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 z-50 max-w-[calc(100vw-2rem)] rounded-lg border border-gray-200 bg-white shadow-2xl flex flex-col sm:flex-row overflow-hidden">
           {/* Shortcuts */}
-          <div className="flex flex-col border-b sm:border-b-0 sm:border-r border-white/[0.06] py-2 w-full sm:w-44">
+          <div className="flex flex-col border-b sm:border-b-0 sm:border-r border-gray-100 py-2 w-full sm:w-44">
             {SHORTCUTS.map(s => (
               <button
                 key={s.value}
                 onClick={() => { onSelect(s.value); setOpen(false); setPicking(null) }}
                 className={`px-4 py-2.5 text-xs text-left transition-colors
                   ${range === s.value && !picking
-                    ? 'text-cyan-400 bg-cyan-500/10'
-                    : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04]'
+                    ? 'text-primary-600 bg-primary-50'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
                   }`}
               >
                 {s.label}
@@ -146,13 +146,13 @@ export function DateRangePicker({ range, customFrom, customTo, onSelect }: Props
           <div className="p-4 w-full sm:w-64">
             {/* Nav */}
             <div className="flex items-center justify-between mb-3">
-              <button onClick={prevMonth} className="p-1 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors">
+              <button onClick={prevMonth} className="p-1 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors">
                 <ChevronLeft size={14} />
               </button>
-              <span className="text-xs font-medium text-white/70">
+              <span className="text-xs font-medium text-gray-700">
                 {MONTHS[viewMonth]} {viewYear}
               </span>
-              <button onClick={nextMonth} className="p-1 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white/70 transition-colors">
+              <button onClick={nextMonth} className="p-1 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors">
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -160,7 +160,7 @@ export function DateRangePicker({ range, customFrom, customTo, onSelect }: Props
             {/* Días semana */}
             <div className="grid grid-cols-7 mb-1">
               {DAYS.map(d => (
-                <div key={d} className="text-center text-[10px] text-white/25 py-1">{d}</div>
+                <div key={d} className="text-center text-[10px] text-gray-400 py-1">{d}</div>
               ))}
             </div>
 
@@ -176,15 +176,15 @@ export function DateRangePicker({ range, customFrom, customTo, onSelect }: Props
 
                 let cls = 'text-center text-[11px] py-1 cursor-pointer rounded-lg transition-all select-none '
                 if (start || end) {
-                  cls += 'bg-cyan-500 text-white font-semibold '
+                  cls += 'bg-primary-500 text-white font-semibold '
                 } else if (inRng) {
-                  cls += 'bg-cyan-500/15 text-cyan-300 '
+                  cls += 'bg-primary-50 text-primary-700 '
                 } else if (isToday) {
-                  cls += 'text-cyan-400 font-medium hover:bg-white/[0.06] '
+                  cls += 'text-primary-600 font-medium hover:bg-gray-50 '
                 } else if (future) {
-                  cls += 'text-white/20 cursor-not-allowed '
+                  cls += 'text-gray-300 cursor-not-allowed '
                 } else {
-                  cls += 'text-white/55 hover:bg-white/[0.06] hover:text-white/80 '
+                  cls += 'text-gray-600 hover:bg-gray-50 hover:text-gray-800 '
                 }
 
                 return (
@@ -202,7 +202,7 @@ export function DateRangePicker({ range, customFrom, customTo, onSelect }: Props
             </div>
 
             {/* Hint */}
-            <p className="text-[10px] text-white/25 text-center mt-3">
+            <p className="text-[10px] text-gray-400 text-center mt-3">
               {picking ? 'Haz clic en la fecha de fin' : 'Haz clic en la fecha de inicio'}
             </p>
           </div>

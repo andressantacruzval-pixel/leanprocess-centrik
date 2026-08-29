@@ -22,14 +22,14 @@ export function PantallaEstrecha({ que, motivo }: Props) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 py-12 text-center">
-      <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-4">
-        <MonitorSmartphone size={26} className="text-cyan-400" />
+      <div className="w-14 h-14 rounded-lg bg-primary-50 border border-primary-200 flex items-center justify-center mb-4">
+        <MonitorSmartphone size={26} className="text-primary-600" />
       </div>
-      <h2 className="text-lg font-bold text-white">{que} necesita una pantalla más ancha</h2>
-      <p className="mt-2 max-w-xs text-sm text-white/50 leading-relaxed">{motivo}</p>
+      <h2 className="text-lg font-bold text-gray-900">{que} necesita una pantalla más ancha</h2>
+      <p className="mt-2 max-w-xs text-sm text-gray-500 leading-relaxed">{motivo}</p>
       <button
         onClick={() => navigate(-1)}
-        className="mt-6 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+        className="mt-6 px-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
       >
         Volver
       </button>

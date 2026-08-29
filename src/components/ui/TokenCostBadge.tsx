@@ -11,8 +11,8 @@ export function TokenCostBadge({ operationKey, className }: Props) {
   const cost = getCost(operationKey)
 
   return (
-    <span className={`inline-flex items-center gap-0.5 text-xs text-amber-400/70 ${className ?? ''}`}>
-      <Zap size={10} className="fill-amber-400/70 shrink-0" />
+    <span className={`inline-flex items-center gap-0.5 text-xs text-amber-600 ${className ?? ''}`}>
+      <Zap size={10} className="fill-amber-600 shrink-0" />
       {cost}
     </span>
   )

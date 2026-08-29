@@ -42,15 +42,15 @@ export default function SettingsPage() {
         subtitle="Administra tus empresas, miembros y suscripcion."
       />
 
-      <div className="flex items-center gap-1 border-b border-white/5 overflow-x-auto">
+      <div className="flex items-center gap-1 border-b border-gray-100 overflow-x-auto">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-all border-b-2 -mb-px ${
               tab === id
-                ? 'border-cyan-400 text-cyan-400'
-                : 'border-transparent text-white/40 hover:text-white/70'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             <Icon size={14} />
@@ -67,15 +67,15 @@ export default function SettingsPage() {
           <div className="space-y-6">
             {/* Profile info display */}
             <div>
-              <h3 className="text-sm font-medium text-white/70 mb-3">Perfil</h3>
-              <div className="bg-white/5 rounded-xl p-4 border border-white/10 space-y-2">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Perfil</h3>
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-primary-500">
                     {profile?.full_name?.[0]?.toUpperCase() ?? profile?.email?.[0]?.toUpperCase() ?? '?'}
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-white">{profile?.full_name ?? 'Sin nombre'}</div>
-                    <div className="text-xs text-white/40">{profile?.email}</div>
+                    <div className="text-sm font-medium text-gray-900">{profile?.full_name ?? 'Sin nombre'}</div>
+                    <div className="text-xs text-gray-500">{profile?.email}</div>
                   </div>
                 </div>
               </div>

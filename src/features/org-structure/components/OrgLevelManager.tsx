@@ -53,14 +53,14 @@ export function OrgLevelManager({ open, onClose }: OrgLevelManagerProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-[#0d1420] border border-white/10 rounded-xl shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto mx-4 p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/45">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto mx-4 p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold text-white">Gestionar niveles</h3>
+          <h3 className="text-lg font-bold text-gray-900">Gestionar niveles</h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-white/5 text-white/20 hover:text-white/40 transition-colors"
+            className="p-1 rounded-lg hover:bg-gray-50 text-gray-300 hover:text-gray-500 transition-colors"
           >
             <X size={20} />
           </button>
@@ -69,7 +69,7 @@ export function OrgLevelManager({ open, onClose }: OrgLevelManagerProps) {
         {/* Level list */}
         <div className="space-y-2 mb-5 max-h-72 overflow-y-auto">
           {orgLevelDefinitions.length === 0 && (
-            <p className="text-white/30 text-sm text-center py-4">
+            <p className="text-gray-400 text-sm text-center py-4">
               No hay niveles definidos. Agrega uno abajo.
             </p>
           )}
@@ -81,7 +81,7 @@ export function OrgLevelManager({ open, onClose }: OrgLevelManagerProps) {
             return (
               <div key={level.id} className="flex items-center gap-3 py-1.5">
                 <span
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-gray-900 text-xs font-bold shrink-0"
                   style={{ backgroundColor: color }}
                 >
                   {index + 1}
@@ -94,10 +94,10 @@ export function OrgLevelManager({ open, onClose }: OrgLevelManagerProps) {
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
                     onKeyDown={(e) => handleEditKeyDown(e, level.id)}
-                    className="flex-1 px-2 py-1 bg-white/5 border border-cyan-500/50 rounded-lg text-white text-sm focus:outline-none"
+                    className="flex-1 px-2 py-1 bg-gray-50 border border-primary-300 rounded-lg text-gray-900 text-sm focus:outline-none"
                   />
                 ) : (
-                  <span className="flex-1 text-white text-sm">{level.level_name}</span>
+                  <span className="flex-1 text-gray-900 text-sm">{level.level_name}</span>
                 )}
 
                 <div className="flex items-center gap-1 shrink-0">
@@ -105,14 +105,14 @@ export function OrgLevelManager({ open, onClose }: OrgLevelManagerProps) {
                     <button
                       onClick={() => handleConfirmEdit(level.id)}
                       disabled={!editingName.trim()}
-                      className="p-1.5 text-cyan-400 hover:text-cyan-300 transition-colors disabled:opacity-30"
+                      className="p-1.5 text-primary-600 hover:text-primary-700 transition-colors disabled:opacity-30"
                     >
                       <Check size={15} />
                     </button>
                   ) : (
                     <button
                       onClick={() => handleStartEdit(level.id, level.level_name)}
-                      className="p-1.5 text-white/20 hover:text-white/60 transition-colors"
+                      className="p-1.5 text-gray-300 hover:text-gray-600 transition-colors"
                     >
                       <Pencil size={15} />
                     </button>
@@ -121,7 +121,7 @@ export function OrgLevelManager({ open, onClose }: OrgLevelManagerProps) {
                     onClick={() => !blocked && removeOrgLevelDefinition(level.id)}
                     disabled={blocked || orgLevelDefinitions.length <= 1}
                     title={blocked ? 'Hay unidades asignadas a este nivel' : undefined}
-                    className="p-1.5 text-white/20 hover:text-red-500 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                    className="p-1.5 text-gray-300 hover:text-red-600 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
                   >
                     <Trash2 size={15} />
                   </button>
@@ -132,19 +132,19 @@ export function OrgLevelManager({ open, onClose }: OrgLevelManagerProps) {
         </div>
 
         {/* Add new level */}
-        <div className="flex items-center gap-2 pt-4 border-t border-white/5">
+        <div className="flex items-center gap-2 pt-4 border-t border-gray-100">
           <input
             type="text"
             value={newLevelName}
             onChange={(e) => setNewLevelName(e.target.value)}
             onKeyDown={handleAddKeyDown}
             placeholder="Nuevo nivel (ej: Coordinación)"
-            className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent"
+            className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 text-sm placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
           <button
             onClick={handleAdd}
             disabled={!newLevelName.trim()}
-            className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-cyan-500 hover:to-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-3 py-2 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-primary-500 hover:bg-primary-600"
           >
             <Plus size={15} />
             Agregar

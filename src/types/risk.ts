@@ -87,11 +87,11 @@ export function computeControlScore(c: Omit<ControlItem, 'score' | 'effectivenes
 }
 
 export const EFFECTIVENESS_COLORS: Record<EffectivenessLevel, string> = {
-  Deficiente: 'bg-red-500/20 text-red-400',
-  Debil: 'bg-orange-500/20 text-orange-400',
-  Regular: 'bg-yellow-500/20 text-yellow-400',
-  Bueno: 'bg-emerald-500/20 text-emerald-400',
-  Optimo: 'bg-cyan-500/20 text-cyan-400',
+  Deficiente: 'bg-red-100 text-red-600',
+  Debil: 'bg-amber-100 text-amber-600',
+  Regular: 'bg-amber-100 text-amber-600',
+  Bueno: 'bg-emerald-100 text-emerald-600',
+  Optimo: 'bg-primary-100 text-primary-600',
 }
 
 // ── Risk level from probability × impact ──────────────────────────────
@@ -99,8 +99,8 @@ export const EFFECTIVENESS_COLORS: Record<EffectivenessLevel, string> = {
 export function getRiskLevel(probability: number, impact: number): { label: RiskLevel; color: string; hex: string } {
   const score = probability * impact
   if (score >= 15) return { label: 'Extremo', color: 'bg-red-500', hex: '#ef4444' }
-  if (score >= 8) return { label: 'Alto', color: 'bg-orange-500', hex: '#f97316' }
-  if (score >= 4) return { label: 'Moderado', color: 'bg-yellow-400', hex: '#facc15' }
+  if (score >= 8) return { label: 'Alto', color: 'bg-amber-500', hex: '#f97316' }
+  if (score >= 4) return { label: 'Moderado', color: 'bg-amber-500', hex: '#facc15' }
   return { label: 'Bajo', color: 'bg-emerald-500', hex: '#10b981' }
 }
 
@@ -108,10 +108,10 @@ export function getRiskLevel(probability: number, impact: number): { label: Risk
 
 export function heatMapCellColor(probability: number, impact: number): string {
   const score = probability * impact
-  if (score >= 15) return 'bg-red-500/80'
-  if (score >= 8) return 'bg-orange-500/80'
-  if (score >= 4) return 'bg-yellow-400/80'
-  return 'bg-emerald-500/80'
+  if (score >= 15) return 'bg-red-100'
+  if (score >= 8) return 'bg-amber-100'
+  if (score >= 4) return 'bg-amber-100'
+  return 'bg-emerald-100'
 }
 
 // ── Residual risk calculation ─────────────────────────────────────────

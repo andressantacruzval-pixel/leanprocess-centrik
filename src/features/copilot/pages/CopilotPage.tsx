@@ -26,12 +26,12 @@ export default function CopilotPage() {
   return (
     <div className="h-[calc(100vh-7rem)] flex flex-col">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 ring-1 ring-cyan-500/30 flex items-center justify-center">
-          <Bot size={16} className="text-cyan-400" />
+        <div className="w-8 h-8 rounded-lg ring-1 ring-primary-500 flex items-center justify-center bg-primary-500">
+          <Bot size={16} className="text-primary-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-bold text-white leading-none">Copiloto</h1>
-          <p className="text-[11px] text-white/40 mt-1 truncate">
+          <h1 className="text-lg font-bold text-gray-900 leading-none">Copiloto</h1>
+          <p className="text-[11px] text-gray-500 mt-1 truncate">
             {activeConversation ? activeConversation.title : 'Consulta toda tu documentación de procesos en lenguaje natural'}
           </p>
         </div>
@@ -43,14 +43,14 @@ export default function CopilotPage() {
                 if (t && t.trim()) renameConversation(activeConversation.id, t.trim())
               }}
               title="Renombrar consulta"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] text-white/60 bg-white/5 border border-white/10 hover:text-cyan-300 hover:border-cyan-500/30 transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] text-gray-600 bg-gray-50 border border-gray-200 hover:text-primary-700 hover:border-primary-300 transition-colors"
             >
               <Pencil size={13} /> <span className="hidden sm:inline">Renombrar</span>
             </button>
             <button
               onClick={() => { if (window.confirm('¿Eliminar esta consulta?')) deleteConversation(activeConversation.id) }}
               title="Eliminar consulta"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] text-white/60 bg-white/5 border border-white/10 hover:text-red-300 hover:border-red-500/30 transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] text-gray-600 bg-gray-50 border border-gray-200 hover:text-red-700 hover:border-red-300 transition-colors"
             >
               <Trash2 size={13} /> <span className="hidden sm:inline">Eliminar</span>
             </button>
@@ -58,7 +58,7 @@ export default function CopilotPage() {
         )}
       </div>
 
-      <div className="flex-1 flex min-h-0 rounded-2xl border border-white/5 overflow-hidden">
+      <div className="flex-1 flex min-h-0 rounded-lg border border-gray-100 overflow-hidden">
         <ConversationRail
           conversations={conversations}
           activeId={activeId}

@@ -38,7 +38,7 @@ const faqs: FaqItem[] = [
           href="https://process-masters.circle.so"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-cyan-400 hover:underline"
+          className="text-primary-600 hover:underline"
         >
           Únete aquí
         </a>
@@ -52,27 +52,27 @@ export default function LandingFaq() {
   return (
     <section id="faq" aria-labelledby="faq-title" className="mx-auto max-w-4xl px-6 py-20">
       <div className="mb-14 text-center">
-        <h2 id="faq-title" className="mb-4 text-3xl font-bold text-white md:text-4xl">
+        <h2 id="faq-title" className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
           Preguntas frecuentes
         </h2>
-        <p className="text-white/50">Todo lo que necesitas saber antes de comenzar.</p>
+        <p className="text-gray-500">Todo lo que necesitas saber antes de comenzar.</p>
       </div>
 
       <div className="space-y-3">
         {faqs.map(({ question, answer }) => (
           <details
             key={question}
-            className="group rounded-2xl border border-white/[0.06] bg-white/[0.03] px-6"
+            className="group rounded-lg border border-gray-100 bg-gray-50 px-6"
           >
-            <summary className="flex cursor-pointer select-none list-none items-center justify-between py-5 font-medium text-white">
+            <summary className="flex cursor-pointer select-none list-none items-center justify-between py-5 font-medium text-gray-900">
               <span>{question}</span>
               <ChevronDown
-                className="shrink-0 text-white/40 transition-transform duration-200 group-open:rotate-180"
+                className="shrink-0 text-gray-500 transition-transform duration-200 group-open:rotate-180"
                 size={18}
                 aria-hidden="true"
               />
             </summary>
-            <div className="pb-5 text-sm leading-relaxed text-white/50">{answer}</div>
+            <div className="pb-5 text-sm leading-relaxed text-gray-500">{answer}</div>
           </details>
         ))}
       </div>

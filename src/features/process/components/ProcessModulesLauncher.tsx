@@ -28,12 +28,12 @@ const MODULES: {
   iconText: string
   hover: string
 }[] = [
-  { key: 'procedimiento', label: 'Procedimiento', hint: 'SOP del proceso', title: 'Procedimiento', Icon: Book, iconBg: 'bg-purple-500/10', iconText: 'text-purple-400', hover: 'hover:border-purple-500/30 hover:bg-purple-500/[0.03]' },
-  { key: 'indicadores', label: 'KPI', hint: 'Métricas y semáforos', title: 'Indicadores KPI', Icon: BarChart3, iconBg: 'bg-amber-500/10', iconText: 'text-amber-400', hover: 'hover:border-amber-500/30 hover:bg-amber-500/[0.03]' },
-  { key: 'riesgos', label: 'Riesgos', hint: 'Matriz 5×5 y controles', title: 'Gestión de Riesgos', Icon: ShieldAlert, iconBg: 'bg-red-500/10', iconText: 'text-red-400', hover: 'hover:border-red-500/30 hover:bg-red-500/[0.03]' },
-  { key: 'auditoria', label: 'Auditoría', hint: 'Programa de auditoría', title: 'Programa de Auditoría', Icon: ClipboardCheck, iconBg: 'bg-violet-500/10', iconText: 'text-violet-400', hover: 'hover:border-violet-500/30 hover:bg-violet-500/[0.03]' },
-  { key: 'analisis', label: 'Valor', hint: 'VA / NVA / NVABN', title: 'Análisis de Valor', Icon: Activity, iconBg: 'bg-teal-500/10', iconText: 'text-teal-400', hover: 'hover:border-teal-500/30 hover:bg-teal-500/[0.03]' },
-  { key: 'mejoras', label: 'Mejoras', hint: 'Oportunidades de mejora', title: 'Oportunidades de Mejora', Icon: Lightbulb, iconBg: 'bg-yellow-500/10', iconText: 'text-yellow-400', hover: 'hover:border-yellow-500/30 hover:bg-yellow-500/[0.03]' },
+  { key: 'procedimiento', label: 'Procedimiento', hint: 'SOP del proceso', title: 'Procedimiento', Icon: Book, iconBg: 'bg-primary-50', iconText: 'text-primary-600', hover: 'hover:border-primary-300 hover:bg-primary-50' },
+  { key: 'indicadores', label: 'KPI', hint: 'Métricas y semáforos', title: 'Indicadores KPI', Icon: BarChart3, iconBg: 'bg-amber-50', iconText: 'text-amber-600', hover: 'hover:border-amber-300 hover:bg-amber-50' },
+  { key: 'riesgos', label: 'Riesgos', hint: 'Matriz 5×5 y controles', title: 'Gestión de Riesgos', Icon: ShieldAlert, iconBg: 'bg-red-50', iconText: 'text-red-600', hover: 'hover:border-red-300 hover:bg-red-50' },
+  { key: 'auditoria', label: 'Auditoría', hint: 'Programa de auditoría', title: 'Programa de Auditoría', Icon: ClipboardCheck, iconBg: 'bg-primary-50', iconText: 'text-primary-600', hover: 'hover:border-primary-300 hover:bg-primary-50' },
+  { key: 'analisis', label: 'Valor', hint: 'VA / NVA / NVABN', title: 'Análisis de Valor', Icon: Activity, iconBg: 'bg-primary-50', iconText: 'text-primary-600', hover: 'hover:border-primary-300 hover:bg-primary-50' },
+  { key: 'mejoras', label: 'Mejoras', hint: 'Oportunidades de mejora', title: 'Oportunidades de Mejora', Icon: Lightbulb, iconBg: 'bg-amber-50', iconText: 'text-amber-600', hover: 'hover:border-amber-300 hover:bg-amber-50' },
 ]
 
 export function ProcessModulesLauncher({ processId }: { processId: string }) {
@@ -85,10 +85,10 @@ export function ProcessModulesLauncher({ processId }: { processId: string }) {
   }
 
   return (
-    <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-4 sm:p-6">
+    <div className="bg-gray-50 rounded-lg border border-gray-100 p-4 sm:p-6">
       <div className="mb-4">
-        <h2 className="text-base font-semibold text-white">Módulos del proceso</h2>
-        <p className="text-[11px] text-white/35">Abre cualquiera sin ir al diagramador. Es la misma información y se guarda en el mismo lugar.</p>
+        <h2 className="text-base font-semibold text-gray-900">Módulos del proceso</h2>
+        <p className="text-[11px] text-gray-400">Abre cualquiera sin ir al diagramador. Es la misma información y se guarda en el mismo lugar.</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
@@ -97,13 +97,13 @@ export function ProcessModulesLauncher({ processId }: { processId: string }) {
             key={key}
             onClick={() => setActive(key)}
             title={hint}
-            className={`group bg-white/[0.03] rounded-xl border border-white/5 p-3 text-left transition-all ${hover}`}
+            className={`group bg-gray-50 rounded-lg border border-gray-100 p-3 text-left transition-all ${hover}`}
           >
             <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center mb-2`}>
               <Icon size={17} className={iconText} />
             </div>
-            <h3 className="font-semibold text-[12.5px] text-white leading-tight">{label}</h3>
-            <p className="text-[10px] text-white/30 mt-0.5 leading-tight">{hint}</p>
+            <h3 className="font-semibold text-[12.5px] text-gray-900 leading-tight">{label}</h3>
+            <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">{hint}</p>
           </button>
         ))}
       </div>
@@ -111,19 +111,19 @@ export function ProcessModulesLauncher({ processId }: { processId: string }) {
       {/* Ventana emergente con el panel seleccionado (mismo componente del diagramador) */}
       {active && activeMod && createPortal(
         <>
-          <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setActive(null)} />
-          <div className="fixed z-[61] inset-0 m-auto h-[90vh] w-[95vw] max-w-4xl bg-[#0a0f1a] rounded-2xl border border-white/10 flex flex-col shadow-[0_8px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-in zoom-in-95 fade-in duration-200">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-black/20 shrink-0">
+          <div className="fixed inset-0 z-[60] bg-gray-900/45 animate-in fade-in duration-200" onClick={() => setActive(null)} />
+          <div className="fixed z-[61] inset-0 m-auto h-[90vh] w-[95vw] max-w-4xl bg-white rounded-lg border border-gray-200 flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-900/45 shrink-0">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className={`w-7 h-7 rounded-lg ${activeMod.iconBg} flex items-center justify-center shrink-0`}>
                   <activeMod.Icon size={15} className={activeMod.iconText} />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-semibold text-white truncate">{activeMod.title}</h3>
-                  <p className="text-[10px] text-white/35 truncate">{process.name}</p>
+                  <h3 className="text-sm font-semibold text-gray-900 truncate">{activeMod.title}</h3>
+                  <p className="text-[10px] text-gray-400 truncate">{process.name}</p>
                 </div>
               </div>
-              <button onClick={() => setActive(null)} title="Cerrar" className="p-1.5 rounded-md text-white/40 hover:text-white/80 hover:bg-white/5 transition-colors shrink-0">
+              <button onClick={() => setActive(null)} title="Cerrar" className="p-1.5 rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors shrink-0">
                 <X size={18} />
               </button>
             </div>

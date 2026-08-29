@@ -39,42 +39,42 @@ export function ApplicationsCatalog() {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar aplicación, categoría o proveedor…"
-            className="w-full pl-8 pr-3 py-2 border border-white/10 rounded-lg text-sm bg-white/5 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50" />
+            className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500" />
         </div>
-        <button onClick={() => setForm({ app: null })} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-500 hover:to-cyan-500"><Plus size={14} /> Nueva aplicación</button>
+        <button onClick={() => setForm({ app: null })} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-primary-500 hover:bg-primary-600"><Plus size={14} /> Nueva aplicación</button>
       </div>
 
-      <div className="rounded-xl border border-white/5 divide-y divide-white/5">
-        {shown.length === 0 && <div className="px-4 py-10 text-center text-xs text-white/30">No hay aplicaciones. Crea la primera o identifícalas con IA desde un proceso.</div>}
+      <div className="rounded-lg border border-gray-100 divide-y divide-gray-100">
+        {shown.length === 0 && <div className="px-4 py-10 text-center text-xs text-gray-400">No hay aplicaciones. Crea la primera o identifícalas con IA desde un proceso.</div>}
         {shown.map((app) => {
           const risk = techRisk(app)
           const nProc = procNamesOf(app.id).length
           return (
-            <div key={app.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.02]">
-              <MonitorSmartphone size={15} className="text-sky-300 shrink-0" />
+            <div key={app.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50">
+              <MonitorSmartphone size={15} className="text-primary-700 shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] text-white font-medium truncate">{app.name}</p>
+                <p className="text-[13px] text-gray-900 font-medium truncate">{app.name}</p>
                 <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-                  {app.category && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{app.category}</span>}
-                  {app.vendor && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/45">{app.vendor}</span>}
-                  {app.deployment && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/45">{deployLabel(app.deployment)}</span>}
-                  {app.has_api && <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 inline-flex items-center gap-0.5"><Zap size={9} /> API</span>}
-                  <span className="text-[9px] px-1.5 py-0.5 rounded text-white" style={{ background: risk.hex }}>Riesgo {risk.label}</span>
-                  <span className="text-[9px] text-white/35">{nProc} proceso{nProc === 1 ? '' : 's'}</span>
+                  {app.category && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{app.category}</span>}
+                  {app.vendor && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{app.vendor}</span>}
+                  {app.deployment && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{deployLabel(app.deployment)}</span>}
+                  {app.has_api && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 inline-flex items-center gap-0.5"><Zap size={9} /> API</span>}
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-md text-gray-900" style={{ background: risk.hex }}>Riesgo {risk.label}</span>
+                  <span className="text-[9px] text-gray-400">{nProc} proceso{nProc === 1 ? '' : 's'}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <button onClick={() => setForm({ app })} title="Editar ficha" className="p-2 rounded text-white/30 hover:text-cyan-400 hover:bg-cyan-500/10"><Pencil size={13} /></button>
-                <button onClick={() => del(app)} title="Eliminar del inventario" className="p-2 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button>
+                <button onClick={() => setForm({ app })} title="Editar ficha" className="p-2 rounded-md text-gray-400 hover:text-primary-600 hover:bg-primary-50"><Pencil size={13} /></button>
+                <button onClick={() => del(app)} title="Eliminar del inventario" className="p-2 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50"><Trash2 size={13} /></button>
               </div>
             </div>
           )
         })}
       </div>
 
-      <p className="text-[11px] text-white/30">Este inventario es la fuente central: el área de TI completa aquí la información y todos los usuarios la ven actualizada.</p>
+      <p className="text-[11px] text-gray-400">Este inventario es la fuente central: el área de TI completa aquí la información y todos los usuarios la ven actualizada.</p>
 
       {form && <AppFormModal processId="" application={form.app} linkUsage={false} onClose={() => setForm(null)} />}
     </div>

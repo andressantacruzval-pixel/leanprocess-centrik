@@ -300,16 +300,16 @@ export default function Dashboard() {
               <Link
                 key={nudge.id}
                 to={route}
-                className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 transition-colors hover:border-cyan-500/30 hover:bg-cyan-500/5"
+                className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 transition-colors hover:border-primary-300 hover:bg-primary-50"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10">
-                  <Icon className="h-4 w-4 text-cyan-400" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50">
+                  <Icon className="h-4 w-4 text-primary-600" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs text-amber-300">
-                    Te falta{nudge.remaining === 1 ? '' : 'n'} {nudge.remaining} para desbloquear <span className="font-semibold text-white">'{nudge.title}'</span>
+                  <span className="text-xs text-amber-700">
+                    Te falta{nudge.remaining === 1 ? '' : 'n'} {nudge.remaining} para desbloquear <span className="font-semibold text-gray-900">'{nudge.title}'</span>
                   </span>
-                  <span className="text-[10px] text-cyan-400/70">+{nudge.points} pts</span>
+                  <span className="text-[10px] text-primary-600">+{nudge.points} pts</span>
                 </div>
               </Link>
             )
@@ -318,38 +318,38 @@ export default function Dashboard() {
       )}
 
       {/* Weekly Digest */}
-      <div className="rounded-2xl border border-transparent bg-white/[0.03] p-[1px]" style={{ backgroundImage: 'linear-gradient(#0a0f1a, #0a0f1a), linear-gradient(135deg, #f59e0b, #06b6d4)', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }}>
-        <div className="rounded-2xl bg-[#0a0f1a] p-4">
+      <div className="rounded-lg border border-transparent bg-gray-50 p-[1px]" style={{ backgroundImage: 'linear-gradient(#0a0f1a, #0a0f1a), linear-gradient(135deg, #f59e0b, #06b6d4)', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }}>
+        <div className="rounded-lg bg-white p-4">
           <button
             onClick={() => setDigestOpen((v) => !v)}
             className="flex w-full items-center justify-between"
           >
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-amber-400" />
-              <span className="text-sm font-semibold text-white">Resumen Semanal</span>
+              <Sparkles className="h-4 w-4 text-amber-600" />
+              <span className="text-sm font-semibold text-gray-900">Resumen Semanal</span>
             </div>
             {digestOpen ? (
-              <ChevronUp className="h-4 w-4 text-white/40" />
+              <ChevronUp className="h-4 w-4 text-gray-500" />
             ) : (
-              <ChevronDown className="h-4 w-4 text-white/40" />
+              <ChevronDown className="h-4 w-4 text-gray-500" />
             )}
           </button>
           {digestOpen && (
-            <div className="mt-3 grid grid-cols-2 md:grid-cols-5 gap-3 text-xs text-white/60">
+            <div className="mt-3 grid grid-cols-2 md:grid-cols-5 gap-3 text-xs text-gray-600">
               <div className="flex flex-col gap-0.5">
-                <span className="text-lg font-bold text-cyan-400">{weeklyDigest.processesThisWeek}</span>
+                <span className="text-lg font-bold text-primary-600">{weeklyDigest.processesThisWeek}</span>
                 <span>Creaste {weeklyDigest.processesThisWeek} procesos</span>
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-lg font-bold text-red-400">{weeklyDigest.totalRisks}</span>
+                <span className="text-lg font-bold text-red-600">{weeklyDigest.totalRisks}</span>
                 <span>Identificaste {weeklyDigest.totalRisks} riesgos</span>
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-lg font-bold text-emerald-400">{weeklyDigest.totalKpis}</span>
+                <span className="text-lg font-bold text-emerald-600">{weeklyDigest.totalKpis}</span>
                 <span>Definiste {weeklyDigest.totalKpis} KPIs</span>
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className={`text-lg font-bold ${weeklyDigest.scoreDelta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <span className={`text-lg font-bold ${weeklyDigest.scoreDelta >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                   {weeklyDigest.scoreDelta >= 0 ? '+' : ''}{weeklyDigest.scoreDelta}
                 </span>
                 <span>Tu score de madurez {weeklyDigest.scoreDelta >= 0 ? 'subio' : 'bajo'} {Math.abs(weeklyDigest.scoreDelta)} puntos</span>
@@ -364,7 +364,7 @@ export default function Dashboard() {
 
       {/* ═══ Row 1: Process Overview ═══ */}
       <div>
-        <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider mb-3">Procesos</h2>
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Procesos</h2>
         <div className={`grid grid-cols-2 gap-3 ${processLevelCount >= 3 ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
           <StatCard icon={Layers}    color="cyan"    label={getLevelName(1)}   value={stats.macroCount}    prevValue={prevSnapshot?.macroCount} />
           <StatCard icon={BarChart3} color="blue"    label={getLevelName(2)}   value={stats.depth1Count}   prevValue={prevSnapshot?.depth1Count} />
@@ -382,7 +382,7 @@ export default function Dashboard() {
 
       {/* ═══ Row 2: Risks & Controls ═══ */}
       <div>
-        <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider mb-3">Riesgos y Controles</h2>
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Riesgos y Controles</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard icon={ShieldAlert} color="red" label="Riesgos Identificados" value={stats.totalRisks}
             badge={stats.highRisks > 0 ? `${stats.highRisks} alto/extremo` : undefined}
@@ -405,7 +405,7 @@ export default function Dashboard() {
 
       {/* ═══ Row 3: Value Analysis ═══ */}
       <div>
-        <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider mb-3">Analisis de Valor</h2>
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Analisis de Valor</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard icon={Activity} color="emerald" label="Actividades VA" value={stats.vaCount} />
           <StatCard icon={Zap} color="red" label="Actividades NVA" value={stats.nvaCount}
@@ -413,17 +413,17 @@ export default function Dashboard() {
             badgeColor="red"
           />
           <StatCard icon={AlertTriangle} color="amber" label="Actividades NVABN" value={stats.nvabnCount} />
-          <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-4 hover:border-emerald-500/20 transition-colors">
+          <div className="bg-gray-50 rounded-lg border border-gray-100 p-4 hover:border-emerald-200 transition-colors">
             <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 bg-emerald-500/10 rounded-lg ring-1 ring-emerald-500/20">
-                <TrendingUp className="text-emerald-400" size={16} />
+              <div className="p-2 bg-emerald-50 rounded-lg ring-1 ring-emerald-500">
+                <TrendingUp className="text-emerald-600" size={16} />
               </div>
-              <span className="text-xs text-white/40">Eficiencia VA</span>
+              <span className="text-xs text-gray-500">Eficiencia VA</span>
             </div>
-            <p className="text-2xl font-bold text-emerald-400">{stats.vaEfficiency}%</p>
-            <div className="mt-2 h-1.5 rounded-full bg-white/5 overflow-hidden">
+            <p className="text-2xl font-bold text-emerald-600">{stats.vaEfficiency}%</p>
+            <div className="mt-2 h-1.5 rounded-full bg-gray-50 overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all"
+                className="h-full rounded-full transition-all bg-primary-500"
                 style={{ width: `${Math.min(stats.vaEfficiency, 100)}%` }}
               />
             </div>
@@ -433,7 +433,7 @@ export default function Dashboard() {
 
       {/* ═══ Row 4: Mejoras ═══ */}
       <div>
-        <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider mb-3">Mejoras</h2>
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Mejoras</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard icon={Lightbulb} color="amber" label="Oportunidades" value={improvementStats.total} />
           <StatCard icon={Zap} color="emerald" label="Quick wins" value={improvementStats.quickWins} />
@@ -445,29 +445,29 @@ export default function Dashboard() {
       {/* ═══ Row 5: Coverage Matrix ═══ */}
       <div>
         <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-          <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider">Cobertura por Proceso</h2>
-          <div className="flex items-center gap-1.5 bg-white/[0.03] rounded-lg border border-white/10 px-2.5 py-1.5 w-full max-w-[260px]">
-            <Search size={13} className="text-white/25 shrink-0" />
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Cobertura por Proceso</h2>
+          <div className="flex items-center gap-1.5 bg-gray-50 rounded-lg border border-gray-200 px-2.5 py-1.5 w-full max-w-[260px]">
+            <Search size={13} className="text-gray-400 shrink-0" />
             <input type="text" value={coverageQuery} onChange={(e) => setCoverageQuery(e.target.value)}
               placeholder={`Buscar ${coverageLabel.toLowerCase()}…`}
-              className="bg-transparent text-xs text-white placeholder-white/25 outline-none flex-1 min-w-0" />
-            {coverageQuery && <button onClick={() => setCoverageQuery('')} className="text-white/25 hover:text-white/60 shrink-0"><X size={12} /></button>}
+              className="bg-transparent text-xs text-gray-900 placeholder-gray-400 outline-none flex-1 min-w-0" />
+            {coverageQuery && <button onClick={() => setCoverageQuery('')} className="text-gray-400 hover:text-gray-600 shrink-0"><X size={12} /></button>}
           </div>
         </div>
         {/* `overflow-x-auto`, no `overflow-hidden`: son 8 columnas de datos y antes se
             aplastaban dentro de un contenedor que ademas impedia desplazarlas. */}
-        <div className="bg-white/[0.03] rounded-2xl border border-white/5 overflow-x-auto">
+        <div className="bg-gray-50 rounded-lg border border-gray-100 overflow-x-auto">
           <div className="min-w-[860px]">
-          <div className="grid grid-cols-10 gap-px bg-white/5 text-[10px] text-white/30 uppercase">
-            <div className="bg-[#0a0f1a] px-3 py-2 col-span-2">{coverageLabel}</div>
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center">BPMN</div>
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center">Procedimiento</div>
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center">KPIs</div>
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center">Riesgos</div>
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center">Auditoria</div>
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center">Valor</div>
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center">Mejoras</div>
-            <div className="bg-[#0a0f1a] px-3 py-2 text-center">Madurez</div>
+          <div className="grid grid-cols-10 gap-px bg-gray-50 text-[10px] text-gray-400 uppercase">
+            <div className="bg-white px-3 py-2 col-span-2">{coverageLabel}</div>
+            <div className="bg-white px-3 py-2 text-center">BPMN</div>
+            <div className="bg-white px-3 py-2 text-center">Procedimiento</div>
+            <div className="bg-white px-3 py-2 text-center">KPIs</div>
+            <div className="bg-white px-3 py-2 text-center">Riesgos</div>
+            <div className="bg-white px-3 py-2 text-center">Auditoria</div>
+            <div className="bg-white px-3 py-2 text-center">Valor</div>
+            <div className="bg-white px-3 py-2 text-center">Mejoras</div>
+            <div className="bg-white px-3 py-2 text-center">Madurez</div>
           </div>
           <div className={coverageExpanded || coverageQuery.trim() ? 'max-h-[480px] overflow-y-auto' : ''}>
           {coverageVisible.map((p) => {
@@ -498,11 +498,11 @@ export default function Dashboard() {
               <Fila
                 key={p.id}
                 {...(propsDeFila as { to: string })}
-                className={`grid grid-cols-10 gap-px bg-white/5 transition-colors group ${
-                  sinCupo ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/[0.08]'
+                className={`grid grid-cols-10 gap-px bg-gray-50 transition-colors group ${
+                  sinCupo ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
                 }`}
               >
-                <div className="bg-[#0a0f1a] px-3 py-2 col-span-2 text-[11px] text-white/70 group-hover:text-cyan-400 truncate transition-colors">
+                <div className="bg-white px-3 py-2 col-span-2 text-[11px] text-gray-700 group-hover:text-primary-600 truncate transition-colors">
                   {p.name}
                 </div>
                 <CoverageCell active={hasBpmn} />
@@ -512,30 +512,30 @@ export default function Dashboard() {
                 <CoverageCell active={auditCount > 0} count={auditCount} />
                 <CoverageCell active={valueCount > 0} count={valueCount} />
                 <CoverageCell active={improvementCount > 0} count={improvementCount} />
-                <div className="bg-[#0a0f1a] px-3 py-2 flex items-center justify-center gap-1">
+                <div className="bg-white px-3 py-2 flex items-center justify-center gap-1">
                   <span className={`w-2 h-2 rounded-full ${
-                    (health?.score ?? 0) >= 67 ? 'bg-emerald-400' :
-                    (health?.score ?? 0) >= 33 ? 'bg-amber-400' :
-                    'bg-red-400'
+                    (health?.score ?? 0) >= 67 ? 'bg-emerald-500' :
+                    (health?.score ?? 0) >= 33 ? 'bg-amber-500' :
+                    'bg-red-500'
                   }`} />
                   <span className={`text-[10px] ${
-                    (health?.score ?? 0) >= 67 ? 'text-emerald-400/70' :
-                    (health?.score ?? 0) >= 33 ? 'text-amber-400/70' :
-                    'text-red-400/70'
+                    (health?.score ?? 0) >= 67 ? 'text-emerald-600' :
+                    (health?.score ?? 0) >= 33 ? 'text-amber-600' :
+                    'text-red-600'
                   }`}>{health?.score ?? 0}%</span>
                 </div>
               </Fila>
             )
           })}
           {coverageQuery.trim() && coverageFiltered.length === 0 && (
-            <div className="bg-[#0a0f1a] px-3 py-4 text-center text-[11px] text-white/30">
+            <div className="bg-white px-3 py-4 text-center text-[11px] text-gray-400">
               Ningún {coverageLabel.toLowerCase()} coincide con «{coverageQuery.trim()}».
             </div>
           )}
           </div>
           {!coverageQuery.trim() && documentableProcesses.length > 10 && (
             <button onClick={() => setCoverageExpanded((v) => !v)}
-              className="w-full bg-[#0a0f1a] px-3 py-2 text-center text-[11px] text-cyan-300/80 hover:text-cyan-200 inline-flex items-center justify-center gap-1.5 transition-colors">
+              className="w-full bg-white px-3 py-2 text-center text-[11px] text-primary-700 hover:text-primary-700 inline-flex items-center justify-center gap-1.5 transition-colors">
               {coverageExpanded
                 ? (<><ChevronUp size={13} /> Ver menos</>)
                 : (<><ChevronDown size={13} /> Ver todos ({documentableProcesses.length})</>)}
@@ -544,7 +544,7 @@ export default function Dashboard() {
           </div>
           {/* El estado vacio queda FUERA del `min-w`: no tiene columnas que desplazar */}
           {documentableProcesses.length === 0 && (
-            <div className="bg-[#0a0f1a]">
+            <div className="bg-white">
               <EmptyState
                 icon={Layers}
                 title={processes.length > 0 ? `Sin ${coverageLabel.toLowerCase()}s` : 'Sin procesos'}
@@ -566,25 +566,25 @@ export default function Dashboard() {
 
       {/* ═══ Quick Links ═══ */}
       <div>
-        <h2 className="text-xs font-semibold text-white/30 uppercase tracking-wider mb-3">Accesos rapidos</h2>
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Accesos rapidos</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {quickLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
-              className="group bg-white/[0.03] rounded-2xl border border-white/5 p-4 hover:border-cyan-500/20 hover:bg-white/[0.05] transition-all"
+              className="group bg-gray-50 rounded-lg border border-gray-100 p-4 hover:border-primary-200 hover:bg-gray-50 transition-all"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-cyan-500/10 rounded-lg ring-1 ring-cyan-500/20 group-hover:ring-cyan-500/40 transition-all">
-                    <link.icon className="text-cyan-400" size={16} />
+                  <div className="p-2 bg-primary-50 rounded-lg ring-1 ring-primary-500 group-hover:ring-primary-500 transition-all">
+                    <link.icon className="text-primary-600" size={16} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-white">{link.label}</h3>
-                    <p className="text-[10px] text-white/30">{link.description}</p>
+                    <h3 className="text-sm font-medium text-gray-900">{link.label}</h3>
+                    <p className="text-[10px] text-gray-400">{link.description}</p>
                   </div>
                 </div>
-                <ArrowRight size={14} className="text-white/10 group-hover:text-cyan-400/50 transition-colors" />
+                <ArrowRight size={14} className="text-gray-300 group-hover:text-primary-600 transition-colors" />
               </div>
             </Link>
           ))}
@@ -597,13 +597,13 @@ export default function Dashboard() {
 // ── Sub-components ──
 
 const COLOR_MAP: Record<string, { bg: string; ring: string; text: string; hoverBorder: string }> = {
-  cyan:    { bg: 'bg-cyan-500/10',    ring: 'ring-cyan-500/20',    text: 'text-cyan-400',    hoverBorder: 'hover:border-cyan-500/20' },
-  blue:    { bg: 'bg-blue-500/10',    ring: 'ring-blue-500/20',    text: 'text-blue-400',    hoverBorder: 'hover:border-blue-500/20' },
-  purple:  { bg: 'bg-purple-500/10',  ring: 'ring-purple-500/20',  text: 'text-purple-400',  hoverBorder: 'hover:border-purple-500/20' },
-  emerald: { bg: 'bg-emerald-500/10', ring: 'ring-emerald-500/20', text: 'text-emerald-400', hoverBorder: 'hover:border-emerald-500/20' },
-  red:     { bg: 'bg-red-500/10',     ring: 'ring-red-500/20',     text: 'text-red-400',     hoverBorder: 'hover:border-red-500/20' },
-  amber:   { bg: 'bg-amber-500/10',   ring: 'ring-amber-500/20',   text: 'text-amber-400',   hoverBorder: 'hover:border-amber-500/20' },
-  violet:  { bg: 'bg-violet-500/10',  ring: 'ring-violet-500/20',  text: 'text-violet-400', hoverBorder: 'hover:border-violet-500/20' },
+  cyan:    { bg: 'bg-primary-50',    ring: 'ring-primary-500',    text: 'text-primary-600',    hoverBorder: 'hover:border-primary-200' },
+  blue:    { bg: 'bg-blue-50',    ring: 'ring-blue-500',    text: 'text-blue-600',    hoverBorder: 'hover:border-blue-200' },
+  purple:  { bg: 'bg-primary-50',  ring: 'ring-primary-500',  text: 'text-primary-600',  hoverBorder: 'hover:border-primary-200' },
+  emerald: { bg: 'bg-emerald-50', ring: 'ring-emerald-500', text: 'text-emerald-600', hoverBorder: 'hover:border-emerald-200' },
+  red:     { bg: 'bg-red-50',     ring: 'ring-red-500',     text: 'text-red-600',     hoverBorder: 'hover:border-red-200' },
+  amber:   { bg: 'bg-amber-50',   ring: 'ring-amber-500',   text: 'text-amber-600',   hoverBorder: 'hover:border-amber-200' },
+  violet:  { bg: 'bg-primary-50',  ring: 'ring-primary-500',  text: 'text-primary-600', hoverBorder: 'hover:border-primary-200' },
 }
 
 function StatCard({ icon: Icon, color, label, value, badge, badgeColor, prevValue }: {
@@ -613,21 +613,21 @@ function StatCard({ icon: Icon, color, label, value, badge, badgeColor, prevValu
   const c = COLOR_MAP[color] || COLOR_MAP.cyan
   const diff = prevValue !== undefined ? value - prevValue : undefined
   return (
-    <div className={`bg-white/[0.03] rounded-2xl border border-white/5 p-4 ${c.hoverBorder} transition-colors`}>
+    <div className={`bg-gray-50 rounded-lg border border-gray-100 p-4 ${c.hoverBorder} transition-colors`}>
       <div className="flex items-center gap-2 mb-2">
         <div className={`p-2 ${c.bg} rounded-lg ring-1 ${c.ring}`}>
           <Icon className={c.text} size={16} />
         </div>
-        <span className="text-xs text-white/40">{label}</span>
+        <span className="text-xs text-gray-500">{label}</span>
       </div>
-      <p className="text-2xl font-bold text-white">{value}</p>
+      <p className="text-2xl font-bold text-gray-900">{value}</p>
       {diff !== undefined && diff !== 0 && (
-        <p className={`text-[9px] mt-0.5 ${diff > 0 ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
+        <p className={`text-[9px] mt-0.5 ${diff > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
           {diff > 0 ? `↑ ${diff}` : `↓ ${Math.abs(diff)}`}
         </p>
       )}
       {badge && (
-        <p className={`text-[9px] mt-1 ${badgeColor === 'red' ? 'text-red-400/70' : 'text-amber-400/70'}`}>
+        <p className={`text-[9px] mt-1 ${badgeColor === 'red' ? 'text-red-600' : 'text-amber-600'}`}>
           {badge}
         </p>
       )}
@@ -637,16 +637,16 @@ function StatCard({ icon: Icon, color, label, value, badge, badgeColor, prevValu
 
 function CoverageCell({ active, count }: { active: boolean; count?: number }) {
   return (
-    <div className="bg-[#0a0f1a] px-3 py-2 flex items-center justify-center">
+    <div className="bg-white px-3 py-2 flex items-center justify-center">
       {active ? (
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
           {count !== undefined && count > 0 && (
-            <span className="text-[10px] text-white/40">{count}</span>
+            <span className="text-[10px] text-gray-500">{count}</span>
           )}
         </span>
       ) : (
-        <span className="w-2 h-2 rounded-full bg-white/10" />
+        <span className="w-2 h-2 rounded-full bg-gray-100" />
       )}
     </div>
   )

@@ -94,7 +94,7 @@ export function UsersTab({ metrics, range, alerts, dismissedAlerts, dismissAlert
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 flex items-center justify-center text-white/30 text-sm mt-3">Sin datos de onboarding aún</div>
+            <div className="h-64 flex items-center justify-center text-gray-400 text-sm mt-3">Sin datos de onboarding aún</div>
           )}
         </Card>
       </div>
@@ -102,7 +102,7 @@ export function UsersTab({ metrics, range, alerts, dismissedAlerts, dismissAlert
       {/* Usuarios activos por día */}
       <Card>
         <SectionTitle>Usuarios activos por día (últimos {dauLabel} días)</SectionTitle>
-        <p className="text-[11px] text-white/30 mt-0.5 mb-3">Usuarios únicos que usaron IA en cada día</p>
+        <p className="text-[11px] text-gray-400 mt-0.5 mb-3">Usuarios únicos que usaron IA en cada día</p>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={metrics.dailyActiveUsers}>
@@ -125,7 +125,7 @@ export function UsersTab({ metrics, range, alerts, dismissedAlerts, dismissAlert
       {/* Registros por día */}
       <Card>
         <SectionTitle>Registros por día (nuevos usuarios)</SectionTitle>
-        <p className="text-[11px] text-white/30 mt-0.5 mb-3">Nuevas cuentas creadas cada día en el periodo</p>
+        <p className="text-[11px] text-gray-400 mt-0.5 mb-3">Nuevas cuentas creadas cada día en el periodo</p>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={metrics.registrationsByDay}>
@@ -145,16 +145,16 @@ export function UsersTab({ metrics, range, alerts, dismissedAlerts, dismissAlert
           <SectionTitle>Uso de IA (tokens totales en periodo)</SectionTitle>
           <div className="flex items-center gap-8 mt-3 flex-wrap">
             <div>
-              <p className="text-xs text-white/40 mb-1">Total tokens</p>
-              <p className="text-2xl font-bold text-white">{fmtNumber(metrics.aiUsage.reduce((s, a) => s + a.totalTokens, 0))}</p>
+              <p className="text-xs text-gray-500 mb-1">Total tokens</p>
+              <p className="text-2xl font-bold text-gray-900">{fmtNumber(metrics.aiUsage.reduce((s, a) => s + a.totalTokens, 0))}</p>
             </div>
             <div>
-              <p className="text-xs text-white/40 mb-1">Costo estimado</p>
-              <p className="text-2xl font-bold text-amber-400">${metrics.totalAiCostUsd.toFixed(2)} USD</p>
+              <p className="text-xs text-gray-500 mb-1">Costo estimado</p>
+              <p className="text-2xl font-bold text-amber-600">${metrics.totalAiCostUsd.toFixed(2)} USD</p>
             </div>
             <div>
-              <p className="text-xs text-white/40 mb-1">Usuarios que usaron IA</p>
-              <p className="text-2xl font-bold text-white">{fmtNumber(new Set(metrics.aiUsage.map(() => 0)).size || metrics.aiUsage.reduce((s, a) => s + (a.avgPerUser > 0 ? 1 : 0), 0))}</p>
+              <p className="text-xs text-gray-500 mb-1">Usuarios que usaron IA</p>
+              <p className="text-2xl font-bold text-gray-900">{fmtNumber(new Set(metrics.aiUsage.map(() => 0)).size || metrics.aiUsage.reduce((s, a) => s + (a.avgPerUser > 0 ? 1 : 0), 0))}</p>
             </div>
           </div>
         </Card>

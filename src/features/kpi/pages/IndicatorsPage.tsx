@@ -323,42 +323,42 @@ export default function IndicatorsPage() {
 
       {/* Error/Success */}
       {error && (
-        <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-          <AlertCircle size={20} className="text-red-400 shrink-0" />
-          <p className="text-sm text-red-400">{error}</p>
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+          <AlertCircle size={20} className="text-red-600 shrink-0" />
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-4 py-3">
-          <Sparkles size={20} className="text-cyan-400 shrink-0" />
-          <p className="text-sm text-cyan-400">{success}</p>
+        <div className="flex items-center gap-3 bg-primary-50 border border-primary-200 rounded-lg px-4 py-3">
+          <Sparkles size={20} className="text-primary-600 shrink-0" />
+          <p className="text-sm text-primary-600">{success}</p>
         </div>
       )}
 
       {/* Input section */}
-      <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Informacion del Proceso</h2>
+      <div className="bg-gray-50 rounded-lg border border-gray-100 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Informacion del Proceso</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-white/40 mb-1">Nombre del proceso *</label>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Nombre del proceso *</label>
             <input
               type="text"
               value={manualName}
               onChange={(e) => setManualName(e.target.value)}
               placeholder="Ej: Gestion de Reclamos"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
               disabled={hasProcessContext}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-white/40 mb-1">Descripcion (opcional)</label>
+            <label className="block text-sm font-medium text-gray-500 mb-1">Descripcion (opcional)</label>
             <input
               type="text"
               value={manualDescription}
               onChange={(e) => setManualDescription(e.target.value)}
               placeholder="Breve descripcion del proceso"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300"
               disabled={hasProcessContext}
             />
           </div>
@@ -366,13 +366,13 @@ export default function IndicatorsPage() {
 
         {/* File upload */}
         <div className="mt-4">
-          <label className="block text-sm font-medium text-white/40 mb-1">
+          <label className="block text-sm font-medium text-gray-500 mb-1">
             Subir diagrama de flujo (opcional)
           </label>
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-cyan-500/30 hover:bg-white/5 transition-colors">
-              <Upload size={18} className="text-white/40" />
-              <span className="text-sm text-white/40">
+            <label className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-gray-50 transition-colors">
+              <Upload size={18} className="text-gray-500" />
+              <span className="text-sm text-gray-500">
                 {uploadedFile ? uploadedFile.name : 'PDF, imagen o DOCX'}
               </span>
               <input
@@ -385,7 +385,7 @@ export default function IndicatorsPage() {
             {uploadedFile && (
               <button
                 onClick={() => setUploadedFile(null)}
-                className="text-sm text-red-400 hover:text-red-300"
+                className="text-sm text-red-600 hover:text-red-700"
               >
                 Quitar
               </button>
@@ -398,7 +398,7 @@ export default function IndicatorsPage() {
           <button
             onClick={handleGenerate}
             disabled={isGenerating || indicatorBudget.isConsuming || !manualName.trim()}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-medium hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-cyan-500/20"
+            className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg bg-primary-500 hover:bg-primary-600"
           >
             {(isGenerating || indicatorBudget.isConsuming) ? (
               <>
@@ -418,12 +418,12 @@ export default function IndicatorsPage() {
 
       {/* Indicators list */}
       {(allIndicators.length > 0 || loadingSaved) && (
-        <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">
+        <div className="bg-gray-50 rounded-lg border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-gray-900">
               Indicadores
               {allIndicators.length > 0 && (
-                <span className="ml-2 text-sm font-normal text-white/40">({allIndicators.length})</span>
+                <span className="ml-2 text-sm font-normal text-gray-500">({allIndicators.length})</span>
               )}
             </h2>
 
@@ -431,7 +431,7 @@ export default function IndicatorsPage() {
               {generatedIndicators.length > 0 && selectedIds.size > 0 && (
                 <button
                   onClick={handleDeleteSelected}
-                  className="flex items-center gap-1.5 px-3 py-2 border border-red-500/30 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 border border-red-300 rounded-lg text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
                   <Trash2 size={16} />
                   Eliminar ({selectedIds.size})
@@ -441,7 +441,7 @@ export default function IndicatorsPage() {
               <button
                 onClick={handleExportExcel}
                 disabled={selectedIds.size === 0}
-                className="flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white/60 hover:bg-white/10 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
               >
                 <Download size={16} />
                 Exportar Excel
@@ -451,7 +451,7 @@ export default function IndicatorsPage() {
                 <button
                   onClick={handleSaveSelected}
                   disabled={isSaving || selectedIds.size === 0}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-cyan-500 hover:to-blue-500 disabled:opacity-50 transition-colors shadow-lg shadow-cyan-500/20"
+                  className="flex items-center gap-1.5 px-4 py-2 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors shadow-lg bg-primary-500 hover:bg-primary-600"
                 >
                   {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                   Guardar seleccionados
@@ -462,7 +462,7 @@ export default function IndicatorsPage() {
 
           {loadingSaved ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 size={32} className="animate-spin text-cyan-400" />
+              <Loader2 size={32} className="animate-spin text-primary-600" />
             </div>
           ) : (
             <IndicatorsList
@@ -479,7 +479,7 @@ export default function IndicatorsPage() {
 
       {/* Empty state */}
       {allIndicators.length === 0 && !loadingSaved && !isGenerating && (
-        <div className="bg-white/[0.03] rounded-2xl border border-white/5">
+        <div className="bg-gray-50 rounded-lg border border-gray-100">
           <EmptyState
             icon={TrendingUp}
             title="Define KPIs para medir tus procesos"

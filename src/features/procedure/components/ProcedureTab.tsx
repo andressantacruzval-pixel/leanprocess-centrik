@@ -325,13 +325,13 @@ export function ProcedureTab({
   return (
     <div className={`flex flex-col gap-3 ${isExpanded ? 'max-w-3xl mx-auto px-6 py-4' : ''}`}>
       {/* ─── Document Toolbar ─── */}
-      <div className="flex items-center justify-between sticky top-0 z-10 bg-[#0a0f1a] py-2 -mx-4 px-4 border-b border-white/5">
+      <div className="flex items-center justify-between sticky top-0 z-10 bg-white py-2 -mx-4 px-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleRegenerate}
             disabled={generating || bpmnBudget.isConsuming || contextBudget.isConsuming}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 text-[11px] font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200 text-[11px] font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {(generating || bpmnBudget.isConsuming || contextBudget.isConsuming) ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCcw className="w-3 h-3" />}
             {(generating || bpmnBudget.isConsuming || contextBudget.isConsuming) ? 'Generando...' : 'Regenerar'}
@@ -339,7 +339,7 @@ export function ProcedureTab({
           </button>
           <button
             onClick={handleExportWord}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70 border border-white/10 text-[11px] font-medium transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 border border-gray-200 text-[11px] font-medium transition-colors"
           >
             <Download className="w-3 h-3" />
             Word
@@ -347,8 +347,8 @@ export function ProcedureTab({
         </div>
         {generating && (
           <div className="flex items-center gap-2">
-            <Loader2 className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
-            <span className="text-[11px] text-cyan-400 animate-pulse">{loadingMessage}</span>
+            <Loader2 className="w-3.5 h-3.5 text-primary-600 animate-spin" />
+            <span className="text-[11px] text-primary-600 animate-pulse">{loadingMessage}</span>
           </div>
         )}
       </div>
@@ -363,66 +363,66 @@ export function ProcedureTab({
         }}
       >
         {/* ─── Document Header Bar (blue stripe) ─── */}
-        <div className="bg-[#2563EB] px-4 sm:px-10 py-6">
+        <div className="bg-primary-500 px-4 sm:px-10 py-6">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-blue-200 text-[10px] uppercase tracking-[0.2em] font-semibold mb-1">
+              <p className="text-blue-700 text-[10px] uppercase tracking-[0.2em] font-semibold mb-1">
                 Procedimiento Operativo Estandar
               </p>
               <EditableText
                 value={data.titulo}
                 onChange={v => update({ titulo: v })}
-                className="text-white text-xl font-bold leading-tight"
+                className="text-gray-900 text-xl font-bold leading-tight"
                 placeholder="Titulo del procedimiento"
               />
             </div>
             <div className="text-right shrink-0 ml-6">
-              <p className="text-blue-200 text-[10px] uppercase tracking-wider mb-1">{companyName}</p>
+              <p className="text-blue-700 text-[10px] uppercase tracking-wider mb-1">{companyName}</p>
               <EditableText
                 value={data.codigo}
                 onChange={v => update({ codigo: v })}
-                className="text-white text-sm font-mono font-semibold"
+                className="text-gray-900 text-sm font-mono font-semibold"
                 placeholder="PROC-000"
               />
             </div>
           </div>
 
           {/* Meta strip */}
-          <div className="flex items-center gap-6 mt-4 pt-3 border-t border-blue-400/30">
+          <div className="flex items-center gap-6 mt-4 pt-3 border-t border-blue-300">
             <div>
-              <p className="text-blue-300 text-[9px] uppercase tracking-wider">Version</p>
+              <p className="text-blue-700 text-[9px] uppercase tracking-wider">Version</p>
               {/* La version del documento es la del PROCESO y solo la mueve «Aprobar y
                   publicar». Antes habia aqui un campo suelto que nadie tocaba: acabo con
                   73 de 74 procedimientos congelados en 1.0 mientras el Word decia lo mismo. */}
               <p
-                className="text-white text-xs font-semibold"
+                className="text-gray-900 text-xs font-semibold"
                 title="Sube al aprobar y publicar el proceso"
               >
                 {processVersion}
               </p>
             </div>
             <div>
-              <p className="text-blue-300 text-[9px] uppercase tracking-wider">Fecha</p>
+              <p className="text-blue-700 text-[9px] uppercase tracking-wider">Fecha</p>
               <EditableText
                 value={data.fecha}
                 onChange={v => update({ fecha: v })}
-                className="text-white text-xs font-semibold"
+                className="text-gray-900 text-xs font-semibold"
                 placeholder="2026-01-01"
               />
             </div>
             <div>
-              <p className="text-blue-300 text-[9px] uppercase tracking-wider">Macroproceso</p>
-              <p className="text-white text-xs font-semibold">{macroprocessName}</p>
+              <p className="text-blue-700 text-[9px] uppercase tracking-wider">Macroproceso</p>
+              <p className="text-gray-900 text-xs font-semibold">{macroprocessName}</p>
             </div>
             <div>
-              <p className="text-blue-300 text-[9px] uppercase tracking-wider">Proceso</p>
-              <p className="text-white text-xs font-semibold">{processName}</p>
+              <p className="text-blue-700 text-[9px] uppercase tracking-wider">Proceso</p>
+              <p className="text-gray-900 text-xs font-semibold">{processName}</p>
             </div>
           </div>
         </div>
 
         {/* ─── Document Body ─── */}
-        <div className="px-4 sm:px-10 py-8 text-gray-800 text-[13px] leading-relaxed space-y-8">
+        <div className="px-4 sm:px-10 py-8 text-gray-900 text-[13px] leading-relaxed space-y-8">
 
           {/* ══ 1. INTRODUCCION ══ */}
           <DocSection number="1" title="Introduccion" field="introduccion" improvingField={improvingField} onImprove={() => handleImproveText('introduccion', 'Introduccion')}>
@@ -440,7 +440,7 @@ export function ProcedureTab({
             <div className="mb-4">
               <p className="text-gray-500 text-[10px] uppercase tracking-wider font-semibold mb-1">
                 Objetivo General
-                <span className="ml-1.5 text-[9px] normal-case tracking-normal text-blue-500/70" title="Es el mismo objetivo de la caracterización; editarlo aquí lo actualiza allá y viceversa.">· vinculado a la caracterización</span>
+                <span className="ml-1.5 text-[9px] normal-case tracking-normal text-blue-600" title="Es el mismo objetivo de la caracterización; editarlo aquí lo actualiza allá y viceversa.">· vinculado a la caracterización</span>
               </p>
               {/* Fuente única: process.description. Editar aquí escribe en el proceso
                   (bidireccional) y refleja el jsonb para el export. */}
@@ -466,7 +466,7 @@ export function ProcedureTab({
                         className="text-gray-700 text-[13px] flex-1"
                         placeholder="Objetivo especifico..."
                       />
-                      <button onClick={() => removeObjective(i)} title="Eliminar objetivo" className={`text-red-400 hover:text-red-600 shrink-0 p-2 -m-1 ${ACCIONES_AL_PASAR}`}>
+                      <button onClick={() => removeObjective(i)} title="Eliminar objetivo" className={`text-red-600 hover:text-red-600 shrink-0 p-2 -m-1 ${ACCIONES_AL_PASAR}`}>
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </li>
@@ -474,7 +474,7 @@ export function ProcedureTab({
                 </ol>
               </div>
             )}
-            <button onClick={addObjective} className="mt-2 flex items-center gap-1 text-[11px] text-blue-500 hover:text-blue-700 font-medium">
+            <button onClick={addObjective} className="mt-2 flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium">
               <Plus className="w-3 h-3" /> Agregar objetivo especifico
             </button>
           </DocSection>
@@ -497,19 +497,19 @@ export function ProcedureTab({
                 <table className="w-full min-w-[520px] border-collapse">
                 <thead>
                   <tr>
-                    <th className="bg-[#DC2626] text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Proveedores</th>
-                    <th className="bg-[#1F2937] text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Entradas</th>
-                    <th className="bg-[#0D9488] text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Salidas</th>
-                    <th className="bg-[#2563EB] text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Clientes</th>
+                    <th className="bg-red-500 text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Proveedores</th>
+                    <th className="bg-white text-gray-900 text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Entradas</th>
+                    <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Salidas</th>
+                    <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-center border border-gray-300">Clientes</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sipocRows.map((entry, i) => (
                     <tr key={i}>
-                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 bg-red-50/30">{entry.supplier_name || '-'}</td>
+                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 bg-red-100">{entry.supplier_name || '-'}</td>
                       <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700">{entry.input_description || '-'}</td>
-                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 bg-teal-50/30">{entry.output_description || '-'}</td>
-                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 bg-blue-50/30">{entry.customer_name || '-'}</td>
+                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 bg-primary-100">{entry.output_description || '-'}</td>
+                      <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 bg-blue-100">{entry.customer_name || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -526,9 +526,9 @@ export function ProcedureTab({
               <table className="w-full min-w-[420px] border-collapse mb-2">
               <thead>
                 <tr>
-                  <th className="bg-[#2563EB] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300 w-1/3">Termino</th>
-                  <th className="bg-[#2563EB] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Definicion</th>
-                  <th className="bg-[#2563EB] border border-gray-300 w-7"></th>
+                  <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300 w-1/3">Termino</th>
+                  <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Definicion</th>
+                  <th className="bg-primary-500 border border-gray-300 w-7"></th>
                 </tr>
               </thead>
               <tbody>
@@ -541,7 +541,7 @@ export function ProcedureTab({
                       <EditableText value={item.definicion} onChange={v => updateGlossaryItem(i, { definicion: v })} className="text-gray-700 text-[12px]" placeholder="Definicion..." />
                     </td>
                     <td className="border border-gray-200 px-1 text-center">
-                      <button onClick={() => removeGlossaryItem(i)} title="Eliminar termino" className={`text-red-400 hover:text-red-600 shrink-0 p-2 -m-1 ${ACCIONES_AL_PASAR}`}><Trash2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => removeGlossaryItem(i)} title="Eliminar termino" className={`text-red-600 hover:text-red-600 shrink-0 p-2 -m-1 ${ACCIONES_AL_PASAR}`}><Trash2 className="w-3.5 h-3.5" /></button>
                     </td>
                   </tr>
                 ))}
@@ -551,7 +551,7 @@ export function ProcedureTab({
               </tbody>
               </table>
             </div>
-            <button onClick={addGlossaryItem} className="flex items-center gap-1 text-[11px] text-blue-500 hover:text-blue-700 font-medium">
+            <button onClick={addGlossaryItem} className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium">
               <Plus className="w-3 h-3" /> Agregar termino
             </button>
           </DocSection>
@@ -574,16 +574,16 @@ export function ProcedureTab({
                 <table className="w-full min-w-[560px] border-collapse">
                 <thead>
                   <tr>
-                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Indicador</th>
-                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Formula</th>
-                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Meta</th>
-                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Frecuencia</th>
-                    <th className="bg-[#059669] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Responsable</th>
+                    <th className="bg-primary-600 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Indicador</th>
+                    <th className="bg-primary-600 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Formula</th>
+                    <th className="bg-primary-600 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Meta</th>
+                    <th className="bg-primary-600 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Frecuencia</th>
+                    <th className="bg-primary-600 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Responsable</th>
                   </tr>
                 </thead>
                 <tbody>
                   {processIndicators.map((ind, i) => (
-                    <tr key={ind.id} className={i % 2 === 0 ? 'bg-emerald-50/30' : ''}>
+                    <tr key={ind.id} className={i % 2 === 0 ? 'bg-emerald-100' : ''}>
                       <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 font-medium">{ind.name || '-'}</td>
                       <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700">{ind.formula || '-'}</td>
                       <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 text-center">{[ind.target_value, ind.unit].filter(Boolean).join(' ') || '-'}</td>
@@ -606,33 +606,33 @@ export function ProcedureTab({
                 <table className="w-full min-w-[520px] border-collapse">
                 <thead>
                   <tr>
-                    <th className="bg-[#DC2626] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Actividad</th>
-                    <th className="bg-[#DC2626] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Riesgo</th>
-                    <th className="bg-[#DC2626] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Nivel</th>
-                    <th className="bg-[#0D9488] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Controles</th>
+                    <th className="bg-red-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Actividad</th>
+                    <th className="bg-red-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Riesgo</th>
+                    <th className="bg-red-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Nivel</th>
+                    <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Controles</th>
                   </tr>
                 </thead>
                 <tbody>
                   {processRisks.map((risk, i) => {
                     const level = getRiskLevel(risk.inherentProbability, risk.inherentImpact)
                     return (
-                      <tr key={risk.id} className={i % 2 === 0 ? 'bg-red-50/30' : ''}>
+                      <tr key={risk.id} className={i % 2 === 0 ? 'bg-red-100' : ''}>
                         <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700">{risk.processStep || '-'}</td>
                         <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700">
                           <span className="font-medium">{risk.title}</span>
                           {risk.description && <p className="text-[10px] text-gray-400 mt-0.5">{risk.description}</p>}
                         </td>
                         <td className="border border-gray-200 px-3 py-1.5 text-center">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded text-white ${level.color}`}>{level.label}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md text-gray-900 ${level.color}`}>{level.label}</span>
                         </td>
-                        <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 bg-teal-50/20">
+                        <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 bg-primary-100">
                           {risk.controls.length > 0 ? (
                             <ul className="space-y-1">
                               {risk.controls.map((c) => {
                                 const { effectiveness } = computeControlScore(c)
                                 return (
                                   <li key={c.id} className="flex items-center gap-1.5">
-                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${EFFECTIVENESS_COLORS[effectiveness]}`}>{effectiveness}</span>
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${EFFECTIVENESS_COLORS[effectiveness]}`}>{effectiveness}</span>
                                     <span className="text-[11px]">{c.description || 'Sin descripcion'}</span>
                                   </li>
                                 )
@@ -660,16 +660,16 @@ export function ProcedureTab({
                 <table className="w-full min-w-[640px] border-collapse">
                 <thead>
                   <tr>
-                    <th className="bg-[#7C3AED] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Actividad</th>
-                    <th className="bg-[#7C3AED] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Que Auditar</th>
-                    <th className="bg-[#7C3AED] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Criterio</th>
-                    <th className="bg-[#7C3AED] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Evidencia</th>
-                    <th className="bg-[#7C3AED] text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Frecuencia</th>
+                    <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Actividad</th>
+                    <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Que Auditar</th>
+                    <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Criterio</th>
+                    <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Evidencia</th>
+                    <th className="bg-primary-500 text-white text-[11px] font-semibold px-3 py-2 text-left border border-gray-300">Frecuencia</th>
                   </tr>
                 </thead>
                 <tbody>
                   {auditItems.map((item, i) => (
-                    <tr key={i} className={i % 2 === 0 ? 'bg-violet-50/30' : ''}>
+                    <tr key={i} className={i % 2 === 0 ? 'bg-primary-100' : ''}>
                       <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700">{item.actividad}</td>
                       <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700 font-medium">{item.queAuditar}</td>
                       <td className="border border-gray-200 px-3 py-1.5 text-[12px] text-gray-700">{item.criterio}</td>

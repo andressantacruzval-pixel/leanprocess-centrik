@@ -238,8 +238,8 @@ export function ApplicationsReport() {
     return query ? cargoRows.filter((r) => r.app.name.toLowerCase().includes(query) || r.cargo.toLowerCase().includes(query) || r.activity.toLowerCase().includes(query)) : cargoRows
   }, [cargoRows, q])
   const cargoCols = useMemo<Column<CargoRow>[]>(() => [
-    { key: 'app', header: 'Aplicación', accessor: (r) => r.app.name, className: 'text-white font-medium max-w-[180px]', cell: (r) => <div className="truncate" title={r.app.name}>{r.app.name}</div> },
-    { key: 'cargo', header: 'Cargo', accessor: (r) => r.cargo, className: 'max-w-[160px]', cell: (r) => <div className="truncate text-violet-300" title={r.cargo}>{r.cargo}</div> },
+    { key: 'app', header: 'Aplicación', accessor: (r) => r.app.name, className: 'text-gray-900 font-medium max-w-[180px]', cell: (r) => <div className="truncate" title={r.app.name}>{r.app.name}</div> },
+    { key: 'cargo', header: 'Cargo', accessor: (r) => r.cargo, className: 'max-w-[160px]', cell: (r) => <div className="truncate text-primary-700" title={r.cargo}>{r.cargo}</div> },
     ...hierarchyColumns<CargoRow>(org, (r) => { const p = r.process; return { management: p?.management, coordination: p?.coordination, operative: p?.operative, ...resolveProcessHierarchy(p, macroMap, procById) } }),
     { key: 'act', header: 'Actividad', accessor: (r) => r.activity, className: 'max-w-[200px]', cell: (r) => <div className="truncate" title={r.activity}>{r.activity || '—'}</div> },
     { key: 'tdia', header: 'Min/día', accessor: (r) => Math.round(r.dailyMinutes), cell: (r) => r.dailyMinutes ? Math.round(r.dailyMinutes * 10) / 10 : '-' },
@@ -289,13 +289,13 @@ export function ApplicationsReport() {
 
   const columns = useMemo<Column<AppRow>[]>(() => [
     { key: 'code', header: 'Código', accessor: (r) => r.app.code || '' },
-    { key: 'name', header: 'Aplicación', accessor: (r) => r.app.name, className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.app.name}>{r.app.name}</div> },
+    { key: 'name', header: 'Aplicación', accessor: (r) => r.app.name, className: 'text-gray-900 font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.app.name}>{r.app.name}</div> },
     { key: 'cat', header: 'Categoría', accessor: (r) => r.app.category || '' },
     { key: 'own', header: 'Propiedad', accessor: (r) => ownLabel(r.app.ownership) },
     { key: 'dep', header: 'Despliegue', accessor: (r) => deployLabel(r.app.deployment) },
     { key: 'vendor', header: 'Proveedor', accessor: (r) => r.app.vendor || '' },
     { key: 'crit', header: 'Criticidad', accessor: (r) => r.app.criticality || 0 },
-    { key: 'api', header: 'API', accessor: (r) => (r.app.has_api ? 'Sí' : 'No'), cell: (r) => r.app.has_api ? <Badge label="API" hex="#10b981" /> : <span className="text-white/30">No</span> },
+    { key: 'api', header: 'API', accessor: (r) => (r.app.has_api ? 'Sí' : 'No'), cell: (r) => r.app.has_api ? <Badge label="API" hex="#10b981" /> : <span className="text-gray-400">No</span> },
     { key: 'risk', header: 'Riesgo tecnológico', accessor: (r) => r.risk.score, cell: (r) => <Badge label={r.risk.label} hex={r.risk.hex} /> },
     { key: 'nproc', header: '# Procesos', accessor: (r) => r.processNames.length },
     { key: 'procs', header: 'Procesos', accessor: (r) => r.processNames.join(', '), className: 'max-w-[220px]', cell: (r) => <div className="truncate" title={r.processNames.join(', ')}>{r.processNames.join(', ') || '-'}</div> },
@@ -305,7 +305,7 @@ export function ApplicationsReport() {
     { key: 'tmes', header: 'Min/mes', accessor: (r) => Math.round(scaleToPeriod(r.dailyMinutes, 'mes')), cell: (r) => r.dailyMinutes ? Math.round(scaleToPeriod(r.dailyMinutes, 'mes')) : '-' },
     { key: 'tanio', header: 'Hrs/año', accessor: (r) => Math.round(scaleToPeriod(r.dailyMinutes, 'año') / 60 * 10) / 10, cell: (r) => r.dailyMinutes ? Math.round(scaleToPeriod(r.dailyMinutes, 'año') / 60 * 10) / 10 : '-' },
     { key: 'status', header: 'Estado', accessor: (r) => r.app.status || '' },
-    { key: 'del', header: '', accessor: () => '', cell: (r) => <button onClick={() => delApp(r)} title="Eliminar del catálogo" className="p-1 rounded text-white/25 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button> },
+    { key: 'del', header: '', accessor: () => '', cell: (r) => <button onClick={() => delApp(r)} title="Eliminar del catálogo" className="p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50"><Trash2 size={13} /></button> },
   ], [delApp])
 
   return (
@@ -317,10 +317,10 @@ export function ApplicationsReport() {
         <Stat label="Riesgo tecnológico alto" value={highRisk} sub="crítico o alto" tone="red" />
       </Grid>
 
-      <div className="flex rounded-lg border border-white/10 overflow-hidden w-max flex-wrap">
-        <button onClick={() => setView('resumen')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'resumen' ? 'bg-cyan-500/20 text-cyan-200' : 'text-white/50 hover:bg-white/5'}`}><LayoutDashboard size={13} /> Resumen</button>
-        <button onClick={() => setView('actividades')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'actividades' ? 'bg-cyan-500/20 text-cyan-200' : 'text-white/50 hover:bg-white/5'}`}><ListTree size={13} /> Por aplicación / actividad</button>
-        <button onClick={() => setView('porCargo')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'porCargo' ? 'bg-cyan-500/20 text-cyan-200' : 'text-white/50 hover:bg-white/5'}`}><UserCog size={13} /> Por cargo</button>
+      <div className="flex rounded-lg border border-gray-200 overflow-hidden w-max flex-wrap">
+        <button onClick={() => setView('resumen')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'resumen' ? 'bg-primary-100 text-primary-700' : 'text-gray-500 hover:bg-gray-50'}`}><LayoutDashboard size={13} /> Resumen</button>
+        <button onClick={() => setView('actividades')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'actividades' ? 'bg-primary-100 text-primary-700' : 'text-gray-500 hover:bg-gray-50'}`}><ListTree size={13} /> Por aplicación / actividad</button>
+        <button onClick={() => setView('porCargo')} className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] ${view === 'porCargo' ? 'bg-primary-100 text-primary-700' : 'text-gray-500 hover:bg-gray-50'}`}><UserCog size={13} /> Por cargo</button>
       </div>
 
       {view === 'resumen' && (<>
@@ -343,16 +343,16 @@ export function ApplicationsReport() {
 
       <div className="flex items-center gap-2 px-1">
         <div className="relative">
-          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar aplicación…"
-            className="pl-7 pr-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11.5px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 w-52" />
+            className="pl-7 pr-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-[11.5px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 w-52" />
         </div>
         {pick && (
-          <button onClick={() => setPick(null)} className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md border border-cyan-500/40 text-cyan-200 bg-cyan-500/10 hover:bg-cyan-500/20">
-            {pick.v} <span className="text-cyan-300/70">✕</span>
+          <button onClick={() => setPick(null)} className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md border border-primary-300 text-primary-700 bg-primary-50 hover:bg-primary-100">
+            {pick.v} <span className="text-primary-700">✕</span>
           </button>
         )}
-        <span className="text-[10px] text-white/25">Tiempo total: {Math.round(totalMinutes)} min/día · {Math.round(scaleToPeriod(totalMinutes, 'mes'))} min/mes · {Math.round(scaleToPeriod(totalMinutes, 'año') / 60 * 10) / 10} hrs/año</span>
+        <span className="text-[10px] text-gray-400">Tiempo total: {Math.round(totalMinutes)} min/día · {Math.round(scaleToPeriod(totalMinutes, 'mes'))} min/mes · {Math.round(scaleToPeriod(totalMinutes, 'año') / 60 * 10) / 10} hrs/año</span>
       </div>
 
       <DataTable columns={columns} rows={shown} minWidth={2100} rowKey={(r) => r.app.id} />
@@ -361,24 +361,24 @@ export function ApplicationsReport() {
       {view === 'actividades' && (<>
       <div className="flex items-center gap-2 flex-wrap">
         <div className="relative flex-1 max-w-[240px]">
-          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/30" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar aplicación…" className="w-full pl-7 pr-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11.5px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50" />
+          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar aplicación…" className="w-full pl-7 pr-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-[11.5px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500" />
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <label className="inline-flex items-center gap-1.5 text-[11px] text-white/50">Periodo
-            <select value={period} onChange={(e) => setPeriod(e.target.value as CargoPeriod)} className="appearance-none bg-white/[0.03] border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white/80 outline-none cursor-pointer focus:ring-2 focus:ring-cyan-500/50">
+          <label className="inline-flex items-center gap-1.5 text-[11px] text-gray-500">Periodo
+            <select value={period} onChange={(e) => setPeriod(e.target.value as CargoPeriod)} className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[11px] text-gray-800 outline-none cursor-pointer focus:ring-2 focus:ring-primary-500">
               {PERIOD_OPTIONS.map((p) => <option key={p} value={p}>{PERIOD_LABELS[p]}</option>)}
             </select>
           </label>
-          <div className="inline-flex rounded-lg border border-white/10 p-0.5">
-            {(['min', 'h'] as const).map((u) => <button key={u} onClick={() => setUnit(u)} className={`px-2 py-1 rounded text-[11px] ${unit === u ? 'bg-cyan-500/20 text-cyan-300' : 'text-white/40 hover:text-white/70'}`}>{u === 'h' ? 'Horas' : 'Minutos'}</button>)}
+          <div className="inline-flex rounded-lg border border-gray-200 p-0.5">
+            {(['min', 'h'] as const).map((u) => <button key={u} onClick={() => setUnit(u)} className={`px-2 py-1 rounded-md text-[11px] ${unit === u ? 'bg-primary-100 text-primary-700' : 'text-gray-500 hover:text-gray-700'}`}>{u === 'h' ? 'Horas' : 'Minutos'}</button>)}
           </div>
         </div>
       </div>
 
       <TableWrap minWidth={1000}>
         <thead>
-          <tr className="bg-white/[0.03] border-b border-white/5">
+          <tr className="bg-gray-50 border-b border-gray-100">
             <Th> </Th><Th>Aplicación</Th><Th>Categoría</Th><Th>Propiedad</Th><Th>Riesgo</Th><Th>Procesos</Th><Th>Actividades</Th><Th>{unitLabel}</Th>
           </tr>
         </thead>
@@ -387,33 +387,33 @@ export function ApplicationsReport() {
             const dets = usagesByApp.get(r.app.id) ?? []
             const isOpen = open.has(r.app.id)
             return [
-              <tr key={r.app.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                <Td>{dets.length > 0 && <button onClick={() => toggleRow(r.app.id)} className="text-white/40 hover:text-white/80">{isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</button>}</Td>
-                <Td className="text-white font-medium"><span className="inline-flex items-center gap-1.5"><MonitorSmartphone size={12} className="text-sky-300 shrink-0" />{r.app.name}</span></Td>
-                <Td className="text-white/60">{r.app.category || '—'}</Td>
-                <Td className="text-white/60">{ownLabel(r.app.ownership)}</Td>
+              <tr key={r.app.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <Td>{dets.length > 0 && <button onClick={() => toggleRow(r.app.id)} className="text-gray-500 hover:text-gray-800">{isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</button>}</Td>
+                <Td className="text-gray-900 font-medium"><span className="inline-flex items-center gap-1.5"><MonitorSmartphone size={12} className="text-primary-700 shrink-0" />{r.app.name}</span></Td>
+                <Td className="text-gray-600">{r.app.category || '—'}</Td>
+                <Td className="text-gray-600">{ownLabel(r.app.ownership)}</Td>
                 <Td><Badge label={r.risk.label} hex={r.risk.hex} /></Td>
                 <Td className="tabular-nums">{r.processNames.length}</Td>
-                <Td className="tabular-nums text-white/85">{r.activities}</Td>
+                <Td className="tabular-nums text-gray-800">{r.activities}</Td>
                 <Td className="tabular-nums">{fmtT(r.dailyMinutes)}</Td>
               </tr>,
               isOpen && (
-                <tr key={r.app.id + '-d'} className="bg-black/20">
+                <tr key={r.app.id + '-d'} className="bg-gray-900/45">
                   <td colSpan={8} className="px-3 py-2">
-                    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5">
-                      <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-white/35 mb-1.5">
+                    <div className="rounded-lg border border-gray-100 bg-gray-50 p-2.5">
+                      <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-gray-400 mb-1.5">
                         <span>Actividades de «{r.app.name}» ({dets.length})</span><span>{unitLabel}</span>
                       </div>
-                      {dets.length === 0 ? <p className="text-[11px] text-white/30">Sin actividades ancladas (uso a nivel de proceso).</p> : (
+                      {dets.length === 0 ? <p className="text-[11px] text-gray-400">Sin actividades ancladas (uso a nivel de proceso).</p> : (
                         <div className="space-y-1">
                           {dets.map((d, i) => (
                             <div key={i} className="grid grid-cols-[1fr_auto] items-start gap-3 text-[11px]">
                               <span className="min-w-0">
-                                <span className="text-white/80">{d.activity || '(sin actividad)'}</span>
-                                {d.cargo && <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-300 align-middle">{d.cargo}</span>}
-                                <span className="block text-[10px] text-white/35 truncate" title={d.path}>{d.path}</span>
+                                <span className="text-gray-800">{d.activity || '(sin actividad)'}</span>
+                                {d.cargo && <span className="ml-1.5 text-[9px] px-1.5 py-0.5 rounded-md bg-primary-50 text-primary-700 align-middle">{d.cargo}</span>}
+                                <span className="block text-[10px] text-gray-400 truncate" title={d.path}>{d.path}</span>
                               </span>
-                              <span className="text-white/55 tabular-nums w-24 text-right">{fmtT(d.dailyMinutes)}</span>
+                              <span className="text-gray-600 tabular-nums w-24 text-right">{fmtT(d.dailyMinutes)}</span>
                             </div>
                           ))}
                         </div>
@@ -432,10 +432,10 @@ export function ApplicationsReport() {
       {view === 'porCargo' && (<>
       <div className="flex items-center gap-2 px-1">
         <div className="relative">
-          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/30" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar aplicación, cargo o actividad…" className="pl-7 pr-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11.5px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 w-64" />
+          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar aplicación, cargo o actividad…" className="pl-7 pr-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-[11.5px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 w-64" />
         </div>
-        <span className="text-[10px] text-white/25">Qué cargos usan cada aplicación (para levantar perfiles y necesidades).</span>
+        <span className="text-[10px] text-gray-400">Qué cargos usan cada aplicación (para levantar perfiles y necesidades).</span>
       </div>
       <DataTable columns={cargoCols} rows={cargoShown} minWidth={1700} rowKey={(r, i) => `${r.app.id}:${r.cargo}:${i}`} />
       </>)}

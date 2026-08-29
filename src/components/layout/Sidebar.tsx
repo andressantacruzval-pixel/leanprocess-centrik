@@ -74,14 +74,14 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-full flex flex-col w-64 bg-gradient-to-b from-[#0a0f1a] to-[#0d1420] border-r border-white/5 transition-all duration-300 z-40 lg:translate-x-0 ${
+      className={`fixed left-0 top-0 h-full flex flex-col w-64 border-r border-gray-100 transition-all duration-300 z-40 lg:translate-x-0 bg-white ${
         drawerOpen ? 'translate-x-0' : '-translate-x-full'
       } ${sidebarOpen ? 'lg:w-64' : 'lg:w-16'}`}
     >
       {/* Cabecera: solo el isotipo, centrado, en los dos estados. El nombre de marca
           salio de aqui — la barra ya dice de que producto es con el logo, y sin el
           texto el rail y el panel se leen igual, sin un salto de composicion. */}
-      <div className="relative flex items-center justify-center p-4 border-b border-white/5 shrink-0">
+      <div className="relative flex items-center justify-center p-4 border-b border-gray-100 shrink-0">
         <img
           src="/logo.png"
           alt="Lean Process"
@@ -93,7 +93,7 @@ export function Sidebar() {
         <button
           onClick={() => setDrawerOpen(false)}
           aria-label="Cerrar menu"
-          className="lg:hidden absolute right-2 p-2.5 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/70 transition-colors"
+          className="lg:hidden absolute right-2 p-2.5 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
         >
           <X size={18} />
         </button>
@@ -114,26 +114,25 @@ export function Sidebar() {
         aria-label={sidebarOpen ? 'Contraer barra lateral' : 'Expandir barra lateral'}
         title={sidebarOpen ? 'Contraer' : 'Expandir'}
         className="hidden lg:flex absolute -right-3 bottom-6 z-50 w-6 h-6 items-center justify-center rounded-full
-                   bg-[#111a28] border border-white/15 text-white/50 shadow-lg shadow-black/40
-                   hover:bg-[#16223a] hover:text-cyan-400 hover:border-cyan-500/40
-                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/60
-                   transition-colors"
+                   bg-white border border-gray-200 text-gray-500 shadow-lg hover:bg-surface-section
+                   hover:text-primary-600 hover:border-primary-300 focus-visible:outline-none focus-visible:ring-2
+                   focus-visible:ring-primary-500 transition-colors"
       >
         {sidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
       </button>
 
       {/* Workspace switcher */}
-      <div className="py-3 border-b border-white/5 shrink-0">
+      <div className="py-3 border-b border-gray-100 shrink-0">
         {IS_PHASE_1 ? (
           <div className={expandido ? 'px-3' : 'px-2'}>
-            <div className={`flex items-center py-2 rounded-xl bg-white/[0.03] border border-white/5 ${expandido ? 'gap-2 px-3' : 'justify-center'}`}>
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center ring-1 ring-cyan-500/30 shrink-0">
-                <Building2 size={14} className="text-cyan-400" />
+            <div className={`flex items-center py-2 rounded-lg bg-gray-50 border border-gray-100 ${expandido ? 'gap-2 px-3' : 'justify-center'}`}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center ring-1 ring-primary-500 shrink-0 bg-primary-500">
+                <Building2 size={14} className="text-primary-600" />
               </div>
               {expandido && (
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] uppercase tracking-wider text-white/30">Empresa</div>
-                  <div className="text-sm font-medium text-white/80 truncate">{activeCompanyName}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-gray-400">Empresa</div>
+                  <div className="text-sm font-medium text-gray-800 truncate">{activeCompanyName}</div>
                 </div>
               )}
             </div>
@@ -163,10 +162,10 @@ export function Sidebar() {
               // En el rail el titulo nativo sustituye al globo de antes: aquel vivia
               // fuera del ancho de la barra y ahora quedaria recortado.
               title={expandido ? undefined : item.label}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                 isActive
-                  ? 'bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm shadow-cyan-500/5'
-                  : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                  ? 'text-primary-600 border border-primary-200 shadow-sm bg-primary-500'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
               <item.icon size={20} className="shrink-0" />
@@ -179,10 +178,10 @@ export function Sidebar() {
           <Link
             to="/app/admin"
             title={expandido ? undefined : 'Admin'}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
               location.pathname === '/app/admin'
-                ? 'bg-gradient-to-r from-cyan-500/15 to-blue-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm shadow-cyan-500/5'
-                : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                ? 'text-primary-600 border border-primary-200 shadow-sm bg-primary-500'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
             <Shield size={20} className="shrink-0" />
@@ -199,7 +198,7 @@ export function Sidebar() {
           <button
             onClick={reopenOnboarding}
             title={expandido ? undefined : 'Guia de inicio'}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-white/20 hover:text-cyan-400 hover:bg-cyan-500/5 transition-all"
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-gray-300 hover:text-primary-600 hover:bg-primary-50 transition-all"
           >
             <GraduationCap size={18} className="shrink-0" />
             {expandido && <span className="text-[11px] font-medium truncate">Guia de inicio</span>}
@@ -209,14 +208,14 @@ export function Sidebar() {
         <a
           href={HUB_URL}
           title={expandido ? undefined : 'Salir'}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-white/20 hover:text-white/50 hover:bg-white/5 transition-all"
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-gray-300 hover:text-gray-500 hover:bg-gray-50 transition-all"
         >
           <LogOut size={18} className="shrink-0" />
           {expandido && <span className="text-[11px] font-medium truncate">Salir</span>}
         </a>
         {expandido && (
           <div className="text-center">
-            <p className="text-[10px] text-white/15 uppercase tracking-widest">Powered by AI</p>
+            <p className="text-[10px] text-gray-300 uppercase tracking-widest">Powered by AI</p>
           </div>
         )}
       </div>

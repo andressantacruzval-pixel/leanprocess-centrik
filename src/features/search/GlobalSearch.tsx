@@ -326,25 +326,25 @@ export function GlobalSearch() {
     <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-[10vh] sm:pt-[15vh]" onKeyDown={handleKeyDown}>
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+        className="absolute inset-0 bg-gray-900/45 animate-in fade-in duration-150"
         onClick={() => setOpen(false)}
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-xl max-h-[80vh] flex flex-col bg-[#0d1420] border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
+      <div className="relative w-full max-w-xl max-h-[80vh] flex flex-col bg-white border border-gray-200 rounded-lg shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
         {/* Search input */}
-        <div className="shrink-0 flex items-center gap-3 px-4 border-b border-white/10">
-          <Search size={18} className="text-white/30 shrink-0" />
+        <div className="shrink-0 flex items-center gap-3 px-4 border-b border-gray-200">
+          <Search size={18} className="text-gray-400 shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar procesos, riesgos, indicadores..."
-            className="flex-1 h-12 bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
+            className="flex-1 h-12 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none"
           />
           {query && (
-            <button onClick={() => setQuery('')} className="p-1 rounded hover:bg-white/5 text-white/30 hover:text-white/60 transition-colors">
+            <button onClick={() => setQuery('')} className="p-1 rounded-md hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors">
               <X size={14} />
             </button>
           )}
@@ -353,10 +353,10 @@ export function GlobalSearch() {
         {/* Results */}
         <div ref={listRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
           {debouncedQuery.trim() && results.length === 0 && (
-            <div className="px-4 py-10 text-center text-sm text-white/30">No se encontraron resultados</div>
+            <div className="px-4 py-10 text-center text-sm text-gray-400">No se encontraron resultados</div>
           )}
           {!debouncedQuery.trim() && results.length === 0 && (
-            <div className="px-4 py-10 text-center text-sm text-white/30">Escribe para buscar o navega con acciones rapidas</div>
+            <div className="px-4 py-10 text-center text-sm text-gray-400">Escribe para buscar o navega con acciones rapidas</div>
           )}
 
           {Array.from(grouped.entries()).map(([category, items]) => {
@@ -365,7 +365,7 @@ export function GlobalSearch() {
               <div key={category}>
                 <div className="px-4 pt-3 pb-1.5 flex items-center gap-2">
                   <meta.icon size={12} className={meta.color} />
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-white/40">{category}</span>
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-gray-500">{category}</span>
                 </div>
                 {items.map(({ result, globalIdx }) => {
                   const isActive = globalIdx === activeIndex
@@ -377,21 +377,21 @@ export function GlobalSearch() {
                       onClick={() => goToResult(result)}
                       onMouseEnter={() => setActiveIndex(globalIdx)}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                        isActive ? 'bg-cyan-500/10 border-l-2 border-cyan-500/30' : 'border-l-2 border-transparent hover:bg-white/5'
+                        isActive ? 'bg-primary-50 border-l-2 border-primary-300' : 'border-l-2 border-transparent hover:bg-gray-50'
                       }`}
                     >
-                      <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${isActive ? 'bg-cyan-500/15' : 'bg-white/5'}`}>
-                        <Icon size={15} className={isActive ? 'text-cyan-400' : 'text-white/40'} />
+                      <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${isActive ? 'bg-primary-50' : 'bg-gray-50'}`}>
+                        <Icon size={15} className={isActive ? 'text-primary-600' : 'text-gray-500'} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-white/90 truncate">{result.title}</span>
+                          <span className="text-sm text-gray-800 truncate">{result.title}</span>
                           <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded-full ring-1 ${BADGE_COLORS[result.category]}`}>
                             {result.category}
                           </span>
                         </div>
                         {result.description && (
-                          <p className="text-xs text-white/30 truncate mt-0.5">{result.description}</p>
+                          <p className="text-xs text-gray-400 truncate mt-0.5">{result.description}</p>
                         )}
                       </div>
                     </button>
@@ -403,17 +403,17 @@ export function GlobalSearch() {
         </div>
 
         {/* Footer hints */}
-        <div className="hidden sm:flex shrink-0 px-4 py-2.5 border-t border-white/10 items-center gap-4 text-[11px] text-white/25">
+        <div className="hidden sm:flex shrink-0 px-4 py-2.5 border-t border-gray-200 items-center gap-4 text-[11px] text-gray-400">
           <span className="flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 font-mono text-[10px]">Esc</kbd>
+            <kbd className="px-1.5 py-0.5 rounded-md bg-gray-50 border border-gray-200 font-mono text-[10px]">Esc</kbd>
             para cerrar
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 font-mono text-[10px]">Enter</kbd>
+            <kbd className="px-1.5 py-0.5 rounded-md bg-gray-50 border border-gray-200 font-mono text-[10px]">Enter</kbd>
             para ir
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 font-mono text-[10px]">&uarr;&darr;</kbd>
+            <kbd className="px-1.5 py-0.5 rounded-md bg-gray-50 border border-gray-200 font-mono text-[10px]">&uarr;&darr;</kbd>
             para navegar
           </span>
         </div>

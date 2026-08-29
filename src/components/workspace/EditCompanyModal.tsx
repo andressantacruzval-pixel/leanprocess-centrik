@@ -55,22 +55,22 @@ export function EditCompanyModal({ open, company, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-lg max-h-[85vh] flex flex-col bg-[#0d1420] border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-gray-900/45 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg max-h-[85vh] flex flex-col bg-white border border-gray-200 rounded-lg shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-white/5">
+        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 ring-1 ring-cyan-500/30 flex items-center justify-center">
-              <Building2 size={16} className="text-cyan-400" />
+            <div className="w-9 h-9 rounded-lg ring-1 ring-primary-500 flex items-center justify-center bg-primary-500">
+              <Building2 size={16} className="text-primary-600" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white">Editar empresa</h2>
-              <p className="text-xs text-white/40">Actualiza los datos de la empresa</p>
+              <h2 className="text-base font-semibold text-gray-900">Editar empresa</h2>
+              <p className="text-xs text-gray-500">Actualiza los datos de la empresa</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/70 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X size={16} />
           </button>
@@ -84,7 +84,7 @@ export function EditCompanyModal({ open, company, onClose }: Props) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ej: Acme Corp"
-              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-500/40"
+              className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary-300"
             />
           </Field>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -123,29 +123,29 @@ export function EditCompanyModal({ open, company, onClose }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe brevemente a que se dedica tu empresa"
               rows={3}
-              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-500/40 resize-y field-sizing-content max-h-64"
+              className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary-300 resize-y field-sizing-content max-h-64"
             />
           </Field>
 
           {error && (
-            <div className="rounded-lg bg-red-500/10 border border-red-500/30 px-3 py-2 text-xs text-red-300">
+            <div className="rounded-lg bg-red-50 border border-red-300 px-3 py-2 text-xs text-red-700">
               {error}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 px-6 py-4 border-t border-white/5 flex flex-wrap items-center justify-end gap-2">
+        <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex flex-wrap items-center justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-white/60 hover:text-white/90 transition-colors"
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:opacity-50 text-white text-sm font-medium transition-all"
+            className="px-4 py-2 rounded-lg disabled:opacity-50 text-white text-sm font-medium transition-all bg-primary-500 hover:bg-primary-600"
           >
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </button>
@@ -158,7 +158,7 @@ export function EditCompanyModal({ open, company, onClose }: Props) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <div className="text-[11px] uppercase tracking-wider text-white/40 mb-1.5">{label}</div>
+      <div className="text-[11px] uppercase tracking-wider text-gray-500 mb-1.5">{label}</div>
       {children}
     </label>
   )

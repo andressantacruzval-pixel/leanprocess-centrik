@@ -11,9 +11,9 @@ interface Props {
 }
 
 const TOGGLE_MODAL: Record<ValueClassification, { active: string; inactive: string }> = {
-  VA:    { active: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', inactive: 'bg-white/5 text-white/40 border-white/5 hover:bg-white/10' },
-  NVA:   { active: 'bg-red-500/20 text-red-400 border-red-500/40',            inactive: 'bg-white/5 text-white/40 border-white/5 hover:bg-white/10' },
-  NVABN: { active: 'bg-amber-500/20 text-amber-400 border-amber-500/40',      inactive: 'bg-white/5 text-white/40 border-white/5 hover:bg-white/10' },
+  VA:    { active: 'bg-emerald-100 text-emerald-600 border-emerald-300', inactive: 'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100' },
+  NVA:   { active: 'bg-red-100 text-red-600 border-red-300',            inactive: 'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100' },
+  NVABN: { active: 'bg-amber-100 text-amber-600 border-amber-300',      inactive: 'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100' },
 }
 
 export function EditValueActivityModal({ activity, onSave, onClose }: Props) {
@@ -53,9 +53,9 @@ export function EditValueActivityModal({ activity, onSave, onClose }: Props) {
         title={activity.name}
         subtitle={
           <span className="flex items-center gap-2">
-            {activity.laneName && <span className="text-[11px] text-white/30">{activity.laneName}</span>}
+            {activity.laneName && <span className="text-[11px] text-gray-400">{activity.laneName}</span>}
             {cls && (
-              <span className={`text-[11px] px-1.5 py-0.5 rounded ${cls.bg} ${cls.text} font-medium`}>
+              <span className={`text-[11px] px-1.5 py-0.5 rounded-md ${cls.bg} ${cls.text} font-medium`}>
                 {activity.classification}
               </span>
             )}
@@ -63,12 +63,12 @@ export function EditValueActivityModal({ activity, onSave, onClose }: Props) {
         }
         footer={
           <>
-            <button onClick={onClose} className="px-3 py-2 rounded-md text-xs font-medium text-white/40 hover:text-white/60 transition-colors">
+            <button onClick={onClose} className="px-3 py-2 rounded-md text-xs font-medium text-gray-500 hover:text-gray-600 transition-colors">
               Cancelar
             </button>
             <button
               onClick={handleSaveAndClose}
-              className="px-4 py-2 rounded-md text-xs font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
+              className="px-4 py-2 rounded-md text-xs font-medium bg-blue-100 text-blue-600 hover:bg-blue-100 transition-colors"
             >
               Guardar
             </button>
@@ -78,7 +78,7 @@ export function EditValueActivityModal({ activity, onSave, onClose }: Props) {
         <div className="space-y-4">
           {/* Clasificación manual */}
           <div>
-            <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1.5 block">Clasificación</label>
+            <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5 block">Clasificación</label>
             <div className="flex gap-2">
               {(['VA', 'NVA', 'NVABN'] as const).map((type) => (
                 <button
@@ -99,7 +99,7 @@ export function EditValueActivityModal({ activity, onSave, onClose }: Props) {
 
           {/* Frequency */}
           <div>
-            <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1.5 block">Frecuencia</label>
+            <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5 block">Frecuencia</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
               {FREQUENCY_OPTIONS.map((opt) => (
                 <button
@@ -107,8 +107,8 @@ export function EditValueActivityModal({ activity, onSave, onClose }: Props) {
                   onClick={() => setFrequency(opt.value)}
                   className={`px-2 py-1.5 rounded-md text-[10px] font-medium transition-all ${
                     frequency === opt.value
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                      : 'bg-white/5 text-white/40 border border-white/5 hover:bg-white/10'
+                      ? 'bg-blue-100 text-blue-600 border border-blue-300'
+                      : 'bg-gray-50 text-gray-500 border border-gray-100 hover:bg-gray-100'
                   }`}
                 >
                   {opt.label}
@@ -119,7 +119,7 @@ export function EditValueActivityModal({ activity, onSave, onClose }: Props) {
 
           {/* Time per occurrence */}
           <div>
-            <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1.5 block">
+            <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5 block">
               Tiempo por ocurrencia (minutos)
             </label>
             <input
@@ -128,14 +128,14 @@ export function EditValueActivityModal({ activity, onSave, onClose }: Props) {
               step={0.5}
               value={time || ''}
               onChange={(e) => setTime(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-md bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-blue-500/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="w-full px-3 py-2 rounded-md bg-gray-50 border border-gray-200 text-gray-900 text-xs focus:outline-none focus:border-blue-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               placeholder="Ej: 15"
             />
           </div>
 
           {/* Occurrences */}
           <div>
-            <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1.5 block">
+            <label className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5 block">
               Veces por {frequency === 'diaria' ? 'día' : frequency === 'semanal' ? 'semana' : frequency === 'mensual' ? 'mes' : 'ocurrencia'}
             </label>
             <input
@@ -149,16 +149,16 @@ export function EditValueActivityModal({ activity, onSave, onClose }: Props) {
                 setOccurrences(n)
                 setOccurrencesInput(String(n))
               }}
-              className="w-full px-3 py-2 rounded-md bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-blue-500/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="w-full px-3 py-2 rounded-md bg-gray-50 border border-gray-200 text-gray-900 text-xs focus:outline-none focus:border-blue-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               placeholder="Ej: 3"
             />
           </div>
 
           {/* Preview */}
           {time > 0 && (
-            <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
-              <p className="text-[9px] text-white/30 uppercase mb-1">Tiempo total por periodo</p>
-              <p className="text-sm font-semibold text-white">{time * occurrences} min / {frequency === 'diaria' ? 'día' : frequency === 'semanal' ? 'semana' : frequency === 'mensual' ? 'mes' : 'ocurrencia'}</p>
+            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+              <p className="text-[9px] text-gray-400 uppercase mb-1">Tiempo total por periodo</p>
+              <p className="text-sm font-semibold text-gray-900">{time * occurrences} min / {frequency === 'diaria' ? 'día' : frequency === 'semanal' ? 'semana' : frequency === 'mensual' ? 'mes' : 'ocurrencia'}</p>
             </div>
           )}
         </div>

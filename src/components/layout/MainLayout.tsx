@@ -40,20 +40,20 @@ export function MainLayout() {
   }, [drawerOpen, setDrawerOpen])
 
   return (
-    <div className="flex h-screen bg-[#070b14]">
+    <div className="flex h-screen bg-surface-ground">
       <Sidebar />
       {/* Fondo del cajon. Solo existe en movil: en >=lg la barra esta siempre a la vista. */}
       {drawerOpen && (
         <div
           onClick={() => setDrawerOpen(false)}
-          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-gray-900/45 lg:hidden"
           aria-hidden
         />
       )}
       {/* Sin margen en movil (la barra sale del flujo); el margen es solo de escritorio. */}
       <div className={`flex-1 min-w-0 flex flex-col transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
         <Header />
-        <main className="flex-1 overflow-auto p-4 lg:p-6 bg-[#070b14]">
+        <main className="flex-1 overflow-auto p-4 lg:p-6 bg-surface-ground">
           <Outlet />
         </main>
       </div>

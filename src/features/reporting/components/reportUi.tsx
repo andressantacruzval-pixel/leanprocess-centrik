@@ -22,12 +22,12 @@ export function Grid({ cols = 4, children }: { cols?: number; children: React.Re
 
 export function Card({ title, sub, right, children }: { title?: string; sub?: string; right?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
       {(title || right) && (
         <div className="flex items-start justify-between gap-2 mb-3">
           <div>
-            {title && <h4 className="text-sm font-semibold text-white">{title}</h4>}
-            {sub && <p className="text-[11px] text-white/40 mt-0.5">{sub}</p>}
+            {title && <h4 className="text-sm font-semibold text-gray-900">{title}</h4>}
+            {sub && <p className="text-[11px] text-gray-500 mt-0.5">{sub}</p>}
           </div>
           {right}
         </div>
@@ -40,20 +40,20 @@ export function Card({ title, sub, right, children }: { title?: string; sub?: st
 // ─── Stat card ───────────────────────────────────────────────────────────
 
 const TONE: Record<string, string> = {
-  cyan: 'border-cyan-500/30 bg-cyan-500/[0.06] text-cyan-300',
-  emerald: 'border-emerald-500/30 bg-emerald-500/[0.06] text-emerald-300',
-  amber: 'border-amber-500/30 bg-amber-500/[0.06] text-amber-300',
-  red: 'border-red-500/30 bg-red-500/[0.06] text-red-300',
-  violet: 'border-violet-500/30 bg-violet-500/[0.06] text-violet-300',
-  plain: 'border-white/10 bg-white/5 text-white',
+  cyan: 'border-primary-300 bg-primary-50 text-primary-700',
+  emerald: 'border-emerald-300 bg-emerald-50 text-emerald-700',
+  amber: 'border-amber-300 bg-amber-50 text-amber-700',
+  red: 'border-red-300 bg-red-50 text-red-700',
+  violet: 'border-primary-300 bg-primary-50 text-primary-700',
+  plain: 'border-gray-200 bg-gray-50 text-gray-900',
 }
 
 export function Stat({ label, value, sub, tone = 'plain' }: { label: string; value: number | string; sub?: string; tone?: keyof typeof TONE }) {
   return (
-    <div className={`rounded-2xl border p-4 ${TONE[tone]}`}>
-      <div className="text-[10px] uppercase tracking-wide text-white/40">{label}</div>
+    <div className={`rounded-lg border p-4 ${TONE[tone]}`}>
+      <div className="text-[10px] uppercase tracking-wide text-gray-500">{label}</div>
       <div className="text-2xl font-black mt-1 leading-none tabular-nums">{value}</div>
-      {sub && <div className="text-[10px] text-white/40 mt-1">{sub}</div>}
+      {sub && <div className="text-[10px] text-gray-500 mt-1">{sub}</div>}
     </div>
   )
 }
@@ -64,16 +64,16 @@ export interface Datum { label: string; value: number; color?: string }
 
 export function HBars({ data, onBar, active }: { data: Datum[]; onBar?: (label: string) => void; active?: string }) {
   const max = Math.max(1, ...data.map((d) => d.value))
-  if (!data.length) return <p className="text-[11px] text-white/30 py-4 text-center">Sin datos</p>
+  if (!data.length) return <p className="text-[11px] text-gray-400 py-4 text-center">Sin datos</p>
   return (
     <div className="space-y-1.5">
       {data.map((d) => (
         <button key={d.label} onClick={onBar ? () => onBar(d.label) : undefined} disabled={!onBar}
           className={`w-full flex items-center gap-3 group text-left ${onBar ? 'cursor-pointer' : 'cursor-default'}`}>
-          <span className={`w-36 shrink-0 text-[12px] truncate text-right ${active === d.label ? 'text-white' : 'text-white/60 group-hover:text-white/90'}`}>{d.label}</span>
-          <span className="flex-1 h-5 rounded-md bg-white/5 overflow-hidden">
+          <span className={`w-36 shrink-0 text-[12px] truncate text-right ${active === d.label ? 'text-gray-900' : 'text-gray-600 group-hover:text-gray-800'}`}>{d.label}</span>
+          <span className="flex-1 h-5 rounded-md bg-gray-50 overflow-hidden">
             <span className="h-full rounded-md flex items-center justify-end px-2 min-w-[1.5rem]" style={{ width: `${Math.max(6, d.value / max * 100)}%`, background: d.color ?? '#06b6d4' }}>
-              <span className="text-[10px] font-bold text-white/95">{d.value}</span>
+              <span className="text-[10px] font-bold text-gray-800">{d.value}</span>
             </span>
           </span>
         </button>
@@ -101,18 +101,18 @@ export function Donut({ data, center, unit, onSlice, active }: { data: Datum[]; 
         })}
       </svg>
       <div className="min-w-0 flex-1">
-        {center != null && <div className="mb-2"><span className="text-2xl font-black text-white tabular-nums">{center}</span>{unit && <span className="text-[11px] text-white/40 ml-1">{unit}</span>}</div>}
+        {center != null && <div className="mb-2"><span className="text-2xl font-black text-gray-900 tabular-nums">{center}</span>{unit && <span className="text-[11px] text-gray-500 ml-1">{unit}</span>}</div>}
         <div className="space-y-1">
           {data.map((d) => {
             const inner = (
               <>
                 <i className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: d.color ?? '#06b6d4' }} />
-                <span className={`truncate ${active === d.label ? 'text-white' : 'text-white/70'}`}>{d.label}</span>
-                <span className="ml-auto text-white/50 tabular-nums">{d.value}{total > 0 ? ` · ${Math.round(d.value / total * 100)}%` : ''}</span>
+                <span className={`truncate ${active === d.label ? 'text-gray-900' : 'text-gray-700'}`}>{d.label}</span>
+                <span className="ml-auto text-gray-500 tabular-nums">{d.value}{total > 0 ? ` · ${Math.round(d.value / total * 100)}%` : ''}</span>
               </>
             )
             return onSlice
-              ? <button key={d.label} onClick={() => onSlice(d.label)} className={`w-full flex items-center gap-2 text-[11px] rounded px-1 -mx-1 transition-colors ${active === d.label ? 'bg-white/10' : 'hover:bg-white/5'}`}>{inner}</button>
+              ? <button key={d.label} onClick={() => onSlice(d.label)} className={`w-full flex items-center gap-2 text-[11px] rounded-md px-1 -mx-1 transition-colors ${active === d.label ? 'bg-gray-100' : 'hover:bg-gray-50'}`}>{inner}</button>
               : <div key={d.label} className="flex items-center gap-2 text-[11px]">{inner}</div>
           })}
         </div>
@@ -124,18 +124,18 @@ export function Donut({ data, center, unit, onSlice, active }: { data: Datum[]; 
 // ─── Insight callout ─────────────────────────────────────────────────────
 
 const INSIGHT_TONE: Record<string, { border: string; icon: string }> = {
-  crit: { border: 'border-red-500/30 bg-red-500/[0.06]', icon: '🔴' },
-  warn: { border: 'border-amber-500/30 bg-amber-500/[0.06]', icon: '🟠' },
-  ok: { border: 'border-emerald-500/30 bg-emerald-500/[0.06]', icon: '🟢' },
-  info: { border: 'border-cyan-500/30 bg-cyan-500/[0.06]', icon: '💡' },
+  crit: { border: 'border-red-300 bg-red-50', icon: '🔴' },
+  warn: { border: 'border-amber-300 bg-amber-50', icon: '🟠' },
+  ok: { border: 'border-emerald-300 bg-emerald-50', icon: '🟢' },
+  info: { border: 'border-primary-300 bg-primary-50', icon: '💡' },
 }
 
 export function Insight({ tone = 'info', children }: { tone?: keyof typeof INSIGHT_TONE; children: React.ReactNode }) {
   const t = INSIGHT_TONE[tone]
   return (
-    <div className={`flex items-start gap-2.5 rounded-xl border px-3 py-2.5 ${t.border}`}>
+    <div className={`flex items-start gap-2.5 rounded-lg border px-3 py-2.5 ${t.border}`}>
       <span className="text-[13px] leading-none mt-0.5">{t.icon}</span>
-      <p className="text-[12.5px] text-white/75 leading-snug">{children}</p>
+      <p className="text-[12.5px] text-gray-700 leading-snug">{children}</p>
     </div>
   )
 }
@@ -143,19 +143,19 @@ export function Insight({ tone = 'info', children }: { tone?: keyof typeof INSIG
 // ─── Table primitives ────────────────────────────────────────────────────
 
 export function Th({ children }: { children: React.ReactNode }) {
-  return <th className="px-3 py-2.5 text-[9px] font-semibold text-white/35 uppercase tracking-wider whitespace-nowrap sticky top-0 bg-[#0d1117] z-10">{children}</th>
+  return <th className="px-3 py-2.5 text-[9px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap sticky top-0 bg-white z-10">{children}</th>
 }
 
 export function Td({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-3 py-2 text-[11px] text-white/65 whitespace-nowrap ${className}`}>{children}</td>
+  return <td className={`px-3 py-2 text-[11px] text-gray-700 whitespace-nowrap ${className}`}>{children}</td>
 }
 
 export function EmptyRow({ cols }: { cols: number }) {
-  return <tr><td colSpan={cols} className="px-3 py-8 text-center text-[11px] text-white/20">No hay datos para mostrar</td></tr>
+  return <tr><td colSpan={cols} className="px-3 py-8 text-center text-[11px] text-gray-300">No hay datos para mostrar</td></tr>
 }
 
 export function Badge({ label, hex }: { label: string; hex: string }) {
-  return <span className="text-[9px] px-1.5 py-0.5 rounded font-bold whitespace-nowrap" style={{ backgroundColor: `${hex}22`, color: hex }}>{label}</span>
+  return <span className="text-[9px] px-1.5 py-0.5 rounded-md font-bold whitespace-nowrap" style={{ backgroundColor: `${hex}22`, color: hex }}>{label}</span>
 }
 
 export function VerMasRow({ cols, ocultas, onVerMas }: { cols: number; ocultas: number; onVerMas: () => void }) {
@@ -163,10 +163,10 @@ export function VerMasRow({ cols, ocultas, onVerMas }: { cols: number; ocultas: 
   return (
     <tr>
       <td colSpan={cols} className="px-3 py-3 text-center">
-        <button onClick={onVerMas} className="px-4 py-1.5 rounded-lg text-[11px] font-medium text-white/50 hover:text-white/80 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-colors">
+        <button onClick={onVerMas} className="px-4 py-1.5 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-800 bg-gray-50 hover:bg-gray-50 border border-gray-100 transition-colors">
           Ver {Math.min(ocultas, FILAS_POR_TANDA)} más · quedan {ocultas}
         </button>
-        <p className="mt-1.5 text-[10px] text-white/20">La descarga incluye las {ocultas} restantes</p>
+        <p className="mt-1.5 text-[10px] text-gray-300">La descarga incluye las {ocultas} restantes</p>
       </td>
     </tr>
   )
@@ -174,7 +174,7 @@ export function VerMasRow({ cols, ocultas, onVerMas }: { cols: number; ocultas: 
 
 export function TableWrap({ minWidth, children }: { minWidth: number; children: React.ReactNode }) {
   return (
-    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent rounded-2xl border border-white/5 bg-white/[0.02]">
+    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent rounded-lg border border-gray-100 bg-gray-50">
       <table className="w-full text-left" style={{ minWidth }}>{children}</table>
     </div>
   )

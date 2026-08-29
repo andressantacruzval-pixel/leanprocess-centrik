@@ -110,7 +110,7 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
               onClick={() => setExportOpen(true)}
               disabled={isEmpty}
               title={isEmpty ? 'Crea primero tus macroprocesos' : 'Exportar el mapa'}
-              className="whitespace-nowrap flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-white/70 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="whitespace-nowrap flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Download size={14} />
               Exportar
@@ -119,14 +119,14 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
               onClick={() => setInventoryOpen(true)}
               disabled={isEmpty}
               title={isEmpty ? 'Crea primero tus macroprocesos' : 'Levantar el inventario de procesos con IA'}
-              className="whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/15 text-cyan-300 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-lg border border-primary-300 bg-primary-50 hover:bg-primary-50 text-primary-700 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <ClipboardList size={14} />
               Inventario de Procesos IA
             </button>
             <Link
               to="/app/process-map/onboarding"
-              className="whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium shadow-lg shadow-cyan-500/20 transition-all"
+              className="whitespace-nowrap flex items-center gap-2 px-3.5 py-2 rounded-lg text-white text-sm font-medium shadow-lg transition-all bg-primary-500 hover:bg-primary-600"
             >
               <Sparkles size={14} />
               Construir con IA
@@ -139,21 +139,21 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
       {isEmpty && (
         <Link
           to="/app/process-map/onboarding"
-          className="block rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-transparent p-6 hover:border-cyan-400/50 hover:from-cyan-500/15 transition-all group"
+          className="block rounded-lg border border-primary-300 p-6 hover:border-primary-300 transition-all group bg-primary-500 hover:bg-primary-600"
         >
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-cyan-500/20 ring-1 ring-cyan-500/30 group-hover:scale-105 transition-transform">
-              <Sparkles size={22} className="text-cyan-300" />
+            <div className="p-3 rounded-lg bg-primary-100 ring-1 ring-primary-500 group-hover:scale-105 transition-transform">
+              <Sparkles size={22} className="text-primary-700" />
             </div>
             <div className="flex-1">
-              <h3 className="text-base font-semibold text-white">
+              <h3 className="text-base font-semibold text-gray-900">
                 Arma tu mapa conversando con la IA
               </h3>
-              <p className="text-sm text-white/50 mt-0.5">
+              <p className="text-sm text-gray-500 mt-0.5">
                 Un consultor tipo Jarvis que construye tus macroprocesos en vivo mientras hablas con el.
               </p>
             </div>
-            <div className="text-cyan-300 text-xs font-medium group-hover:translate-x-1 transition-transform">
+            <div className="text-primary-700 text-xs font-medium group-hover:translate-x-1 transition-transform">
               Empezar →
             </div>
           </div>
@@ -191,10 +191,10 @@ export function ProcessMap({ onDrillDown }: ProcessMapProps) {
         <button
           onClick={handleSaveOrder}
           disabled={showSaved}
-          className={`flex items-center gap-2 px-5 py-3 rounded-xl text-white text-sm font-semibold shadow-xl transition-all duration-200 ${
+          className={`flex items-center gap-2 px-5 py-3 rounded-lg text-white text-sm font-semibold shadow-xl transition-all duration-200 ${
             showSaved
-              ? 'bg-green-600 shadow-green-500/30'
-              : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105'
+              ? 'bg-emerald-600'
+              : 'hover:scale-105 bg-primary-500 hover:bg-primary-600'
           }`}
         >
           {showSaved ? (

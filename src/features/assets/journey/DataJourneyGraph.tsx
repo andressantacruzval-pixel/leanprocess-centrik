@@ -215,22 +215,22 @@ export function DataJourneyGraph() {
   return (
     <div className="flex flex-col h-full w-full">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-white/8 bg-[#0b1220]">
+      <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 border-b border-gray-100 bg-white">
         {/* Buscar activo */}
         <div className="relative">
-          <button onClick={() => setShowSearch((v) => !v)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11px] text-white/70 hover:bg-white/10">
+          <button onClick={() => setShowSearch((v) => !v)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-[11px] text-gray-700 hover:bg-gray-100">
             <Search size={13} /> Buscar activo
           </button>
           {showSearch && (
-            <div className="absolute z-30 mt-1 w-72 rounded-xl border border-white/12 bg-[#0d1420] shadow-2xl p-2">
+            <div className="absolute z-30 mt-1 w-72 rounded-lg border border-gray-200 bg-white shadow-2xl p-2">
               <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Nombre del activo…"
-                className="w-full mb-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[12px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50" />
+                className="w-full mb-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-[12px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500" />
               <div className="max-h-56 overflow-y-auto space-y-0.5">
-                {matches.length === 0 ? <p className="text-[11px] text-white/30 px-2 py-2">Sin activos.</p> : matches.map((a) => (
+                {matches.length === 0 ? <p className="text-[11px] text-gray-400 px-2 py-2">Sin activos.</p> : matches.map((a) => (
                   <button key={a.id} onClick={() => toggleAsset(a.id)}
-                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-[11.5px] ${assetFilter.has(a.id) ? 'bg-cyan-500/15 text-cyan-200' : 'text-white/70 hover:bg-white/5'}`}>
+                    className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left text-[11.5px] ${assetFilter.has(a.id) ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-50'}`}>
                     <span className="truncate flex-1">{a.name}</span>
-                    {a.asset_type && <span className="text-[8.5px] px-1 py-0.5 rounded bg-white/8 text-white/40 shrink-0">{a.asset_type}</span>}
+                    {a.asset_type && <span className="text-[8.5px] px-1 py-0.5 rounded-md bg-gray-100 text-gray-500 shrink-0">{a.asset_type}</span>}
                   </button>
                 ))}
               </div>
@@ -240,21 +240,21 @@ export function DataJourneyGraph() {
 
         {/* Chips de activos seleccionados */}
         {selected.map((a) => (
-          <span key={a.id} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-cyan-500/15 border border-cyan-500/30 text-[10.5px] text-cyan-200">
+          <span key={a.id} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-primary-50 border border-primary-300 text-[10.5px] text-primary-700">
             {a.name}
-            <button onClick={() => toggleAsset(a.id)} className="text-cyan-300/70 hover:text-white"><X size={11} /></button>
+            <button onClick={() => toggleAsset(a.id)} className="text-primary-700 hover:text-gray-900"><X size={11} /></button>
           </span>
         ))}
         {assetFilter.size > 0 && (
-          <button onClick={() => setAssetFilter(new Set())} className="text-[10.5px] text-white/45 hover:text-white/80 underline">Ver todo</button>
+          <button onClick={() => setAssetFilter(new Set())} className="text-[10.5px] text-gray-500 hover:text-gray-800 underline">Ver todo</button>
         )}
 
-        <div className="w-px h-5 bg-white/10 mx-1" />
+        <div className="w-px h-5 bg-gray-100 mx-1" />
 
         {/* Estados */}
         {CHIP_STATES.map((st) => (
           <button key={st} onClick={() => toggleState(st)}
-            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10.5px] font-medium transition-colors ${stateFilter.has(st) ? 'border-white/20 text-white' : 'border-white/8 text-white/35'}`}>
+            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10.5px] font-medium transition-colors ${stateFilter.has(st) ? 'border-gray-300 text-gray-900' : 'border-gray-100 text-gray-400'}`}>
             <span className="w-2.5 h-2.5 rounded-full" style={{ background: stateFilter.has(st) ? STATE_COLORS[st] : 'transparent', border: `1px solid ${STATE_COLORS[st]}` }} />
             {STATE_LABELS[st]}
           </button>
@@ -262,31 +262,31 @@ export function DataJourneyGraph() {
 
         <div className="ml-auto flex items-center gap-1.5">
           {selected.length === 1 && (
-            <button onClick={() => { setLifecycleProcId(null); setLifecycleAsset(selected[0]) }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-[10.5px] text-cyan-200 hover:bg-cyan-500/20" title="Ver el ciclo de vida del dato por subproceso"><Route size={12} /> Ciclo de vida</button>
+            <button onClick={() => { setLifecycleProcId(null); setLifecycleAsset(selected[0]) }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-primary-50 border border-primary-200 text-[10.5px] text-primary-700 hover:bg-primary-100" title="Ver el ciclo de vida del dato por subproceso"><Route size={12} /> Ciclo de vida</button>
           )}
-          <button onClick={expandAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10.5px] text-white/60 hover:bg-white/10"><Maximize2 size={12} /> Expandir</button>
-          <button onClick={collapseAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10.5px] text-white/60 hover:bg-white/10"><Minimize2 size={12} /> Colapsar</button>
+          <button onClick={expandAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-[10.5px] text-gray-600 hover:bg-gray-100"><Maximize2 size={12} /> Expandir</button>
+          <button onClick={collapseAll} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-[10.5px] text-gray-600 hover:bg-gray-100"><Minimize2 size={12} /> Colapsar</button>
         </div>
       </div>
 
       {/* Leyenda de tratamientos de datos */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-1.5 border-b border-white/8 bg-[#0a1018]">
-        <span className="text-[9px] uppercase tracking-wider text-white/35">Tratamiento del dato:</span>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-1.5 border-b border-gray-100 bg-surface-section">
+        <span className="text-[9px] uppercase tracking-wider text-gray-400">Tratamiento del dato:</span>
         {['capta', 'crea', 'usa', 'almacena', 'transforma', 'transfiere', 'elimina'].map((st) => (
-          <span key={st} className="inline-flex items-center gap-1 text-[10px] text-white/55">
+          <span key={st} className="inline-flex items-center gap-1 text-[10px] text-gray-600">
             <span className="w-2 h-2 rounded-full" style={{ background: STATE_COLORS[st] }} /> {STATE_LABELS[st]}
           </span>
         ))}
-        <span className="inline-flex items-center gap-1 text-[10px] text-white/40"><span className="w-2 h-2 rounded-full bg-slate-500" /> No se envía</span>
+        <span className="inline-flex items-center gap-1 text-[10px] text-gray-500"><span className="w-2 h-2 rounded-full bg-slate-500" /> No se envía</span>
       </div>
 
       {/* Lienzo */}
       <div className="flex-1 min-h-0 relative">
         {nodes.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10 pointer-events-none">
-            <Route size={30} className="text-white/10 mb-3" />
-            <p className="text-sm text-white/35">No hay flujos que mostrar</p>
-            <p className="text-[11px] text-white/20 mt-1">Registra activos y sus transferencias («viene de / va a») para dibujar el viaje.</p>
+            <Route size={30} className="text-gray-300 mb-3" />
+            <p className="text-sm text-gray-400">No hay flujos que mostrar</p>
+            <p className="text-[11px] text-gray-300 mt-1">Registra activos y sus transferencias («viene de / va a») para dibujar el viaje.</p>
           </div>
         )}
         <ReactFlow
@@ -308,7 +308,7 @@ export function DataJourneyGraph() {
           <FitOnDrill dep={drillKey} />
           <Background variant={BackgroundVariant.Dots} gap={18} size={1} color="#1e293b" />
           <Controls position="bottom-right" showInteractive={false} />
-          <MiniMap className="!hidden lg:!block !bg-[#0a0f1a] !border !border-white/10 !rounded-lg" maskColor="rgba(7,11,20,.75)" nodeColor="#334155" nodeStrokeColor="#475569" pannable zoomable />
+          <MiniMap className="!hidden lg:!block !bg-white !border !border-gray-200 !rounded-lg" maskColor="rgba(7,11,20,.75)" nodeColor="#334155" nodeStrokeColor="#475569" pannable zoomable />
         </ReactFlow>
       </div>
 

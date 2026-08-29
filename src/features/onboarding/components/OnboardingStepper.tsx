@@ -31,14 +31,14 @@ export function OnboardingStepper({ currentStep }: OnboardingStepperProps) {
       {/* Compacto — móvil */}
       <div className="sm:hidden w-full max-w-2xl mx-auto py-6">
         <div className="flex items-baseline justify-between mb-2">
-          <span className="text-sm font-semibold text-cyan-400">{actual.label}</span>
-          <span className="text-xs text-white/40">
+          <span className="text-sm font-semibold text-primary-600">{actual.label}</span>
+          <span className="text-xs text-gray-500">
             Paso {currentStep} de {steps.length}
           </span>
         </div>
-        <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
           <div
-            className="h-full rounded-full bg-cyan-400 transition-all duration-300"
+            className="h-full rounded-full bg-primary-500 transition-all duration-300"
             style={{ width: `${(currentStep / steps.length) * 100}%` }}
           />
         </div>
@@ -57,17 +57,17 @@ export function OnboardingStepper({ currentStep }: OnboardingStepperProps) {
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
                     isCompleted
-                      ? 'bg-cyan-500 text-white'
+                      ? 'bg-primary-500 text-white'
                       : isCurrent
-                      ? 'bg-cyan-500 text-white ring-4 ring-cyan-500/20'
-                      : 'bg-white/20 text-white/40'
+                      ? 'bg-primary-500 text-white ring-4 ring-primary-500'
+                      : 'bg-gray-200 text-gray-500'
                   }`}
                 >
                   {isCompleted ? <Check size={18} /> : step.number}
                 </div>
                 <span
                   className={`mt-2 text-xs font-medium text-center ${
-                    isCurrent || isCompleted ? 'text-cyan-400' : 'text-white/20'
+                    isCurrent || isCompleted ? 'text-primary-600' : 'text-gray-300'
                   }`}
                 >
                   {step.label}
@@ -76,7 +76,7 @@ export function OnboardingStepper({ currentStep }: OnboardingStepperProps) {
               {index < steps.length - 1 && (
                 <div
                   className={`w-8 lg:w-16 h-0.5 mx-2 mb-6 transition-all duration-300 ${
-                    isFuture ? 'bg-white/20' : 'bg-cyan-400'
+                    isFuture ? 'bg-gray-200' : 'bg-primary-500'
                   }`}
                 />
               )}

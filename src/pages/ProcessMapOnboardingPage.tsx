@@ -180,14 +180,14 @@ export default function ProcessMapOnboardingPage() {
       </div>
 
       {/* RIGHT — Live process map */}
-      <div className="flex-1 flex flex-col bg-[#0a0f1a] border border-white/5 rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-white/[0.02]">
+      <div className="flex-1 flex flex-col bg-white border border-gray-100 rounded-lg overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles size={14} className="text-cyan-400" />
-              <h2 className="text-sm font-semibold text-white">Mapa de procesos en vivo</h2>
+              <Sparkles size={14} className="text-primary-600" />
+              <h2 className="text-sm font-semibold text-gray-900">Mapa de procesos en vivo</h2>
             </div>
-            <div className="text-[11px] text-white/40 mt-0.5">
+            <div className="text-[11px] text-gray-500 mt-0.5">
               {total} macroproceso{total === 1 ? '' : 's'} agregado{total === 1 ? '' : 's'}
               {activeCompany && ` a ${activeCompany.name}`}
             </div>
@@ -195,7 +195,7 @@ export default function ProcessMapOnboardingPage() {
           <button
             onClick={handleFinish}
             disabled={total === 0}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all bg-primary-500 hover:bg-primary-600"
           >
             <Check size={14} />
             Terminar y ver mapa
@@ -214,10 +214,10 @@ export default function ProcessMapOnboardingPage() {
                     className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: meta.color }}
                   />
-                  <h3 className="text-xs uppercase tracking-wider font-semibold text-white/60">
+                  <h3 className="text-xs uppercase tracking-wider font-semibold text-gray-600">
                     {meta.label}
                   </h3>
-                  <span className="text-[10px] text-white/30">({items.length})</span>
+                  <span className="text-[10px] text-gray-400">({items.length})</span>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                   {items.map((m) => {
@@ -225,26 +225,26 @@ export default function ProcessMapOnboardingPage() {
                     return (
                       <div
                         key={m.id}
-                        className={`group relative rounded-xl border p-3 transition-all ${
+                        className={`group relative rounded-lg border p-3 transition-all ${
                           isNew
-                            ? 'border-cyan-400/60 bg-cyan-500/10 shadow-lg shadow-cyan-500/20 scale-[1.02]'
-                            : 'border-white/5 bg-white/[0.02] hover:border-white/10'
+                            ? 'border-primary-300 bg-primary-50 shadow-lg scale-[1.02]'
+                            : 'border-gray-100 bg-gray-50 hover:border-gray-200'
                         }`}
                         style={{
                           borderLeftColor: meta.color,
                           borderLeftWidth: 3,
                         }}
                       >
-                        <div className="text-sm font-medium text-white pr-10">{m.name}</div>
+                        <div className="text-sm font-medium text-gray-900 pr-10">{m.name}</div>
                         <button
                           onClick={() => deleteMacroprocess(m.id)}
-                          className={`absolute top-1 right-1 p-2 rounded hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-colors ${ACCIONES_AL_PASAR}`}
+                          className={`absolute top-1 right-1 p-2 rounded-md hover:bg-red-100 text-gray-400 hover:text-red-600 transition-colors ${ACCIONES_AL_PASAR}`}
                           title="Eliminar"
                         >
                           <Trash2 size={12} />
                         </button>
                         {isNew && (
-                          <div className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-cyan-400 text-[9px] text-[#0a0f1a] font-bold">
+                          <div className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full bg-primary-500 text-[9px] text-white font-bold">
                             NUEVO
                           </div>
                         )}
@@ -252,7 +252,7 @@ export default function ProcessMapOnboardingPage() {
                     )
                   })}
                   {items.length === 0 && (
-                    <div className="col-span-full rounded-xl border border-dashed border-white/10 bg-white/[0.01] p-4 text-center text-[11px] text-white/30">
+                    <div className="col-span-full rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-center text-[11px] text-gray-400">
                       Aun no hay macroprocesos {meta.label.toLowerCase()}. Conversa con la IA para agregarlos.
                     </div>
                   )}

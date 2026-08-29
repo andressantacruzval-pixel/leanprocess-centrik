@@ -17,9 +17,9 @@ export interface ValueActivity {
 }
 
 export const CLASSIFICATION_COLORS: Record<ValueClassification, { bg: string; text: string; label: string; hex: string }> = {
-  VA:    { bg: 'bg-emerald-500/15', text: 'text-emerald-400', label: 'Valor Agregado',              hex: '#34d399' },
-  NVA:   { bg: 'bg-red-500/15',     text: 'text-red-400',     label: 'Sin Valor Agregado',          hex: '#f87171' },
-  NVABN: { bg: 'bg-amber-500/15',   text: 'text-amber-400',   label: 'Sin Valor - Necesario',       hex: '#fbbf24' },
+  VA:    { bg: 'bg-emerald-50', text: 'text-emerald-600', label: 'Valor Agregado',              hex: '#34d399' },
+  NVA:   { bg: 'bg-red-50',     text: 'text-red-600',     label: 'Sin Valor Agregado',          hex: '#f87171' },
+  NVABN: { bg: 'bg-amber-50',   text: 'text-amber-600',   label: 'Sin Valor - Necesario',       hex: '#fbbf24' },
 }
 
 export const FREQUENCY_OPTIONS: { value: Frequency; label: string }[] = [

@@ -204,33 +204,33 @@ export function ConversationalPanel({
   }, [speech, agent.messages])
 
   return (
-    <div className="flex flex-col h-full bg-[#0a0f1a] border border-white/5 rounded-2xl overflow-hidden">
+    <div className="flex flex-col h-full bg-white border border-gray-100 rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-gray-50">
         <div
-          className={`w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 ring-1 flex items-center justify-center transition-all ${
+          className={`w-9 h-9 rounded-lg ring-1 flex items-center justify-center transition-all bg-primary-500 ${
             tts.speaking
-              ? 'ring-cyan-400/70 shadow-lg shadow-cyan-500/30 animate-pulse'
-              : 'ring-cyan-500/30'
+              ? 'ring-primary-500 shadow-lg animate-pulse'
+              : 'ring-primary-500'
           }`}
         >
-          <Bot size={16} className="text-cyan-400" />
+          <Bot size={16} className="text-primary-600" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-white truncate">{title}</span>
-            <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300">
+            <span className="text-sm font-semibold text-gray-900 truncate">{title}</span>
+            <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-primary-50 text-primary-700">
               <Zap size={10} />
               Fast mode
             </span>
             {voiceMode && (
-              <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+              <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-primary-300">
                 <Headphones size={10} />
                 Modo voz
               </span>
             )}
           </div>
-          <div className="text-[11px] text-white/40 truncate">
+          <div className="text-[11px] text-gray-500 truncate">
             {voiceMode
               ? tts.speaking
                 ? 'Hablando...'
@@ -263,8 +263,8 @@ export function ConversationalPanel({
             title={ttsEnabled ? 'Silenciar voz de la IA' : 'Activar voz de la IA'}
             className={`p-2 rounded-lg transition-colors ${
               ttsEnabled
-                ? 'bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20'
-                : 'bg-white/5 text-white/40 hover:bg-white/10'
+                ? 'bg-primary-50 text-primary-700 hover:bg-primary-100'
+                : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
             }`}
           >
             {ttsEnabled ? <Volume2 size={12} /> : <VolumeX size={12} />}
@@ -278,8 +278,8 @@ export function ConversationalPanel({
             title={voiceMode ? 'Salir de Modo voz' : 'Activar Modo voz (manos libres)'}
             className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-[11px] font-medium transition-all ${
               voiceMode
-                ? 'bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white shadow-lg shadow-purple-500/30'
-                : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10'
+                ? 'text-white shadow-lg bg-primary-500'
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
             }`}
           >
             <Headphones size={12} />
@@ -290,7 +290,7 @@ export function ConversationalPanel({
         {agent.streaming && (
           <button
             onClick={agent.cancel}
-            className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 transition-colors"
+            className="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 transition-colors"
             title="Detener"
           >
             <Square size={12} />
@@ -301,7 +301,7 @@ export function ConversationalPanel({
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {agent.messages.length === 0 && !agent.streaming && (
-          <div className="text-center text-white/30 text-xs mt-10">
+          <div className="text-center text-gray-400 text-xs mt-10">
             Iniciando conversacion...
           </div>
         )}
@@ -321,7 +321,7 @@ export function ConversationalPanel({
 
       {/* Quick replies */}
       {quickReplies && quickReplies.length > 0 && agent.messages.length <= 2 && (
-        <div className="px-4 py-2 flex flex-wrap gap-2 border-t border-white/5">
+        <div className="px-4 py-2 flex flex-wrap gap-2 border-t border-gray-100">
           {quickReplies.map((q) => (
             <button
               key={q}
@@ -330,7 +330,7 @@ export function ConversationalPanel({
                 agent.sendMessage(q)
               }}
               disabled={agent.streaming}
-              className="px-3 py-1.5 text-xs rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/20 disabled:opacity-50 transition-colors"
+              className="px-3 py-1.5 text-xs rounded-full bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 disabled:opacity-50 transition-colors"
             >
               {q}
             </button>
@@ -339,7 +339,7 @@ export function ConversationalPanel({
       )}
 
       {/* Input */}
-      {!hideInput && <div className="p-3 border-t border-white/5 bg-white/[0.02]">
+      {!hideInput && <div className="p-3 border-t border-gray-100 bg-gray-50">
         <div className="flex items-end gap-2">
           <button
             onClick={speech.toggle}
@@ -353,10 +353,10 @@ export function ConversationalPanel({
             }
             className={`p-2 rounded-lg transition-all ${
               !speech.supported
-                ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
                 : speech.listening
-                ? 'bg-red-500/20 text-red-300 ring-2 ring-red-500/50 animate-pulse'
-                : 'bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 border border-cyan-500/20 disabled:opacity-40'
+                ? 'bg-red-100 text-red-700 ring-2 ring-red-500 animate-pulse'
+                : 'bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200 disabled:opacity-40'
             }`}
           >
             {speech.supported ? <Mic size={16} /> : <MicOff size={16} />}
@@ -370,18 +370,18 @@ export function ConversationalPanel({
             }
             rows={1}
             disabled={agent.streaming || speech.listening}
-            className="flex-1 resize-none px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-500/40 disabled:opacity-60 max-h-32"
+            className="flex-1 resize-none px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary-300 disabled:opacity-60 max-h-32"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || agent.streaming || speech.listening}
-            className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="p-2 rounded-lg text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all bg-primary-500 hover:bg-primary-600"
           >
             <Send size={16} />
           </button>
         </div>
         {speech.error && (
-          <div className="mt-2 text-[11px] text-red-300/80">
+          <div className="mt-2 text-[11px] text-red-700">
             Error de voz: {speech.error}. Puedes escribir normalmente.
           </div>
         )}
@@ -424,10 +424,10 @@ function renderInlineMarkdown(text: string): React.ReactNode[] {
       const [full, , bold, italic, code] = m
       const before = rest.slice(0, m.index)
       if (before) parts.push(<span key={`t${partIdx++}`}>{before}</span>)
-      if (bold) parts.push(<strong key={`b${partIdx++}`} className="font-semibold text-white">{bold}</strong>)
-      else if (italic) parts.push(<em key={`i${partIdx++}`} className="italic text-white/90">{italic}</em>)
+      if (bold) parts.push(<strong key={`b${partIdx++}`} className="font-semibold text-gray-900">{bold}</strong>)
+      else if (italic) parts.push(<em key={`i${partIdx++}`} className="italic text-gray-800">{italic}</em>)
       else if (code) parts.push(
-        <code key={`c${partIdx++}`} className="px-1 py-0.5 rounded bg-white/10 text-cyan-300 text-[0.9em] font-mono">
+        <code key={`c${partIdx++}`} className="px-1 py-0.5 rounded-md bg-gray-100 text-primary-700 text-[0.9em] font-mono">
           {code}
         </code>
       )
@@ -437,7 +437,7 @@ function renderInlineMarkdown(text: string): React.ReactNode[] {
     if (isBullet) {
       return (
         <div key={`l${li}`} className="flex gap-2 my-0.5">
-          <span className="text-cyan-400/70 mt-0.5">•</span>
+          <span className="text-primary-600 mt-0.5">•</span>
           <span className="flex-1">{parts}</span>
         </div>
       )
@@ -458,9 +458,9 @@ function renderInlineMarkdown(text: string): React.ReactNode[] {
 function TypingDots() {
   return (
     <span className="inline-flex items-center gap-0.5 ml-1">
-      <span className="w-1 h-1 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-      <span className="w-1 h-1 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-      <span className="w-1 h-1 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+      <span className="w-1 h-1 rounded-full bg-primary-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+      <span className="w-1 h-1 rounded-full bg-primary-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+      <span className="w-1 h-1 rounded-full bg-primary-500 animate-bounce" style={{ animationDelay: '300ms' }} />
     </span>
   )
 }
@@ -476,21 +476,21 @@ function MessageBubble({ role, content, streaming }: BubbleProps) {
       <div
         className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${
           isUser
-            ? 'bg-gradient-to-br from-white/10 to-white/5 text-white/60 border border-white/10'
-            : 'bg-gradient-to-br from-cyan-500/25 to-blue-500/25 ring-1 ring-cyan-500/40 text-cyan-300 shadow-cyan-500/20'
+            ? 'text-gray-600 border border-gray-200 bg-primary-500'
+            : 'ring-1 ring-primary-500 text-primary-700 bg-primary-500'
         }`}
       >
         {isUser ? <User size={14} /> : <Bot size={14} />}
       </div>
       <div className={`flex flex-col gap-1 max-w-[85%] ${isUser ? 'items-end' : 'items-start'}`}>
         {!isUser && (
-          <span className="text-[10px] text-cyan-300/60 font-medium px-1">Consultor</span>
+          <span className="text-[10px] text-primary-700 font-medium px-1">Consultor</span>
         )}
         <div
-          className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
+          className={`px-3.5 py-2.5 rounded-lg text-sm leading-relaxed ${
             isUser
-              ? 'bg-gradient-to-br from-cyan-600/25 to-blue-600/20 text-white rounded-tr-sm border border-cyan-500/30'
-              : 'bg-white/[0.05] text-white/90 rounded-tl-sm border border-white/10'
+              ? 'text-white rounded-tr-sm border border-primary-300 bg-primary-500'
+              : 'bg-gray-50 text-gray-800 rounded-tl-sm border border-gray-200'
           }`}
         >
           {isUser ? (
@@ -499,7 +499,7 @@ function MessageBubble({ role, content, streaming }: BubbleProps) {
             <div className="space-y-0.5">
               {renderInlineMarkdown(content)}
               {streaming && content.length > 0 && (
-                <span className="inline-block w-1.5 h-3.5 bg-cyan-400 ml-0.5 -mb-0.5 animate-pulse align-middle" />
+                <span className="inline-block w-1.5 h-3.5 bg-primary-500 ml-0.5 -mb-0.5 animate-pulse align-middle" />
               )}
               {streaming && content.length === 0 && <TypingDots />}
             </div>

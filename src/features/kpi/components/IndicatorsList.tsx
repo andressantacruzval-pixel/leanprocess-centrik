@@ -31,12 +31,12 @@ export function IndicatorsList({
     <div>
       {/* Bulk actions */}
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-white/40">
+        <p className="text-sm text-gray-500">
           {selectedIds.size} de {indicators.length} indicadores seleccionados
         </p>
         <button
           onClick={allSelected ? onDeselectAll : onSelectAll}
-          className="text-sm text-cyan-400 hover:text-cyan-300 font-medium"
+          className="text-sm text-primary-600 hover:text-primary-700 font-medium"
         >
           {allSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}
         </button>

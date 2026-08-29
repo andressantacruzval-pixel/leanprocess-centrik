@@ -32,7 +32,7 @@ export function AuditReport({ processes, allAudits, macroMap, processMap }: { pr
       ...resolveProcessHierarchy(r.process, macroMap, processMap),
     })),
     { key: 'act', header: 'Actividad', accessor: (r) => r.item.actividad || '', className: 'max-w-[200px]', cell: (r) => <div className="truncate" title={r.item.actividad}>{r.item.actividad || '-'}</div> },
-    { key: 'que', header: 'Qué auditar', accessor: (r) => r.item.queAuditar || '', className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.item.queAuditar}>{r.item.queAuditar || '-'}</div> },
+    { key: 'que', header: 'Qué auditar', accessor: (r) => r.item.queAuditar || '', className: 'text-gray-900 font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.item.queAuditar}>{r.item.queAuditar || '-'}</div> },
     { key: 'crit', header: 'Criterio', accessor: (r) => r.item.criterio || '', className: 'max-w-[180px]', cell: (r) => <div className="truncate" title={r.item.criterio}>{r.item.criterio || '-'}</div> },
     { key: 'evi', header: 'Evidencia', accessor: (r) => r.item.evidencia || '', className: 'max-w-[160px]', cell: (r) => <div className="truncate" title={r.item.evidencia}>{r.item.evidencia || '-'}</div> },
     { key: 'freq', header: 'Frecuencia', accessor: (r) => r.item.frecuencia || '' },
@@ -92,10 +92,10 @@ export function AuditReport({ processes, allAudits, macroMap, processMap }: { pr
 
       {barFilter && (
         <div className="flex items-center gap-2 -mb-1">
-          <span className="text-[11px] text-white/45">Tabla filtrada por {barFilter.dim === 'freq' ? 'frecuencia' : 'responsable'}:</span>
-          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+          <span className="text-[11px] text-gray-500">Tabla filtrada por {barFilter.dim === 'freq' ? 'frecuencia' : 'responsable'}:</span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
             {barFilter.value}
-            <button onClick={() => setBarFilter(null)} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+            <button onClick={() => setBarFilter(null)} className="hover:text-gray-900" title="Quitar filtro"><X size={12} /></button>
           </span>
         </div>
       )}

@@ -117,31 +117,31 @@ export function DataTable<T>({ columns, rows, rowKey, minWidth }: {
   const openCol = openKey ? colByKey.get(openKey) : null
   const openF = openKey ? filters[openKey] : undefined
   const isActive = (key: string) => !!filters[key]?.value || sort?.key === key
-  const btnCls = (on: boolean) => `flex-1 text-[10px] py-1 rounded-md border transition-colors ${on ? 'border-cyan-400/50 text-cyan-300 bg-cyan-500/10' : 'border-white/10 text-white/50 hover:text-white/80'}`
+  const btnCls = (on: boolean) => `flex-1 text-[10px] py-1 rounded-md border transition-colors ${on ? 'border-primary-300 text-primary-700 bg-primary-50' : 'border-gray-200 text-gray-500 hover:text-gray-800'}`
 
   return (
     <>
-      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent rounded-2xl border border-white/5 bg-white/[0.02]">
+      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent rounded-lg border border-gray-100 bg-gray-50">
         <table className="text-left table-fixed" style={{ width: Math.max(totalW, minWidth ?? 0) }}>
           <colgroup>{cols.map((c) => <col key={c.key} style={{ width: effW(c) }} />)}</colgroup>
           <thead>
-            <tr className="bg-white/[0.03] border-b border-white/5">
+            <tr className="bg-gray-50 border-b border-gray-100">
               {cols.map((c) => (
-                <th key={c.key} className="relative px-3 py-2.5 text-[9px] font-semibold text-white/35 uppercase tracking-wider sticky top-0 bg-[#0d1117] z-10">
+                <th key={c.key} className="relative px-3 py-2.5 text-[9px] font-semibold text-gray-400 uppercase tracking-wider sticky top-0 bg-white z-10">
                   {c.sortable === false && c.filterable === false ? (
                     <span className="block truncate pr-2">{c.header}</span>
                   ) : (
-                    <button onClick={(e) => openMenu(e, c.key)} className={`inline-flex items-center gap-1 max-w-full hover:text-white/70 transition-colors ${isActive(c.key) ? 'text-cyan-300' : ''}`}>
+                    <button onClick={(e) => openMenu(e, c.key)} className={`inline-flex items-center gap-1 max-w-full hover:text-gray-700 transition-colors ${isActive(c.key) ? 'text-primary-700' : ''}`}>
                       <span className="truncate">{c.header}</span>
                       {sort?.key === c.key
-                        ? <span className="text-cyan-300 text-[8px] shrink-0">{sort.dir === 'asc' ? '▲' : '▼'}</span>
+                        ? <span className="text-primary-700 text-[8px] shrink-0">{sort.dir === 'asc' ? '▲' : '▼'}</span>
                         : <ChevronDown size={11} className="opacity-50 shrink-0" />}
                     </button>
                   )}
                   {/* Manija de redimensionado (borde derecho de la cabecera) */}
                   <span
                     onMouseDown={(e) => startResize(e, c)}
-                    className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-cyan-400/50 active:bg-cyan-400/70"
+                    className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-primary-100 active:bg-primary-100"
                     title="Arrastra para ajustar el ancho"
                   />
                 </th>
@@ -150,24 +150,24 @@ export function DataTable<T>({ columns, rows, rowKey, minWidth }: {
           </thead>
           <tbody>
             {visibles.map((r, i) => (
-              <tr key={rowKey(r, i)} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors align-top">
+              <tr key={rowKey(r, i)} className="border-b border-gray-100 hover:bg-gray-50 transition-colors align-top">
                 {cols.map((c) => (
-                  <td key={c.key} className={`px-3 py-2 text-[11px] text-white/65 overflow-hidden ${c.className ?? ''}`}>
+                  <td key={c.key} className={`px-3 py-2 text-[11px] text-gray-700 overflow-hidden ${c.className ?? ''}`}>
                     {c.cell ? c.cell(r) : <div className="truncate" title={asStr(c.accessor(r))}>{asStr(c.accessor(r)) || '-'}</div>}
                   </td>
                 ))}
               </tr>
             ))}
             {processed.length === 0 && (
-              <tr><td colSpan={cols.length} className="px-3 py-8 text-center text-[11px] text-white/20">No hay datos para mostrar</td></tr>
+              <tr><td colSpan={cols.length} className="px-3 py-8 text-center text-[11px] text-gray-300">No hay datos para mostrar</td></tr>
             )}
             {ocultas > 0 && (
               <tr>
                 <td colSpan={cols.length} className="px-3 py-3 text-center">
-                  <button onClick={verMas} className="px-4 py-1.5 rounded-lg text-[11px] font-medium text-white/50 hover:text-white/80 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-colors">
+                  <button onClick={verMas} className="px-4 py-1.5 rounded-lg text-[11px] font-medium text-gray-500 hover:text-gray-800 bg-gray-50 hover:bg-gray-50 border border-gray-100 transition-colors">
                     Ver {Math.min(ocultas, FILAS_POR_TANDA)} más · quedan {ocultas}
                   </button>
-                  <p className="mt-1.5 text-[10px] text-white/20">La descarga incluye las {ocultas} restantes</p>
+                  <p className="mt-1.5 text-[10px] text-gray-300">La descarga incluye las {ocultas} restantes</p>
                 </td>
               </tr>
             )}
@@ -178,10 +178,10 @@ export function DataTable<T>({ columns, rows, rowKey, minWidth }: {
       {openKey && openCol && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpenKey(null)} />
-          <div className="fixed z-50 w-[230px] rounded-xl border border-white/10 bg-[#0d1117] shadow-2xl p-3 space-y-2.5" style={{ top: menuPos.top, left: menuPos.left }}>
+          <div className="fixed z-50 w-[230px] rounded-lg border border-gray-200 bg-white shadow-2xl p-3 space-y-2.5" style={{ top: menuPos.top, left: menuPos.left }}>
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-white/70 truncate">{openCol.header}</span>
-              <button onClick={() => setOpenKey(null)} className="text-white/30 hover:text-white/60"><X size={13} /></button>
+              <span className="text-[11px] font-semibold text-gray-700 truncate">{openCol.header}</span>
+              <button onClick={() => setOpenKey(null)} className="text-gray-400 hover:text-gray-600"><X size={13} /></button>
             </div>
             {openCol.sortable !== false && (
               <div className="flex gap-1">
@@ -197,18 +197,18 @@ export function DataTable<T>({ columns, rows, rowKey, minWidth }: {
                 </div>
                 {openF?.mode === 'equals' ? (
                   <select value={openF?.value ?? ''} onChange={(e) => setFilter(openKey, { value: e.target.value })}
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white/80 outline-none cursor-pointer">
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[11px] text-gray-800 outline-none cursor-pointer">
                     <option value="">Cualquiera</option>
-                    {(distinct[openKey] ?? []).map((v) => <option key={v} value={v} className="bg-[#0d1117]">{v}</option>)}
+                    {(distinct[openKey] ?? []).map((v) => <option key={v} value={v} className="bg-white">{v}</option>)}
                   </select>
                 ) : (
                   <input value={openF?.value ?? ''} onChange={(e) => setFilter(openKey, { value: e.target.value })} placeholder="Escribe para filtrar…"
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-white/80 outline-none placeholder-white/25" />
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[11px] text-gray-800 outline-none placeholder-gray-400" />
                 )}
               </div>
             )}
             {isActive(openKey) && (
-              <button onClick={() => clearCol(openKey)} className="w-full text-[10px] py-1 rounded-md text-white/40 hover:text-white/70 border border-white/5">Limpiar columna</button>
+              <button onClick={() => clearCol(openKey)} className="w-full text-[10px] py-1 rounded-md text-gray-500 hover:text-gray-700 border border-gray-100">Limpiar columna</button>
             )}
           </div>
         </>

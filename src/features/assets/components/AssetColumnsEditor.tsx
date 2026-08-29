@@ -14,7 +14,7 @@ import { STATE_COLORS } from '../journey/journeyGraph'
 import { buildColumnCode } from '../assetCodes'
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
-const inpBase = 'bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1.5 text-[13px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-cyan-500/50'
+const inpBase = 'bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[13px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500'
 const inp = `w-full ${inpBase}`
 const inpCode = `w-24 shrink-0 ${inpBase}` // sin w-full para no tapar nombre/descripción
 
@@ -65,23 +65,23 @@ export function AssetColumnsEditor({ columns, setColumns, assetName, assetType, 
   return (
     <div>
       <div className="flex items-center justify-between mb-2 flex-wrap gap-1.5">
-        <p className="text-[11px] font-semibold text-white/70 flex items-center gap-1.5"><Columns3 size={13} className="text-indigo-400" />Columnas / campos del activo <span className="text-[10px] font-medium text-indigo-300 bg-indigo-500/15 rounded px-1.5 py-0.5">{columns.length}</span></p>
+        <p className="text-[11px] font-semibold text-gray-700 flex items-center gap-1.5"><Columns3 size={13} className="text-primary-600" />Columnas / campos del activo <span className="text-[10px] font-medium text-primary-700 bg-primary-50 rounded-md px-1.5 py-0.5">{columns.length}</span></p>
         <div className="flex items-center gap-1.5">
-          <button type="button" onClick={handleSuggest} disabled={suggesting || budget.isConsuming} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-gradient-to-r from-purple-600/80 to-cyan-600/80 text-white text-[10.5px] font-medium hover:from-purple-500 hover:to-cyan-500 disabled:opacity-50">{(suggesting || budget.isConsuming) ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />} Sugerir IA <TokenCostBadge operationKey="asset_columns" /></button>
-          {columns.length > 0 && <button type="button" onClick={autoColumnCodes} title="Auto-codificar columnas" className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 text-white/60 border border-white/10 text-[10.5px] font-medium hover:bg-white/10"><Wand2 size={11} /> Códigos</button>}
-          <button type="button" onClick={addColumn} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10.5px] font-medium hover:bg-indigo-500/25"><Plus size={11} /> Columna</button>
+          <button type="button" onClick={handleSuggest} disabled={suggesting || budget.isConsuming} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-white text-[10.5px] font-medium disabled:opacity-50 bg-primary-500 hover:bg-primary-600">{(suggesting || budget.isConsuming) ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />} Sugerir IA <TokenCostBadge operationKey="asset_columns" /></button>
+          {columns.length > 0 && <button type="button" onClick={autoColumnCodes} title="Auto-codificar columnas" className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-50 text-gray-600 border border-gray-200 text-[10.5px] font-medium hover:bg-gray-100"><Wand2 size={11} /> Códigos</button>}
+          <button type="button" onClick={addColumn} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-primary-50 text-primary-700 border border-primary-300 text-[10.5px] font-medium hover:bg-primary-100"><Plus size={11} /> Columna</button>
         </div>
       </div>
 
       {columns.length === 0 && suggestions.length === 0 ? (
-        <p className="text-[11px] text-white/30 py-2">Sin columnas. Añádelas manualmente o pulsa «Sugerir IA» para proponer los campos lógicos de este activo.</p>
+        <p className="text-[11px] text-gray-400 py-2">Sin columnas. Añádelas manualmente o pulsa «Sugerir IA» para proponer los campos lógicos de este activo.</p>
       ) : (
         <div className="space-y-1.5">
           {columns.map((col, i) => {
             const inCat = !!col.name.trim() && fieldSet.has(norm(col.name))
             return (
               <div key={i} className="flex flex-wrap items-center gap-2">
-                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${!col.name.trim() ? 'bg-white/20' : inCat ? 'bg-emerald-400' : 'bg-amber-400'}`} title={!col.name.trim() ? '' : inCat ? 'En catálogo' : 'Campo nuevo (se agrega al catálogo al guardar)'} />
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${!col.name.trim() ? 'bg-gray-200' : inCat ? 'bg-emerald-500' : 'bg-amber-500'}`} title={!col.name.trim() ? '' : inCat ? 'En catálogo' : 'Campo nuevo (se agrega al catálogo al guardar)'} />
                 <input className={inpCode} value={col.code ?? ''} onChange={(e) => updateColumn(i, 'code', e.target.value)} placeholder="Código" title="Código de la columna" />
                 <div className="flex-1 min-w-[130px]"><CreatableSelect options={opts} value={col.name} onChange={(v) => updateColumn(i, 'name', v)} onCreateOption={() => { /* se persiste al guardar */ }} placeholder="Buscar campo por nombre…" /></div>
                 <div className="relative shrink-0">
@@ -92,7 +92,7 @@ export function AssetColumnsEditor({ columns, setColumns, assetName, assetType, 
                   <span className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full pointer-events-none" style={{ background: col.operation ? (STATE_COLORS[col.operation] ?? '#64748b') : 'transparent', border: col.operation ? 'none' : '1px solid rgba(255,255,255,.2)' }} />
                 </div>
                 <div className="flex-[1.4] min-w-[150px]"><input className={inp} value={col.description} onChange={(e) => updateColumn(i, 'description', e.target.value)} placeholder="Descripción de la columna" /></div>
-                <button type="button" onClick={() => removeColumn(i)} className="p-1.5 rounded text-white/25 hover:text-red-400 hover:bg-red-500/10 shrink-0" title="Quitar"><Trash2 size={13} /></button>
+                <button type="button" onClick={() => removeColumn(i)} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 shrink-0" title="Quitar"><Trash2 size={13} /></button>
               </div>
             )
           })}
@@ -100,24 +100,24 @@ export function AssetColumnsEditor({ columns, setColumns, assetName, assetType, 
       )}
 
       {suggestions.length > 0 && (
-        <div className="mt-2 rounded-lg border border-purple-500/25 bg-purple-500/[0.05] p-2.5">
+        <div className="mt-2 rounded-lg border border-primary-200 bg-primary-50 p-2.5">
           <div className="flex items-center justify-between mb-1.5">
-            <p className="text-[11px] text-purple-200/90">{suggestions.length} columna(s) sugeridas por IA — confírmalas para agregarlas.</p>
+            <p className="text-[11px] text-primary-700">{suggestions.length} columna(s) sugeridas por IA — confírmalas para agregarlas.</p>
             <div className="flex items-center gap-1.5">
-              <button type="button" onClick={acceptAll} className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-200 border border-emerald-500/30 text-[10px] font-medium hover:bg-emerald-500/30">Aceptar todas</button>
-              <button type="button" onClick={() => setSuggestions([])} className="px-2 py-0.5 rounded text-white/40 hover:text-white/70 text-[10px]">Descartar</button>
+              <button type="button" onClick={acceptAll} className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 border border-emerald-300 text-[10px] font-medium hover:bg-emerald-100">Aceptar todas</button>
+              <button type="button" onClick={() => setSuggestions([])} className="px-2 py-0.5 rounded-md text-gray-500 hover:text-gray-700 text-[10px]">Descartar</button>
             </div>
           </div>
           <div className="space-y-1">
             {suggestions.map((s) => {
               const inCat = fieldSet.has(norm(s.name))
               return (
-                <div key={s.name} className="flex items-center gap-2 px-2 py-1.5 rounded bg-white/[0.03] border border-white/8">
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${inCat ? 'bg-emerald-400' : 'bg-amber-400'}`} title={inCat ? 'Ya en catálogo' : 'Campo nuevo'} />
-                  <span className="min-w-0 flex-1"><span className="text-[12px] text-white/80">{s.name}</span>{s.description && <span className="block text-[10px] text-white/35 truncate">{s.description}</span>}</span>
-                  {s.operation && <span className="text-[8.5px] px-1.5 py-0.5 rounded shrink-0" style={{ background: `${STATE_COLORS[s.operation] ?? '#64748b'}22`, color: STATE_COLORS[s.operation] ?? '#94a3b8' }}>{s.operation}</span>}
-                  <button type="button" onClick={() => acceptSuggestion(s)} title="Agregar" className="p-1 rounded text-emerald-300 hover:bg-emerald-500/15 shrink-0"><Check size={13} /></button>
-                  <button type="button" onClick={() => setSuggestions((prev) => prev.filter((x) => x.name !== s.name))} title="Descartar" className="p-1 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10 shrink-0"><X size={13} /></button>
+                <div key={s.name} className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-gray-50 border border-gray-100">
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${inCat ? 'bg-emerald-500' : 'bg-amber-500'}`} title={inCat ? 'Ya en catálogo' : 'Campo nuevo'} />
+                  <span className="min-w-0 flex-1"><span className="text-[12px] text-gray-800">{s.name}</span>{s.description && <span className="block text-[10px] text-gray-400 truncate">{s.description}</span>}</span>
+                  {s.operation && <span className="text-[8.5px] px-1.5 py-0.5 rounded-md shrink-0" style={{ background: `${STATE_COLORS[s.operation] ?? '#64748b'}22`, color: STATE_COLORS[s.operation] ?? '#94a3b8' }}>{s.operation}</span>}
+                  <button type="button" onClick={() => acceptSuggestion(s)} title="Agregar" className="p-1 rounded-md text-emerald-700 hover:bg-emerald-50 shrink-0"><Check size={13} /></button>
+                  <button type="button" onClick={() => setSuggestions((prev) => prev.filter((x) => x.name !== s.name))} title="Descartar" className="p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 shrink-0"><X size={13} /></button>
                 </div>
               )
             })}

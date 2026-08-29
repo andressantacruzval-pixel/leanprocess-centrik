@@ -42,10 +42,10 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
 
   if (!datums.length) {
     return (
-      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
-        <BarChart3 size={18} className="mx-auto text-white/25 mb-1.5" />
-        <p className="text-[12px] text-white/45">{title}</p>
-        <p className="text-[11px] text-white/30 mt-0.5">No hay datos que cumplan ese criterio.</p>
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center">
+        <BarChart3 size={18} className="mx-auto text-gray-400 mb-1.5" />
+        <p className="text-[12px] text-gray-500">{title}</p>
+        <p className="text-[11px] text-gray-400 mt-0.5">No hay datos que cumplan ese criterio.</p>
       </div>
     )
   }
@@ -57,10 +57,10 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
   const insight = chartInsight(datums)
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 copilot-fade">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 copilot-fade">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[12px] font-semibold text-white/80 inline-flex items-center gap-1.5"><BarChart3 size={13} className="text-cyan-400" /> {title}</span>
-        <span className="text-[11px] text-white/35 tabular-nums">Total: {total}</span>
+        <span className="text-[12px] font-semibold text-gray-800 inline-flex items-center gap-1.5"><BarChart3 size={13} className="text-primary-600" /> {title}</span>
+        <span className="text-[11px] text-gray-400 tabular-nums">Total: {total}</span>
       </div>
       <ResponsiveContainer width="100%" height={height}>
         {isPie ? (
@@ -88,7 +88,7 @@ export function CopilotChart({ params }: { params: Record<string, string> }) {
           </BarChart>
         )}
       </ResponsiveContainer>
-      {insight && <p className="text-[11.5px] text-white/50 mt-1.5 pl-0.5">💡 {insight}</p>}
+      {insight && <p className="text-[11.5px] text-gray-500 mt-1.5 pl-0.5">💡 {insight}</p>}
     </div>
   )
 }

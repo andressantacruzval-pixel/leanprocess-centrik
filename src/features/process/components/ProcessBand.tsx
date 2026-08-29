@@ -166,17 +166,17 @@ export function ProcessBand({
   // Colores opacos que equivalen a bg-[color]-500/10 sobre #070b14
   // Usar opaco garantiza que el scroll canvas de overflow-x-auto no quede blanco
   const bandBg = category === 'estrategico'
-    ? 'bg-[#0c172b]'
+    ? 'bg-white'
     : category === 'productivo'
-    ? 'bg-[#071c27]'
-    : 'bg-[#17122b]'
+    ? 'bg-white'
+    : 'bg-white'
 
   return (
     <div
-      className={`rounded-xl overflow-hidden border bg-[#070b14] transition-colors duration-200 ${
+      className={`rounded-lg overflow-hidden border bg-surface-ground transition-colors duration-200 ${
         bandDragOver
-          ? 'border-cyan-400/60 border-dashed shadow-[inset_0_0_20px_rgba(34,211,238,0.08)]'
-          : 'border-white/5'
+          ? 'border-primary-300 border-dashed'
+          : 'border-gray-100'
       }`}
     >
       <div className="flex min-h-[140px]">
@@ -185,9 +185,9 @@ export function ProcessBand({
           className="w-9 sm:w-12 flex-shrink-0 flex flex-col items-center justify-center gap-2"
           style={{ backgroundColor: config.color }}
         >
-          <Icon size={18} className="text-white" />
+          <Icon size={18} className="text-gray-900" />
           <span
-            className="text-white text-[10px] font-bold uppercase tracking-widest whitespace-nowrap"
+            className="text-gray-900 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap"
             style={{
               writingMode: 'vertical-lr',
               transform: 'rotate(180deg)',
@@ -245,9 +245,8 @@ export function ProcessBand({
                 onClick={() => scrollCards(-1)}
                 aria-label="Desplazar a la izquierda"
                 data-export-hide
-                className="absolute left-0 top-0 bottom-0 w-8 z-10 flex items-center justify-center
-                           bg-gradient-to-r from-black/50 to-transparent hover:from-black/70
-                           text-white/60 hover:text-white transition-all"
+                className="absolute left-0 top-0 bottom-0 w-8 z-10 flex items-center justify-center text-gray-600
+                           hover:text-white transition-all bg-primary-500 hover:bg-primary-600"
               >
                 <ChevronLeft size={18} />
               </button>
@@ -257,9 +256,8 @@ export function ProcessBand({
                 onClick={() => scrollCards(1)}
                 aria-label="Desplazar a la derecha"
                 data-export-hide
-                className="absolute right-0 top-0 bottom-0 w-8 z-10 flex items-center justify-center
-                           bg-gradient-to-l from-black/50 to-transparent hover:from-black/70
-                           text-white/60 hover:text-white transition-all"
+                className="absolute right-0 top-0 bottom-0 w-8 z-10 flex items-center justify-center text-gray-600
+                           hover:text-white transition-all bg-primary-500 hover:bg-primary-600"
               >
                 <ChevronRight size={18} />
               </button>
@@ -269,14 +267,15 @@ export function ProcessBand({
           {/* Botón "Agregar" — fuera del scroll, siempre visible. `data-export-hide`
               lo excluye de las exportaciones (imagen/PDF): es un control de edición,
               no parte del mapa. */}
-          <div data-export-hide className={`flex-shrink-0 p-3 sm:p-4 flex items-center border-l border-white/[0.04] ${bandBg}`}>
+          <div data-export-hide className={`flex-shrink-0 p-3 sm:p-4 flex items-center border-l border-gray-100 ${bandBg}`}>
             <button
               onClick={onAddMacro}
-              className="w-16 sm:w-20 min-h-[80px] rounded-lg border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-1.5
-                         transition-colors duration-200 hover:border-cyan-500 hover:bg-cyan-500/10 group"
+              className="w-16 sm:w-20 min-h-[80px] rounded-lg border-2 border-dashed border-gray-200 flex flex-col
+                         items-center justify-center gap-1.5 transition-colors duration-200 hover:border-primary-500
+                         hover:bg-primary-50 group"
             >
-              <Plus size={20} className="text-white/30 group-hover:text-cyan-400 transition-colors" />
-              <span className="text-xs text-white/30 group-hover:text-cyan-400 transition-colors">
+              <Plus size={20} className="text-gray-400 group-hover:text-primary-600 transition-colors" />
+              <span className="text-xs text-gray-400 group-hover:text-primary-600 transition-colors">
                 Agregar
               </span>
             </button>

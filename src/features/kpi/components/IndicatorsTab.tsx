@@ -178,14 +178,14 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
   if (!bpmnXml && indicators.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <AlertTriangle size={48} className="text-white/20 mb-4" />
-        <h3 className="text-lg font-semibold text-white/60 mb-2">Diagrama BPMN no disponible</h3>
-        <p className="text-sm text-white/30 max-w-md">
+        <AlertTriangle size={48} className="text-gray-300 mb-4" />
+        <h3 className="text-lg font-semibold text-gray-600 mb-2">Diagrama BPMN no disponible</h3>
+        <p className="text-sm text-gray-400 max-w-md">
           Genera primero el diagrama BPMN del proceso para poder crear indicadores con IA, o agrega indicadores manualmente.
         </p>
         <button
           onClick={handleAddBlank}
-          className="mt-6 p-2 rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white/80 transition-colors"
+          className="mt-6 p-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 transition-colors"
           title="Agregar indicador"
         >
           <Plus size={16} />
@@ -203,7 +203,7 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
             type="button"
             onClick={handleGenerate}
             disabled={loading || indicatorBudget.isConsuming}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 text-[11px] font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200 text-[11px] font-medium transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             {(loading || indicatorBudget.isConsuming) ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
             {(loading || indicatorBudget.isConsuming) ? 'Generando...' : indicators.length > 0 ? 'Regenerar con IA' : 'Generar con IA'}
@@ -213,7 +213,7 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
 
         <button
           onClick={handleAddBlank}
-          className="p-1.5 rounded-md text-white/40 hover:text-white/70 hover:bg-white/10 border border-white/10 transition-colors"
+          className="p-1.5 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200 transition-colors"
           title="Agregar indicador"
         >
           <Plus size={13} />
@@ -223,10 +223,10 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
           <div className="ml-auto">
             <button
               onClick={handleExport}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70 border border-white/10 text-[11px] font-medium transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 border border-gray-200 text-[11px] font-medium transition-colors"
             >
               <FileSpreadsheet size={12} /> Exportar Excel
-              <span className="px-1.5 py-0.5 bg-white/10 rounded text-[9px] text-white/40">{indicators.length}</span>
+              <span className="px-1.5 py-0.5 bg-gray-100 rounded-md text-[9px] text-gray-500">{indicators.length}</span>
             </button>
           </div>
         )}
@@ -234,32 +234,32 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
 
       {/* BPMN Summary */}
       {bpmnSummary && (
-        <div className="flex items-center gap-4 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/5 text-xs">
-          <div className="flex items-center gap-1.5 text-white/50">
-            <Activity size={12} className="text-cyan-400" />
-            <span className="text-white/70 font-medium">{bpmnSummary.activities}</span> actividades
+        <div className="flex items-center gap-4 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-xs">
+          <div className="flex items-center gap-1.5 text-gray-500">
+            <Activity size={12} className="text-primary-600" />
+            <span className="text-gray-700 font-medium">{bpmnSummary.activities}</span> actividades
           </div>
-          <div className="flex items-center gap-1.5 text-white/50">
-            <GitBranch size={12} className="text-cyan-400" />
-            <span className="text-white/70 font-medium">{bpmnSummary.decisions}</span> decisiones
+          <div className="flex items-center gap-1.5 text-gray-500">
+            <GitBranch size={12} className="text-primary-600" />
+            <span className="text-gray-700 font-medium">{bpmnSummary.decisions}</span> decisiones
           </div>
-          <div className="flex items-center gap-1.5 text-white/50">
-            <Users size={12} className="text-cyan-400" />
-            <span className="text-white/70 font-medium">{bpmnSummary.roles}</span> roles
+          <div className="flex items-center gap-1.5 text-gray-500">
+            <Users size={12} className="text-primary-600" />
+            <span className="text-gray-700 font-medium">{bpmnSummary.roles}</span> roles
           </div>
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs">{error}</div>
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs">{error}</div>
       )}
 
       {/* ── Indicators List ── */}
       {indicators.length > 0 && (
-        <div className="rounded-xl border border-white/5 overflow-hidden">
+        <div className="rounded-lg border border-gray-100 overflow-hidden">
           {/* Header */}
-          <div className="grid grid-cols-[1fr_52px_32px] min-[420px]:grid-cols-[1fr_70px_52px_32px] min-[520px]:grid-cols-[1fr_90px_70px_52px_32px] gap-0 bg-white/[0.05] border-b border-white/5 px-4 py-2.5 text-[10px] uppercase tracking-wider text-white/40 font-semibold">
+          <div className="grid grid-cols-[1fr_52px_32px] min-[420px]:grid-cols-[1fr_70px_52px_32px] min-[520px]:grid-cols-[1fr_90px_70px_52px_32px] gap-0 bg-gray-50 border-b border-gray-100 px-4 py-2.5 text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
             <div>Indicador</div>
             <div className="hidden min-[520px]:block">Frecuencia</div>
             <div className="hidden min-[420px]:block">Meta</div>
@@ -271,38 +271,38 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
           {indicators.map((ind) => {
             const isRowExpanded = expandedId === ind.id
             return (
-              <div key={ind.id} className="border-b border-white/5 last:border-b-0">
+              <div key={ind.id} className="border-b border-gray-100 last:border-b-0">
                 {/* Main row */}
                 <div
-                  className="grid grid-cols-[1fr_52px_32px] min-[420px]:grid-cols-[1fr_70px_52px_32px] min-[520px]:grid-cols-[1fr_90px_70px_52px_32px] gap-0 px-4 py-3 items-center transition-colors hover:bg-white/[0.02] cursor-pointer"
+                  className="grid grid-cols-[1fr_52px_32px] min-[420px]:grid-cols-[1fr_70px_52px_32px] min-[520px]:grid-cols-[1fr_90px_70px_52px_32px] gap-0 px-4 py-3 items-center transition-colors hover:bg-gray-50 cursor-pointer"
                   onClick={() => setExpandedId(isRowExpanded ? null : ind.id)}
                 >
                   <div className="pr-3 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{ind.name}</p>
-                    <p className="text-[11px] text-white/30 truncate mt-0.5">{ind.description}</p>
+                    <p className="text-sm font-semibold text-gray-900 truncate">{ind.name}</p>
+                    <p className="text-[11px] text-gray-400 truncate mt-0.5">{ind.description}</p>
                   </div>
                   <div className="hidden min-[520px]:block">
-                    <span className="px-2 py-0.5 bg-white/5 rounded text-[10px] text-white/60 border border-white/5">{ind.frequency}</span>
+                    <span className="px-2 py-0.5 bg-gray-50 rounded-md text-[10px] text-gray-600 border border-gray-100">{ind.frequency}</span>
                   </div>
                   <div className="hidden min-[420px]:block">
-                    <span className="text-xs text-white/70 font-medium">{ind.target_value}</span>
+                    <span className="text-xs text-gray-700 font-medium">{ind.target_value}</span>
                   </div>
                   <div
                     className="flex items-center gap-1"
                     title={`Verde: ${formatRange(ind.threshold_green_min, ind.threshold_green_max)} | Amarillo: ${formatRange(ind.threshold_yellow_min, ind.threshold_yellow_max)} | Rojo: ${formatRange(ind.threshold_red_min, ind.threshold_red_max)}`}
                   >
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-100" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-100" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-100" />
                   </div>
                   <div className="flex items-center justify-center">
-                    {isRowExpanded ? <ChevronUp size={14} className="text-white/30" /> : <ChevronDown size={14} className="text-white/30" />}
+                    {isRowExpanded ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
                   </div>
                 </div>
 
                 {/* Expanded detail */}
                 {isRowExpanded && (
-                  <div className="px-6 pb-4 pt-1 bg-white/[0.02] border-t border-white/5 space-y-3 animate-in slide-in-from-top-1 duration-150">
+                  <div className="px-6 pb-4 pt-1 bg-gray-50 border-t border-gray-100 space-y-3 animate-in slide-in-from-top-1 duration-150">
                     <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                       <DetailField label="Formula" value={ind.formula} />
                       <DetailField label="Fuente de datos" value={ind.data_source} />
@@ -313,29 +313,29 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
                     </div>
 
                     {/* Thresholds detail */}
-                    <div className="pt-2 border-t border-white/5">
-                      <p className="text-[10px] text-white/30 uppercase tracking-wider mb-2">Umbrales del Semaforo</p>
+                    <div className="pt-2 border-t border-gray-100">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Umbrales del Semaforo</p>
                       <div className="grid grid-cols-3 gap-3">
-                        <div className="p-2.5 rounded-lg bg-green-500/5 border border-green-500/15">
+                        <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="w-2 h-2 rounded-full bg-green-400" />
-                            <span className="text-[10px] text-green-400 font-semibold uppercase">Verde</span>
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span className="text-[10px] text-emerald-600 font-semibold uppercase">Verde</span>
                           </div>
-                          <p className="text-xs text-white/70">{formatRange(ind.threshold_green_min, ind.threshold_green_max)}</p>
+                          <p className="text-xs text-gray-700">{formatRange(ind.threshold_green_min, ind.threshold_green_max)}</p>
                         </div>
-                        <div className="p-2.5 rounded-lg bg-yellow-500/5 border border-yellow-500/15">
+                        <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="w-2 h-2 rounded-full bg-yellow-400" />
-                            <span className="text-[10px] text-yellow-400 font-semibold uppercase">Amarillo</span>
+                            <span className="w-2 h-2 rounded-full bg-amber-500" />
+                            <span className="text-[10px] text-amber-600 font-semibold uppercase">Amarillo</span>
                           </div>
-                          <p className="text-xs text-white/70">{formatRange(ind.threshold_yellow_min, ind.threshold_yellow_max)}</p>
+                          <p className="text-xs text-gray-700">{formatRange(ind.threshold_yellow_min, ind.threshold_yellow_max)}</p>
                         </div>
-                        <div className="p-2.5 rounded-lg bg-red-500/5 border border-red-500/15">
+                        <div className="p-2.5 rounded-lg bg-red-50 border border-red-200">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="w-2 h-2 rounded-full bg-red-400" />
-                            <span className="text-[10px] text-red-400 font-semibold uppercase">Rojo</span>
+                            <span className="w-2 h-2 rounded-full bg-red-500" />
+                            <span className="text-[10px] text-red-600 font-semibold uppercase">Rojo</span>
                           </div>
-                          <p className="text-xs text-white/70">{formatRange(ind.threshold_red_min, ind.threshold_red_max)}</p>
+                          <p className="text-xs text-gray-700">{formatRange(ind.threshold_red_min, ind.threshold_red_max)}</p>
                         </div>
                       </div>
                     </div>
@@ -344,13 +344,13 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
                     <div className="flex items-center gap-2 pt-1">
                       <button
                         onClick={(e) => { e.stopPropagation(); setEditingId(ind.id) }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/50 hover:text-white/80 text-[11px] transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-800 text-[11px] transition-colors"
                       >
                         <Pencil size={12} /> Editar
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); setDeleteTarget(ind.id) }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/5 border border-red-500/15 text-red-400/70 hover:text-red-400 text-[11px] transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-600 hover:text-red-600 text-[11px] transition-colors"
                       >
                         <Trash2 size={12} /> Eliminar
                       </button>
@@ -366,8 +366,8 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
       {/* Empty state */}
       {!loading && indicators.length === 0 && bpmnXml && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Sparkles size={40} className="text-white/10 mb-3" />
-          <p className="text-sm text-white/30">
+          <Sparkles size={40} className="text-gray-300 mb-3" />
+          <p className="text-sm text-gray-400">
             Haz clic en &quot;Generar con IA&quot; para crear KPIs basados en el diagrama BPMN.
           </p>
         </div>
@@ -375,7 +375,7 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
 
       {/* Saved indicator count */}
       {indicators.length > 0 && (
-        <p className="text-[10px] text-white/20 text-center">
+        <p className="text-[10px] text-gray-300 text-center">
           {indicators.length} indicador{indicators.length !== 1 ? 'es' : ''} guardado{indicators.length !== 1 ? 's' : ''}
         </p>
       )}
@@ -412,8 +412,8 @@ export function IndicatorsTab({ processId, processName, description, bpmnXml, is
 function DetailField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] text-white/30 uppercase tracking-wider mb-0.5">{label}</p>
-      <p className="text-xs text-white/70">{value || '-'}</p>
+      <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-0.5">{label}</p>
+      <p className="text-xs text-gray-700">{value || '-'}</p>
     </div>
   )
 }
@@ -460,23 +460,23 @@ function EditModal({
   const handleSave = () => { onUpdate(draft); onClose() }
   const handleCloseAttempt = () => { if (isDirty) setShowConfirmClose(true); else onClose() }
 
-  const f = "w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+  const f = "w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-primary-300"
 
   // ── Vista expandida: popup nuevo centrado ──
   if (expanded) {
     return (
-      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md p-6 animate-in fade-in duration-200">
-        <div className="w-full max-w-4xl rounded-2xl bg-[#0b1020] border border-white/10 shadow-[0_8px_60px_rgba(0,0,0,0.8)] flex flex-col max-h-[88vh]">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/45 p-6 animate-in fade-in duration-200">
+        <div className="w-full max-w-4xl rounded-lg bg-surface-ground border border-gray-200 flex flex-col max-h-[88vh]">
 
           {/* Header expandido */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.07] shrink-0 bg-white/[0.02]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0 bg-gray-50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                <Activity size={16} className="text-cyan-400" />
+              <div className="w-10 h-10 rounded-lg bg-primary-50 border border-primary-200 flex items-center justify-center">
+                <Activity size={16} className="text-primary-600" />
               </div>
               <div>
-                <p className="text-[9px] text-white/30 uppercase tracking-[0.15em] font-semibold">Indicador de Desempeño</p>
-                <p className="text-base font-semibold text-white leading-tight">{indicator.name}</p>
+                <p className="text-[9px] text-gray-400 uppercase tracking-[0.15em] font-semibold">Indicador de Desempeño</p>
+                <p className="text-base font-semibold text-gray-900 leading-tight">{indicator.name}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -485,7 +485,7 @@ function EditModal({
                   onClick={onAiSuggest}
                   disabled={!canAiSuggest || isAiSuggesting}
                   title={canAiSuggest ? 'Sugerir indicador con IA' : 'Necesitas un diagrama BPMN para usar esta función'}
-                  className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isAiSuggesting ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
                   IA
@@ -493,11 +493,11 @@ function EditModal({
               )}
               <button
                 onClick={() => setExpanded(false)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/40 hover:text-white/70 text-[11px] font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-700 text-[11px] font-medium transition-colors"
               >
                 <Minimize2 size={12} /> Vista compacta
               </button>
-              <button onClick={handleCloseAttempt} className="p-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-white/60 transition-colors">
+              <button onClick={handleCloseAttempt} className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors">
                 <X size={16} />
               </button>
             </div>
@@ -507,8 +507,8 @@ function EditModal({
           <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-[3fr_2fr]">
 
             {/* Izquierda: campos generales */}
-            <div className="p-6 space-y-4 border-b md:border-b-0 md:border-r border-white/[0.06]">
-              <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.18em]">Información General</p>
+            <div className="p-6 space-y-4 border-b md:border-b-0 md:border-r border-gray-100">
+              <p className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.18em]">Información General</p>
               <ModalField label="Nombre del Indicador">
                 <input type="text" value={draft.name} onChange={e => handleFieldChange({ name: e.target.value })} className={f} />
               </ModalField>
@@ -525,12 +525,12 @@ function EditModal({
               <div className="grid grid-cols-3 gap-3 pt-1">
                 <ModalField label="Unidad">
                   <select value={draft.unit} onChange={e => handleFieldChange({ unit: e.target.value })} className={f}>
-                    {UNIT_OPTIONS.map(u => <option key={u} value={u} className="bg-[#0b1020] text-white">{u}</option>)}
+                    {UNIT_OPTIONS.map(u => <option key={u} value={u} className="bg-surface-ground text-gray-900">{u}</option>)}
                   </select>
                 </ModalField>
                 <ModalField label="Frecuencia">
                   <select value={draft.frequency} onChange={e => handleFieldChange({ frequency: e.target.value })} className={f}>
-                    {FREQUENCY_OPTIONS.map(fr => <option key={fr} value={fr} className="bg-[#0b1020] text-white">{fr}</option>)}
+                    {FREQUENCY_OPTIONS.map(fr => <option key={fr} value={fr} className="bg-surface-ground text-gray-900">{fr}</option>)}
                   </select>
                 </ModalField>
                 <ModalField label="Meta">
@@ -540,70 +540,70 @@ function EditModal({
             </div>
 
             {/* Derecha: semáforo + responsables */}
-            <div className="p-6 space-y-6 bg-white/[0.01]">
+            <div className="p-6 space-y-6 bg-gray-50">
               <div className="space-y-3">
-                <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.18em]">Semáforo de Desempeño</p>
-                <div className="p-4 rounded-2xl bg-green-500/[0.08] border border-green-500/20 flex items-start gap-3.5">
-                  <div className="w-3.5 h-3.5 rounded-full bg-green-400 shrink-0 mt-0.5 shadow-[0_0_10px_rgba(74,222,128,0.7)]" />
+                <p className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.18em]">Semáforo de Desempeño</p>
+                <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex items-start gap-3.5">
+                  <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-[10px] text-green-400/90 font-bold uppercase tracking-wider mb-2">Verde — Óptimo</p>
+                    <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mb-2">Verde — Óptimo</p>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <p className="text-[9px] text-green-400/50 mb-1">Mínimo</p>
+                        <p className="text-[9px] text-emerald-600 mb-1">Mínimo</p>
                         <input type="number" value={draft.threshold_green_min ?? ''}
                           onChange={e => handleFieldChange({ threshold_green_min: e.target.value === '' ? null : Number(e.target.value) })}
-                          className="w-full px-3 py-2 rounded-xl bg-green-500/[0.08] border border-green-500/25 text-white text-sm focus:outline-none focus:border-green-400/70"
+                          className="w-full px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-gray-900 text-sm focus:outline-none focus:border-emerald-300"
                           placeholder="ej. 90" />
                       </div>
                       <div>
-                        <p className="text-[9px] text-green-400/50 mb-1">Máximo</p>
+                        <p className="text-[9px] text-emerald-600 mb-1">Máximo</p>
                         <input type="number" value={draft.threshold_green_max ?? ''}
                           onChange={e => handleFieldChange({ threshold_green_max: e.target.value === '' ? null : Number(e.target.value) })}
-                          className="w-full px-3 py-2 rounded-xl bg-green-500/[0.08] border border-green-500/25 text-white text-sm focus:outline-none focus:border-green-400/70"
+                          className="w-full px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-gray-900 text-sm focus:outline-none focus:border-emerald-300"
                           placeholder="ej. 100" />
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="p-4 rounded-2xl bg-yellow-500/[0.08] border border-yellow-500/20 flex items-start gap-3.5">
-                  <div className="w-3.5 h-3.5 rounded-full bg-yellow-400 shrink-0 mt-0.5 shadow-[0_0_10px_rgba(234,179,8,0.7)]" />
+                <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 flex items-start gap-3.5">
+                  <div className="w-3.5 h-3.5 rounded-full bg-amber-500 shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-[10px] text-yellow-400/90 font-bold uppercase tracking-wider mb-2">Amarillo — Alerta</p>
+                    <p className="text-[10px] text-amber-600 font-bold uppercase tracking-wider mb-2">Amarillo — Alerta</p>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <p className="text-[9px] text-yellow-400/50 mb-1">Mínimo</p>
+                        <p className="text-[9px] text-amber-600 mb-1">Mínimo</p>
                         <input type="number" value={draft.threshold_yellow_min ?? ''}
                           onChange={e => handleFieldChange({ threshold_yellow_min: e.target.value === '' ? null : Number(e.target.value) })}
-                          className="w-full px-3 py-2 rounded-xl bg-yellow-500/[0.08] border border-yellow-500/25 text-white text-sm focus:outline-none focus:border-yellow-400/70"
+                          className="w-full px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-gray-900 text-sm focus:outline-none focus:border-amber-300"
                           placeholder="ej. 70" />
                       </div>
                       <div>
-                        <p className="text-[9px] text-yellow-400/50 mb-1">Máximo</p>
+                        <p className="text-[9px] text-amber-600 mb-1">Máximo</p>
                         <input type="number" value={draft.threshold_yellow_max ?? ''}
                           onChange={e => handleFieldChange({ threshold_yellow_max: e.target.value === '' ? null : Number(e.target.value) })}
-                          className="w-full px-3 py-2 rounded-xl bg-yellow-500/[0.08] border border-yellow-500/25 text-white text-sm focus:outline-none focus:border-yellow-400/70"
+                          className="w-full px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-gray-900 text-sm focus:outline-none focus:border-amber-300"
                           placeholder="ej. 89" />
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="p-4 rounded-2xl bg-red-500/[0.08] border border-red-500/20 flex items-start gap-3.5">
-                  <div className="w-3.5 h-3.5 rounded-full bg-red-400 shrink-0 mt-0.5 shadow-[0_0_10px_rgba(248,113,113,0.7)]" />
+                <div className="p-4 rounded-lg bg-red-50 border border-red-200 flex items-start gap-3.5">
+                  <div className="w-3.5 h-3.5 rounded-full bg-red-500 shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-[10px] text-red-400/90 font-bold uppercase tracking-wider mb-2">Rojo — Crítico</p>
+                    <p className="text-[10px] text-red-600 font-bold uppercase tracking-wider mb-2">Rojo — Crítico</p>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <p className="text-[9px] text-red-400/50 mb-1">Mínimo</p>
+                        <p className="text-[9px] text-red-600 mb-1">Mínimo</p>
                         <input type="number" value={draft.threshold_red_min ?? ''}
                           onChange={e => handleFieldChange({ threshold_red_min: e.target.value === '' ? null : Number(e.target.value) })}
-                          className="w-full px-3 py-2 rounded-xl bg-red-500/[0.08] border border-red-500/25 text-white text-sm focus:outline-none focus:border-red-400/70"
+                          className="w-full px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-gray-900 text-sm focus:outline-none focus:border-red-300"
                           placeholder="ej. 0" />
                       </div>
                       <div>
-                        <p className="text-[9px] text-red-400/50 mb-1">Máximo</p>
+                        <p className="text-[9px] text-red-600 mb-1">Máximo</p>
                         <input type="number" value={draft.threshold_red_max ?? ''}
                           onChange={e => handleFieldChange({ threshold_red_max: e.target.value === '' ? null : Number(e.target.value) })}
-                          className="w-full px-3 py-2 rounded-xl bg-red-500/[0.08] border border-red-500/25 text-white text-sm focus:outline-none focus:border-red-400/70"
+                          className="w-full px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-gray-900 text-sm focus:outline-none focus:border-red-300"
                           placeholder="ej. 69" />
                       </div>
                     </div>
@@ -612,7 +612,7 @@ function EditModal({
               </div>
 
               <div className="space-y-3 pt-1">
-                <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.18em]">Responsables</p>
+                <p className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.18em]">Responsables</p>
                 <ModalField label="Responsable de Reporte">
                   <input type="text" value={draft.owner} onChange={e => handleFieldChange({ owner: e.target.value })} className={f} placeholder="Nombre del responsable..." />
                 </ModalField>
@@ -624,11 +624,11 @@ function EditModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-2 px-6 py-3.5 border-t border-white/[0.07] shrink-0 bg-white/[0.02]">
-            <button onClick={onClose} className="px-4 py-2 text-xs text-white/50 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors">
+          <div className="flex items-center justify-end gap-2 px-6 py-3.5 border-t border-gray-100 shrink-0 bg-gray-50">
+            <button onClick={onClose} className="px-4 py-2 text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors">
               Cancelar
             </button>
-            <button onClick={handleSave} className="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-medium hover:from-cyan-500 hover:to-blue-500 transition-all">
+            <button onClick={handleSave} className="px-5 py-2 rounded-lg text-white text-sm font-medium transition-all bg-primary-500 hover:bg-primary-600">
               Guardar
             </button>
           </div>
@@ -642,18 +642,18 @@ function EditModal({
 
   // ── Vista compacta: modal estándar ──
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="w-full max-w-xl rounded-2xl bg-[#0d1420] border border-white/10 shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/45 p-4">
+      <div className="w-full max-w-xl rounded-lg bg-white border border-gray-200 shadow-2xl flex flex-col max-h-[90vh]">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
-              <Activity size={14} className="text-cyan-400" />
+            <div className="w-8 h-8 rounded-lg bg-primary-50 border border-primary-200 flex items-center justify-center shrink-0">
+              <Activity size={14} className="text-primary-600" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] text-white/30 uppercase tracking-wider">Indicador</p>
-              <p className="text-sm font-semibold text-white truncate">{indicator.name}</p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider">Indicador</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">{indicator.name}</p>
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0 ml-3">
@@ -662,17 +662,17 @@ function EditModal({
                 onClick={onAiSuggest}
                 disabled={!canAiSuggest || isAiSuggesting}
                 title={canAiSuggest ? 'Sugerir indicador con IA' : 'Necesitas un diagrama BPMN para usar esta función'}
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isAiSuggesting ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
                 IA
               </button>
             )}
             <button onClick={() => setExpanded(true)} title="Vista ampliada"
-              className="p-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-cyan-400 transition-colors">
+              className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-primary-600 transition-colors">
               <Maximize2 size={14} />
             </button>
-            <button onClick={handleCloseAttempt} className="p-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-white/60 transition-colors">
+            <button onClick={handleCloseAttempt} className="p-1.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors">
               <X size={16} />
             </button>
           </div>
@@ -696,12 +696,12 @@ function EditModal({
           <div className="grid grid-cols-2 gap-4">
             <ModalField label="Unidad de medida">
               <select value={draft.unit} onChange={e => handleFieldChange({ unit: e.target.value })} className={f}>
-                {UNIT_OPTIONS.map(u => <option key={u} value={u} className="bg-[#0b1020] text-white">{u}</option>)}
+                {UNIT_OPTIONS.map(u => <option key={u} value={u} className="bg-surface-ground text-gray-900">{u}</option>)}
               </select>
             </ModalField>
             <ModalField label="Frecuencia">
               <select value={draft.frequency} onChange={e => handleFieldChange({ frequency: e.target.value })} className={f}>
-                {FREQUENCY_OPTIONS.map(fr => <option key={fr} value={fr} className="bg-[#0b1020] text-white">{fr}</option>)}
+                {FREQUENCY_OPTIONS.map(fr => <option key={fr} value={fr} className="bg-surface-ground text-gray-900">{fr}</option>)}
               </select>
             </ModalField>
           </div>
@@ -709,54 +709,54 @@ function EditModal({
             <input type="text" value={draft.target_value} onChange={e => handleFieldChange({ target_value: e.target.value })} className={f} />
           </ModalField>
           <div className="space-y-2">
-            <p className="text-xs font-medium text-white/40">Semáforo de Desempeño</p>
-            <div className="p-3 rounded-xl bg-green-500/[0.06] border border-green-500/20">
-              <p className="text-[9px] text-green-400 font-bold uppercase tracking-wider mb-2">Verde — Óptimo</p>
+            <p className="text-xs font-medium text-gray-500">Semáforo de Desempeño</p>
+            <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+              <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-wider mb-2">Verde — Óptimo</p>
               <div className="grid grid-cols-2 gap-2">
-                <ModalField label="Mínimo" labelClass="text-green-400/50">
+                <ModalField label="Mínimo" labelClass="text-emerald-600">
                   <input type="number" value={draft.threshold_green_min ?? ''}
                     onChange={e => handleFieldChange({ threshold_green_min: e.target.value === '' ? null : Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-green-500/20 text-white text-sm focus:outline-none focus:border-green-500/50"
+                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-emerald-200 text-gray-900 text-sm focus:outline-none focus:border-emerald-300"
                     placeholder="ej. 90" />
                 </ModalField>
-                <ModalField label="Máximo" labelClass="text-green-400/50">
+                <ModalField label="Máximo" labelClass="text-emerald-600">
                   <input type="number" value={draft.threshold_green_max ?? ''}
                     onChange={e => handleFieldChange({ threshold_green_max: e.target.value === '' ? null : Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-green-500/20 text-white text-sm focus:outline-none focus:border-green-500/50"
+                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-emerald-200 text-gray-900 text-sm focus:outline-none focus:border-emerald-300"
                     placeholder="ej. 100" />
                 </ModalField>
               </div>
             </div>
-            <div className="p-3 rounded-xl bg-yellow-500/[0.06] border border-yellow-500/20">
-              <p className="text-[9px] text-yellow-400 font-bold uppercase tracking-wider mb-2">Amarillo — Alerta</p>
+            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+              <p className="text-[9px] text-amber-600 font-bold uppercase tracking-wider mb-2">Amarillo — Alerta</p>
               <div className="grid grid-cols-2 gap-2">
-                <ModalField label="Mínimo" labelClass="text-yellow-400/50">
+                <ModalField label="Mínimo" labelClass="text-amber-600">
                   <input type="number" value={draft.threshold_yellow_min ?? ''}
                     onChange={e => handleFieldChange({ threshold_yellow_min: e.target.value === '' ? null : Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-yellow-500/20 text-white text-sm focus:outline-none focus:border-yellow-500/50"
+                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-amber-200 text-gray-900 text-sm focus:outline-none focus:border-amber-300"
                     placeholder="ej. 70" />
                 </ModalField>
-                <ModalField label="Máximo" labelClass="text-yellow-400/50">
+                <ModalField label="Máximo" labelClass="text-amber-600">
                   <input type="number" value={draft.threshold_yellow_max ?? ''}
                     onChange={e => handleFieldChange({ threshold_yellow_max: e.target.value === '' ? null : Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-yellow-500/20 text-white text-sm focus:outline-none focus:border-yellow-500/50"
+                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-amber-200 text-gray-900 text-sm focus:outline-none focus:border-amber-300"
                     placeholder="ej. 89" />
                 </ModalField>
               </div>
             </div>
-            <div className="p-3 rounded-xl bg-red-500/[0.06] border border-red-500/20">
-              <p className="text-[9px] text-red-400 font-bold uppercase tracking-wider mb-2">Rojo — Crítico</p>
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+              <p className="text-[9px] text-red-600 font-bold uppercase tracking-wider mb-2">Rojo — Crítico</p>
               <div className="grid grid-cols-2 gap-2">
-                <ModalField label="Mínimo" labelClass="text-red-400/50">
+                <ModalField label="Mínimo" labelClass="text-red-600">
                   <input type="number" value={draft.threshold_red_min ?? ''}
                     onChange={e => handleFieldChange({ threshold_red_min: e.target.value === '' ? null : Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-red-500/20 text-white text-sm focus:outline-none focus:border-red-500/50"
+                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-red-200 text-gray-900 text-sm focus:outline-none focus:border-red-300"
                     placeholder="ej. 0" />
                 </ModalField>
-                <ModalField label="Máximo" labelClass="text-red-400/50">
+                <ModalField label="Máximo" labelClass="text-red-600">
                   <input type="number" value={draft.threshold_red_max ?? ''}
                     onChange={e => handleFieldChange({ threshold_red_max: e.target.value === '' ? null : Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-red-500/20 text-white text-sm focus:outline-none focus:border-red-500/50"
+                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-red-200 text-gray-900 text-sm focus:outline-none focus:border-red-300"
                     placeholder="ej. 69" />
                 </ModalField>
               </div>
@@ -773,11 +773,11 @@ function EditModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-white/10 shrink-0">
-          <button onClick={onClose} className="px-4 py-2 text-xs text-white/50 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors">
+        <div className="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-gray-200 shrink-0">
+          <button onClick={onClose} className="px-4 py-2 text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors">
             Cancelar
           </button>
-          <button onClick={handleSave} className="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-medium hover:from-cyan-500 hover:to-blue-500 transition-all">
+          <button onClick={handleSave} className="px-5 py-2 rounded-lg text-white text-sm font-medium transition-all bg-primary-500 hover:bg-primary-600">
             Guardar
           </button>
         </div>
@@ -792,7 +792,7 @@ function EditModal({
 function ModalField({ label, labelClass, children }: { label: string; labelClass?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className={`block text-xs font-medium mb-1 ${labelClass || 'text-white/40'}`}>{label}</label>
+      <label className={`block text-xs font-medium mb-1 ${labelClass || 'text-gray-500'}`}>{label}</label>
       {children}
     </div>
   )

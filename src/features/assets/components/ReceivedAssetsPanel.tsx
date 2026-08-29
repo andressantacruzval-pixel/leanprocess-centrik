@@ -20,8 +20,8 @@ export function ReceivedAssetsPanel({ processId }: { processId: string }) {
   if (incoming.length === 0) return null
 
   return (
-    <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/[0.05] p-2.5 space-y-2">
-      <p className="text-[11px] font-semibold text-cyan-200/90 flex items-center gap-1.5"><ArrowDownLeft size={13} /> Recibidos de otros procesos ({incoming.length})</p>
+    <div className="rounded-lg border border-primary-200 bg-primary-50 p-2.5 space-y-2">
+      <p className="text-[11px] font-semibold text-primary-700 flex items-center gap-1.5"><ArrowDownLeft size={13} /> Recibidos de otros procesos ({incoming.length})</p>
       {incoming.map((o) => {
         const asset = assets.find((a) => a.id === o.asset_id)
         if (!asset) return null
@@ -32,24 +32,24 @@ export function ReceivedAssetsPanel({ processId }: { processId: string }) {
         // enlace (las que llegaron a él): lo no enviado antes no puede reenviarse.
         const notArriving = columnsAvailableAt(asset, o.process_id, operations).filter((c) => !arrivingNames.has(c.name))
         return (
-          <div key={o.id} className="rounded-lg border border-white/8 bg-white/[0.03] p-2.5">
+          <div key={o.id} className="rounded-lg border border-gray-100 bg-gray-50 p-2.5">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-[12.5px] font-medium text-white flex items-center gap-1.5"><ShieldCheck size={12} className="text-indigo-300 shrink-0" />{asset.name}</p>
-                <p className="text-[10px] text-white/45 mt-0.5">Viene de <span className="text-white/70">{sourceName}</span></p>
+                <p className="text-[12.5px] font-medium text-gray-900 flex items-center gap-1.5"><ShieldCheck size={12} className="text-primary-700 shrink-0" />{asset.name}</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">Viene de <span className="text-gray-700">{sourceName}</span></p>
               </div>
-              <button onClick={() => { if (confirm(`¿Quitar la relación de «${asset.name}» recibido de ${sourceName}? Se elimina también del Data Journey.`)) deleteOperation(o.id) }} title="Quitar relación" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10 shrink-0"><Trash2 size={13} /></button>
+              <button onClick={() => { if (confirm(`¿Quitar la relación de «${asset.name}» recibido de ${sourceName}? Se elimina también del Data Journey.`)) deleteOperation(o.id) }} title="Quitar relación" className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 shrink-0"><Trash2 size={13} /></button>
             </div>
 
-            {o.justification && <p className="text-[10.5px] text-white/40 mt-1 italic">“{o.justification}”</p>}
-            {o.medium && <p className="text-[10px] text-white/45 mt-0.5">Medio: <span className="text-white/65">{o.medium}</span>{o.medium_detail ? ` · ${o.medium_detail}` : ''}</p>}
+            {o.justification && <p className="text-[10.5px] text-gray-500 mt-1 italic">“{o.justification}”</p>}
+            {o.medium && <p className="text-[10px] text-gray-500 mt-0.5">Medio: <span className="text-gray-700">{o.medium}</span>{o.medium_detail ? ` · ${o.medium_detail}` : ''}</p>}
 
             <div className="mt-1.5">
-              <p className="text-[9.5px] text-white/40 uppercase tracking-wide mb-1">Columnas que llegan ({arriving.length})</p>
+              <p className="text-[9.5px] text-gray-500 uppercase tracking-wide mb-1">Columnas que llegan ({arriving.length})</p>
               <div className="flex flex-wrap gap-1">
-                {arriving.length === 0 ? <span className="text-[10px] text-white/30">Ninguna declarada.</span> : arriving.map((c) => (
-                  <span key={c.name} className="text-[9.5px] px-1.5 py-0.5 rounded bg-white/8 text-white/70 inline-flex items-center gap-1">
-                    {c.code && <span className="text-white/40 font-mono">{c.code}</span>}{c.name}
+                {arriving.length === 0 ? <span className="text-[10px] text-gray-400">Ninguna declarada.</span> : arriving.map((c) => (
+                  <span key={c.name} className="text-[9.5px] px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-700 inline-flex items-center gap-1">
+                    {c.code && <span className="text-gray-500 font-mono">{c.code}</span>}{c.name}
                     {c.operation && <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATE_COLORS[c.operation] ?? '#64748b' }} />}
                   </span>
                 ))}
@@ -58,20 +58,20 @@ export function ReceivedAssetsPanel({ processId }: { processId: string }) {
 
             {notArriving.length > 0 && (
               <div className="mt-1.5">
-                <p className="text-[9.5px] text-white/30 uppercase tracking-wide mb-1">Existen pero no llegan ({notArriving.length}) · pulsa para incorporar</p>
+                <p className="text-[9.5px] text-gray-400 uppercase tracking-wide mb-1">Existen pero no llegan ({notArriving.length}) · pulsa para incorporar</p>
                 <div className="flex flex-wrap gap-1">
                   {notArriving.map((c) => (
                     <button key={c.name} onClick={() => updateJourneyLink(o.id, [...arriving, c], o.justification ?? '', o.dest_operation, o.medium, o.medium_detail)}
-                      title="Incorporar esta columna a lo que llega" className="text-[9.5px] px-1.5 py-0.5 rounded border border-dashed border-white/15 text-white/45 hover:text-cyan-300 hover:border-cyan-500/40">+ {c.name}</button>
+                      title="Incorporar esta columna a lo que llega" className="text-[9.5px] px-1.5 py-0.5 rounded-md border border-dashed border-gray-200 text-gray-500 hover:text-primary-700 hover:border-primary-300">+ {c.name}</button>
                   ))}
                 </div>
               </div>
             )}
 
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-[9.5px] text-white/40">Tratamiento aquí:</span>
+              <span className="text-[9.5px] text-gray-500">Tratamiento aquí:</span>
               <select value={o.dest_operation ?? ''} onChange={(e) => updateJourneyLink(o.id, arriving, o.justification ?? '', e.target.value)}
-                className="bg-white/[0.04] border border-white/10 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50">
+                className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-[11px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500">
                 <option value="">Sin definir…</option>
                 {ASSET_OPERATIONS.filter((op) => op.value !== 'transfiere').map((op) => <option key={op.value} value={op.value}>{op.label}</option>)}
               </select>

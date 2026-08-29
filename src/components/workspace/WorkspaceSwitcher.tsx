@@ -52,7 +52,7 @@ export function WorkspaceSwitcher({ collapsed = false }: Props) {
           <button
             onClick={() => setOpen((v) => !v)}
             title={active?.name ?? 'Sin empresa'}
-            className="w-full flex items-center justify-center p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 text-cyan-400 transition-colors"
+            className="w-full flex items-center justify-center p-2 rounded-lg bg-gray-50 hover:bg-gray-50 border border-gray-100 text-primary-600 transition-colors"
           >
             <Building2 size={16} />
           </button>
@@ -78,18 +78,18 @@ export function WorkspaceSwitcher({ collapsed = false }: Props) {
       <div ref={rootRef} className="relative px-3">
         <button
           onClick={() => setOpen((v) => !v)}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 transition-colors text-left"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-50 border border-gray-100 transition-colors text-left"
         >
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center ring-1 ring-cyan-500/30 shrink-0">
-            <Building2 size={14} className="text-cyan-400" />
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center ring-1 ring-primary-500 shrink-0 bg-primary-500">
+            <Building2 size={14} className="text-primary-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[10px] uppercase tracking-wider text-white/30">Empresa</div>
-            <div className="text-sm font-medium text-white/80 truncate">
+            <div className="text-[10px] uppercase tracking-wider text-gray-400">Empresa</div>
+            <div className="text-sm font-medium text-gray-800 truncate">
               {active?.name ?? 'Crear empresa'}
             </div>
           </div>
-          <ChevronDown size={14} className="text-white/30 shrink-0" />
+          <ChevronDown size={14} className="text-gray-400 shrink-0" />
         </button>
         {open && (
           <DropdownPanel
@@ -117,13 +117,13 @@ interface DropdownProps {
 
 function DropdownPanel({ companies, activeId, onSelect, onCreate }: DropdownProps) {
   return (
-    <div className="absolute left-3 right-3 top-full mt-2 z-50 bg-[#0d1420] border border-white/10 rounded-xl shadow-2xl shadow-black/60 overflow-hidden">
-      <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-white/30 border-b border-white/5">
+    <div className="absolute left-3 right-3 top-full mt-2 z-50 bg-white border border-gray-200 rounded-lg shadow-2xl overflow-hidden">
+      <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-400 border-b border-gray-100">
         Mis empresas
       </div>
       <div className="max-h-60 overflow-y-auto">
         {companies.length === 0 && (
-          <div className="px-3 py-4 text-xs text-white/40">
+          <div className="px-3 py-4 text-xs text-gray-500">
             Aun no tienes empresas creadas.
           </div>
         )}
@@ -131,24 +131,24 @@ function DropdownPanel({ companies, activeId, onSelect, onCreate }: DropdownProp
           <button
             key={c.id}
             onClick={() => onSelect(c.id)}
-            className="w-full flex items-center gap-2 px-3 py-2 hover:bg-white/5 text-left"
+            className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left"
           >
-            <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center shrink-0">
-              <Building2 size={12} className="text-white/50" />
+            <div className="w-6 h-6 rounded-md bg-gray-50 flex items-center justify-center shrink-0">
+              <Building2 size={12} className="text-gray-500" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm text-white/80 truncate">{c.name}</div>
+              <div className="text-sm text-gray-800 truncate">{c.name}</div>
               {c.industry && (
-                <div className="text-[10px] text-white/30 truncate">{c.industry}</div>
+                <div className="text-[10px] text-gray-400 truncate">{c.industry}</div>
               )}
             </div>
-            {c.id === activeId && <Check size={14} className="text-cyan-400 shrink-0" />}
+            {c.id === activeId && <Check size={14} className="text-primary-600 shrink-0" />}
           </button>
         ))}
       </div>
       <button
         onClick={onCreate}
-        className="w-full flex items-center gap-2 px-3 py-2.5 border-t border-white/5 bg-white/[0.02] hover:bg-cyan-500/10 text-cyan-400 text-sm font-medium transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2.5 border-t border-gray-100 bg-gray-50 hover:bg-primary-50 text-primary-600 text-sm font-medium transition-colors"
       >
         <Plus size={14} />
         Crear nueva empresa

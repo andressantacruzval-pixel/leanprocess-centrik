@@ -15,9 +15,9 @@ const TIERS = ['bronze', 'silver', 'gold', 'platinum'] as const
 
 const TIER_COLORS: Record<string, string> = {
   bronze:   'text-amber-600',
-  silver:   'text-slate-400',
-  gold:     'text-yellow-400',
-  platinum: 'text-cyan-300',
+  silver:   'text-gray-500',
+  gold:     'text-amber-600',
+  platinum: 'text-primary-700',
 }
 
 const EMPTY_FORM: AchievementCreate = {
@@ -103,7 +103,7 @@ export function AchievementsTab() {
         {!showForm && (
           <button
             onClick={handleNew}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-50 text-primary-600 border border-primary-200 hover:bg-primary-100 transition-colors"
           >
             <Plus size={13} />
             Nuevo Achievement
@@ -112,7 +112,7 @@ export function AchievementsTab() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
           <AlertCircle size={15} className="shrink-0" />
           {error}
         </div>
@@ -122,10 +122,10 @@ export function AchievementsTab() {
       {showForm && (
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-sm font-semibold text-white">
+            <h4 className="text-sm font-semibold text-gray-900">
               {editingId ? 'Editar Achievement' : 'Nuevo Achievement'}
             </h4>
-            <button onClick={handleCancel} className="text-white/30 hover:text-white/60 transition-colors">
+            <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600 transition-colors">
               <X size={16} />
             </button>
           </div>
@@ -137,7 +137,7 @@ export function AchievementsTab() {
                 onChange={(e) => field('id', e.target.value)}
                 disabled={!!editingId}
                 placeholder="ej: first-process"
-                className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 disabled:opacity-40 focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 disabled:opacity-40 focus:outline-none focus:border-primary-300"
               />
             </FormField>
 
@@ -146,7 +146,7 @@ export function AchievementsTab() {
                 value={form.title}
                 onChange={(e) => field('title', e.target.value)}
                 placeholder="ej: Primer Paso"
-                className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-primary-300"
               />
             </FormField>
 
@@ -156,7 +156,7 @@ export function AchievementsTab() {
                 onChange={(e) => field('description', e.target.value)}
                 rows={2}
                 placeholder="ej: Crea tu primer subproceso"
-                className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-cyan-500/50 resize-none"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-primary-300 resize-none"
               />
             </FormField>
 
@@ -165,7 +165,7 @@ export function AchievementsTab() {
                 value={form.icon}
                 onChange={(e) => field('icon', e.target.value)}
                 placeholder="ej: Star, Trophy, Flame"
-                className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-primary-300"
               />
             </FormField>
 
@@ -173,10 +173,10 @@ export function AchievementsTab() {
               <select
                 value={form.category}
                 onChange={(e) => field('category', e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary-300"
               >
                 {CATEGORIES.map((c) => (
-                  <option key={c} value={c} className="bg-[#0b1020] text-white">{c}</option>
+                  <option key={c} value={c} className="bg-surface-ground text-gray-900">{c}</option>
                 ))}
               </select>
             </FormField>
@@ -187,7 +187,7 @@ export function AchievementsTab() {
                 min={1}
                 value={form.points}
                 onChange={(e) => field('points', parseInt(e.target.value) || 1)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary-300"
               />
             </FormField>
 
@@ -195,10 +195,10 @@ export function AchievementsTab() {
               <select
                 value={form.tier}
                 onChange={(e) => field('tier', e.target.value)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary-300"
               >
                 {TIERS.map((t) => (
-                  <option key={t} value={t} className="bg-[#0b1020] text-white">{t}</option>
+                  <option key={t} value={t} className="bg-surface-ground text-gray-900">{t}</option>
                 ))}
               </select>
             </FormField>
@@ -208,7 +208,7 @@ export function AchievementsTab() {
                 value={form.criteria}
                 onChange={(e) => field('criteria', e.target.value)}
                 placeholder="ej: Crea 1 subproceso"
-                className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-primary-300"
               />
             </FormField>
 
@@ -218,7 +218,7 @@ export function AchievementsTab() {
                 min={0}
                 value={form.sort_order}
                 onChange={(e) => field('sort_order', parseInt(e.target.value) || 0)}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary-300"
               />
             </FormField>
           </div>
@@ -226,14 +226,14 @@ export function AchievementsTab() {
           <div className="flex justify-end gap-2 mt-5">
             <button
               onClick={handleCancel}
-              className="px-4 py-2 rounded-lg text-sm text-white/40 hover:text-white/60 transition-colors"
+              className="px-4 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-600 transition-colors"
             >
               Cancelar
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !form.id || !form.title}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-50 text-primary-600 border border-primary-200 hover:bg-primary-100 disabled:opacity-40 transition-colors"
             >
               <Save size={13} />
               {saving ? 'Guardando...' : editingId ? 'Actualizar' : 'Crear'}
@@ -245,14 +245,14 @@ export function AchievementsTab() {
       {/* Table */}
       <Card>
         {loading ? (
-          <p className="text-white/30 text-sm text-center py-8">Cargando achievements...</p>
+          <p className="text-gray-400 text-sm text-center py-8">Cargando achievements...</p>
         ) : achievements.length === 0 ? (
-          <p className="text-white/30 text-sm text-center py-8">Sin achievements</p>
+          <p className="text-gray-400 text-sm text-center py-8">Sin achievements</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-sm">
               <thead>
-                <tr className="text-white/30 text-xs uppercase tracking-wider border-b border-white/5">
+                <tr className="text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
                   <th className="text-left pb-3 font-medium">ID</th>
                   <th className="text-left pb-3 font-medium">Título</th>
                   <th className="text-left pb-3 font-medium">Categoría</th>
@@ -262,19 +262,19 @@ export function AchievementsTab() {
                   <th className="pb-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.03]">
+              <tbody className="divide-y divide-gray-100">
                 {achievements.map((a) => (
                   <tr key={a.id} className={`transition-colors ${!a.is_active ? 'opacity-40' : ''}`}>
-                    <td className="py-3 pr-4 font-mono text-white/50 text-xs">{a.id}</td>
-                    <td className="py-3 pr-4 text-white">{a.title}</td>
-                    <td className="py-3 pr-4 text-white/50">{a.category}</td>
-                    <td className="py-3 pr-4 text-right text-white/70">{a.points}</td>
+                    <td className="py-3 pr-4 font-mono text-gray-500 text-xs">{a.id}</td>
+                    <td className="py-3 pr-4 text-gray-900">{a.title}</td>
+                    <td className="py-3 pr-4 text-gray-500">{a.category}</td>
+                    <td className="py-3 pr-4 text-right text-gray-700">{a.points}</td>
                     <td className={`py-3 pr-4 font-medium capitalize ${TIER_COLORS[a.tier] ?? ''}`}>{a.tier}</td>
                     <td className="py-3 pr-4 text-center">
                       <button
                         onClick={() => void handleToggleActive(a)}
                         title={a.is_active ? 'Desactivar' : 'Activar'}
-                        className="text-white/30 hover:text-white/70 transition-colors"
+                        className="text-gray-400 hover:text-gray-700 transition-colors"
                       >
                         {a.is_active ? <Eye size={14} /> : <EyeOff size={14} />}
                       </button>
@@ -282,7 +282,7 @@ export function AchievementsTab() {
                     <td className="py-3 text-right">
                       <button
                         onClick={() => handleEdit(a)}
-                        className="text-white/30 hover:text-cyan-400 transition-colors"
+                        className="text-gray-400 hover:text-primary-600 transition-colors"
                       >
                         <Pencil size={13} />
                       </button>
@@ -305,7 +305,7 @@ function FormField({ label, children, className = '' }: {
 }) {
   return (
     <div className={className}>
-      <label className="block text-xs text-white/40 mb-1.5 uppercase tracking-wider">{label}</label>
+      <label className="block text-xs text-gray-500 mb-1.5 uppercase tracking-wider">{label}</label>
       {children}
     </div>
   )

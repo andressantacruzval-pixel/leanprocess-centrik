@@ -69,9 +69,9 @@ function Inline({ text }: { text: string }) {
   return (
     <>
       {tokens.map((t, i) => {
-        if (t.startsWith('**') && t.endsWith('**')) return <strong key={i} className="font-semibold text-white">{t.slice(2, -2)}</strong>
-        if (t.startsWith('`') && t.endsWith('`')) return <code key={i} className="px-1 py-0.5 rounded bg-white/10 text-cyan-200 text-[0.85em]">{t.slice(1, -1)}</code>
-        if (t.startsWith('*') && t.endsWith('*')) return <em key={i} className="italic text-white/90">{t.slice(1, -1)}</em>
+        if (t.startsWith('**') && t.endsWith('**')) return <strong key={i} className="font-semibold text-gray-900">{t.slice(2, -2)}</strong>
+        if (t.startsWith('`') && t.endsWith('`')) return <code key={i} className="px-1 py-0.5 rounded-md bg-gray-100 text-primary-700 text-[0.85em]">{t.slice(1, -1)}</code>
+        if (t.startsWith('*') && t.endsWith('*')) return <em key={i} className="italic text-gray-800">{t.slice(1, -1)}</em>
         return <Fragment key={i}>{t}</Fragment>
       })}
     </>
@@ -82,25 +82,25 @@ export function Markdown({ text }: { text: string }) {
   if (!text) return null
   const blocks = parseBlocks(text)
   return (
-    <div className="text-[13.5px] text-white/85 leading-relaxed space-y-2">
+    <div className="text-[13.5px] text-gray-800 leading-relaxed space-y-2">
       {blocks.map((b, i) => {
         switch (b.kind) {
           case 'h': {
-            const cls = b.level === 1 ? 'text-[15px] font-bold text-white' : b.level === 2 ? 'text-[14px] font-semibold text-white' : 'text-[13px] font-semibold text-white/90'
+            const cls = b.level === 1 ? 'text-[15px] font-bold text-gray-900' : b.level === 2 ? 'text-[14px] font-semibold text-gray-900' : 'text-[13px] font-semibold text-gray-800'
             return <p key={i} className={`${cls} mt-1`}><Inline text={b.text} /></p>
           }
           case 'ul': return <ul key={i} className="list-disc pl-5 space-y-0.5">{b.items.map((it, j) => <li key={j}><Inline text={it} /></li>)}</ul>
           case 'ol': return <ol key={i} className="list-decimal pl-5 space-y-0.5">{b.items.map((it, j) => <li key={j}><Inline text={it} /></li>)}</ol>
-          case 'quote': return <blockquote key={i} className="border-l-2 border-cyan-500/40 pl-3 text-white/60 italic"><Inline text={b.text} /></blockquote>
+          case 'quote': return <blockquote key={i} className="border-l-2 border-primary-300 pl-3 text-gray-600 italic"><Inline text={b.text} /></blockquote>
           case 'table': return (
             <div key={i} className="overflow-x-auto">
               <table className="w-full text-[12px] border-collapse">
                 <thead>
-                  <tr>{b.headers.map((h, j) => <th key={j} className="text-left font-semibold text-white/70 border-b border-white/15 px-2 py-1.5"><Inline text={h} /></th>)}</tr>
+                  <tr>{b.headers.map((h, j) => <th key={j} className="text-left font-semibold text-gray-700 border-b border-gray-200 px-2 py-1.5"><Inline text={h} /></th>)}</tr>
                 </thead>
                 <tbody>
                   {b.rows.map((r, j) => (
-                    <tr key={j} className="border-b border-white/5">{r.map((c, k) => <td key={k} className="px-2 py-1.5 text-white/70 align-top"><Inline text={c} /></td>)}</tr>
+                    <tr key={j} className="border-b border-gray-100">{r.map((c, k) => <td key={k} className="px-2 py-1.5 text-gray-700 align-top"><Inline text={c} /></td>)}</tr>
                   ))}
                 </tbody>
               </table>

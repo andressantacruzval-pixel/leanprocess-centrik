@@ -47,7 +47,7 @@ export default function CatalogsPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <PageHeader
         icon={BookOpen}
-        iconClass="bg-cyan-500/10 border border-cyan-500/20"
+        iconClass="bg-primary-50 border border-primary-200"
         title="Catalogo General"
         subtitle="Administra las opciones de los combos que aparecen en la caracterizacion de procesos."
       />
@@ -60,7 +60,7 @@ export default function CatalogsPage() {
             {/* Inventario de aplicaciones (destacado) */}
             <button
               onClick={() => setActiveType(APPS_TYPE)}
-              className={`w-full text-left px-3 py-2.5 rounded-xl transition-all border ${activeType === APPS_TYPE ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' : 'border-transparent text-white/50 hover:text-white/80 hover:bg-white/5'}`}
+              className={`w-full text-left px-3 py-2.5 rounded-lg transition-all border ${activeType === APPS_TYPE ? 'bg-primary-50 border-primary-300 text-primary-700' : 'border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50'}`}
             >
               <div className="flex items-center gap-2">
                 <MonitorSmartphone size={14} className="shrink-0" />
@@ -74,15 +74,15 @@ export default function CatalogsPage() {
                 <button
                   key={cat.type}
                   onClick={() => setActiveType(cat.type)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl transition-all border ${
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-all border ${
                     isActive
-                      ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300'
-                      : 'border-transparent text-white/50 hover:text-white/80 hover:bg-white/5'
+                      ? 'bg-primary-50 border-primary-300 text-primary-700'
+                      : 'border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium truncate">{cat.label}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${isActive ? 'bg-cyan-500/20 text-cyan-300' : 'bg-white/5 text-white/40'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${isActive ? 'bg-primary-100 text-primary-700' : 'bg-gray-50 text-gray-500'}`}>
                       {count}
                     </span>
                   </div>
@@ -94,11 +94,11 @@ export default function CatalogsPage() {
 
         {/* ─── Editor del catalogo activo ────────────────────────── */}
         <section className="col-span-12 md:col-span-8 lg:col-span-9">
-          <div className="bg-white/[0.03] rounded-2xl border border-white/5 p-6">
+          <div className="bg-gray-50 rounded-lg border border-gray-100 p-6">
             <div className="flex items-start justify-between gap-4 mb-5">
               <div>
-                <h2 className="text-lg font-semibold text-white">{activeMeta.label}</h2>
-                <p className="text-xs text-white/40 mt-0.5">{activeMeta.description}</p>
+                <h2 className="text-lg font-semibold text-gray-900">{activeMeta.label}</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{activeMeta.description}</p>
               </div>
             </div>
 
@@ -171,12 +171,12 @@ function CatalogEditor({ items, onAdd, onUpdate, onDelete }: CatalogEditorProps)
             if (e.key === 'Enter') handleAdd()
           }}
           placeholder="Nueva opcion..."
-          className="flex-1 px-3 py-2 border border-white/10 rounded-lg text-sm bg-white/5 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+          className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500"
         />
         <button
           onClick={handleAdd}
           disabled={!newValue.trim()}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-500 hover:to-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-primary-500 hover:bg-primary-600"
         >
           <Plus size={14} />
           Agregar
@@ -184,9 +184,9 @@ function CatalogEditor({ items, onAdd, onUpdate, onDelete }: CatalogEditorProps)
       </div>
 
       {/* List */}
-      <div className="rounded-xl border border-white/5 divide-y divide-white/5">
+      <div className="rounded-lg border border-gray-100 divide-y divide-gray-100">
         {items.length === 0 && (
-          <div className="px-4 py-10 text-center text-xs text-white/30">
+          <div className="px-4 py-10 text-center text-xs text-gray-400">
             No hay opciones en este catalogo. Agrega la primera arriba.
           </div>
         )}
@@ -196,7 +196,7 @@ function CatalogEditor({ items, onAdd, onUpdate, onDelete }: CatalogEditorProps)
             <div
               key={item.id}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                item.is_active ? 'hover:bg-white/[0.02]' : 'opacity-50 hover:bg-white/[0.02]'
+                item.is_active ? 'hover:bg-gray-50' : 'opacity-50 hover:bg-gray-50'
               }`}
             >
               {isEditing ? (
@@ -209,10 +209,10 @@ function CatalogEditor({ items, onAdd, onUpdate, onDelete }: CatalogEditorProps)
                     if (e.key === 'Enter') commitEdit()
                     if (e.key === 'Escape') setEditingId(null)
                   }}
-                  className="flex-1 px-2 py-1 border border-cyan-500/40 rounded text-sm bg-white/5 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                  className="flex-1 px-2 py-1 border border-primary-300 rounded-md text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 />
               ) : (
-                <span className={`flex-1 text-sm ${item.is_active ? 'text-white/80' : 'text-white/40 line-through'}`}>
+                <span className={`flex-1 text-sm ${item.is_active ? 'text-gray-800' : 'text-gray-500 line-through'}`}>
                   {item.value}
                 </span>
               )}
@@ -222,14 +222,14 @@ function CatalogEditor({ items, onAdd, onUpdate, onDelete }: CatalogEditorProps)
                   <>
                     <button
                       onClick={commitEdit}
-                      className="p-2.5 rounded text-emerald-400 hover:bg-emerald-500/10"
+                      className="p-2.5 rounded-md text-emerald-600 hover:bg-emerald-50"
                       title="Confirmar"
                     >
                       <Check size={14} />
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
-                      className="p-2.5 rounded text-white/40 hover:bg-white/5"
+                      className="p-2.5 rounded-md text-gray-500 hover:bg-gray-50"
                       title="Cancelar"
                     >
                       <X size={14} />
@@ -239,21 +239,21 @@ function CatalogEditor({ items, onAdd, onUpdate, onDelete }: CatalogEditorProps)
                   <>
                     <button
                       onClick={() => startEdit(item)}
-                      className="p-2.5 rounded text-white/30 hover:text-cyan-400 hover:bg-cyan-500/10"
+                      className="p-2.5 rounded-md text-gray-400 hover:text-primary-600 hover:bg-primary-50"
                       title="Renombrar"
                     >
                       <Pencil size={13} />
                     </button>
                     <button
                       onClick={() => onUpdate(item.id, { is_active: !item.is_active })}
-                      className="p-2.5 rounded text-white/30 hover:text-amber-400 hover:bg-amber-500/10"
+                      className="p-2.5 rounded-md text-gray-400 hover:text-amber-600 hover:bg-amber-50"
                       title={item.is_active ? 'Desactivar' : 'Activar'}
                     >
                       {item.is_active ? <Eye size={13} /> : <EyeOff size={13} />}
                     </button>
                     <button
                       onClick={() => setDeleteTarget(item.id)}
-                      className="p-2.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"
+                      className="p-2.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50"
                       title="Eliminar"
                     >
                       <Trash2 size={13} />
@@ -266,7 +266,7 @@ function CatalogEditor({ items, onAdd, onUpdate, onDelete }: CatalogEditorProps)
         })}
       </div>
 
-      <p className="text-[11px] text-white/30">
+      <p className="text-[11px] text-gray-400">
         Tip: desactivar oculta la opcion en los combos sin perderla. Eliminar la borra definitivamente.
       </p>
 

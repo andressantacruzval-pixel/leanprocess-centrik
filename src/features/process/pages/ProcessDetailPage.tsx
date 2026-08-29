@@ -36,7 +36,7 @@ import { processMapUrl } from '@/lib/processMapUrl'
 
 /** Clase literal, no interpolada: Tailwind no compila clases hechas con plantilla. */
 const CLASE_ACCION_BLOQUEADA =
-  'bg-white/[0.02] rounded-xl border border-white/5 p-4 text-left cursor-not-allowed opacity-40'
+  'bg-gray-50 rounded-lg border border-gray-100 p-4 text-left cursor-not-allowed opacity-40'
 
 // ─── Toggle fields ──────────────────────────────────────────────────────
 const TOGGLE_FIELDS: { key: keyof Process; label: string }[] = [
@@ -210,9 +210,9 @@ export default function ProcessDetailPage() {
 
   if (!process) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-white/30">
+      <div className="flex flex-col items-center justify-center py-20 text-gray-400">
         <p className="text-lg">Proceso no encontrado</p>
-        <button onClick={() => navigate(processMapUrl(process))} className="mt-4 text-cyan-400 hover:underline">Volver al mapa</button>
+        <button onClick={() => navigate(processMapUrl(process))} className="mt-4 text-primary-600 hover:underline">Volver al mapa</button>
       </div>
     )
   }
@@ -225,7 +225,7 @@ export default function ProcessDetailPage() {
           <button
             onClick={() => navigate(processMapUrl(process))}
             aria-label="Volver al mapa de procesos"
-            className="p-2.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-white/60 transition-colors"
+            className="p-2.5 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors"
           >
             <ArrowLeft size={20} />
           </button>
@@ -244,13 +244,13 @@ export default function ProcessDetailPage() {
           <div className="flex items-center gap-2">
             {published ? (
               <>
-                <span className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                <span className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-300">
                   <BadgeCheck size={14} />
                   Publicado v{process.version ?? '1.0'}
                 </span>
                 <button
                   onClick={unlock}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/5 text-white/70 hover:text-white hover:bg-white/10 border border-white/10 font-medium text-sm transition-all"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gray-50 text-gray-700 hover:text-gray-900 hover:bg-gray-100 border border-gray-200 font-medium text-sm transition-all"
                   title="Vuelve a borrador para poder editarlo. Al publicar de nuevo sube la version."
                 >
                   <Pencil size={16} />
@@ -262,7 +262,7 @@ export default function ProcessDetailPage() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-medium text-sm hover:from-cyan-500 hover:to-blue-500 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-white font-medium text-sm transition-all disabled:opacity-50 bg-primary-500 hover:bg-primary-600"
                 >
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                   Guardar
@@ -270,7 +270,7 @@ export default function ProcessDetailPage() {
                 <button
                   onClick={publish}
                   disabled={saving}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium text-sm hover:from-emerald-500 hover:to-teal-500 transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-white font-medium text-sm transition-all disabled:opacity-50 bg-primary-500 hover:bg-primary-600"
                   title="Cierra esta version del documento y la deja en solo lectura."
                 >
                   <BadgeCheck size={16} />
@@ -284,11 +284,11 @@ export default function ProcessDetailPage() {
 
       {/* ═══ AVISO: proceso agrupador ═══ */}
       {isGrouping && (
-        <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.05] px-5 py-4 flex items-start gap-3">
-          <Info size={16} className="text-blue-400 shrink-0 mt-0.5" />
+        <div className="rounded-lg border border-blue-200 bg-blue-50 px-5 py-4 flex items-start gap-3">
+          <Info size={16} className="text-blue-600 shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-white/80">Proceso agrupador</p>
-            <p className="text-xs text-white/40 mt-0.5">
+            <p className="text-sm font-medium text-gray-800">Proceso agrupador</p>
+            <p className="text-xs text-gray-500 mt-0.5">
               Este proceso contiene subprocesos. La caracterización, BPMN, procedimientos,
               KPIs, riesgos y auditoría se gestionan en cada subproceso.
             </p>
@@ -309,15 +309,15 @@ export default function ProcessDetailPage() {
             navigate(`/app/process/${processId}/characterization`)
           }}
           title={sinCupo ? motivoSinCupo : 'BPMN, IA, Paleta, Exportar'}
-          className={sinCupo ? `block w-full ${CLASE_ACCION_BLOQUEADA}` : 'group block w-full bg-white/[0.03] rounded-xl border border-white/5 p-4 text-left hover:border-cyan-500/30 hover:bg-cyan-500/[0.03] transition-all'}
+          className={sinCupo ? `block w-full ${CLASE_ACCION_BLOQUEADA}` : 'group block w-full bg-gray-50 rounded-lg border border-gray-100 p-4 text-left hover:border-primary-300 hover:bg-primary-50 transition-all'}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
-              <GitBranch size={20} className="text-cyan-400" />
+            <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
+              <GitBranch size={20} className="text-primary-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-sm text-white group-hover:text-cyan-400 transition-colors">Ir al Diagramador</h3>
-              <p className="text-[11px] text-white/30">BPMN, IA, Paleta, Exportar</p>
+              <h3 className="font-semibold text-sm text-gray-900 group-hover:text-primary-600 transition-colors">Ir al Diagramador</h3>
+              <p className="text-[11px] text-gray-400">BPMN, IA, Paleta, Exportar</p>
             </div>
           </div>
         </button>
@@ -329,14 +329,14 @@ export default function ProcessDetailPage() {
       {/* ═══ CHARACTERIZATION CARD ═══ */}
       {/* Publicado = solo lectura. Mismo idioma que CharacterizationPanel (:141, :243):
           sin esto los campos quedarian editables pero sin boton con el que guardarlos. */}
-      {!isGrouping && <div className={`bg-white/[0.03] rounded-2xl border border-white/5 p-6 ${published ? 'pointer-events-none opacity-70' : ''}`}>
+      {!isGrouping && <div className={`bg-gray-50 rounded-lg border border-gray-100 p-6 ${published ? 'pointer-events-none opacity-70' : ''}`}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-            <Settings2 size={18} className="text-cyan-400" />
+          <div className="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center">
+            <Settings2 size={18} className="text-primary-600" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-white">Caracterizacion del Proceso</h2>
-            <p className="text-[11px] text-white/30">Ficha tecnica, atributos y metadatos</p>
+            <h2 className="text-base font-semibold text-gray-900">Caracterizacion del Proceso</h2>
+            <p className="text-[11px] text-gray-400">Ficha tecnica, atributos y metadatos</p>
           </div>
         </div>
 
@@ -345,14 +345,14 @@ export default function ProcessDetailPage() {
           <div>
             <div className="flex items-center justify-between mb-1">
               <span className="flex items-center gap-1">
-                <label className="block text-xs font-medium text-white/60">Objetivo / Descripcion</label>
+                <label className="block text-xs font-medium text-gray-600">Objetivo / Descripcion</label>
                 <FieldHelpIcon text={CHARACTERIZATION_FIELD_HELP.description} />
               </span>
               <button
                 type="button"
                 onClick={handleGenerateObjective}
                 disabled={generatingObjective || objectiveBudget.isConsuming}
-                className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-cyan-400 bg-cyan-500/10 rounded hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-primary-600 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors disabled:opacity-50"
               >
                 {(generatingObjective || objectiveBudget.isConsuming) ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
                 IA <TokenCostBadge operationKey="process_objective" />
@@ -362,7 +362,7 @@ export default function ProcessDetailPage() {
               value={(formData.description as string) || ''}
               onChange={(e) => updateField('description', e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-white/10 rounded-lg text-xs bg-white/5 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50 resize-none"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500 resize-none"
               placeholder="Objetivo del proceso..."
             />
           </div>
@@ -375,7 +375,7 @@ export default function ProcessDetailPage() {
                 value={(formData.update_date as string) || ''}
                 readOnly
                 disabled
-                className="w-full px-2 py-1.5 border border-white/10 rounded text-xs bg-white/[0.02] text-white/50 cursor-not-allowed"
+                className="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-gray-50 text-gray-500 cursor-not-allowed"
               />
             </FieldBox>
             <FieldBox label="Version" hint="Sube al aprobar y publicar" helpText={CHARACTERIZATION_FIELD_HELP.version}>
@@ -384,14 +384,14 @@ export default function ProcessDetailPage() {
                 value={process.version ?? '1.0'}
                 readOnly
                 disabled
-                className="w-full px-2 py-1.5 border border-white/10 rounded text-xs bg-white/[0.02] text-white/50 cursor-not-allowed"
+                className="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-gray-50 text-gray-500 cursor-not-allowed"
               />
             </FieldBox>
             <FieldBox label="Entidad" helpText={CHARACTERIZATION_FIELD_HELP.entity}>
-              <input type="text" value={(formData.entity as string) || ''} readOnly disabled className="w-full px-2 py-1.5 border border-white/10 rounded text-xs bg-white/[0.02] text-white/50 cursor-not-allowed" />
+              <input type="text" value={(formData.entity as string) || ''} readOnly disabled className="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-gray-50 text-gray-500 cursor-not-allowed" />
             </FieldBox>
             <FieldBox label="Tipo de proceso" helpText={CHARACTERIZATION_FIELD_HELP.process_type}>
-              <input type="text" value={(formData.process_type as string) || ''} readOnly disabled className="w-full px-2 py-1.5 border border-white/10 rounded text-xs bg-white/[0.02] text-white/50 cursor-not-allowed" />
+              <input type="text" value={(formData.process_type as string) || ''} readOnly disabled className="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-gray-50 text-gray-500 cursor-not-allowed" />
             </FieldBox>
             <FieldBox label="Frecuencia" helpText={CHARACTERIZATION_FIELD_HELP.execution_frequency}>
               <CreatableSelect options={frequencyOptions} value={(formData.execution_frequency as string) || ''} onChange={(v) => updateField('execution_frequency', v)} onCreateOption={(v) => addCatalogItem('execution_frequency', v)} placeholder="Frecuencia..." />
@@ -463,18 +463,18 @@ export default function ProcessDetailPage() {
 
           {/* Toggles */}
           <div>
-            <h3 className="text-xs font-medium text-white/60 mb-2">Atributos</h3>
+            <h3 className="text-xs font-medium text-gray-600 mb-2">Atributos</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {TOGGLE_FIELDS.map(({ key, label }) => {
                 const helpText = CHARACTERIZATION_FIELD_HELP[key as string]
                 return (
-                  <label key={key} className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg border border-white/10 hover:border-cyan-500/40 hover:bg-cyan-500/5 cursor-pointer transition-colors has-[:checked]:border-cyan-500/40 has-[:checked]:bg-cyan-500/[0.06]">
+                  <label key={key} className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 cursor-pointer transition-colors has-[:checked]:border-primary-300 has-[:checked]:bg-primary-50">
                     <div className="relative shrink-0">
                       <input type="checkbox" checked={!!formData[key]} onChange={(e) => updateField(key, e.target.checked)} className="sr-only peer" />
-                      <div className="w-9 h-5 rounded-full bg-white/10 ring-1 ring-inset ring-white/20 peer-checked:ring-0 peer-checked:bg-gradient-to-r peer-checked:from-cyan-500 peer-checked:to-blue-500 peer-checked:shadow-[0_0_10px_rgba(6,182,212,0.55)] transition-all" />
+                      <div className="w-9 h-5 rounded-full bg-gray-100 ring-1 ring-inset ring-gray-300 peer-checked:ring-0 transition-all bg-primary-500" />
                       <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-md peer-checked:translate-x-4 transition-transform" />
                     </div>
-                    <span className="flex items-center gap-1 text-[11px] text-white/70">
+                    <span className="flex items-center gap-1 text-[11px] text-gray-700">
                       {label}
                       {helpText && <FieldHelpIcon text={helpText} />}
                     </span>
@@ -504,11 +504,11 @@ function FieldBox({ label, hint, helpText, children }: { label: string; hint?: s
   return (
     <div>
       <span className="flex items-center gap-1 mb-0.5">
-        <label className="block text-[10px] font-medium text-white/50">{label}</label>
+        <label className="block text-[10px] font-medium text-gray-500">{label}</label>
         {helpText && <FieldHelpIcon text={helpText} />}
       </span>
       {children}
-      {hint && <p className="text-[9px] text-white/30 mt-0.5">{hint}</p>}
+      {hint && <p className="text-[9px] text-gray-400 mt-0.5">{hint}</p>}
     </div>
   )
 }

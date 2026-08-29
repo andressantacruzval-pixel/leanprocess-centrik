@@ -53,20 +53,20 @@ export function StepDocCode({ onComplete, onBack }: StepDocCodeProps) {
   return (
     <div className="flex flex-col flex-1 px-4 w-full max-w-3xl mx-auto">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-4">
-          <FileCode2 className="text-cyan-400" size={32} />
+        <div className="w-16 h-16 rounded-lg bg-primary-50 flex items-center justify-center mx-auto mb-4">
+          <FileCode2 className="text-primary-600" size={32} />
         </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Como numeramos tus documentos</h2>
-        <p className="text-white/50 text-sm">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Como numeramos tus documentos</h2>
+        <p className="text-gray-500 text-sm">
           Cada procedimiento llevara un codigo unico. Elige como se compone.
         </p>
-        <p className="text-amber-300/70 text-xs mt-2">
+        <p className="text-amber-700 text-xs mt-2">
           Se define una sola vez: cambiarlo despues afectaria a los documentos ya emitidos.
         </p>
       </div>
 
       <div className="mb-5">
-        <label className="block text-sm font-medium text-white/70 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Prefijo del procedimiento
         </label>
         <input
@@ -74,43 +74,43 @@ export function StepDocCode({ onComplete, onBack }: StepDocCodeProps) {
           onChange={(e) => setPrefix(e.target.value)}
           maxLength={12}
           placeholder={DEFAULT_DOC_CODE_PREFIX}
-          className="w-full sm:w-48 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-mono uppercase placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent"
+          className="w-full sm:w-48 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 font-mono uppercase placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
       </div>
 
       <div className="space-y-2.5 mb-6">
-        <label className="block text-sm font-medium text-white/70">Orden de los segmentos</label>
+        <label className="block text-sm font-medium text-gray-700">Orden de los segmentos</label>
         {DOC_CODE_PATTERNS.map((opt) => {
           const active = pattern === opt.value
           return (
             <button
               key={opt.value}
               onClick={() => setPattern(opt.value)}
-              className={`w-full flex items-center justify-between gap-4 px-5 py-4 rounded-xl border text-left transition-all ${
+              className={`w-full flex items-center justify-between gap-4 px-5 py-4 rounded-lg border text-left transition-all ${
                 active
-                  ? 'bg-cyan-500/10 border-cyan-500/40'
-                  : 'bg-white/[0.03] border-white/10 hover:border-white/20'
+                  ? 'bg-primary-50 border-primary-300'
+                  : 'bg-gray-50 border-gray-200 hover:border-gray-300'
               }`}
             >
-              <span className={`text-sm font-medium ${active ? 'text-white' : 'text-white/70'}`}>
+              <span className={`text-sm font-medium ${active ? 'text-gray-900' : 'text-gray-700'}`}>
                 {opt.label}
               </span>
               <span className="flex items-center gap-3 shrink-0">
-                <span className="font-mono text-xs text-white/40">{opt.example}</span>
-                {active && <Check size={16} className="text-cyan-400" />}
+                <span className="font-mono text-xs text-gray-500">{opt.example}</span>
+                {active && <Check size={16} className="text-primary-600" />}
               </span>
             </button>
           )
         })}
       </div>
 
-      <div className="rounded-xl bg-white/[0.03] border border-white/10 px-5 py-4 mb-6">
-        <p className="text-[10px] uppercase tracking-wider text-white/40 mb-1">
+      <div className="rounded-lg bg-gray-50 border border-gray-200 px-5 py-4 mb-6">
+        <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">
           Asi quedara tu primer procedimiento
         </p>
-        <p className="text-cyan-300 font-mono text-lg font-semibold">{preview}</p>
+        <p className="text-primary-700 font-mono text-lg font-semibold">{preview}</p>
         {!areaEjemplo && pattern !== 'tipo-num' && (
-          <p className="text-white/40 text-xs mt-2">
+          <p className="text-gray-500 text-xs mt-2">
             El area se anade cuando el proceso tenga una asignada.
           </p>
         )}
@@ -119,14 +119,14 @@ export function StepDocCode({ onComplete, onBack }: StepDocCodeProps) {
       <div className="flex items-center justify-between gap-3 pb-6">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-6 py-2.5 text-white/60 hover:text-white transition-colors"
+          className="flex items-center gap-2 px-6 py-2.5 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft size={18} />
           Anterior
         </button>
         <button
           onClick={handleComplete}
-          className="flex items-center gap-2 px-8 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold hover:from-cyan-500 hover:to-blue-500 transition-colors"
+          className="flex items-center gap-2 px-8 py-2.5 text-white rounded-lg font-semibold transition-colors bg-primary-500 hover:bg-primary-600"
         >
           <Check size={18} />
           Finalizar

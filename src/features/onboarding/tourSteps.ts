@@ -56,7 +56,7 @@ export const TOURS: Record<string, TourStep[]> = {
       clickToAdvance: true,
     },
     {
-      target: 'button[class*="from-cyan-600"], button:has(.lucide-plus)',
+      target: 'button[class*="bg-primary-500"], button:has(.lucide-plus)',
       title: 'Agregar Unidad Raiz',
       content: 'Haz clic en "Agregar raiz" para crear tu primera unidad organizacional (ej: Gerencia General, Direccion Ejecutiva).',
       route: '/app/org-structure',

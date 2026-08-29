@@ -25,8 +25,8 @@ interface PageHeaderProps {
  */
 export function PageHeader({
   icon: Icon,
-  iconClass = 'bg-cyan-500/15',
-  iconColor = 'text-cyan-400',
+  iconClass = 'bg-primary-50',
+  iconColor = 'text-primary-600',
   leading,
   title,
   subtitle,
@@ -36,13 +36,13 @@ export function PageHeader({
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
       {leading && <div className="shrink-0">{leading}</div>}
       {Icon && (
-        <div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center ${iconClass}`}>
+        <div className={`w-10 h-10 rounded-lg shrink-0 flex items-center justify-center ${iconClass}`}>
           <Icon size={20} className={iconColor} />
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <h1 className="text-xl sm:text-2xl font-bold text-white truncate">{title}</h1>
-        {subtitle && <div className="text-xs sm:text-sm text-white/40 truncate">{subtitle}</div>}
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{title}</h1>
+        {subtitle && <div className="text-xs sm:text-sm text-gray-500 truncate">{subtitle}</div>}
       </div>
       {actions && <div className="shrink-0 ml-auto">{actions}</div>}
     </div>

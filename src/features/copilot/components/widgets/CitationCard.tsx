@@ -19,8 +19,8 @@ export function CitationCard({ params }: { params: Record<string, string> }) {
 
   if (!process) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-[12px] text-white/35 border border-white/10 rounded-lg px-2.5 py-1.5">
-        <Icon size={13} /> {label} <span className="text-white/25">(no encontrado)</span>
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-gray-400 border border-gray-200 rounded-lg px-2.5 py-1.5">
+        <Icon size={13} /> {label} <span className="text-gray-400">(no encontrado)</span>
       </span>
     )
   }
@@ -31,19 +31,19 @@ export function CitationCard({ params }: { params: Record<string, string> }) {
     <span className="relative inline-block" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <Link
         to={def.path(process.id)}
-        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-cyan-300 bg-cyan-500/10 border border-cyan-500/25 rounded-lg px-2.5 py-1.5 hover:bg-cyan-500/20 transition-colors"
+        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-primary-700 bg-primary-50 border border-primary-200 rounded-lg px-2.5 py-1.5 hover:bg-primary-100 transition-colors"
       >
         <Icon size={13} />
         {label}
         <ExternalLink size={11} className="opacity-60" />
       </Link>
       {preview && (
-        <span className="absolute z-20 bottom-full left-0 mb-1.5 w-64 rounded-xl border border-white/10 bg-[#0d1420] shadow-xl shadow-black/40 p-3 copilot-fade block">
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-cyan-300 mb-1.5"><Icon size={12} /> {preview.title}</span>
+        <span className="absolute z-20 bottom-full left-0 mb-1.5 w-64 rounded-lg border border-gray-200 bg-white shadow-xl p-3 copilot-fade block">
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-primary-700 mb-1.5"><Icon size={12} /> {preview.title}</span>
           <span className="block space-y-0.5">
-            {preview.lines.map((l, i) => <span key={i} className="block text-[11.5px] text-white/55 leading-snug truncate">{l}</span>)}
+            {preview.lines.map((l, i) => <span key={i} className="block text-[11.5px] text-gray-600 leading-snug truncate">{l}</span>)}
           </span>
-          <span className="block text-[10px] text-white/30 mt-1.5">Clic para abrir →</span>
+          <span className="block text-[10px] text-gray-400 mt-1.5">Clic para abrir →</span>
         </span>
       )}
     </span>

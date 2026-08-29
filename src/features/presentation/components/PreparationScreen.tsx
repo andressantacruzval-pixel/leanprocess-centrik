@@ -49,11 +49,11 @@ export function PreparationScreen({
 }: PreparationScreenProps) {
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-6">
-      <div className="w-full max-w-2xl rounded-2xl border border-white/5 bg-white/[0.03] backdrop-blur-sm p-8">
+      <div className="w-full max-w-2xl rounded-lg border border-gray-100 bg-gray-50 p-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Presentation className="w-7 h-7 text-cyan-400" />
-          <h2 className="text-2xl font-bold text-white">Preparar Presentacion</h2>
+          <Presentation className="w-7 h-7 text-primary-600" />
+          <h2 className="text-2xl font-bold text-gray-900">Preparar Presentacion</h2>
         </div>
 
         {/* Select all / deselect all */}
@@ -63,7 +63,7 @@ export function PreparationScreen({
           </span>
           <button
             onClick={toggleAll}
-            className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition"
+            className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 transition"
           >
             {selectedIndices.size === allSlides.length ? (
               <>
@@ -89,14 +89,14 @@ export function PreparationScreen({
               <button
                 key={idx}
                 onClick={() => toggleSlide(idx)}
-                className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl border transition text-left ${
+                className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg border transition text-left ${
                   selected
-                    ? 'border-cyan-500/30 bg-cyan-500/[0.06]'
-                    : 'border-white/5 bg-white/[0.02] opacity-50'
-                } hover:bg-white/[0.06]`}
+                    ? 'border-primary-300 bg-primary-50'
+                    : 'border-gray-100 bg-gray-50 opacity-50'
+                } hover:bg-gray-50`}
               >
                 {selected ? (
-                  <CheckSquare className="w-5 h-5 text-cyan-400 shrink-0" />
+                  <CheckSquare className="w-5 h-5 text-primary-600 shrink-0" />
                 ) : (
                   <Square className="w-5 h-5 text-gray-600 shrink-0" />
                 )}
@@ -104,7 +104,7 @@ export function PreparationScreen({
                 <Icon className="w-5 h-5 text-gray-400 shrink-0" />
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{s.title}</p>
+                  <p className="text-sm font-medium text-gray-900 truncate">{s.title}</p>
                   <p className="text-xs text-gray-500 truncate">{slideDescriptions[s.type]}</p>
                 </div>
 
@@ -118,10 +118,10 @@ export function PreparationScreen({
 
         {/* Export loading overlay */}
         {exporting && (
-          <div className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-[#0d1117] px-10 py-8">
-              <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
-              <span className="text-lg text-white font-medium">
+          <div className="fixed inset-0 z-[100] bg-gray-900/45 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4 rounded-lg border border-gray-200 bg-white px-10 py-8">
+              <Loader2 className="w-10 h-10 text-primary-600 animate-spin" />
+              <span className="text-lg text-gray-900 font-medium">
                 Generando PPTX...
               </span>
               <span className="text-sm text-gray-500">Esto puede tomar unos segundos</span>
@@ -130,10 +130,10 @@ export function PreparationScreen({
         )}
 
         {/* Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mt-6 pt-6 border-t border-white/5">
+        <div className="flex flex-wrap items-center justify-between gap-3 mt-6 pt-6 border-t border-gray-100">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition"
           >
             <ChevronLeft className="w-4 h-4" />
             Volver
@@ -143,10 +143,10 @@ export function PreparationScreen({
             <button
               disabled={!canStart || exporting !== null}
               onClick={exportToPptx}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition ${
                 canStart && !exporting
-                  ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 hover:text-blue-300'
-                  : 'bg-white/5 text-gray-600 cursor-not-allowed border border-white/5'
+                  ? 'bg-blue-50 text-blue-600 border border-blue-300 hover:bg-blue-100 hover:text-blue-700'
+                  : 'bg-gray-50 text-gray-600 cursor-not-allowed border border-gray-100'
               }`}
             >
               <FileDown className="w-4 h-4" />
@@ -156,10 +156,10 @@ export function PreparationScreen({
             <button
               disabled={!canStart}
               onClick={onStart}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition ${
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition ${
                 canStart
-                  ? 'bg-gradient-to-r from-cyan-500 to-cyan-400 text-gray-900 hover:from-cyan-400 hover:to-cyan-300 shadow-lg shadow-cyan-500/20'
-                  : 'bg-white/5 text-gray-600 cursor-not-allowed'
+                  ? 'text-gray-900 shadow-lg bg-primary-500 hover:bg-primary-600'
+                  : 'bg-gray-50 text-gray-600 cursor-not-allowed'
               }`}
             >
               <Play className="w-4 h-4" />
@@ -169,7 +169,7 @@ export function PreparationScreen({
         </div>
 
         {!canStart && (
-          <p className="text-xs text-amber-400/70 text-center mt-3">
+          <p className="text-xs text-amber-600 text-center mt-3">
             Selecciona al menos 2 slides para iniciar
           </p>
         )}

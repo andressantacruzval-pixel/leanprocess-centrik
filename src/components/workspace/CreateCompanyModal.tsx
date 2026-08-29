@@ -134,17 +134,17 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-lg max-h-[85vh] flex flex-col bg-[#0d1420] border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-gray-900/45 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg max-h-[85vh] flex flex-col bg-white border border-gray-200 rounded-lg shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-white/5">
+        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 ring-1 ring-cyan-500/30 flex items-center justify-center">
-              <Building2 size={16} className="text-cyan-400" />
+            <div className="w-9 h-9 rounded-lg ring-1 ring-primary-500 flex items-center justify-center bg-primary-500">
+              <Building2 size={16} className="text-primary-600" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-white">Nueva empresa</h2>
-              <p className="text-xs text-white/40">
+              <h2 className="text-base font-semibold text-gray-900">Nueva empresa</h2>
+              <p className="text-xs text-gray-500">
                 {step === 'form' && 'Datos principales de la empresa'}
                 {step === 'payment' && 'Confirmar cobro de empresa adicional'}
                 {step === 'success' && 'Empresa creada'}
@@ -153,7 +153,7 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
           </div>
           <button
             onClick={handleClose}
-            className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/70 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X size={16} />
           </button>
@@ -169,7 +169,7 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej: Acme Corp"
-                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-500/40"
+                  className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary-300"
                 />
               </Field>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -196,22 +196,22 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="Ej: Consultoria de procesos para clientes de retail"
-                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-500/40 resize-none"
+                  className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary-300 resize-none"
                 />
               </Field>
 
               {/* Info del gate */}
-              <div className="rounded-xl border border-white/5 bg-white/[0.02] p-3 text-xs">
+              <div className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-xs">
                 {gate.requires_payment ? (
                   <>
-                    <div className="text-white/50">
+                    <div className="text-gray-500">
                       Esta sera tu empresa numero{' '}
-                      <span className="text-white/80 font-semibold">
+                      <span className="text-gray-800 font-semibold">
                         {useWorkspaceStore.getState().companies.length + 1}
                       </span>
                       .
                     </div>
-                    <div className="mt-1 text-cyan-400">
+                    <div className="mt-1 text-primary-600">
                       Se agregara un cobro adicional de{' '}
                       <span className="font-semibold">
                         {formatMoney(gate.addon_amount, gate.currency)}/mes
@@ -220,7 +220,7 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
                     </div>
                   </>
                 ) : (
-                  <div className="text-emerald-400">
+                  <div className="text-emerald-600">
                     Tu plan incluye esta empresa sin costo adicional.
                   </div>
                 )}
@@ -230,28 +230,28 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
 
           {step === 'payment' && (
             <div className="space-y-4">
-              <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+              <div className="rounded-lg border border-primary-200 bg-primary-50 p-4">
                 <div className="flex items-start gap-3">
-                  <CreditCard size={18} className="text-cyan-400 mt-0.5" />
+                  <CreditCard size={18} className="text-primary-600 mt-0.5" />
                   <div className="flex-1">
-                    <div className="text-sm font-semibold text-white">
+                    <div className="text-sm font-semibold text-gray-900">
                       {ADDON_LABELS.extra_company}
                     </div>
-                    <p className="text-xs text-white/50 mt-1">
+                    <p className="text-xs text-gray-500 mt-1">
                       {ADDON_DESCRIPTIONS.extra_company}
                     </p>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-white/5 flex items-baseline justify-between">
-                  <span className="text-xs text-white/40">Se agrega a tu ciclo mensual</span>
-                  <span className="text-2xl font-bold text-white">
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-baseline justify-between">
+                  <span className="text-xs text-gray-500">Se agrega a tu ciclo mensual</span>
+                  <span className="text-2xl font-bold text-gray-900">
                     {formatMoney(gate.addon_amount, gate.currency)}
-                    <span className="text-xs text-white/40 font-normal ml-1">/mes</span>
+                    <span className="text-xs text-gray-500 font-normal ml-1">/mes</span>
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-white/40">
-                Al confirmar, agregaras la empresa <span className="text-white/70">{name}</span>{' '}
+              <p className="text-xs text-gray-500">
+                Al confirmar, agregaras la empresa <span className="text-gray-700">{name}</span>{' '}
                 y tu siguiente factura reflejara el cambio.
               </p>
             </div>
@@ -259,13 +259,13 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
 
           {step === 'success' && (
             <div className="py-6 text-center space-y-3">
-              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/15 ring-1 ring-emerald-500/30 flex items-center justify-center">
-                <Check size={24} className="text-emerald-400" />
+              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-50 ring-1 ring-emerald-500 flex items-center justify-center">
+                <Check size={24} className="text-emerald-600" />
               </div>
               <div>
-                <div className="text-base font-semibold text-white">Empresa creada</div>
-                <p className="text-xs text-white/50 mt-1">
-                  <span className="text-white/80">{name}</span> esta lista. Iniciaras el
+                <div className="text-base font-semibold text-gray-900">Empresa creada</div>
+                <p className="text-xs text-gray-500 mt-1">
+                  <span className="text-gray-800">{name}</span> esta lista. Iniciaras el
                   onboarding de esta empresa al cerrar.
                 </p>
               </div>
@@ -273,25 +273,25 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
           )}
 
           {error && (
-            <div className="rounded-lg bg-red-500/10 border border-red-500/30 px-3 py-2 text-xs text-red-300">
+            <div className="rounded-lg bg-red-50 border border-red-300 px-3 py-2 text-xs text-red-700">
               {error}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 px-6 py-4 border-t border-white/5 flex flex-wrap items-center justify-end gap-2">
+        <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex flex-wrap items-center justify-end gap-2">
           {step === 'form' && (
             <>
               <button
                 onClick={handleClose}
-                className="px-4 py-2 text-sm text-white/60 hover:text-white/90 transition-colors"
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleNext}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium transition-all"
+                className="px-4 py-2 rounded-lg text-white text-sm font-medium transition-all bg-primary-500 hover:bg-primary-600"
               >
                 {gate.requires_payment ? 'Continuar al pago' : 'Crear empresa'}
               </button>
@@ -302,14 +302,14 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
             <>
               <button
                 onClick={() => setStep('form')}
-                className="px-4 py-2 text-sm text-white/60 hover:text-white/90 transition-colors"
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
               >
                 Volver
               </button>
               <button
                 onClick={handlePay}
                 disabled={processing}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 disabled:opacity-50 text-white text-sm font-medium transition-all"
+                className="px-4 py-2 rounded-lg disabled:opacity-50 text-white text-sm font-medium transition-all bg-primary-500 hover:bg-primary-600"
               >
                 {processing ? 'Procesando...' : `Pagar ${formatMoney(gate.addon_amount)} y crear`}
               </button>
@@ -319,7 +319,7 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
           {step === 'success' && (
             <button
               onClick={handleClose}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium transition-all"
+              className="px-4 py-2 rounded-lg text-white text-sm font-medium transition-all bg-primary-500 hover:bg-primary-600"
             >
               Cerrar
             </button>
@@ -333,7 +333,7 @@ export function CreateCompanyModal({ open, onClose, onCreated }: Props) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <div className="text-[11px] uppercase tracking-wider text-white/40 mb-1.5">{label}</div>
+      <div className="text-[11px] uppercase tracking-wider text-gray-500 mb-1.5">{label}</div>
       {children}
     </label>
   )

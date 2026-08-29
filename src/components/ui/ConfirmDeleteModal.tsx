@@ -13,45 +13,45 @@ export function ConfirmDeleteModal({ open, title, description, onConfirm, onCanc
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/45"
       onClick={onCancel}
     >
       <div
-        className="bg-[#0d1424] border border-white/10 rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl"
+        className="bg-white border border-gray-200 rounded-lg p-6 w-full max-w-md mx-4 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center shrink-0">
-              <AlertTriangle size={20} className="text-red-400" />
+            <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+              <AlertTriangle size={20} className="text-red-600" />
             </div>
             <div>
-              <h2 className="text-white font-semibold text-base">
+              <h2 className="text-gray-900 font-semibold text-base">
                 {title ?? '¿Eliminar este elemento?'}
               </h2>
-              <p className="text-white/40 text-sm mt-0.5">
+              <p className="text-gray-500 text-sm mt-0.5">
                 Esta acción no se puede deshacer. Los datos se eliminarán permanentemente.
               </p>
             </div>
           </div>
           <button
             onClick={onCancel}
-            className="text-white/30 hover:text-white/60 transition-colors ml-2 shrink-0"
+            className="text-gray-400 hover:text-gray-600 transition-colors ml-2 shrink-0"
           >
             <X size={16} />
           </button>
         </div>
 
         {description && (
-          <p className="text-white/50 text-sm mb-4 pl-13">{description}</p>
+          <p className="text-gray-500 text-sm mb-4 pl-13">{description}</p>
         )}
 
         {/* Actions */}
         <div className="flex gap-3 justify-end mt-6">
           <button
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-white/15 text-white/60 text-sm hover:bg-white/5 transition-colors"
+            className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition-colors"
           >
             Cancelar
           </button>

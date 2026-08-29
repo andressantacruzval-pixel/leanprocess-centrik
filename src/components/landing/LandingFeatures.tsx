@@ -50,10 +50,10 @@ export default function LandingFeatures() {
   return (
     <section id="features" aria-labelledby="features-title" className="mx-auto max-w-6xl px-6 py-20">
       <div className="mb-14 text-center">
-        <h2 id="features-title" className="mb-4 text-3xl font-bold text-white md:text-4xl">
+        <h2 id="features-title" className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
           Soluciones para el crecimiento acelerado de tus procesos
         </h2>
-        <p className="mx-auto max-w-xl text-white/50">
+        <p className="mx-auto max-w-xl text-gray-500">
           Todo lo que necesitas para gestionar, documentar y optimizar los procesos de tu organización.
         </p>
       </div>
@@ -61,12 +61,12 @@ export default function LandingFeatures() {
       <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {features.map(({ icon: Icon, title, description }) => (
           <li key={title}>
-            <article className="group h-full rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 transition-all duration-200 hover:border-white/[0.12] hover:shadow-[0_0_24px_rgba(6,182,212,0.06)]">
-              <div className="mb-4 w-fit rounded-xl bg-cyan-500/10 p-2.5 transition-colors duration-200 group-hover:bg-cyan-500/20">
-                <Icon className="text-cyan-400" size={22} aria-hidden="true" />
+            <article className="group h-full rounded-lg border border-gray-100 bg-gray-50 p-6 transition-all duration-200 hover:border-gray-200">
+              <div className="mb-4 w-fit rounded-lg bg-primary-50 p-2.5 transition-colors duration-200 group-hover:bg-primary-100">
+                <Icon className="text-primary-600" size={22} aria-hidden="true" />
               </div>
-              <h3 className="mb-2 font-semibold text-white">{title}</h3>
-              <p className="text-sm leading-relaxed text-white/50">{description}</p>
+              <h3 className="mb-2 font-semibold text-gray-900">{title}</h3>
+              <p className="text-sm leading-relaxed text-gray-500">{description}</p>
             </article>
           </li>
         ))}

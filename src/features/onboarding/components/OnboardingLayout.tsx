@@ -7,16 +7,16 @@ interface OnboardingLayoutProps {
 
 export function OnboardingLayout({ currentStep, children }: OnboardingLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#070b14] flex flex-col">
+    <div className="min-h-screen bg-surface-ground flex flex-col">
       {/* Header */}
-      <div className="bg-white/[0.03] border-b border-white/5 px-6 py-4">
-        <h1 className="text-xl font-bold text-cyan-400 text-center">
+      <div className="bg-gray-50 border-b border-gray-100 px-6 py-4">
+        <h1 className="text-xl font-bold text-primary-600 text-center">
           Lean Process
         </h1>
       </div>
 
       {/* Stepper */}
-      <div className="bg-white/[0.03] border-b border-white/5 px-4">
+      <div className="bg-gray-50 border-b border-gray-100 px-4">
         <OnboardingStepper currentStep={currentStep} />
       </div>
 

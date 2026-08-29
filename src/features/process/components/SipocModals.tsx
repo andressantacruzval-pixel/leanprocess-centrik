@@ -5,11 +5,11 @@ import type { SipocEntry } from '@/features/catalog/catalogStore'
 
 function ModalOverlay({ onClose, title, children }: { onClose: () => void; title: string; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#0d1420] rounded-2xl shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto mx-4 p-6 border border-white/10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/45">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto mx-4 p-6 border border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
-          <button onClick={onClose} className="p-1 rounded hover:bg-white/5 text-white/30 hover:text-white/60"><X size={20} /></button>
+          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-gray-50 text-gray-400 hover:text-gray-600"><X size={20} /></button>
         </div>
         {children}
       </div>
@@ -35,7 +35,7 @@ export function SipocLeftModal({
     <ModalOverlay onClose={onClose} title="Proveedores y Entradas">
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-white/70 mb-1">Proveedor / Origen</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Proveedor / Origen</label>
           <CreatableSelect
             options={supplierOptions}
             value={selectedSupplier?.id || ''}
@@ -45,18 +45,18 @@ export function SipocLeftModal({
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-white/70 mb-1">Entradas / Inputs</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Entradas / Inputs</label>
           <input type="text" value={inputDesc} onChange={(e) => setInputDesc(e.target.value)}
-            placeholder="Descripcion de la entrada" className="w-full px-3 py-2 border border-white/10 rounded-lg text-sm bg-white/5 text-white focus:ring-1 focus:ring-cyan-500/50"
+            placeholder="Descripcion de la entrada" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500"
             disabled={!selectedSupplier} />
         </div>
       </div>
       <div className="flex justify-end gap-3 mt-6">
-        <button onClick={onClose} className="px-4 py-2 text-sm text-white/40 hover:text-white/70">Cancelar</button>
+        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Cancelar</button>
         <button
           onClick={() => { if (selectedSupplier && inputDesc.trim()) onSave(selectedSupplier.id, selectedSupplier.name, inputDesc.trim()) }}
           disabled={!selectedSupplier || !inputDesc.trim()}
-          className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 text-white rounded-lg text-sm font-medium disabled:opacity-50 bg-primary-500"
         >
           Guardar
         </button>
@@ -85,12 +85,12 @@ export function SipocRightModal({
     <ModalOverlay onClose={onClose} title="Salidas y Clientes">
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-white/70 mb-1">Salidas / Outputs</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Salidas / Outputs</label>
           <input type="text" value={outputDesc} onChange={(e) => setOutputDesc(e.target.value)}
-            placeholder="Descripcion de la salida" className="w-full px-3 py-2 border border-white/10 rounded-lg text-sm bg-white/5 text-white focus:ring-1 focus:ring-cyan-500/50" />
+            placeholder="Descripcion de la salida" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500" />
         </div>
         <div>
-          <label className="block text-xs font-medium text-white/70 mb-1">Cliente / Destino</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Cliente / Destino</label>
           <CreatableSelect
             options={customerOptions}
             value={selectedCustomer?.id || ''}
@@ -101,11 +101,11 @@ export function SipocRightModal({
         </div>
       </div>
       <div className="flex justify-end gap-3 mt-6">
-        <button onClick={onClose} className="px-4 py-2 text-sm text-white/40 hover:text-white/70">Cancelar</button>
+        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Cancelar</button>
         <button
           onClick={() => { if (selectedCustomer && outputDesc.trim()) onSave(unpaired?.id || null, outputDesc.trim(), selectedCustomer.id, selectedCustomer.name) }}
           disabled={!selectedCustomer || !outputDesc.trim()}
-          className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 text-white rounded-lg text-sm font-medium disabled:opacity-50 bg-primary-500"
         >
           Guardar
         </button>
@@ -135,7 +135,7 @@ export function SipocEditInputModal({
     <ModalOverlay onClose={onClose} title="Editar Proveedor y Entrada">
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-white/70 mb-1">Proveedor / Origen</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Proveedor / Origen</label>
           <CreatableSelect
             options={supplierOptions}
             value={selectedSupplier?.id || ''}
@@ -145,22 +145,22 @@ export function SipocEditInputModal({
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-white/70 mb-1">Entradas / Inputs</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Entradas / Inputs</label>
           <input
             type="text"
             value={inputDesc}
             onChange={(e) => setInputDesc(e.target.value)}
             placeholder="Descripcion de la entrada"
-            className="w-full px-3 py-2 border border-white/10 rounded-lg text-sm bg-white/5 text-white focus:ring-1 focus:ring-cyan-500/50"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500"
           />
         </div>
       </div>
       <div className="flex justify-end gap-3 mt-6">
-        <button onClick={onClose} className="px-4 py-2 text-sm text-white/40 hover:text-white/70">Cancelar</button>
+        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Cancelar</button>
         <button
           onClick={() => { if (selectedSupplier && inputDesc.trim()) onSave(selectedSupplier.id, selectedSupplier.name, inputDesc.trim()) }}
           disabled={!selectedSupplier || !inputDesc.trim()}
-          className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 text-white rounded-lg text-sm font-medium disabled:opacity-50 bg-primary-500"
         >
           Guardar cambios
         </button>
@@ -190,17 +190,17 @@ export function SipocEditOutputModal({
     <ModalOverlay onClose={onClose} title="Editar Salida y Cliente">
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-white/70 mb-1">Salidas / Outputs</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Salidas / Outputs</label>
           <input
             type="text"
             value={outputDesc}
             onChange={(e) => setOutputDesc(e.target.value)}
             placeholder="Descripcion de la salida"
-            className="w-full px-3 py-2 border border-white/10 rounded-lg text-sm bg-white/5 text-white focus:ring-1 focus:ring-cyan-500/50"
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-white/70 mb-1">Cliente / Destino</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Cliente / Destino</label>
           <CreatableSelect
             options={customerOptions}
             value={selectedCustomer?.id || ''}
@@ -211,11 +211,11 @@ export function SipocEditOutputModal({
         </div>
       </div>
       <div className="flex justify-end gap-3 mt-6">
-        <button onClick={onClose} className="px-4 py-2 text-sm text-white/40 hover:text-white/70">Cancelar</button>
+        <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700">Cancelar</button>
         <button
           onClick={() => { if (selectedCustomer && outputDesc.trim()) onSave(outputDesc.trim(), selectedCustomer.id, selectedCustomer.name) }}
           disabled={!selectedCustomer || !outputDesc.trim()}
-          className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 text-white rounded-lg text-sm font-medium disabled:opacity-50 bg-primary-500"
         >
           Guardar cambios
         </button>

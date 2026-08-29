@@ -66,9 +66,9 @@ export function CargoManualsReport() {
   if (!conActividad.length) {
     return (
       <div className="p-10 text-center">
-        <UserCog size={28} className="mx-auto text-white/20 mb-3" />
-        <h3 className="text-base font-semibold text-white">Aún no hay cargos con actividades</h3>
-        <p className="text-sm text-white/50 mt-1 max-w-md mx-auto">Dibuja flujogramas con roles (lanes). Cuando un cargo tenga actividades, aquí podrás generar su manual de cargo con IA.</p>
+        <UserCog size={28} className="mx-auto text-gray-300 mb-3" />
+        <h3 className="text-base font-semibold text-gray-900">Aún no hay cargos con actividades</h3>
+        <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">Dibuja flujogramas con roles (lanes). Cuando un cargo tenga actividades, aquí podrás generar su manual de cargo con IA.</p>
       </div>
     )
   }
@@ -93,21 +93,21 @@ export function CargoManualsReport() {
       <div className="flex flex-col lg:flex-row gap-4">
       {/* Lista de cargos */}
       <aside className="lg:w-64 shrink-0 space-y-2">
-        <div className="flex items-center gap-1.5 bg-white/[0.03] rounded-lg border border-white/10 px-3 py-1.5">
-          <Search size={13} className="text-white/25 shrink-0" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cargo…" className="bg-transparent text-xs text-white placeholder-white/25 outline-none flex-1 min-w-0" />
+        <div className="flex items-center gap-1.5 bg-gray-50 rounded-lg border border-gray-200 px-3 py-1.5">
+          <Search size={13} className="text-gray-400 shrink-0" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cargo…" className="bg-transparent text-xs text-gray-900 placeholder-gray-400 outline-none flex-1 min-w-0" />
         </div>
         <div className="space-y-1 max-h-[70vh] overflow-y-auto pr-1">
           {shown.map((c) => {
             const has = !!getProfile(companyId, c.cargo)
             return (
               <button key={c.key} onClick={() => { setSelKey(c.key); setEdit(false) }}
-                className={`w-full text-left rounded-lg px-2.5 py-2 transition-colors ${selKey === c.key ? 'bg-cyan-500/15 border border-cyan-500/30' : 'border border-transparent hover:bg-white/5'}`}>
+                className={`w-full text-left rounded-lg px-2.5 py-2 transition-colors ${selKey === c.key ? 'bg-primary-50 border border-primary-300' : 'border border-transparent hover:bg-gray-50'}`}>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[12.5px] text-white/85 truncate flex-1">{c.cargo}</span>
-                  {has && <Check size={12} className="text-emerald-400 shrink-0" />}
+                  <span className="text-[12.5px] text-gray-800 truncate flex-1">{c.cargo}</span>
+                  {has && <Check size={12} className="text-emerald-600 shrink-0" />}
                 </div>
-                <div className="text-[10px] text-white/35">{c.processes.size} proc. · {c.activities.length} act.</div>
+                <div className="text-[10px] text-gray-400">{c.processes.size} proc. · {c.activities.length} act.</div>
               </button>
             )
           })}
@@ -117,38 +117,38 @@ export function CargoManualsReport() {
       {/* Panel del perfil */}
       <div className="flex-1 min-w-0">
         {!sel ? (
-          <div className="rounded-2xl border border-dashed border-white/10 p-10 text-center">
-            <UserCog size={24} className="mx-auto text-white/20 mb-2" />
-            <p className="text-sm text-white/50">Elige un cargo a la izquierda para ver o generar su manual.</p>
+          <div className="rounded-lg border border-dashed border-gray-200 p-10 text-center">
+            <UserCog size={24} className="mx-auto text-gray-300 mb-2" />
+            <p className="text-sm text-gray-500">Elige un cargo a la izquierda para ver o generar su manual.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {/* Barra de acciones */}
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-base font-bold text-white flex-1 min-w-0 truncate">{sel.cargo}</h3>
+              <h3 className="text-base font-bold text-gray-900 flex-1 min-w-0 truncate">{sel.cargo}</h3>
               {profile ? (
                 <>
-                  <button onClick={() => setEdit((v) => !v)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] border ${edit ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300' : 'border-white/15 text-white/70 hover:bg-white/5'}`}>{edit ? <Check size={13} /> : <Pencil size={13} />} {edit ? 'Listo' : 'Editar'}</button>
-                  <button onClick={() => generate(sel)} disabled={busy} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] border border-white/15 text-white/70 hover:bg-white/5 disabled:opacity-50">{busy ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />} Regenerar</button>
-                  <button onClick={exportPdf} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-red-500/10 text-red-300 border border-red-500/20 hover:bg-red-500/15"><FileDown size={13} /> PDF</button>
-                  <button onClick={exportDocx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-blue-500/10 text-blue-300 border border-blue-500/20 hover:bg-blue-500/15"><FileText size={13} /> Word</button>
+                  <button onClick={() => setEdit((v) => !v)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] border ${edit ? 'border-primary-300 bg-primary-50 text-primary-700' : 'border-gray-200 text-gray-700 hover:bg-gray-50'}`}>{edit ? <Check size={13} /> : <Pencil size={13} />} {edit ? 'Listo' : 'Editar'}</button>
+                  <button onClick={() => generate(sel)} disabled={busy} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50">{busy ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />} Regenerar</button>
+                  <button onClick={exportPdf} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-red-50 text-red-700 border border-red-200 hover:bg-red-50"><FileDown size={13} /> PDF</button>
+                  <button onClick={exportDocx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-50"><FileText size={13} /> Word</button>
                 </>
               ) : (
-                <button onClick={() => generate(sel)} disabled={busy} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-[13px] font-semibold shadow-lg shadow-cyan-500/30 disabled:opacity-50">{busy ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />} Generar con IA</button>
+                <button onClick={() => generate(sel)} disabled={busy} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-[13px] font-semibold shadow-lg disabled:opacity-50 bg-primary-500">{busy ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />} Generar con IA</button>
               )}
             </div>
 
             {profile && metrics ? (
-              <div className="overflow-x-auto rounded-2xl bg-slate-200/5 p-4">
+              <div className="overflow-x-auto rounded-lg bg-slate-200/5 p-4">
                 <div ref={pagesRef}>
                   <CargoProfileView companyName={company?.name ?? 'Empresa'} profile={profile} metrics={metrics} editable={edit} onPatch={onPatch} />
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-white/10 p-10 text-center">
-                <Sparkles size={22} className="mx-auto text-cyan-400/60 mb-2" />
-                <p className="text-sm text-white/60">Genera el manual de «{sel.cargo}» con IA a partir de sus {sel.activities.length} actividades en {sel.processes.size} proceso(s).</p>
-                <p className="text-[11px] text-white/35 mt-1">Objetivo, responsabilidades y perfil requerido (educación, conocimientos, tecnología, competencias).</p>
+              <div className="rounded-lg border border-dashed border-gray-200 p-10 text-center">
+                <Sparkles size={22} className="mx-auto text-primary-600 mb-2" />
+                <p className="text-sm text-gray-600">Genera el manual de «{sel.cargo}» con IA a partir de sus {sel.activities.length} actividades en {sel.processes.size} proceso(s).</p>
+                <p className="text-[11px] text-gray-400 mt-1">Objetivo, responsabilidades y perfil requerido (educación, conocimientos, tecnología, competencias).</p>
               </div>
             )}
           </div>
@@ -160,12 +160,12 @@ export function CargoManualsReport() {
 }
 
 function MiniStat({ label, value, tone }: { label: string; value: number; tone: 'cyan' | 'emerald' | 'amber' }) {
-  const cls = tone === 'cyan' ? 'border-cyan-500/30 bg-cyan-500/[0.06] text-cyan-300'
-    : tone === 'emerald' ? 'border-emerald-500/30 bg-emerald-500/[0.06] text-emerald-300'
-    : 'border-amber-500/30 bg-amber-500/[0.06] text-amber-300'
+  const cls = tone === 'cyan' ? 'border-primary-300 bg-primary-50 text-primary-700'
+    : tone === 'emerald' ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+    : 'border-amber-300 bg-amber-50 text-amber-700'
   return (
-    <div className={`rounded-2xl border p-4 ${cls}`}>
-      <div className="text-[10px] uppercase tracking-wide text-white/40">{label}</div>
+    <div className={`rounded-lg border p-4 ${cls}`}>
+      <div className="text-[10px] uppercase tracking-wide text-gray-500">{label}</div>
       <div className="text-2xl font-black mt-1 leading-none tabular-nums">{value}</div>
     </div>
   )

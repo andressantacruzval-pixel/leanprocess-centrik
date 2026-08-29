@@ -33,8 +33,8 @@ export function ThresholdBadges({
   if (compact) {
     return (
       <div className="flex gap-1">
-        {hasGreen && <span className="w-3 h-3 rounded-full bg-green-500" title={`Verde: ${greenLabel}`} />}
-        {hasYellow && <span className="w-3 h-3 rounded-full bg-yellow-400" title={`Amarillo: ${yellowLabel}`} />}
+        {hasGreen && <span className="w-3 h-3 rounded-full bg-emerald-500" title={`Verde: ${greenLabel}`} />}
+        {hasYellow && <span className="w-3 h-3 rounded-full bg-amber-500" title={`Amarillo: ${yellowLabel}`} />}
         {hasRed && <span className="w-3 h-3 rounded-full bg-red-500" title={`Rojo: ${redLabel}`} />}
       </div>
     )
@@ -44,20 +44,20 @@ export function ThresholdBadges({
     <div className="flex flex-col gap-1.5">
       {hasGreen && (
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-green-500 shrink-0" />
-          <span className="text-xs text-white/40">{greenLabel}</span>
+          <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
+          <span className="text-xs text-gray-500">{greenLabel}</span>
         </div>
       )}
       {hasYellow && (
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-yellow-400 shrink-0" />
-          <span className="text-xs text-white/40">{yellowLabel}</span>
+          <span className="w-3 h-3 rounded-full bg-amber-500 shrink-0" />
+          <span className="text-xs text-gray-500">{yellowLabel}</span>
         </div>
       )}
       {hasRed && (
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-red-500 shrink-0" />
-          <span className="text-xs text-white/40">{redLabel}</span>
+          <span className="text-xs text-gray-500">{redLabel}</span>
         </div>
       )}
     </div>

@@ -35,15 +35,15 @@ export function StepOrgChart({ onComplete, onBack }: StepOrgChartProps) {
   return (
     <div className="flex flex-col flex-1 px-4 w-full max-w-6xl mx-auto">
       <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold text-white mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Construye tu organigrama
         </h2>
-        <p className="text-white/40">
+        <p className="text-gray-500">
           Agrega las areas y departamentos de tu empresa
         </p>
       </div>
 
-      <div className="flex-1 min-h-[400px] bg-white/[0.03] rounded-xl border border-white/10 overflow-hidden">
+      <div className="flex-1 min-h-[400px] bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
         <OrgChart compact />
       </div>
 
@@ -51,14 +51,14 @@ export function StepOrgChart({ onComplete, onBack }: StepOrgChartProps) {
       <div className="flex justify-center gap-3 py-6">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-6 py-2.5 border border-white/10 text-white/70 rounded-xl font-medium hover:bg-white/5 transition-colors"
+          className="flex items-center gap-2 px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
         >
           <ArrowLeft size={18} />
           Anterior
         </button>
         <button
           onClick={onComplete}
-          className="flex items-center gap-2 px-8 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold hover:from-cyan-500 hover:to-blue-500 transition-colors"
+          className="flex items-center gap-2 px-8 py-2.5 text-white rounded-lg font-semibold transition-colors bg-primary-500 hover:bg-primary-600"
         >
           Siguiente
           <ArrowRight size={18} />

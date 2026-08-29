@@ -35,15 +35,15 @@ export function ControlModal({ control, onSave, onClose }: ControlModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#0d1420] rounded-2xl shadow-xl w-full max-w-lg mx-4 border border-white/10 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900/45">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 border border-gray-200 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <Shield size={18} className="text-cyan-400" />
-            <h3 className="text-sm font-semibold text-white">Evaluar Control</h3>
+            <Shield size={18} className="text-primary-600" />
+            <h3 className="text-sm font-semibold text-gray-900">Evaluar Control</h3>
           </div>
-          <button onClick={onClose} className="p-1 rounded hover:bg-white/5 text-white/30 hover:text-white/60">
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-gray-50 text-gray-400 hover:text-gray-600">
             <X size={18} />
           </button>
         </div>
@@ -51,19 +51,19 @@ export function ControlModal({ control, onSave, onClose }: ControlModalProps) {
         <div className="p-5 space-y-4">
           {/* Description */}
           <div>
-            <label className="block text-[10px] font-medium text-white/50 mb-1">Descripcion del control</label>
+            <label className="block text-[10px] font-medium text-gray-500 mb-1">Descripcion del control</label>
             <input
               type="text"
               value={form.description}
               onChange={(e) => handleChange('description', e.target.value)}
-              className="w-full px-3 py-2 border border-white/10 rounded-lg text-xs bg-white/5 text-white focus:ring-1 focus:ring-cyan-500/50"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500"
               placeholder="Describe el control..."
             />
           </div>
 
           {/* Mitigates */}
           <div>
-            <label className="block text-[10px] font-medium text-white/50 mb-1">Mitiga</label>
+            <label className="block text-[10px] font-medium text-gray-500 mb-1">Mitiga</label>
             <div className="flex gap-2">
               {(['Probabilidad', 'Impacto', 'Ambos'] as MitigationType[]).map((m) => (
                 <button
@@ -71,8 +71,8 @@ export function ControlModal({ control, onSave, onClose }: ControlModalProps) {
                   onClick={() => handleChange('mitigates', m)}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-medium border transition-all ${
                     form.mitigates === m
-                      ? 'bg-cyan-600/20 border-cyan-500/30 text-cyan-300'
-                      : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
+                      ? 'bg-primary-100 border-primary-300 text-primary-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   {m}
@@ -83,20 +83,20 @@ export function ControlModal({ control, onSave, onClose }: ControlModalProps) {
 
           {/* 8 Effectiveness Factors */}
           <div className="space-y-2">
-            <label className="block text-[10px] font-medium text-white/50">Variables de efectividad</label>
+            <label className="block text-[10px] font-medium text-gray-500">Variables de efectividad</label>
             <div className="grid grid-cols-1 gap-2">
               {CONTROL_FACTORS.map((factor) => (
                 <div key={factor.key} className="flex items-center gap-2">
-                  <span className="text-[10px] text-white/50 w-24 shrink-0">{factor.label}</span>
+                  <span className="text-[10px] text-gray-500 w-24 shrink-0">{factor.label}</span>
                   <div className="flex gap-1 flex-1">
                     {factor.options.map((opt) => (
                       <button
                         key={opt.value}
                         onClick={() => handleChange(factor.key, opt.value)}
-                        className={`flex-1 px-2 py-1 rounded text-[9px] font-medium border transition-all ${
+                        className={`flex-1 px-2 py-1 rounded-md text-[9px] font-medium border transition-all ${
                           form[factor.key] === opt.value
-                            ? 'bg-cyan-600/20 border-cyan-500/30 text-cyan-300'
-                            : 'bg-white/5 border-white/10 text-white/30 hover:text-white/60'
+                            ? 'bg-primary-100 border-primary-300 text-primary-700'
+                            : 'bg-gray-50 border-gray-200 text-gray-400 hover:text-gray-600'
                         }`}
                       >
                         {opt.label}
@@ -109,10 +109,10 @@ export function ControlModal({ control, onSave, onClose }: ControlModalProps) {
           </div>
 
           {/* Score preview */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100">
             <div>
-              <span className="text-[10px] text-white/40">Puntaje: </span>
-              <span className="text-sm font-bold text-white">{score}/40</span>
+              <span className="text-[10px] text-gray-500">Puntaje: </span>
+              <span className="text-sm font-bold text-gray-900">{score}/40</span>
             </div>
             <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${EFFECTIVENESS_COLORS[effectiveness]}`}>
               {effectiveness}
@@ -121,8 +121,8 @@ export function ControlModal({ control, onSave, onClose }: ControlModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-5 py-4 border-t border-white/5">
-          <button onClick={onClose} className="px-4 py-2 text-xs text-white/40 hover:text-white/70">
+        <div className="flex justify-end gap-3 px-5 py-4 border-t border-gray-100">
+          <button onClick={onClose} className="px-4 py-2 text-xs text-gray-500 hover:text-gray-700">
             Cancelar
           </button>
           <button
@@ -131,7 +131,7 @@ export function ControlModal({ control, onSave, onClose }: ControlModalProps) {
             className={`px-5 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
               saved
                 ? 'bg-emerald-600 text-white cursor-default'
-                : 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-500 hover:to-blue-500'
+                : 'text-white bg-primary-500 hover:bg-primary-600'
             }`}
           >
             {saved ? <><CheckCircle2 size={13} />Guardado</> : 'Guardar'}

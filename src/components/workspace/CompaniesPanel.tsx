@@ -79,9 +79,9 @@ export function CompaniesPanel() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-white">Mis empresas</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Mis empresas</h2>
           {!IS_PHASE_1 && (
-            <p className="text-xs text-white/40 mt-0.5">
+            <p className="text-xs text-gray-500 mt-0.5">
               {companies.length} de {BASE_PLAN.included_companies} incluidas en tu plan —{' '}
               {formatMoney(ADDON_PRICES.extra_company)}/mes por cada empresa adicional.
             </p>
@@ -90,7 +90,7 @@ export function CompaniesPanel() {
         {!IS_PHASE_1 && (
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium transition-all"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-white text-sm font-medium transition-all bg-primary-500 hover:bg-primary-600"
           >
             <Plus size={14} />
             Nueva empresa
@@ -99,15 +99,15 @@ export function CompaniesPanel() {
       </div>
 
       {companies.length === 0 ? (
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-8 text-center">
-          <Building2 size={32} className="mx-auto text-white/20 mb-2" />
-          <div className="text-sm text-white/50">
+        <div className="rounded-lg border border-gray-100 bg-gray-50 p-8 text-center">
+          <Building2 size={32} className="mx-auto text-gray-300 mb-2" />
+          <div className="text-sm text-gray-500">
             Aun no has creado ninguna empresa.
           </div>
           {!IS_PHASE_1 && (
             <button
               onClick={() => setModalOpen(true)}
-              className="mt-3 text-sm text-cyan-400 hover:text-cyan-300"
+              className="mt-3 text-sm text-primary-600 hover:text-primary-700"
             >
               Crear tu primera empresa
             </button>
@@ -121,47 +121,47 @@ export function CompaniesPanel() {
             return (
               <div
                 key={c.id}
-                className={`rounded-xl border p-4 transition-all ${
+                className={`rounded-lg border p-4 transition-all ${
                   isActive
-                    ? 'bg-cyan-500/5 border-cyan-500/30'
-                    : 'bg-white/[0.02] border-white/5 hover:border-white/10'
+                    ? 'bg-primary-50 border-primary-300'
+                    : 'bg-gray-50 border-gray-100 hover:border-gray-200'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                       isActive
-                        ? 'bg-gradient-to-br from-cyan-500/30 to-blue-500/30 ring-1 ring-cyan-500/40'
-                        : 'bg-white/5'
+                        ? 'ring-1 ring-primary-500 bg-primary-500'
+                        : 'bg-gray-50'
                     }`}
                   >
                     <Building2
                       size={16}
-                      className={isActive ? 'text-cyan-400' : 'text-white/50'}
+                      className={isActive ? 'text-primary-600' : 'text-gray-500'}
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-white truncate">
+                      <span className="text-sm font-medium text-gray-900 truncate">
                         {c.name}
                       </span>
                       {isActive && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-medium">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary-100 text-primary-700 font-medium">
                           Activa
                         </span>
                       )}
                       {isExtra ? (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-medium">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 font-medium">
                           Add-on {formatMoney(ADDON_PRICES.extra_company)}/mes
                         </span>
                       ) : (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-medium">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium">
                           Incluida en el plan
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-white/40 mt-0.5 truncate">
+                    <div className="text-[11px] text-gray-500 mt-0.5 truncate">
                       {c.industry ?? 'Sin industria'}
                       {c.country && ` · ${c.country}`}
                     </div>
@@ -171,7 +171,7 @@ export function CompaniesPanel() {
                     {!isActive && (
                       <button
                         onClick={() => handleActivate(c.id)}
-                        className="px-3 py-1.5 text-xs rounded-lg bg-white/5 hover:bg-white/10 text-white/80 transition-colors"
+                        className="px-3 py-1.5 text-xs rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-800 transition-colors"
                       >
                         Activar
                       </button>
@@ -179,7 +179,7 @@ export function CompaniesPanel() {
                     {isOwner(c.id) && (
                       <button
                         onClick={() => setEditTarget(c.id)}
-                        className="p-2 rounded-lg transition-colors hover:bg-white/5 text-white/30 hover:text-cyan-400"
+                        className="p-2 rounded-lg transition-colors hover:bg-gray-50 text-gray-400 hover:text-primary-600"
                         title="Editar empresa"
                       >
                         <Pencil size={14} />
@@ -188,7 +188,7 @@ export function CompaniesPanel() {
                     {isOwner(c.id) && (
                       <button
                         onClick={() => setResetTarget(c.id)}
-                        className="p-2 rounded-lg transition-colors hover:bg-white/5 text-white/30 hover:text-amber-400"
+                        className="p-2 rounded-lg transition-colors hover:bg-gray-50 text-gray-400 hover:text-amber-600"
                         title="Reiniciar empresa de fábrica"
                       >
                         <RotateCcw size={14} />
@@ -197,7 +197,7 @@ export function CompaniesPanel() {
                     {canDelete(c.id) && (
                       <button
                         onClick={() => setDeleteTarget(c.id)}
-                        className="p-2 rounded-lg transition-colors hover:bg-white/5 text-white/30 hover:text-red-400"
+                        className="p-2 rounded-lg transition-colors hover:bg-gray-50 text-gray-400 hover:text-red-600"
                         title="Eliminar empresa"
                       >
                         <Trash2 size={14} />

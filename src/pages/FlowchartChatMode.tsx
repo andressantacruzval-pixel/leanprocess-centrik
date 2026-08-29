@@ -284,8 +284,8 @@ EMITE AHORA los ${missing} marcadores faltantes. Responde SOLO con los marcadore
           onClick={() => setReadOnly((v) => !v)}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium transition-all ${
             readOnly
-              ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-              : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/5'
+              ? 'bg-primary-100 text-primary-700 border border-primary-300'
+              : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-100'
           }`}
         >
           {readOnly ? <EyeOff size={12} /> : <Eye size={12} />}
@@ -294,7 +294,7 @@ EMITE AHORA los ${missing} marcadores faltantes. Responde SOLO con los marcadore
         <button
           onClick={handleRelayout}
           disabled={nodeCount === 0 || readOnly}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600 text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           <Wand2 size={12} />
           Reorganizar
@@ -302,23 +302,23 @@ EMITE AHORA los ${missing} marcadores faltantes. Responde SOLO con los marcadore
         <button
           onClick={handleReset}
           disabled={nodeCount === 0 || readOnly}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600 text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           <RotateCcw size={12} />
           Empezar de nuevo
         </button>
         {autoSaveStatus === 'pending' && (
-          <span className="text-[11px] text-amber-400 animate-pulse">Guardando...</span>
+          <span className="text-[11px] text-amber-600 animate-pulse">Guardando...</span>
         )}
         {autoSaveStatus === 'saved' && (
-          <span className="text-[11px] text-emerald-400">Guardado automaticamente</span>
+          <span className="text-[11px] text-emerald-600">Guardado automaticamente</span>
         )}
         {/* `readOnly` desactivaba «Reorganizar» y «Empezar de nuevo» pero NO este boton:
             era la puerta por la que se podia escribir un diagrama en modo lectura. */}
         <button
           onClick={handleSave}
           disabled={nodeCount === 0 || isSaving || readOnly}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all bg-primary-500 hover:bg-primary-600"
         >
           <Check size={14} />
           {isSaving ? 'Optimizando...' : 'Guardar flujograma'}
@@ -326,7 +326,7 @@ EMITE AHORA los ${missing} marcadores faltantes. Responde SOLO con los marcadore
       </div>
 
       {readOnly && (
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs">
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-50 border border-primary-200 text-primary-700 text-xs">
           <Eye size={14} />
           Modo lectura — visualizacion sin edicion
         </div>
@@ -343,13 +343,13 @@ EMITE AHORA los ${missing} marcadores faltantes. Responde SOLO con los marcadore
             hideInput={readOnly}
           />
         </div>
-        <div className="flex-1 flex flex-col bg-[#0a0f1a] border border-white/5 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-white/[0.02]">
+        <div className="flex-1 flex flex-col bg-white border border-gray-100 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <h2 className="text-sm font-semibold text-white">Flujograma en vivo</h2>
+              <div className="w-2 h-2 rounded-full bg-primary-500 animate-pulse" />
+              <h2 className="text-sm font-semibold text-gray-900">Flujograma en vivo</h2>
             </div>
-            <div className="text-[11px] text-white/40">
+            <div className="text-[11px] text-gray-500">
               {nodeCount === 0 ? 'Empieza conversando con la IA' : `${nodeCount} ${nodeCount === 1 ? 'elemento' : 'elementos'}`}
             </div>
           </div>

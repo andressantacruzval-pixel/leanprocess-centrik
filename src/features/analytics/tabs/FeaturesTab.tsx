@@ -42,7 +42,7 @@ export function FeaturesTab({ metrics, planFilter, setPlanFilter, filteredFeatur
   return (
     <div className="space-y-6">
       {/* Plan filter */}
-      <div className="flex gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/5 w-fit">
+      <div className="flex gap-1 bg-gray-50 p-1 rounded-lg border border-gray-100 w-fit">
         {([
           { value: 'all' as const,       label: 'Todos',     color: CYAN        },
           { value: 'free' as const,      label: 'Free',      color: PLAN_COLORS[0] },
@@ -55,8 +55,8 @@ export function FeaturesTab({ metrics, planFilter, setPlanFilter, filteredFeatur
             onClick={() => setPlanFilter(opt.value)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all
               ${planFilter === opt.value
-                ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                : 'text-white/40 hover:text-white/60 hover:bg-white/[0.04] border border-transparent'
+                ? 'bg-primary-50 text-primary-600 border border-primary-200'
+                : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50 border border-transparent'
               }`}
           >
             {opt.value !== 'all' && (
@@ -73,12 +73,12 @@ export function FeaturesTab({ metrics, planFilter, setPlanFilter, filteredFeatur
           Adopción de Features{planFilter !== 'all' ? ` — Plan ${planFilter.charAt(0).toUpperCase() + planFilter.slice(1)}` : ''}
         </SectionTitle>
         {filteredFeatureUsage.length === 0 ? (
-          <p className="text-white/30 text-sm text-center py-8">Sin datos en el periodo seleccionado</p>
+          <p className="text-gray-400 text-sm text-center py-8">Sin datos en el periodo seleccionado</p>
         ) : (
           <div className="overflow-x-auto mt-3">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
-                <tr className="text-white/30 text-xs uppercase border-b border-white/5">
+                <tr className="text-gray-400 text-xs uppercase border-b border-gray-100">
                   <th className="text-left py-2 pr-4">Feature</th>
                   <th className="text-right py-2 px-4">Empresas</th>
                   <th className="text-left py-2 px-4 w-1/2">Adopción</th>
@@ -87,18 +87,18 @@ export function FeaturesTab({ metrics, planFilter, setPlanFilter, filteredFeatur
               </thead>
               <tbody>
                 {filteredFeatureUsage.map((f, i) => (
-                  <tr key={f.feature} className="border-b border-white/[0.03] hover:bg-white/[0.02]">
-                    <td className="py-2.5 pr-4 text-white/80">{f.feature}</td>
-                    <td className="py-2.5 px-4 text-right font-medium text-white/80">{f.usersCount}</td>
+                  <tr key={f.feature} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-2.5 pr-4 text-gray-800">{f.feature}</td>
+                    <td className="py-2.5 px-4 text-right font-medium text-gray-800">{f.usersCount}</td>
                     <td className="py-2.5 px-4">
-                      <div className="w-full bg-white/[0.06] rounded-full h-2">
+                      <div className="w-full bg-gray-50 rounded-full h-2">
                         <div
                           className="h-2 rounded-full"
                           style={{ width: `${f.percentage}%`, backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
                         />
                       </div>
                     </td>
-                    <td className="py-2.5 pl-4 text-right text-white/50">{f.percentage}%</td>
+                    <td className="py-2.5 pl-4 text-right text-gray-500">{f.percentage}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -116,16 +116,16 @@ export function FeaturesTab({ metrics, planFilter, setPlanFilter, filteredFeatur
               const color = PIE_COLORS[i % PIE_COLORS.length]
               return (
                 <div key={s.step} className="flex items-center gap-3">
-                  <span className="text-xs text-white/50 w-36 text-right shrink-0 truncate">{s.step}</span>
+                  <span className="text-xs text-gray-500 w-36 text-right shrink-0 truncate">{s.step}</span>
                   <div className="flex-1 flex items-center">
                     <div
-                      className="h-8 rounded-lg flex items-center px-3 text-xs font-medium text-white/90 transition-all"
+                      className="h-8 rounded-lg flex items-center px-3 text-xs font-medium text-gray-800 transition-all"
                       style={{ width: `${Math.max(s.percentage, 6)}%`, backgroundColor: color, opacity: 0.75 }}
                     >
                       {s.count > 0 ? s.count : ''}
                     </div>
                   </div>
-                  <span className="text-xs text-white/40 w-10 text-right">{s.percentage}%</span>
+                  <span className="text-xs text-gray-500 w-10 text-right">{s.percentage}%</span>
                 </div>
               )
             })}
@@ -134,7 +134,7 @@ export function FeaturesTab({ metrics, planFilter, setPlanFilter, filteredFeatur
       ) : (
         <Card>
           <SectionTitle>Funnel de Conversión</SectionTitle>
-          <p className="text-white/30 text-sm text-center py-8">
+          <p className="text-gray-400 text-sm text-center py-8">
             Sin suficientes datos para mostrar el funnel en este periodo
           </p>
         </Card>
@@ -144,7 +144,7 @@ export function FeaturesTab({ metrics, planFilter, setPlanFilter, filteredFeatur
       {dailyChartData.length > 0 ? (
         <Card>
           <SectionTitle>Llamadas de IA por día (top {TOP_N} features)</SectionTitle>
-          <p className="text-[11px] text-white/30 mt-0.5 mb-3">
+          <p className="text-[11px] text-gray-400 mt-0.5 mb-3">
             Número de llamadas por feature cada día del periodo
           </p>
           <div className="h-64">
@@ -175,7 +175,7 @@ export function FeaturesTab({ metrics, planFilter, setPlanFilter, filteredFeatur
       ) : (
         <Card>
           <SectionTitle>Llamadas de IA por día</SectionTitle>
-          <p className="text-white/30 text-sm text-center py-8">
+          <p className="text-gray-400 text-sm text-center py-8">
             Sin actividad de IA registrada en el periodo seleccionado
           </p>
         </Card>

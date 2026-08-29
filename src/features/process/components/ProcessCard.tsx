@@ -42,11 +42,11 @@ export function ProcessCard({
         onDragOver={onDragOver}
         onDrop={(e) => onDrop(e, macro.id)}
         onClick={onDrillDown}
-        className="relative flex-shrink-0 w-40 sm:w-48 bg-white/[0.03] hover:bg-white/5 rounded-lg shadow-md border border-white/5
-                   cursor-pointer transition-all duration-200 group select-none"
+        className="relative flex-shrink-0 w-40 sm:w-48 bg-gray-50 hover:bg-gray-50 rounded-lg shadow-md border
+                   border-gray-100 cursor-pointer transition-all duration-200 group select-none"
       >
         {/* Drag handle */}
-        <div className="absolute top-2 left-1.5 text-white/40 group-hover:text-white/20 cursor-grab active:cursor-grabbing">
+        <div className="absolute top-2 left-1.5 text-gray-500 group-hover:text-gray-300 cursor-grab active:cursor-grabbing">
           <GripVertical size={14} />
         </div>
 
@@ -57,14 +57,14 @@ export function ProcessCard({
               e.stopPropagation()
               onEdit()
             }}
-            className="p-2 rounded bg-white/[0.03] hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600 text-white/30 hover:text-white transition-colors"
+            className="p-2 rounded-md bg-gray-50 text-gray-400 hover:text-white transition-colors bg-primary-500 hover:bg-primary-600"
             title="Editar"
           >
             <Pencil size={13} />
           </button>
           <button
             onClick={handleDeleteRequest}
-            className="p-2 rounded bg-white/[0.03] hover:bg-red-600 text-white/30 hover:text-white transition-colors"
+            className="p-2 rounded-md bg-gray-50 hover:bg-red-600 text-gray-400 hover:text-gray-900 transition-colors"
             title="Eliminar"
           >
             <Trash2 size={13} />
@@ -72,14 +72,14 @@ export function ProcessCard({
         </div>
 
         <div className="p-4 pt-3">
-          <h4 className="text-sm font-semibold text-white leading-tight line-clamp-2 pr-6">
+          <h4 className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 pr-6">
             {macro.name}
           </h4>
           <div className="mt-2 flex items-center justify-between">
-            <span className="text-xs text-white/30">
+            <span className="text-xs text-gray-400">
               {childCount} {childCount === 1 ? levelName.toLowerCase() : (levelName.toLowerCase() + 's')}
             </span>
-            <ChevronRight size={14} className="text-white/40 group-hover:text-cyan-400 transition-colors" />
+            <ChevronRight size={14} className="text-gray-500 group-hover:text-primary-600 transition-colors" />
           </div>
         </div>
       </div>

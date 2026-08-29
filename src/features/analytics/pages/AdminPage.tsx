@@ -118,16 +118,16 @@ export default function AdminPage() {
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-white">Panel de Administracion</h1>
-            {isLoadingMetrics && <Loader2 size={16} className="animate-spin text-cyan-400" />}
+            <h1 className="text-2xl font-bold text-gray-900">Panel de Administracion</h1>
+            {isLoadingMetrics && <Loader2 size={16} className="animate-spin text-primary-600" />}
           </div>
-          <p className="text-white/40 text-sm mt-1">Datos reales de todos los usuarios de la plataforma</p>
+          <p className="text-gray-500 text-sm mt-1">Datos reales de todos los usuarios de la plataforma</p>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={() => navigate('/app/admin/billing')}
-            className="flex items-center gap-1.5 px-3 py-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-lg text-xs font-medium hover:bg-amber-500/20 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 bg-amber-50 border border-amber-200 text-amber-600 rounded-lg text-xs font-medium hover:bg-amber-100 transition-colors"
           >
             <Zap size={13} />
             Panel de Billing
@@ -145,18 +145,18 @@ export default function AdminPage() {
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setExportOpen(!exportOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white/40 hover:text-white/60 bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-gray-600 bg-gray-50 border border-gray-100 hover:bg-gray-50 transition-all"
             >
               <Download size={14} />
               Exportar
               <ChevronDown size={12} className={`transition-transform ${exportOpen ? 'rotate-180' : ''}`} />
             </button>
             {exportOpen && (
-              <div className="absolute right-0 mt-1 w-44 bg-[#111827] border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
-                <button onClick={handleExportCsv} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/70 hover:bg-white/[0.06] transition-colors">
+              <div className="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden">
+                <button onClick={handleExportCsv} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                   <Download size={14} /> Exportar CSV
                 </button>
-                <button onClick={handleExportPdf} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-white/70 hover:bg-white/[0.06] transition-colors">
+                <button onClick={handleExportPdf} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                   <Download size={14} /> Exportar PDF
                 </button>
               </div>
@@ -166,7 +166,7 @@ export default function AdminPage() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 bg-white/[0.03] p-1 rounded-xl border border-white/5 overflow-x-auto">
+      <div className="flex gap-1 bg-gray-50 p-1 rounded-lg border border-gray-100 overflow-x-auto">
         {TABS.map((t) => {
           const Icon = t.icon
           const active = tab === t.id
@@ -174,10 +174,11 @@ export default function AdminPage() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                whitespace-nowrap
                 ${active
-                  ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                  : 'text-white/40 hover:text-white/60 hover:bg-white/[0.04] border border-transparent'
+                  ? 'bg-primary-50 text-primary-600 border border-primary-200'
+                  : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50 border border-transparent'
                 }`}
             >
               <Icon size={15} />

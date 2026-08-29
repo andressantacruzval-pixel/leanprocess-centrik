@@ -56,12 +56,12 @@ export function CargoLanesPanel({ modeler, readOnly }: Props) {
   const sinCatalogar = lanes.filter((l) => l.name.trim() && !catalogKeys.has(normCargo(l.name))).length
 
   return (
-    <div className="absolute bottom-3 left-3 z-20 w-72 max-w-[calc(100%-1.5rem)] rounded-xl border border-white/10 bg-[#0d1420]/95 backdrop-blur-sm shadow-xl shadow-black/40">
+    <div className="absolute bottom-3 left-3 z-20 w-72 max-w-[calc(100%-1.5rem)] rounded-lg border border-gray-200 bg-white shadow-xl">
       <button onClick={() => setOpen((v) => !v)} className="w-full flex items-center gap-2 px-3 py-2 text-left">
-        <UserCog size={14} className="text-cyan-300 shrink-0" />
-        <span className="text-[12px] font-semibold text-white flex-1">Cargos del diagrama</span>
-        {sinCatalogar > 0 && <span className="inline-flex items-center gap-1 text-[9px] text-amber-300"><AlertTriangle size={10} /> {sinCatalogar}</span>}
-        {open ? <ChevronDown size={14} className="text-white/40" /> : <ChevronUp size={14} className="text-white/40" />}
+        <UserCog size={14} className="text-primary-700 shrink-0" />
+        <span className="text-[12px] font-semibold text-gray-900 flex-1">Cargos del diagrama</span>
+        {sinCatalogar > 0 && <span className="inline-flex items-center gap-1 text-[9px] text-amber-700"><AlertTriangle size={10} /> {sinCatalogar}</span>}
+        {open ? <ChevronDown size={14} className="text-gray-500" /> : <ChevronUp size={14} className="text-gray-500" />}
       </button>
 
       {open && (
@@ -72,7 +72,7 @@ export function CargoLanesPanel({ modeler, readOnly }: Props) {
             return (
               <div key={l.id}>
                 <div className="flex items-center gap-1.5">
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${!l.name.trim() ? 'bg-white/20' : enCatalogo ? 'bg-emerald-400' : 'bg-amber-400'}`} title={enCatalogo ? 'En catálogo' : 'Cargo no catalogado'} />
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${!l.name.trim() ? 'bg-gray-200' : enCatalogo ? 'bg-emerald-500' : 'bg-amber-500'}`} title={enCatalogo ? 'En catálogo' : 'Cargo no catalogado'} />
                   <input
                     key={l.id + '::' + l.name}
                     list={listId}
@@ -81,18 +81,18 @@ export function CargoLanesPanel({ modeler, readOnly }: Props) {
                     placeholder="Cargo / rol…"
                     onBlur={(e) => rename(l.id, e.target.value.trim())}
                     onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
-                    className="flex-1 min-w-0 bg-white/[0.04] border border-white/10 rounded-md px-2 py-1 text-[12px] text-white placeholder-white/25 outline-none focus:ring-1 focus:ring-cyan-500/50 disabled:opacity-50"
+                    className="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-md px-2 py-1 text-[12px] text-gray-900 placeholder-gray-400 outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50"
                   />
                 </div>
                 {!readOnly && !!l.name.trim() && !enCatalogo && (
-                  <button onClick={() => addCatalogItem(CARGO_CATALOG, l.name.trim())} className="mt-1 ml-3 inline-flex items-center gap-1 text-[10px] text-amber-300 hover:text-amber-200">
+                  <button onClick={() => addCatalogItem(CARGO_CATALOG, l.name.trim())} className="mt-1 ml-3 inline-flex items-center gap-1 text-[10px] text-amber-700 hover:text-amber-700">
                     <Plus size={10} /> Agregar «{l.name.trim()}» al catálogo
                   </button>
                 )}
               </div>
             )
           })}
-          <p className="text-[10px] text-white/30 pt-1">Escribe para buscar un cargo del catálogo o crear uno nuevo. El punto ámbar marca cargos fuera del catálogo.</p>
+          <p className="text-[10px] text-gray-400 pt-1">Escribe para buscar un cargo del catálogo o crear uno nuevo. El punto ámbar marca cargos fuera del catálogo.</p>
         </div>
       )}
     </div>

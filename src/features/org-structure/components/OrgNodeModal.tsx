@@ -52,15 +52,15 @@ export function OrgNodeModal({ mode, parentId, editUnit, onClose }: OrgNodeModal
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-[#0d1420] border border-white/10 rounded-xl shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto mx-4 p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/45">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto mx-4 p-6">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold text-white">
+          <h3 className="text-lg font-bold text-gray-900">
             {mode === 'create' ? 'Agregar unidad' : 'Editar unidad'}
           </h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-white/5 text-white/20 hover:text-white/40 transition-colors"
+            className="p-1 rounded-lg hover:bg-gray-50 text-gray-300 hover:text-gray-500 transition-colors"
           >
             <X size={20} />
           </button>
@@ -68,7 +68,7 @@ export function OrgNodeModal({ mode, parentId, editUnit, onClose }: OrgNodeModal
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Nombre
             </label>
             <input
@@ -78,17 +78,17 @@ export function OrgNodeModal({ mode, parentId, editUnit, onClose }: OrgNodeModal
               onChange={(e) => setName(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ej: Gerencia General"
-              className="w-full px-3 py-2 border border-white/10 rounded-lg bg-white/[0.03] text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
 
           {levelDef && (
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Nivel organizacional
               </label>
               <span
-                className="inline-block px-3 py-1 rounded-full text-white text-sm font-medium"
+                className="inline-block px-3 py-1 rounded-full text-gray-900 text-sm font-medium"
                 style={{ backgroundColor: color }}
               >
                 {levelDef.level_name}
@@ -98,10 +98,10 @@ export function OrgNodeModal({ mode, parentId, editUnit, onClose }: OrgNodeModal
 
           {parentUnit && (
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Depende de
               </label>
-              <span className="text-sm text-white/40 bg-white/[0.03] px-3 py-1.5 rounded-lg inline-block">
+              <span className="text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg inline-block">
                 {parentUnit.name}
               </span>
             </div>
@@ -111,14 +111,14 @@ export function OrgNodeModal({ mode, parentId, editUnit, onClose }: OrgNodeModal
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-white/70 border border-white/10 rounded-lg hover:bg-white/5 transition-colors font-medium"
+            className="px-4 py-2 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium"
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={!name.trim()}
-            className="px-5 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:from-cyan-500 hover:to-blue-500 transition-colors font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-5 py-2 text-white rounded-lg transition-colors font-semibold disabled:opacity-40 disabled:cursor-not-allowed bg-primary-500 hover:bg-primary-600"
           >
             Guardar
           </button>

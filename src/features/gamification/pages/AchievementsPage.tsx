@@ -11,8 +11,8 @@ export default function AchievementsPage() {
     <div className="space-y-6">
       <PageHeader
         icon={Award}
-        iconClass="bg-amber-500/10 border border-amber-500/20"
-        iconColor="text-amber-400"
+        iconClass="bg-amber-50 border border-amber-200"
+        iconColor="text-amber-600"
         title="Logros"
         subtitle="Tu progreso documentando y analizando procesos"
       />

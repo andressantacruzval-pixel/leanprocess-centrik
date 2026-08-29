@@ -49,29 +49,29 @@ export function ChatThread({ conversation, isStreaming, isDeep, error, onSend, o
   const isEmpty = messages.length === 0
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[#0a0f19]">
+    <div className="flex-1 flex flex-col min-h-0 bg-surface-ground">
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-5">
         {isEmpty ? (
           <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 ring-1 ring-cyan-500/30 flex items-center justify-center mb-4">
-              <Sparkles size={26} className="text-cyan-400" />
+            <div className="w-14 h-14 rounded-lg ring-1 ring-primary-500 flex items-center justify-center mb-4 bg-primary-500">
+              <Sparkles size={26} className="text-primary-600" />
             </div>
-            <h2 className="text-lg font-bold text-white">Tu copiloto de procesos</h2>
-            <p className="text-[13px] text-white/45 mt-1.5">
+            <h2 className="text-lg font-bold text-gray-900">Tu copiloto de procesos</h2>
+            <p className="text-[13px] text-gray-500 mt-1.5">
               Pregúntale lo que sea sobre tu empresa. Conoce tus procesos, quién hace qué, tus riesgos, controles e indicadores — y te lleva al documento.
             </p>
             <div className="flex flex-col gap-2 mt-6 w-full">
               <button
                 onClick={() => onDeepResearch('')}
-                className="text-left text-[13px] font-medium text-violet-200 bg-violet-500/10 border border-violet-500/25 rounded-xl px-3.5 py-2.5 hover:bg-violet-500/15 transition-colors inline-flex items-center gap-2"
+                className="text-left text-[13px] font-medium text-primary-700 bg-primary-50 border border-primary-200 rounded-lg px-3.5 py-2.5 hover:bg-primary-50 transition-colors inline-flex items-center gap-2"
               >
-                <Microscope size={15} className="text-violet-300 shrink-0" /> Investigación profunda: diagnóstico integral de la empresa
+                <Microscope size={15} className="text-primary-700 shrink-0" /> Investigación profunda: diagnóstico integral de la empresa
               </button>
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
                   onClick={() => onSend(s)}
-                  className="text-left text-[13px] text-white/70 bg-white/[0.03] border border-white/10 rounded-xl px-3.5 py-2.5 hover:bg-white/[0.06] hover:border-cyan-500/25 transition-colors"
+                  className="text-left text-[13px] text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-2.5 hover:bg-gray-50 hover:border-primary-200 transition-colors"
                 >
                   {s}
                 </button>
@@ -85,16 +85,16 @@ export function ChatThread({ conversation, isStreaming, isDeep, error, onSend, o
               if (streamingThis && showThinking) {
                 return (
                   <div key={m.id} className="flex gap-2.5 copilot-fade">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500/25 to-blue-500/20 ring-1 ring-cyan-500/30 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.25)]">
-                      <Bot size={14} className="text-cyan-400" />
+                    <div className="w-7 h-7 rounded-full ring-1 ring-primary-500 flex items-center justify-center shrink-0 bg-primary-500">
+                      <Bot size={14} className="text-primary-600" />
                     </div>
-                    <div className="rounded-2xl rounded-tl-sm bg-white/[0.04] border border-white/5 px-3.5 py-2.5 inline-flex items-center gap-2">
+                    <div className="rounded-lg rounded-tl-sm bg-gray-50 border border-gray-100 px-3.5 py-2.5 inline-flex items-center gap-2">
                       <span className="flex gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/70 animate-bounce [animation-delay:-0.3s]" />
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/70 animate-bounce [animation-delay:-0.15s]" />
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/70 animate-bounce" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary-100 animate-bounce [animation-delay:-0.3s]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary-100 animate-bounce [animation-delay:-0.15s]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary-100 animate-bounce" />
                       </span>
-                      <span className="text-[12px] text-white/45">{thinkingLabel}</span>
+                      <span className="text-[12px] text-gray-500">{thinkingLabel}</span>
                     </div>
                   </div>
                 )
@@ -109,7 +109,7 @@ export function ChatThread({ conversation, isStreaming, isDeep, error, onSend, o
                 />
               )
             })}
-            {error && <p className="text-[12px] text-red-400 text-center">{error}</p>}
+            {error && <p className="text-[12px] text-red-600 text-center">{error}</p>}
           </div>
         )}
       </div>

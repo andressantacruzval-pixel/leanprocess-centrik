@@ -140,27 +140,27 @@ export function AiUsageHistory() {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-base font-semibold text-white">Uso de IA</h2>
-        <p className="text-xs text-white/40 mt-0.5">Historial de créditos consumidos por herramienta</p>
+        <h2 className="text-base font-semibold text-gray-900">Uso de IA</h2>
+        <p className="text-xs text-gray-500 mt-0.5">Historial de créditos consumidos por herramienta</p>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center justify-between">
         <div>
-          <p className="text-[10px] text-white/40 uppercase mb-0.5">Créditos usados (total histórico)</p>
-          <p className="text-2xl font-bold text-white tabular-nums">{totalCredits.toLocaleString()}</p>
+          <p className="text-[10px] text-gray-500 uppercase mb-0.5">Créditos usados (total histórico)</p>
+          <p className="text-2xl font-bold text-gray-900 tabular-nums">{totalCredits.toLocaleString()}</p>
         </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-8">
-          <Loader2 size={20} className="animate-spin text-cyan-400" />
+          <Loader2 size={20} className="animate-spin text-primary-600" />
         </div>
       ) : (
         <>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[480px] text-xs">
               <thead>
-                <tr className="border-b border-white/10 text-white/30 text-[10px] uppercase">
+                <tr className="border-b border-gray-200 text-gray-400 text-[10px] uppercase">
                   <th className="text-left py-2 pr-4">Herramienta</th>
                   <th className="text-right py-2 pr-4">Créditos</th>
                   <th className="text-right py-2">Fecha</th>
@@ -168,12 +168,12 @@ export function AiUsageHistory() {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-white/5 text-white/60 hover:bg-white/5">
+                  <tr key={r.id} className="border-b border-gray-100 text-gray-600 hover:bg-gray-50">
                     <td className="py-2 pr-4">{getLabel(r.feature)}</td>
-                    <td className="py-2 pr-4 text-right tabular-nums text-red-400">
+                    <td className="py-2 pr-4 text-right tabular-nums text-red-600">
                       -{OPERATION_COSTS[r.feature] ?? DEFAULT_CREDIT_COST}
                     </td>
-                    <td className="py-2 text-right text-white/40">
+                    <td className="py-2 text-right text-gray-500">
                       {new Date(r.created_at).toLocaleDateString('es-ES', {
                         day: '2-digit', month: '2-digit', year: '2-digit',
                       })}
@@ -182,7 +182,7 @@ export function AiUsageHistory() {
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="py-8 text-center text-white/20">
+                    <td colSpan={3} className="py-8 text-center text-gray-300">
                       Aún no has usado herramientas de IA
                     </td>
                   </tr>
@@ -196,22 +196,22 @@ export function AiUsageHistory() {
               <button
                 onClick={() => loadPage(page - 1)}
                 disabled={page === 0}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white/80 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft size={12} /> Anterior
               </button>
-              <span className="text-xs text-white/30">Pág. {page + 1}</span>
+              <span className="text-xs text-gray-400">Pág. {page + 1}</span>
               <button
                 onClick={() => loadPage(page + 1)}
                 disabled={!hasMore}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white/80 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 Siguiente <ChevronRight size={12} />
               </button>
             </div>
           )}
 
-          <p className="text-[10px] text-white/20">Solo se muestran operaciones de IA registradas.</p>
+          <p className="text-[10px] text-gray-300">Solo se muestran operaciones de IA registradas.</p>
         </>
       )}
     </div>

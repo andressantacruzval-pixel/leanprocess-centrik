@@ -45,7 +45,7 @@ export function MembersPanel() {
 
   if (!activeCompany || !activeCompanyId) {
     return (
-      <div className="rounded-xl border border-white/5 bg-white/[0.02] p-8 text-center text-sm text-white/40">
+      <div className="rounded-lg border border-gray-100 bg-gray-50 p-8 text-center text-sm text-gray-500">
         Selecciona o crea una empresa para gestionar miembros.
       </div>
     )
@@ -92,8 +92,8 @@ export function MembersPanel() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold text-white truncate">Miembros de {activeCompany.name}</h2>
-          <p className="text-xs text-white/40 mt-0.5">
+          <h2 className="text-lg font-semibold text-gray-900 truncate">Miembros de {activeCompany.name}</h2>
+          <p className="text-xs text-gray-500 mt-0.5">
             {members.length} miembro{members.length === 1 ? '' : 's'} · Incluidos en el plan:{' '}
             {BASE_PLAN.included_members_per_company} ·{' '}
             {formatMoney(ADDON_PRICES.extra_member)}/mes por cada miembro adicional
@@ -101,7 +101,7 @@ export function MembersPanel() {
         </div>
         <button
           onClick={() => setInviteOpen(true)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium transition-all"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-white text-sm font-medium transition-all bg-primary-500 hover:bg-primary-600"
         >
           <UserPlus size={14} />
           Invitar miembro
@@ -109,49 +109,49 @@ export function MembersPanel() {
       </div>
 
       {members.length === 0 ? (
-        <div className="rounded-xl border border-white/5 bg-white/[0.02] p-8 text-center">
-          <Users size={32} className="mx-auto text-white/20 mb-2" />
-          <div className="text-sm text-white/50">Todavia no hay miembros registrados.</div>
+        <div className="rounded-lg border border-gray-100 bg-gray-50 p-8 text-center">
+          <Users size={32} className="mx-auto text-gray-300 mb-2" />
+          <div className="text-sm text-gray-500">Todavia no hay miembros registrados.</div>
         </div>
       ) : (
         <div className="space-y-2">
           {members.map((m) => (
             <div
               key={m.id}
-              className="rounded-xl border border-white/5 bg-white/[0.02] p-3 flex items-center gap-3"
+              className="rounded-lg border border-gray-100 bg-gray-50 p-3 flex items-center gap-3"
             >
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 ring-1 ring-cyan-500/30 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full ring-1 ring-primary-500 flex items-center justify-center shrink-0 bg-primary-500">
                 {m.role === 'owner' ? (
-                  <Shield size={14} className="text-cyan-400" />
+                  <Shield size={14} className="text-primary-600" />
                 ) : (
-                  <Users size={14} className="text-cyan-400" />
+                  <Users size={14} className="text-primary-600" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-white truncate">
+                  <span className="text-sm font-medium text-gray-900 truncate">
                     {m.full_name || m.email}
                   </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-white/60">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-600">
                     {ROLE_LABELS[m.role]}
                   </span>
                   {m.billed_as_addon && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700">
                       +{formatMoney(ADDON_PRICES.extra_member)}/mes
                     </span>
                   )}
                   {m.status === 'invited' && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/15 text-yellow-300">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700">
                       Invitado
                     </span>
                   )}
                 </div>
-                <div className="text-[11px] text-white/40 mt-0.5 truncate">{m.email}</div>
+                <div className="text-[11px] text-gray-500 mt-0.5 truncate">{m.email}</div>
               </div>
               {m.role !== 'owner' && (
                 <button
                   onClick={() => setDeleteTarget(m.id)}
-                  className="p-2 rounded-lg hover:bg-white/5 text-white/30 hover:text-red-400 transition-colors"
+                  className="p-2 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-red-600 transition-colors"
                   title="Remover miembro"
                 >
                   <Trash2 size={14} />
@@ -172,12 +172,12 @@ export function MembersPanel() {
 
       {/* Inline invite form */}
       {inviteOpen && (
-        <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/[0.03] p-4 space-y-3">
+        <div className="rounded-lg border border-primary-200 bg-primary-50 p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-white">Invitar nuevo miembro</span>
+            <span className="text-sm font-semibold text-gray-900">Invitar nuevo miembro</span>
             <button
               onClick={resetForm}
-              className="p-1 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/70"
+              className="p-1 rounded-lg hover:bg-gray-50 text-gray-500 hover:text-gray-700"
             >
               <X size={14} />
             </button>
@@ -191,21 +191,21 @@ export function MembersPanel() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="correo@ejemplo.com"
-                  className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-500/40"
+                  className="px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary-300"
                 />
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as WorkspaceRole)}
-                  className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-cyan-500/40"
+                  className="px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-900 focus:outline-none focus:border-primary-300"
                 >
-                  <option value="admin" className="bg-[#0b1020] text-white">Administrador</option>
-                  <option value="editor" className="bg-[#0b1020] text-white">Editor</option>
-                  <option value="viewer" className="bg-[#0b1020] text-white">Lector</option>
+                  <option value="admin" className="bg-surface-ground text-gray-900">Administrador</option>
+                  <option value="editor" className="bg-surface-ground text-gray-900">Editor</option>
+                  <option value="viewer" className="bg-surface-ground text-gray-900">Lector</option>
                 </select>
               </div>
 
               {gate.requires_payment && (
-                <div className="text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+                <div className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
                   Agregar este miembro sumara{' '}
                   <span className="font-semibold">
                     {formatMoney(gate.addon_amount)}/mes
@@ -214,20 +214,20 @@ export function MembersPanel() {
                 </div>
               )}
               {error && (
-                <div className="text-[11px] text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+                <div className="text-[11px] text-red-700 bg-red-50 border border-red-300 rounded-lg px-3 py-2">
                   {error}
                 </div>
               )}
               <div className="flex items-center justify-end gap-2">
                 <button
                   onClick={resetForm}
-                  className="px-3 py-1.5 text-xs text-white/60 hover:text-white/90"
+                  className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleInvite}
-                  className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-medium"
+                  className="px-3 py-1.5 rounded-lg text-white text-xs font-medium bg-primary-500 hover:bg-primary-600"
                 >
                   {gate.requires_payment ? 'Continuar al pago' : 'Enviar invitacion'}
                 </button>
@@ -235,32 +235,32 @@ export function MembersPanel() {
             </>
           ) : (
             <>
-              <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
-                <div className="text-sm font-semibold text-white">
+              <div className="rounded-lg border border-primary-200 bg-primary-50 p-3">
+                <div className="text-sm font-semibold text-gray-900">
                   {ADDON_LABELS.extra_member}
                 </div>
-                <div className="text-xs text-white/50 mt-1">
-                  Invitar a <span className="text-white/80">{email}</span> como{' '}
+                <div className="text-xs text-gray-500 mt-1">
+                  Invitar a <span className="text-gray-800">{email}</span> como{' '}
                   {ROLE_LABELS[role]}
                 </div>
-                <div className="mt-3 pt-3 border-t border-white/5 flex items-baseline justify-between">
-                  <span className="text-xs text-white/40">Cobro mensual adicional</span>
-                  <span className="text-lg font-bold text-white">
+                <div className="mt-3 pt-3 border-t border-gray-100 flex items-baseline justify-between">
+                  <span className="text-xs text-gray-500">Cobro mensual adicional</span>
+                  <span className="text-lg font-bold text-gray-900">
                     {formatMoney(gate.addon_amount, gate.currency)}
-                    <span className="text-[10px] text-white/40 font-normal ml-1">/mes</span>
+                    <span className="text-[10px] text-gray-500 font-normal ml-1">/mes</span>
                   </span>
                 </div>
               </div>
               <div className="flex items-center justify-end gap-2">
                 <button
                   onClick={() => setShowPayment(false)}
-                  className="px-3 py-1.5 text-xs text-white/60 hover:text-white/90"
+                  className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800"
                 >
                   Volver
                 </button>
                 <button
                   onClick={handlePayAndInvite}
-                  className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-medium"
+                  className="px-3 py-1.5 rounded-lg text-white text-xs font-medium bg-primary-500 hover:bg-primary-600"
                 >
                   Pagar {formatMoney(gate.addon_amount)} y enviar
                 </button>

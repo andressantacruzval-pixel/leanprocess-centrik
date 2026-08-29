@@ -59,10 +59,10 @@ export function StepProcessLevels({ onNext, onBack }: StepProcessLevelsProps) {
 
   return (
     <div className="flex flex-col items-center flex-1 px-4 max-w-5xl mx-auto w-full">
-      <h2 className="text-2xl font-bold text-white mb-2 text-center">
+      <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
         Cuantos niveles de documentacion necesitas?
       </h2>
-      <p className="text-white/40 mb-8 text-center">
+      <p className="text-gray-500 mb-8 text-center">
         Define como organizaras tu jerarquia de procesos
       </p>
 
@@ -85,31 +85,31 @@ export function StepProcessLevels({ onNext, onBack }: StepProcessLevelsProps) {
             <button
               key={option.count}
               onClick={() => handleSelectCount(option.count)}
-              className={`relative p-5 rounded-xl border-2 text-left transition-all duration-200 ${
+              className={`relative p-5 rounded-lg border-2 text-left transition-all duration-200 ${
                 isSelected
-                  ? 'border-cyan-500 bg-cyan-500/10 shadow-lg shadow-cyan-500/20'
-                  : 'border-white/10 bg-white/[0.03] hover:border-white/20'
+                  ? 'border-primary-500 bg-primary-50 shadow-lg'
+                  : 'border-gray-200 bg-gray-50 hover:border-gray-300'
               }`}
             >
               {isRecommended && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 text-white text-xs font-semibold rounded-full flex items-center gap-1 bg-primary-500">
                   <Star size={12} />
                   Recomendado
                 </span>
               )}
 
-              <div className="text-3xl font-bold text-white mb-1">
+              <div className="text-3xl font-bold text-gray-900 mb-1">
                 {option.count} niveles
               </div>
-              <div className="text-sm text-white/40 mb-4">
+              <div className="text-sm text-gray-500 mb-4">
                 {option.defaultNames.join(' > ')}
               </div>
 
               <div className="space-y-1.5 mb-3">
                 {option.pros.map((pro, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
-                    <Check size={14} className="text-cyan-400 mt-0.5 shrink-0" />
-                    <span className="text-white/70">{pro}</span>
+                    <Check size={14} className="text-primary-600 mt-0.5 shrink-0" />
+                    <span className="text-gray-700">{pro}</span>
                   </div>
                 ))}
               </div>
@@ -117,8 +117,8 @@ export function StepProcessLevels({ onNext, onBack }: StepProcessLevelsProps) {
               <div className="space-y-1.5">
                 {option.cons.map((con, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm">
-                    <AlertTriangle size={14} className="text-amber-500 mt-0.5 shrink-0" />
-                    <span className="text-white/40">{con}</span>
+                    <AlertTriangle size={14} className="text-amber-600 mt-0.5 shrink-0" />
+                    <span className="text-gray-500">{con}</span>
                   </div>
                 ))}
               </div>
@@ -129,20 +129,20 @@ export function StepProcessLevels({ onNext, onBack }: StepProcessLevelsProps) {
 
       {/* Custom names */}
       <div className="w-full max-w-md mb-8">
-        <h3 className="text-sm font-semibold text-white/70 mb-3">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">
           Personaliza los nombres de cada nivel
         </h3>
         <div className="space-y-3">
           {names.map((name, index) => (
             <div key={index} className="flex items-center gap-3">
-              <span className="w-8 h-8 rounded-full bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-sm font-bold shrink-0">
+              <span className="w-8 h-8 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center text-sm font-bold shrink-0">
                 {index + 1}
               </span>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => handleNameChange(index, e.target.value)}
-                className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent"
+                className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder={`Nivel ${index + 1}`}
               />
             </div>
@@ -154,7 +154,7 @@ export function StepProcessLevels({ onNext, onBack }: StepProcessLevelsProps) {
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-6 py-2.5 border border-white/10 text-white/70 rounded-xl font-medium hover:bg-white/5 transition-colors"
+          className="flex items-center gap-2 px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
         >
           <ArrowLeft size={18} />
           Anterior
@@ -162,7 +162,7 @@ export function StepProcessLevels({ onNext, onBack }: StepProcessLevelsProps) {
         <button
           onClick={handleNext}
           disabled={!allNamesFilled}
-          className="flex items-center gap-2 px-8 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold hover:from-cyan-500 hover:to-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-8 py-2.5 text-white rounded-lg font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-primary-500 hover:bg-primary-600"
         >
           Siguiente
           <ArrowRight size={18} />

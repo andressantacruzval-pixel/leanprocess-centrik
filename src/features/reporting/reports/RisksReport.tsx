@@ -62,14 +62,14 @@ function HeatMap({ risks, mode, onCell, selected }: {
     <div className="grid grid-cols-[auto_repeat(5,minmax(0,1fr))] gap-1 text-[10px]">
       {PROB_ROWS.map((p) => (
         <Fragment key={p}>
-          <span className="flex items-center justify-end pr-1 text-right leading-tight text-white/40">{PROBABILITY_LABELS[p]}</span>
+          <span className="flex items-center justify-end pr-1 text-right leading-tight text-gray-500">{PROBABILITY_LABELS[p]}</span>
           {IMP_COLS.map((i) => {
             const c = counts[`${p}-${i}`] || 0
             const isSel = selected?.p === p && selected?.i === i
             return (
               <button key={i} type="button" disabled={c === 0} onClick={() => onCell(p, i)}
                 title={`${PROBABILITY_LABELS[p]} × ${IMPACT_LABELS[i]}`}
-                className={`aspect-square rounded flex items-center justify-center font-bold text-white transition-all ${heatMapCellColor(p, i)} ${c === 0 ? 'opacity-20 cursor-default' : 'cursor-pointer hover:ring-2 hover:ring-white/70'} ${isSel ? 'ring-2 ring-white scale-105' : ''}`}>
+                className={`aspect-square rounded-md flex items-center justify-center font-bold text-gray-900 transition-all ${heatMapCellColor(p, i)} ${c === 0 ? 'opacity-20 cursor-default' : 'cursor-pointer hover:ring-2 hover:ring-gray-400'} ${isSel ? 'ring-2 ring-white scale-105' : ''}`}>
                 {c > 0 ? c : ''}
               </button>
             )
@@ -77,7 +77,7 @@ function HeatMap({ risks, mode, onCell, selected }: {
         </Fragment>
       ))}
       <span />
-      {IMP_COLS.map((i) => <span key={i} className="text-center leading-tight pt-0.5 text-white/40">{IMPACT_LABELS[i]}</span>)}
+      {IMP_COLS.map((i) => <span key={i} className="text-center leading-tight pt-0.5 text-gray-500">{IMPACT_LABELS[i]}</span>)}
     </div>
   )
 }
@@ -114,7 +114,7 @@ export function RisksReport({ processes, allRisks, macroMap, processMap }: { pro
       const p = processMap.get(r.process_id)
       return { management: p?.management, coordination: p?.coordination, operative: p?.operative, ...resolveProcessHierarchy(p, macroMap, processMap) }
     }),
-    { key: 'title', header: 'Riesgo', accessor: (r) => r.title || '', className: 'text-white font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.title}>{r.title}</div> },
+    { key: 'title', header: 'Riesgo', accessor: (r) => r.title || '', className: 'text-gray-900 font-medium max-w-[200px]', cell: (r) => <div className="truncate" title={r.title}>{r.title}</div> },
     { key: 'desc', header: 'Descripción', accessor: (r) => r.description || '', className: 'max-w-[260px]', cell: (r) => <div className="truncate" title={r.description}>{r.description || '-'}</div> },
     { key: 'cause', header: 'Causa', accessor: (r) => r.riskCause || '', className: 'max-w-[160px]', cell: (r) => <div className="truncate" title={r.riskCause}>{r.riskCause || '-'}</div> },
     { key: 'event', header: 'Evento', accessor: (r) => r.riskEvent || '', className: 'max-w-[160px]', cell: (r) => <div className="truncate" title={r.riskEvent}>{r.riskEvent || '-'}</div> },
@@ -171,13 +171,13 @@ export function RisksReport({ processes, allRisks, macroMap, processMap }: { pro
 
       <div>
         <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
-          <h3 className="text-sm font-semibold text-white">Mapas de calor</h3>
-          <label className="flex items-center gap-2 text-[11px] text-white/50">
+          <h3 className="text-sm font-semibold text-gray-900">Mapas de calor</h3>
+          <label className="flex items-center gap-2 text-[11px] text-gray-500">
             Tipo de riesgo
             <select value={heatCategory} onChange={(e) => setHeatCategory(e.target.value as RiskCategory | '')}
-              className="bg-white/[0.03] border border-white/10 rounded-lg px-2 py-1 text-[11px] text-white/80 outline-none cursor-pointer">
+              className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-[11px] text-gray-800 outline-none cursor-pointer">
               <option value="">Todos</option>
-              {RISK_CATEGORIES.map((c) => <option key={c} value={c} className="bg-[#0d1117]">{c}</option>)}
+              {RISK_CATEGORIES.map((c) => <option key={c} value={c} className="bg-white">{c}</option>)}
             </select>
           </label>
         </div>
@@ -195,7 +195,7 @@ export function RisksReport({ processes, allRisks, macroMap, processMap }: { pro
         <Card title="Riesgo inherente" sub="Antes de controles. Clic para filtrar la tabla.">
           <Donut data={byInh} center={String(risks.length)} unit="riesgos" onSlice={(l) => setFLevel(fLevel === l ? '' : l)} active={fLevel} />
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {LEVELS.map((l) => <button key={l} onClick={() => setFLevel(fLevel === l ? '' : l)} className={`text-[10px] px-2 py-1 rounded-md border ${fLevel === l ? 'border-white/40 text-white' : 'border-white/10 text-white/50'}`}>{l}</button>)}
+            {LEVELS.map((l) => <button key={l} onClick={() => setFLevel(fLevel === l ? '' : l)} className={`text-[10px] px-2 py-1 rounded-md border ${fLevel === l ? 'border-gray-300 text-gray-900' : 'border-gray-200 text-gray-500'}`}>{l}</button>)}
           </div>
         </Card>
         <Card title="Riesgo residual" sub="Después de aplicar los controles evaluados.">
@@ -213,10 +213,10 @@ export function RisksReport({ processes, allRisks, macroMap, processMap }: { pro
 
       {heatCell && (
         <div className="flex items-center gap-2 flex-wrap -mb-1">
-          <span className="text-[11px] text-white/45">Tabla filtrada por cuadrante:</span>
-          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+          <span className="text-[11px] text-gray-500">Tabla filtrada por cuadrante:</span>
+          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 border border-primary-200">
             {heatCell.mode === 'inh' ? 'Inherente' : 'Residual'} · {PROBABILITY_LABELS[heatCell.p]} × {IMPACT_LABELS[heatCell.i]}
-            <button onClick={() => setHeatCell(null)} className="hover:text-white" title="Quitar filtro"><X size={12} /></button>
+            <button onClick={() => setHeatCell(null)} className="hover:text-gray-900" title="Quitar filtro"><X size={12} /></button>
           </span>
         </div>
       )}

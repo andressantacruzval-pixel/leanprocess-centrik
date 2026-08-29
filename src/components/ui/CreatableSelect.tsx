@@ -58,24 +58,24 @@ export function CreatableSelect({
           setIsOpen(!isOpen)
           if (!isOpen) setTimeout(() => inputRef.current?.focus(), 50)
         }}
-        className="w-full flex items-center justify-between px-3 py-2 border border-white/10 rounded-lg bg-white/5 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent"
+        className="w-full flex items-center justify-between px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
       >
-        <span className={value ? 'text-white' : 'text-white/30'}>
+        <span className={value ? 'text-gray-900' : 'text-gray-400'}>
           {selectedLabel || placeholder}
         </span>
-        <ChevronDown size={16} className="text-white/30" />
+        <ChevronDown size={16} className="text-gray-400" />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full bg-[#0d1420] border border-white/10 rounded-lg shadow-lg max-h-60 overflow-hidden">
-          <div className="p-2 border-b border-white/5">
+        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-hidden">
+          <div className="p-2 border-b border-gray-100">
             <input
               ref={inputRef}
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar o crear..."
-              className="w-full px-2 py-1.5 text-sm border border-white/10 rounded bg-white/5 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+              className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && filtered.length === 0 && search.trim()) {
                   handleCreate()
@@ -93,8 +93,8 @@ export function CreatableSelect({
                   setIsOpen(false)
                   setSearch('')
                 }}
-                className={`w-full text-left px-3 py-2 text-sm hover:bg-white/5 transition-colors ${
-                  option.value === value ? 'bg-cyan-500/10 text-cyan-400 font-medium' : 'text-white/70'
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${
+                  option.value === value ? 'bg-primary-50 text-primary-600 font-medium' : 'text-gray-700'
                 }`}
               >
                 {option.label}
@@ -105,7 +105,7 @@ export function CreatableSelect({
               <button
                 type="button"
                 onClick={handleCreate}
-                className="w-full text-left px-3 py-2 text-sm text-cyan-400 hover:bg-white/5 flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-sm text-primary-600 hover:bg-gray-50 flex items-center gap-2"
               >
                 <Plus size={14} />
                 Crear "{search.trim()}"
@@ -113,7 +113,7 @@ export function CreatableSelect({
             )}
 
             {filtered.length === 0 && !search.trim() && (
-              <div className="px-3 py-2 text-sm text-white/30">Sin opciones</div>
+              <div className="px-3 py-2 text-sm text-gray-400">Sin opciones</div>
             )}
           </div>
         </div>

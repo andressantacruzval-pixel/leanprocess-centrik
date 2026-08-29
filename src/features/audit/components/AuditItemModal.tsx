@@ -88,13 +88,13 @@ export function AuditItemModal({
   const fieldError = (val: string) => touched && val.trim() === ''
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#0d1420] rounded-2xl shadow-xl w-full max-w-lg mx-4 border border-white/10 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/45">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 border border-gray-200 flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-2">
-            <ClipboardCheck size={15} className="text-violet-400" />
-            <h3 className="text-sm font-semibold text-white">
+            <ClipboardCheck size={15} className="text-primary-600" />
+            <h3 className="text-sm font-semibold text-gray-900">
               {isEditMode ? 'Editar ítem de auditoría' : 'Nuevo ítem de auditoría'}
             </h3>
           </div>
@@ -103,7 +103,7 @@ export function AuditItemModal({
               <button
                 onClick={handleAiSuggestOne}
                 disabled={isAiSuggesting || auditBudget.isConsuming}
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 title="Sugerir ítem con IA"
               >
                 {isAiSuggesting || auditBudget.isConsuming
@@ -114,7 +114,7 @@ export function AuditItemModal({
             )}
             <button
               onClick={handleCloseAttempt}
-              className="p-1 rounded hover:bg-white/5 text-white/30 hover:text-white/60"
+              className="p-1 rounded-md hover:bg-gray-50 text-gray-400 hover:text-gray-600"
             >
               <X size={18} />
             </button>
@@ -125,7 +125,7 @@ export function AuditItemModal({
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Actividad */}
           <div>
-            <label className="block text-[10px] font-medium text-white/40 mb-1">
+            <label className="block text-[10px] font-medium text-gray-500 mb-1">
               Actividad del proceso
             </label>
             <input
@@ -133,52 +133,52 @@ export function AuditItemModal({
               value={form.actividad}
               onChange={(e) => setField('actividad', e.target.value)}
               placeholder="Nombre de la actividad asociada..."
-              className="w-full px-3 py-2 border border-white/10 rounded-lg text-xs bg-white/5 text-white focus:ring-1 focus:ring-violet-500/50 placeholder-white/20"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500 placeholder-gray-400"
             />
           </div>
 
           {/* Qué auditar */}
           <div>
-            <label className="block text-[10px] font-medium text-white/40 mb-1">
-              ¿Qué auditar? <span className="text-red-400">*</span>
+            <label className="block text-[10px] font-medium text-gray-500 mb-1">
+              ¿Qué auditar? <span className="text-red-600">*</span>
             </label>
             <textarea
               value={form.queAuditar}
               onChange={(e) => setField('queAuditar', e.target.value)}
               rows={3}
               placeholder="Aspecto específico a auditar..."
-              className={`w-full px-3 py-2 border rounded-lg text-xs bg-white/5 text-white focus:ring-1 focus:ring-violet-500/50 resize-none placeholder-white/20 ${
-                fieldError(form.queAuditar) ? 'border-red-500/60' : 'border-white/10'
+              className={`w-full px-3 py-2 border rounded-lg text-xs bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500 resize-none placeholder-gray-400 ${
+                fieldError(form.queAuditar) ? 'border-red-300' : 'border-gray-200'
               }`}
             />
             {fieldError(form.queAuditar) && (
-              <p className="text-[9px] text-red-400 mt-1">Campo requerido</p>
+              <p className="text-[9px] text-red-600 mt-1">Campo requerido</p>
             )}
           </div>
 
           {/* Criterio */}
           <div>
-            <label className="block text-[10px] font-medium text-white/40 mb-1">
-              Criterio o norma <span className="text-red-400">*</span>
+            <label className="block text-[10px] font-medium text-gray-500 mb-1">
+              Criterio o norma <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
               value={form.criterio}
               onChange={(e) => setField('criterio', e.target.value)}
               placeholder="ISO 9001, política interna, etc."
-              className={`w-full px-3 py-2 border rounded-lg text-xs bg-white/5 text-white focus:ring-1 focus:ring-violet-500/50 placeholder-white/20 ${
-                fieldError(form.criterio) ? 'border-red-500/60' : 'border-white/10'
+              className={`w-full px-3 py-2 border rounded-lg text-xs bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500 placeholder-gray-400 ${
+                fieldError(form.criterio) ? 'border-red-300' : 'border-gray-200'
               }`}
             />
             {fieldError(form.criterio) && (
-              <p className="text-[9px] text-red-400 mt-1">Campo requerido</p>
+              <p className="text-[9px] text-red-600 mt-1">Campo requerido</p>
             )}
           </div>
 
           {/* Evidencia + Frecuencia */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-medium text-white/40 mb-1">
+              <label className="block text-[10px] font-medium text-gray-500 mb-1">
                 Tipo de evidencia
               </label>
               <input
@@ -186,20 +186,20 @@ export function AuditItemModal({
                 value={form.evidencia}
                 onChange={(e) => setField('evidencia', e.target.value)}
                 placeholder="Registros, reportes..."
-                className="w-full px-3 py-2 border border-white/10 rounded-lg text-xs bg-white/5 text-white focus:ring-1 focus:ring-violet-500/50 placeholder-white/20"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500 placeholder-gray-400"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-white/40 mb-1">
+              <label className="block text-[10px] font-medium text-gray-500 mb-1">
                 Frecuencia
               </label>
               <select
                 value={form.frecuencia}
                 onChange={(e) => setField('frecuencia', e.target.value)}
-                className="w-full px-3 py-2 border border-white/10 rounded-lg text-xs bg-white/5 text-white focus:ring-1 focus:ring-violet-500/50"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500"
               >
                 {FRECUENCIAS.map((f) => (
-                  <option key={f} value={f} className="bg-[#0b1020] text-white">{f}</option>
+                  <option key={f} value={f} className="bg-surface-ground text-gray-900">{f}</option>
                 ))}
               </select>
             </div>
@@ -207,7 +207,7 @@ export function AuditItemModal({
 
           {/* Responsable */}
           <div>
-            <label className="block text-[10px] font-medium text-white/40 mb-1">
+            <label className="block text-[10px] font-medium text-gray-500 mb-1">
               Responsable
             </label>
             <input
@@ -215,23 +215,23 @@ export function AuditItemModal({
               value={form.responsable}
               onChange={(e) => setField('responsable', e.target.value)}
               placeholder="Rol que ejecuta la auditoría..."
-              className="w-full px-3 py-2 border border-white/10 rounded-lg text-xs bg-white/5 text-white focus:ring-1 focus:ring-violet-500/50 placeholder-white/20"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 text-gray-900 focus:ring-1 focus:ring-primary-500 placeholder-gray-400"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-white/5 shrink-0">
+        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100 shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-1.5 text-xs text-white/50 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
+            className="px-4 py-1.5 text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={touched && !isValid}
-            className="px-5 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg text-xs font-medium hover:from-violet-500 hover:to-purple-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-5 py-2 text-white rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-primary-500 hover:bg-primary-600"
           >
             Guardar
           </button>

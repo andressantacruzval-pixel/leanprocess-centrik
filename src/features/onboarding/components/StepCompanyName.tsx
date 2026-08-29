@@ -41,22 +41,22 @@ export function StepCompanyName({ onNext }: StepCompanyNameProps) {
 
   return (
     <div className="flex flex-col items-center justify-center flex-1 px-4">
-      <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center mb-6">
-        <Building2 className="text-cyan-400" size={32} />
+      <div className="w-16 h-16 rounded-lg bg-primary-50 flex items-center justify-center mb-6">
+        <Building2 className="text-primary-600" size={32} />
       </div>
 
-      <h2 className="text-3xl font-bold text-white mb-2 text-center">
+      <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center">
         Cuentanos sobre tu empresa
       </h2>
-      <p className="text-white/40 mb-8 text-center max-w-lg">
+      <p className="text-gray-500 mb-8 text-center max-w-lg">
         Esta informacion nos ayudara a personalizar tu experiencia y generar recomendaciones mas precisas con IA
       </p>
 
       <div className="w-full max-w-lg space-y-4">
         {/* Company Name */}
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1">
-            Nombre de la empresa <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nombre de la empresa <span className="text-red-600">*</span>
           </label>
           <input
             type="text"
@@ -64,7 +64,7 @@ export function StepCompanyName({ onNext }: StepCompanyNameProps) {
             onChange={(e) => setName(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ej: Litransa SA"
-            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent"
+            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             autoFocus
           />
         </div>
@@ -72,20 +72,20 @@ export function StepCompanyName({ onNext }: StepCompanyNameProps) {
         {/* Two-column row: Industry + Size */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-1">
-              Industria / Giro de negocio <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Industria / Giro de negocio <span className="text-red-600">*</span>
             </label>
             <ComboboxSelect
               value={industry}
               onChange={setIndustry}
               options={INDUSTRY_OPTIONS}
               placeholder="Buscar industria..."
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Tamaño de empresa
             </label>
             <ComboboxSelect
@@ -93,14 +93,14 @@ export function StepCompanyName({ onNext }: StepCompanyNameProps) {
               onChange={setCompanySize}
               options={SIZE_OPTIONS}
               placeholder="Seleccionar tamaño..."
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
             />
           </div>
         </div>
 
         {/* Country */}
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Pais
           </label>
           <ComboboxSelect
@@ -108,21 +108,21 @@ export function StepCompanyName({ onNext }: StepCompanyNameProps) {
             onChange={setCountry}
             options={COUNTRY_OPTIONS}
             placeholder="Buscar país..."
-            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white"
+            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900"
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1">
-            Breve descripcion <span className="text-white/20 font-normal">(opcional)</span>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Breve descripcion <span className="text-gray-300 font-normal">(opcional)</span>
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe brevemente a que se dedica tu empresa"
             rows={3}
-            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent resize-none"
+            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
           />
         </div>
       </div>
@@ -130,7 +130,7 @@ export function StepCompanyName({ onNext }: StepCompanyNameProps) {
       <button
         onClick={handleNext}
         disabled={!isValid}
-        className="mt-6 flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold hover:from-cyan-500 hover:to-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="mt-6 flex items-center gap-2 px-8 py-3 text-white rounded-lg font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-primary-500 hover:bg-primary-600"
       >
         Siguiente
         <ArrowRight size={18} />

@@ -8,10 +8,10 @@ function JourneyBandInner({ data }: NodeProps<JourneyBandData>) {
   return (
     <div
       style={{ width: data.width, height: data.height, background: `${data.color}0d`, borderColor: `${data.color}33` }}
-      className="rounded-2xl border flex overflow-hidden pointer-events-none"
+      className="rounded-lg border flex overflow-hidden pointer-events-none"
     >
       <div style={{ background: data.color }} className="w-8 flex items-center justify-center shrink-0">
-        <span style={{ writingMode: 'vertical-lr', transform: 'rotate(180deg)' }} className="text-white text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
+        <span style={{ writingMode: 'vertical-lr', transform: 'rotate(180deg)' }} className="text-gray-900 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap">
           {data.label}
         </span>
       </div>

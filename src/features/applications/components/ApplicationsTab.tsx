@@ -155,53 +155,53 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
 
   return (
     <div className={`flex flex-col h-full ${isExpanded ? 'max-w-3xl mx-auto w-full' : ''}`}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <MonitorSmartphone size={isExpanded ? 16 : 14} className="text-sky-400" />
-          <span className={`font-semibold text-white ${isExpanded ? 'text-sm' : 'text-xs'}`}>Aplicaciones / Software</span>
-          {list.length > 0 && <span className="text-[9px] bg-white/10 px-1.5 py-0.5 rounded text-white/50">{list.length}</span>}
+          <MonitorSmartphone size={isExpanded ? 16 : 14} className="text-primary-600" />
+          <span className={`font-semibold text-gray-900 ${isExpanded ? 'text-sm' : 'text-xs'}`}>Aplicaciones / Software</span>
+          {list.length > 0 && <span className="text-[9px] bg-gray-100 px-1.5 py-0.5 rounded-md text-gray-500">{list.length}</span>}
         </div>
         <div className="flex items-center gap-1.5">
           <button onClick={handleIdentify} disabled={identifying || budget.isConsuming}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-purple-600/80 to-cyan-600/80 text-white hover:from-purple-500 hover:to-cyan-500 text-[11px] font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white text-[11px] font-medium transition-colors disabled:opacity-50 bg-primary-500 hover:bg-primary-600"
             title="La IA identifica las aplicaciones usadas en el proceso desde el diagrama">
             {(identifying || budget.isConsuming) ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
             {(identifying || budget.isConsuming) ? 'Identificando…' : 'Identificar con IA'}
             <TokenCostBadge operationKey="application_identification" />
           </button>
-          <button onClick={() => { setEditing(null); setShowForm(true) }} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 border border-sky-500/20 text-[11px] font-medium"><Plus size={12} /> App</button>
+          <button onClick={() => { setEditing(null); setShowForm(true) }} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200 text-[11px] font-medium"><Plus size={12} /> App</button>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {availableApps.length > 0 && (
-          <div className="rounded-lg border border-white/8 bg-white/[0.02] p-2">
+          <div className="rounded-lg border border-gray-100 bg-gray-50 p-2">
             {!pickExisting ? (
-              <button onClick={() => setPickExisting(true)} className="w-full inline-flex items-center justify-center gap-1.5 text-[11px] text-white/55 hover:text-cyan-300 py-1"><Link2 size={12} /> Usar una aplicación existente del inventario</button>
+              <button onClick={() => setPickExisting(true)} className="w-full inline-flex items-center justify-center gap-1.5 text-[11px] text-gray-600 hover:text-primary-700 py-1"><Link2 size={12} /> Usar una aplicación existente del inventario</button>
             ) : (
               <div className="flex items-center gap-2">
                 <select onChange={(e) => { if (e.target.value) { addUsage(e.target.value, processId, null, ''); setPickExisting(false); toast.success('Aplicación vinculada al proceso.') } }} defaultValue=""
-                  className="flex-1 bg-white/[0.04] border border-white/10 rounded-lg px-2 py-1.5 text-[12px] text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50">
+                  className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[12px] text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary-500">
                   <option value="">Elegir aplicación existente…</option>
                   {availableApps.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
-                <button onClick={() => setPickExisting(false)} className="text-[11px] text-white/40 hover:text-white/70">Cancelar</button>
+                <button onClick={() => setPickExisting(false)} className="text-[11px] text-gray-500 hover:text-gray-700">Cancelar</button>
               </div>
             )}
           </div>
         )}
 
         {unregistered.length > 0 && (
-          <div className="rounded-lg border border-amber-500/25 bg-amber-500/[0.06] p-2.5 space-y-1.5">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 space-y-1.5">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-[11px] text-amber-200/90">{unregistered.length} nodo(s) de aplicación en el diagrama sin registrar.</p>
-              <button onClick={registerAll} className="shrink-0 px-2 py-1 rounded-lg bg-amber-500/20 text-amber-100 border border-amber-500/30 text-[10.5px] font-medium hover:bg-amber-500/30">Registrar todos</button>
+              <p className="text-[11px] text-amber-700">{unregistered.length} nodo(s) de aplicación en el diagrama sin registrar.</p>
+              <button onClick={registerAll} className="shrink-0 px-2 py-1 rounded-lg bg-amber-100 text-amber-700 border border-amber-300 text-[10.5px] font-medium hover:bg-amber-100">Registrar todos</button>
             </div>
             {unregistered.map((n) => (
-              <div key={n.id} className="flex items-center gap-2 px-2 py-1.5 rounded bg-white/[0.03] border border-white/8">
-                <Cpu size={12} className="text-white/40 shrink-0" />
-                <span className="text-[11px] text-white/70 truncate flex-1">{n.name}</span>
-                <button onClick={() => registerNode(n)} className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-cyan-300 hover:bg-cyan-500/15"><Plus size={11} /> Registrar</button>
+              <div key={n.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-gray-50 border border-gray-100">
+                <Cpu size={12} className="text-gray-500 shrink-0" />
+                <span className="text-[11px] text-gray-700 truncate flex-1">{n.name}</span>
+                <button onClick={() => registerNode(n)} className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] text-primary-700 hover:bg-primary-50"><Plus size={11} /> Registrar</button>
               </div>
             ))}
           </div>
@@ -209,9 +209,9 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
 
         {list.length === 0 && unregistered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <MonitorSmartphone size={24} className="text-white/10 mb-3" />
-            <p className="text-xs text-white/30 mb-1">Aún no hay aplicaciones registradas</p>
-            <p className="text-[10px] text-white/20">Identifícalas con IA desde el diagrama o agrégalas manualmente.</p>
+            <MonitorSmartphone size={24} className="text-gray-300 mb-3" />
+            <p className="text-xs text-gray-400 mb-1">Aún no hay aplicaciones registradas</p>
+            <p className="text-[10px] text-gray-300">Identifícalas con IA desde el diagrama o agrégalas manualmente.</p>
           </div>
         ) : byApp.map(({ app, us }) => {
           const risk = techRisk(app)
@@ -219,28 +219,28 @@ export function ApplicationsTab({ processId, processName, isExpanded, modeler }:
           const acts = [...new Set(us.map((u) => u.activity_name).filter(Boolean))]
           const pending = app.status === 'en_evaluacion'
           return (
-            <div key={app.id} className={`group rounded-lg border p-3 transition-colors ${litId === app.id ? 'border-sky-400/50 bg-sky-500/[0.06]' : 'border-white/8 bg-white/[0.03]'}`}>
+            <div key={app.id} className={`group rounded-lg border p-3 transition-colors ${litId === app.id ? 'border-primary-300 bg-primary-50' : 'border-gray-100 bg-gray-50'}`}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1 cursor-pointer" onClick={() => highlight(us, app.id)} title={nodes ? 'Resaltar sus nodos en el diagrama' : 'Sin nodo en el diagrama'}>
-                  <p className="text-[13px] font-medium text-white flex items-center gap-1.5"><MonitorSmartphone size={12} className="text-sky-300 shrink-0" />{app.name}{nodes > 1 && <span className="text-[9px] text-white/40">· {nodes} nodos</span>}</p>
+                  <p className="text-[13px] font-medium text-gray-900 flex items-center gap-1.5"><MonitorSmartphone size={12} className="text-primary-700 shrink-0" />{app.name}{nodes > 1 && <span className="text-[9px] text-gray-500">· {nodes} nodos</span>}</p>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                     {pending
-                      ? <button onClick={(e) => { e.stopPropagation(); updateApplication(app.id, { status: 'activo' }) }} className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 inline-flex items-center gap-0.5"><Plus size={9} /> Agregar al catálogo</button>
-                      : <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/12 text-emerald-300">En catálogo</span>}
-                    {app.category && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{app.category}</span>}
-                    {app.ownership && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/50">{app.ownership === 'propia' ? 'Propia' : app.ownership === 'terceros' ? 'Terceros' : 'Mixta'}</span>}
-                    {app.deployment && <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/45">{deployLabel(app.deployment)}</span>}
-                    {app.has_api && <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 inline-flex items-center gap-0.5"><Zap size={9} /> API</span>}
-                    <span className="text-[9px] px-1.5 py-0.5 rounded text-white" style={{ background: risk.hex }} title={`Riesgo tecnológico: ${risk.factors.join(', ') || 'bajo'}`}>Riesgo {risk.label}</span>
-                    {acts.length > 0 && <span className="text-[9px] text-white/40 truncate">en «{acts.join('», «')}»</span>}
+                      ? <button onClick={(e) => { e.stopPropagation(); updateApplication(app.id, { status: 'activo' }) }} className="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 inline-flex items-center gap-0.5"><Plus size={9} /> Agregar al catálogo</button>
+                      : <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700">En catálogo</span>}
+                    {app.category && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{app.category}</span>}
+                    {app.ownership && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{app.ownership === 'propia' ? 'Propia' : app.ownership === 'terceros' ? 'Terceros' : 'Mixta'}</span>}
+                    {app.deployment && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">{deployLabel(app.deployment)}</span>}
+                    {app.has_api && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 inline-flex items-center gap-0.5"><Zap size={9} /> API</span>}
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-md text-gray-900" style={{ background: risk.hex }} title={`Riesgo tecnológico: ${risk.factors.join(', ') || 'bajo'}`}>Riesgo {risk.label}</span>
+                    {acts.length > 0 && <span className="text-[9px] text-gray-500 truncate">en «{acts.join('», «')}»</span>}
                   </div>
                   {nodes === 0 && (
-                    <p className="text-[10px] text-amber-300/90 mt-1.5 flex items-center gap-1"><AlertTriangle size={11} className="shrink-0" /> Sin nodo en el diagrama. Agrégalo a una actividad o quítalo del panel.</p>
+                    <p className="text-[10px] text-amber-700 mt-1.5 flex items-center gap-1"><AlertTriangle size={11} className="shrink-0" /> Sin nodo en el diagrama. Agrégalo a una actividad o quítalo del panel.</p>
                   )}
                 </div>
                 <div className="flex flex-col gap-0.5 shrink-0">
-                  <button onClick={() => { setEditing(app); setShowForm(true) }} title="Editar" className="p-1.5 rounded text-white/30 hover:text-cyan-400 hover:bg-white/5"><Pencil size={13} /></button>
-                  <button onClick={() => removeFromProcess(app, us)} title="Quitar de este proceso (elimina sus nodos; conserva la app en el catálogo)" className="p-1.5 rounded text-white/30 hover:text-red-400 hover:bg-red-500/10"><Trash2 size={13} /></button>
+                  <button onClick={() => { setEditing(app); setShowForm(true) }} title="Editar" className="p-1.5 rounded-md text-gray-400 hover:text-primary-600 hover:bg-gray-50"><Pencil size={13} /></button>
+                  <button onClick={() => removeFromProcess(app, us)} title="Quitar de este proceso (elimina sus nodos; conserva la app en el catálogo)" className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50"><Trash2 size={13} /></button>
                 </div>
               </div>
             </div>

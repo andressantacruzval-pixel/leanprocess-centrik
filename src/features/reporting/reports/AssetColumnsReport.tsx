@@ -61,35 +61,35 @@ export function AssetColumnsReport({ processes, assets }: { processes: Process[]
     return s
   }, [shown])
 
-  if (list.length === 0) return <p className="text-[12px] text-white/40 py-10 text-center">No hay activos con columnas registradas en el alcance actual.</p>
+  if (list.length === 0) return <p className="text-[12px] text-gray-500 py-10 text-center">No hay activos con columnas registradas en el alcance actual.</p>
 
   return (
-    <div className="rounded-2xl border border-white/8 bg-white/[0.02] overflow-hidden">
-      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-white/8">
-        <div className="flex items-center gap-1.5 text-[12px] font-semibold text-white/80"><Columns3 size={14} className="text-cyan-400" /> Trazabilidad por columna</div>
+    <div className="rounded-lg border border-gray-100 bg-gray-50 overflow-hidden">
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-gray-100">
+        <div className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-800"><Columns3 size={14} className="text-primary-600" /> Trazabilidad por columna</div>
         <div className="relative ml-2">
-          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/30" />
+          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrar columna o activo…"
-            className="pl-7 pr-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11.5px] text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 w-52" />
+            className="pl-7 pr-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-[11.5px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 w-52" />
         </div>
-        <div className="w-px h-5 bg-white/10 mx-0.5" />
+        <div className="w-px h-5 bg-gray-100 mx-0.5" />
         {usedTreatments.map((t) => (
           <button key={t} onClick={() => toggleTreat(t)}
-            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10.5px] font-medium transition-colors ${treatFilter.has(t) ? 'border-white/25 text-white bg-white/5' : 'border-white/8 text-white/45'}`}>
+            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10.5px] font-medium transition-colors ${treatFilter.has(t) ? 'border-gray-300 text-gray-900 bg-gray-50' : 'border-gray-100 text-gray-500'}`}>
             <span className="w-2 h-2 rounded-full" style={{ background: STATE_COLORS[t] ?? '#64748b' }} /> {STATE_LABELS[t] ?? t}
           </button>
         ))}
-        {treatFilter.size > 0 && <button onClick={() => setTreatFilter(new Set())} className="text-[10.5px] text-white/45 hover:text-white/80 underline">Limpiar</button>}
+        {treatFilter.size > 0 && <button onClick={() => setTreatFilter(new Set())} className="text-[10.5px] text-gray-500 hover:text-gray-800 underline">Limpiar</button>}
       </div>
 
       <div className="overflow-auto max-h-[70vh]">
         <table className="border-separate border-spacing-0 text-left">
           <thead>
             <tr>
-              <th className="sticky left-0 top-0 z-30 bg-[#0b1220] px-3 py-2 text-[10px] uppercase tracking-wide text-white/40 border-b border-r border-white/10 min-w-[230px]">Activo · Columna</th>
+              <th className="sticky left-0 top-0 z-30 bg-white px-3 py-2 text-[10px] uppercase tracking-wide text-gray-500 border-b border-r border-gray-200 min-w-[230px]">Activo · Columna</th>
               {procCols.map((p) => (
-                <th key={p.id} className="sticky top-0 z-20 bg-[#0b1220] px-2.5 py-2 border-b border-l border-white/8 min-w-[120px] align-bottom">
-                  <div className="text-[11px] font-medium text-white/85 leading-tight">{p.name}</div>
+                <th key={p.id} className="sticky top-0 z-20 bg-white px-2.5 py-2 border-b border-l border-gray-100 min-w-[120px] align-bottom">
+                  <div className="text-[11px] font-medium text-gray-800 leading-tight">{p.name}</div>
                 </th>
               ))}
             </tr>
@@ -99,16 +99,16 @@ export function AssetColumnsReport({ processes, assets }: { processes: Process[]
               const sm = stagesByAsset.get(r.asset.id)
               const newAsset = firstOfAsset.has(i)
               return (
-                <tr key={`${r.asset.id}:${r.col.name}`} className="hover:bg-white/[0.02]">
-                  <td className={`sticky left-0 z-10 bg-[#0b1220] px-3 py-1.5 border-r border-white/10 align-top ${newAsset ? 'border-t border-white/10' : 'border-b border-white/5'}`}>
+                <tr key={`${r.asset.id}:${r.col.name}`} className="hover:bg-gray-50">
+                  <td className={`sticky left-0 z-10 bg-white px-3 py-1.5 border-r border-gray-200 align-top ${newAsset ? 'border-t border-gray-200' : 'border-b border-gray-100'}`}>
                     {newAsset && (
-                      <button onClick={() => setDetail({ asset: r.asset, procId: null })} className="flex items-center gap-1 text-[10px] text-cyan-300/80 hover:text-cyan-200 mb-0.5" title="Ver ciclo de vida del activo">
+                      <button onClick={() => setDetail({ asset: r.asset, procId: null })} className="flex items-center gap-1 text-[10px] text-primary-700 hover:text-primary-700 mb-0.5" title="Ver ciclo de vida del activo">
                         <Route size={10} className="shrink-0" /><span className="truncate max-w-[200px]">{r.asset.name}</span>
                       </button>
                     )}
                     <div className="flex items-center gap-1.5 pl-3.5">
-                      {r.col.code && <span className="text-[9px] font-mono text-white/40 shrink-0">{r.col.code}</span>}
-                      <span className="text-[11.5px] text-white/85 leading-tight">{r.col.name}</span>
+                      {r.col.code && <span className="text-[9px] font-mono text-gray-500 shrink-0">{r.col.code}</span>}
+                      <span className="text-[11.5px] text-gray-800 leading-tight">{r.col.name}</span>
                     </div>
                   </td>
                   {procCols.map((p) => {
@@ -117,13 +117,13 @@ export function AssetColumnsReport({ processes, assets }: { processes: Process[]
                     const dim = dimCell(t)
                     return (
                       <td key={p.id} onClick={() => st && setDetail({ asset: r.asset, procId: p.id })}
-                        className={`px-2.5 py-1.5 border-l border-white/8 align-middle ${newAsset ? 'border-t border-white/10' : 'border-b border-white/5'} ${st ? 'cursor-pointer hover:bg-white/[0.04]' : ''}`} style={{ opacity: dim ? 0.2 : 1 }}>
+                        className={`px-2.5 py-1.5 border-l border-gray-100 align-middle ${newAsset ? 'border-t border-gray-200' : 'border-b border-gray-100'} ${st ? 'cursor-pointer hover:bg-gray-50' : ''}`} style={{ opacity: dim ? 0.2 : 1 }}>
                         {t === undefined ? (
-                          <span className="text-white/12 text-[12px]">·</span>
+                          <span className="text-gray-300 text-[12px]">·</span>
                         ) : t === null ? (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-white/40">Sin definir</span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-gray-50 text-gray-500">Sin definir</span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[9.5px] px-1.5 py-0.5 rounded text-white whitespace-nowrap" style={{ background: `${STATE_COLORS[t] ?? '#64748b'}33`, border: `1px solid ${STATE_COLORS[t] ?? '#64748b'}` }}>
+                          <span className="inline-flex items-center gap-1 text-[9.5px] px-1.5 py-0.5 rounded-md text-gray-900 whitespace-nowrap" style={{ background: `${STATE_COLORS[t] ?? '#64748b'}33`, border: `1px solid ${STATE_COLORS[t] ?? '#64748b'}` }}>
                             <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATE_COLORS[t] ?? '#64748b' }} />{STATE_LABELS[t] ?? t}
                           </span>
                         )}

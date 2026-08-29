@@ -62,10 +62,10 @@ export function StepOrgLevels({ onNext, onBack }: StepOrgLevelsProps) {
 
   return (
     <div className="flex flex-col items-center flex-1 px-4 max-w-4xl mx-auto w-full">
-      <h2 className="text-2xl font-bold text-white mb-2 text-center">
+      <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
         Define los niveles de tu estructura organizacional
       </h2>
-      <p className="text-white/40 mb-8 text-center">
+      <p className="text-gray-500 mb-8 text-center">
         Como se organizan los cargos en tu empresa?
       </p>
 
@@ -76,7 +76,7 @@ export function StepOrgLevels({ onNext, onBack }: StepOrgLevelsProps) {
             {levels.map((level, index) => (
               <div key={level.id} className="flex items-center gap-3">
                 <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-900 text-sm font-bold shrink-0"
                   style={{ backgroundColor: ORG_LEVEL_COLORS[index % ORG_LEVEL_COLORS.length] }}
                 >
                   {index + 1}
@@ -85,13 +85,13 @@ export function StepOrgLevels({ onNext, onBack }: StepOrgLevelsProps) {
                   type="text"
                   value={level.name}
                   onChange={(e) => handleNameChange(level.id, e.target.value)}
-                  className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent"
+                  className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder={`Nivel ${index + 1}`}
                 />
                 <button
                   onClick={() => handleRemove(level.id)}
                   disabled={levels.length <= 1}
-                  className="p-2 text-white/20 hover:text-red-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-2 text-gray-300 hover:text-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -101,7 +101,7 @@ export function StepOrgLevels({ onNext, onBack }: StepOrgLevelsProps) {
 
           <button
             onClick={handleAdd}
-            className="mt-4 flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-medium text-sm transition-colors"
+            className="mt-4 flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors"
           >
             <Plus size={16} />
             Agregar nivel
@@ -116,7 +116,7 @@ export function StepOrgLevels({ onNext, onBack }: StepOrgLevelsProps) {
               .map((level, index, arr) => (
                 <div key={level.id} className="flex flex-col items-center">
                   <div
-                    className="px-6 py-3 rounded-lg text-white font-semibold text-sm text-center min-w-[160px] shadow-md"
+                    className="px-6 py-3 rounded-lg text-gray-900 font-semibold text-sm text-center min-w-[160px] shadow-md"
                     style={{
                       backgroundColor: ORG_LEVEL_COLORS[index % ORG_LEVEL_COLORS.length],
                     }}
@@ -124,7 +124,7 @@ export function StepOrgLevels({ onNext, onBack }: StepOrgLevelsProps) {
                     {level.name}
                   </div>
                   {index < arr.length - 1 && (
-                    <div className="w-0.5 h-6 bg-white/20" />
+                    <div className="w-0.5 h-6 bg-gray-200" />
                   )}
                 </div>
               ))}
@@ -136,7 +136,7 @@ export function StepOrgLevels({ onNext, onBack }: StepOrgLevelsProps) {
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-6 py-2.5 border border-white/10 text-white/70 rounded-xl font-medium hover:bg-white/5 transition-colors"
+          className="flex items-center gap-2 px-6 py-2.5 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
         >
           <ArrowLeft size={18} />
           Anterior
@@ -144,7 +144,7 @@ export function StepOrgLevels({ onNext, onBack }: StepOrgLevelsProps) {
         <button
           onClick={handleNext}
           disabled={!allFilled}
-          className="flex items-center gap-2 px-8 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold hover:from-cyan-500 hover:to-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-8 py-2.5 text-white rounded-lg font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-primary-500 hover:bg-primary-600"
         >
           Siguiente
           <ArrowRight size={18} />

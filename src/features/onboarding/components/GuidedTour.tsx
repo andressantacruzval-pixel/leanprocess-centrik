@@ -175,7 +175,7 @@ export function GuidedTour() {
 
         {targetRect && (
           <div
-            className="absolute border-2 border-cyan-400 rounded-lg animate-pulse"
+            className="absolute border-2 border-primary-500 rounded-lg animate-pulse"
             style={{
               left: targetRect.left - 6, top: targetRect.top - 6,
               width: targetRect.width + 12, height: targetRect.height + 12,
@@ -204,38 +204,38 @@ export function GuidedTour() {
 
       {/* Tooltip card */}
       <div key={currentStep} ref={medirTooltip} style={tooltipStyle} className="pointer-events-auto">
-        <div className="bg-[#0d1420] border border-cyan-500/30 rounded-xl shadow-2xl shadow-cyan-500/10 overflow-hidden">
+        <div className="bg-white border border-primary-300 rounded-lg shadow-2xl overflow-hidden">
           {/* Progress bar */}
-          <div className="h-1 bg-white/5">
+          <div className="h-1 bg-gray-50">
             <div
-              className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300"
+              className="h-full transition-all duration-300 bg-primary-500"
               style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
             />
           </div>
 
           <div className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[9px] text-cyan-400/60 uppercase tracking-wider font-semibold">
+              <span className="text-[9px] text-primary-600 uppercase tracking-wider font-semibold">
                 Paso {currentStep + 1} de {steps.length}
               </span>
-              <button onClick={closeTour} className="p-1 text-white/20 hover:text-white/50 transition-colors">
+              <button onClick={closeTour} className="p-1 text-gray-300 hover:text-gray-500 transition-colors">
                 <X size={14} />
               </button>
             </div>
 
-            <h3 className="text-sm font-bold text-white mb-1">{step.title}</h3>
-            <p className="text-[13px] text-white/70 leading-relaxed mb-4">{step.content}</p>
+            <h3 className="text-sm font-bold text-gray-900 mb-1">{step.title}</h3>
+            <p className="text-[13px] text-gray-700 leading-relaxed mb-4">{step.content}</p>
 
             {step.clickToAdvance && targetRect && (
-              <div className="flex items-center gap-2 mb-3 bg-cyan-500/10 rounded-lg px-3 py-2 border border-cyan-500/20">
-                <MousePointer2 size={14} className="text-cyan-400 animate-bounce" />
-                <span className="text-[10px] text-cyan-400 font-medium">Haz clic en el elemento resaltado</span>
+              <div className="flex items-center gap-2 mb-3 bg-primary-50 rounded-lg px-3 py-2 border border-primary-200">
+                <MousePointer2 size={14} className="text-primary-600 animate-bounce" />
+                <span className="text-[10px] text-primary-600 font-medium">Haz clic en el elemento resaltado</span>
               </div>
             )}
 
             {!targetRect && (
-              <div className="flex items-center gap-2 mb-3 bg-amber-500/10 rounded-lg px-3 py-2 border border-amber-500/20">
-                <span className="text-[10px] text-amber-400 font-medium">
+              <div className="flex items-center gap-2 mb-3 bg-amber-50 rounded-lg px-3 py-2 border border-amber-200">
+                <span className="text-[10px] text-amber-600 font-medium">
                   Navega manualmente a esta seccion y luego avanza al siguiente paso.
                 </span>
               </div>
@@ -245,7 +245,7 @@ export function GuidedTour() {
               <button
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-medium text-white/30 hover:text-white/60 disabled:opacity-20 transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-medium text-gray-400 hover:text-gray-600 disabled:opacity-20 transition-colors"
               >
                 <ArrowLeft size={12} /> Anterior
               </button>
@@ -253,7 +253,7 @@ export function GuidedTour() {
               {!step.clickToAdvance && (
                 <button
                   onClick={nextStep}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[10px] font-medium bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg shadow-cyan-500/20"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[10px] font-medium text-white transition-all shadow-lg bg-primary-500 hover:bg-primary-600"
                 >
                   {currentStep === steps.length - 1 ? (
                     <><CheckCircle2 size={12} /> Completar</>
