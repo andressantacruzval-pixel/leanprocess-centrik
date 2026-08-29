@@ -294,12 +294,12 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
             position: { top: -4, left: -4 },
             html: `<div style="
               position:absolute; top:0; left:0;
-              width:${(element.width ?? 0) + 8}px; height:${(element.height ?? 0) + 8}px; border: 2px solid #22d3ee; border-radius: 14px; pointer-events: none; opacity: 0.7; "></div>`,
+              width:${(element.width ?? 0) + 8}px; height:${(element.height ?? 0) + 8}px; border: 2px solid #10b981; border-radius: 14px; pointer-events: none; opacity: 0.7; "></div>`,
           })
           overlays.add(element.id, 'risk-control-badge', {
             position: { top: -8, right: -8 },
-            html: `<div style=" width:16px; height:16px; border-radius:50%; background:#22d3ee; display:flex;
-              align-items:center; justify-content:center; font-size:9px; color:#0a0f1a; font-weight:bold;
+            html: `<div style=" width:16px; height:16px; border-radius:50%; background:#10b981; display:flex;
+              align-items:center; justify-content:center; font-size:9px; color:#ffffff; font-weight:bold;
               ">C</div>`,
           })
         } catch { /* overlay may already exist */ }
@@ -309,7 +309,7 @@ export function BpmnModeler({ xml, onXmlChange, onModelerReady, readOnly, hidePa
         try {
           overlays.add(element.id, 'risk-marker', {
             position: { top: -8, left: -8 },
-            html: `<div style=" width:16px; height:16px; border-radius:50%; background:#f87171; display:flex;
+            html: `<div style=" width:16px; height:16px; border-radius:50%; background:#ef4444; display:flex;
               align-items:center; justify-content:center; font-size:10px; color:white; font-weight:bold;
               ">!</div>`,
           })

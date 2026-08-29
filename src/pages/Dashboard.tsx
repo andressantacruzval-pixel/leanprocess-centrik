@@ -318,8 +318,8 @@ export default function Dashboard() {
       )}
 
       {/* Weekly Digest */}
-      <div className="rounded-lg border border-transparent bg-gray-50 p-[1px]" style={{ backgroundImage: 'linear-gradient(#0a0f1a, #0a0f1a), linear-gradient(135deg, #f59e0b, #06b6d4)', backgroundOrigin: 'border-box', backgroundClip: 'padding-box, border-box' }}>
-        <div className="rounded-lg bg-white p-4">
+      <div className="ck-card">
+        <div className="p-4">
           <button
             onClick={() => setDigestOpen((v) => !v)}
             className="flex w-full items-center justify-between"
