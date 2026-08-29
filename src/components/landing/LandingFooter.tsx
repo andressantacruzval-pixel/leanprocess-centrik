@@ -8,7 +8,7 @@ export default function LandingFooter() {
           {/* El pie llevaba la marca solo como texto. Ahora con el isotipo, igual
               que la barra lateral y que el pie de Lite. */}
           <p className="mb-3 flex items-center gap-2.5 text-xl font-bold text-primary-600">
-            <img src="/logo.png" alt="" width={28} height={28} className="w-7 h-7 shrink-0" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width={28} height={28} className="w-7 h-7 shrink-0" />
             LeanProcess
           </p>
           <p className="max-w-xs text-sm leading-relaxed text-gray-500">

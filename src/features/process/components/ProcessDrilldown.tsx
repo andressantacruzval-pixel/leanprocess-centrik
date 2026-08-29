@@ -271,7 +271,7 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
                 className={`transition-all duration-200 ${
                   draggedId === process.id ? 'opacity-40 scale-95' : ''
                 } ${
-                  dragOverId === process.id ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-[#070b14] rounded-lg' : ''
+                  dragOverId === process.id ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-surface-ground rounded-lg' : ''
                 }`}
               >
                 {isEditing ? (
@@ -367,7 +367,7 @@ export function ProcessDrilldown({ macroId, onBack }: ProcessDrilldownProps) {
               className={`transition-all duration-200 ${
                 draggedId === process.id ? 'opacity-40 scale-95' : ''
               } ${
-                dragOverId === process.id ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-[#070b14] rounded-lg' : ''
+                dragOverId === process.id ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-surface-ground rounded-lg' : ''
               }`}
             >
               {isEditing ? (

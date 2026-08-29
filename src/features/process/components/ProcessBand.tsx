@@ -163,7 +163,7 @@ export function ProcessBand({
     }
   }
 
-  // Colores opacos que equivalen a bg-[color]-500/10 sobre #070b14
+  // Colores opacos que equivalen a bg-[color]-500/10 sobre el lienzo claro
   // Usar opaco garantiza que el scroll canvas de overflow-x-auto no quede blanco
   const bandBg = category === 'estrategico'
     ? 'bg-white'

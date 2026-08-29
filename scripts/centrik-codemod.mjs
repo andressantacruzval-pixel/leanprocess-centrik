@@ -182,6 +182,8 @@ function mapearBase(base) {
       if (ACCIONES[h]) return `bg-${ACCIONES[h]}`
     }
     if (prop === 'ring' && SUPERFICIES[h]) return 'ring-gray-200'
+    // `ring-offset-[#070b14]`: el hueco del anillo se pintaba del color del lienzo.
+    if (prop === 'ring-offset' && SUPERFICIES[h]) return `ring-offset-${SUPERFICIES[h] === 'white' ? 'white' : 'surface-ground'}`
     if (prop === 'border' && SUPERFICIES[h]) return `${propLado}-gray-200`
     return base
   }

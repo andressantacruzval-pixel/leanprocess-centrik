@@ -1,11 +1,28 @@
 name: Deploy to GitHub Pages
 
-# Se dispara manualmente (workflow_dispatch). Publica la SPA compilada en
-# GitHub Pages. La base pública es /<repo>/ y el login lo resuelve la propia app
-# (VITE_STANDALONE_AUTH=1), sin depender del Hub Lite externo.
+# ═══════════════════════════════════════════════════════════════════════
+# Publica DOS aplicaciones en el mismo sitio de Pages:
+#
+#   /Andr-s-Santacruz-Pruebas/            → la versión oscura (rama por defecto)
+#   /Andr-s-Santacruz-Pruebas/centrik/    → la versión Centrik (esta rama)
+#
+# ¿Por qué en un solo artefacto? Porque GitHub Pages da UN sitio por repo y
+# `actions/deploy-pages` reemplaza el artefacto entero: publicar solo esta
+# rama borraría la app oscura, que está en uso. Así conviven.
+#
+# La raíz se reconstruye desde la rama por defecto, no se toca a mano. El
+# build de Vite es reproducible: recompilar ese mismo commit devuelve los
+# mismos nombres de fichero con hash (`index-rcFh8yjL.js`, `index-5fuIFaBb.css`)
+# que ya están publicados, así que la app oscura queda idéntica, no «parecida».
+#
+# Ambas usan el MISMO backend de Supabase (el proyecto de pruebas declarado en
+# .env.production), que ya tiene las migraciones aplicadas y el usuario de
+# prueba creado por `db-setup.yml`. No hay nada que desplegar allí para esto.
+# ═══════════════════════════════════════════════════════════════════════
+
 on:
   push:
-    branches: [claude/desplegar-app-local-j8wbqf]
+    branches: [claude/transferir-diseno-lan-process-3qoioz]
   workflow_dispatch:
 
 permissions:
@@ -17,41 +34,114 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  RAMA_OSCURA: claude/desplegar-app-local-j8wbqf
+  BASE_RAIZ: /Andr-s-Santacruz-Pruebas/
+  BASE_CENTRIK: /Andr-s-Santacruz-Pruebas/centrik/
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      # Habilita Pages en el repo si aún no lo está (source = GitHub Actions).
-      - name: Configure Pages
+      # Deja el repo con Pages activo y servido por Actions si aún no lo estaba.
+      - name: Configurar Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
 
-      - name: Build
+      # ── 1. La app oscura, tal cual está hoy, en la raíz ──────────────
+      - name: Descargar la rama por defecto
+        uses: actions/checkout@v4
+        with:
+          ref: claude/desplegar-app-local-j8wbqf
+          path: oscura
+
+      - name: Compilar la app oscura
+        working-directory: oscura
         env:
           VITE_BASE: /Andr-s-Santacruz-Pruebas/
           VITE_STANDALONE_AUTH: '1'
-        run: npm run build
+        run: npm ci && npm run build
 
-      # SPA fallback: Pages sirve 404.html en rutas profundas → recarga la app.
-      - name: SPA fallback + nojekyll
+      - name: Colocarla en la raíz del sitio
         run: |
-          cp dist/index.html dist/404.html
-          touch dist/.nojekyll
+          mkdir -p sitio
+          cp -r oscura/dist/. sitio/
+
+      # ── 2. La app Centrik, bajo /centrik/ ────────────────────────────
+      - name: Descargar esta rama
+        uses: actions/checkout@v4
+        with:
+          path: centrik
+
+      - name: Compilar la app Centrik
+        working-directory: centrik
+        env:
+          VITE_BASE: /Andr-s-Santacruz-Pruebas/centrik/
+          VITE_STANDALONE_AUTH: '1'
+        run: npm ci && npm run build
+
+      - name: Colocarla bajo /centrik/
+        run: |
+          mkdir -p sitio/centrik
+          cp -r centrik/dist/. sitio/centrik/
+
+      # ── 3. Recarga en rutas profundas (fallback de SPA) ──────────────
+      # Pages sirve el 404.html de la RAÍZ para cualquier ruta inexistente
+      # del sitio, incluidas las de /centrik/. Ese 404 es el index de la app
+      # oscura —así sus rutas profundas siguen funcionando igual que hoy— con
+      # un guion delante que desvía las de Centrik a su propio index,
+      # guardando la ruta para restaurarla al arrancar. Sin esto, recargar en
+      # /centrik/app/process-map arrancaría la app equivocada.
+      - name: Fallback de SPA para las dos
+        run: |
+          cat > /tmp/desvio.html <<'HTML'
+          <script>
+          (function () {
+            var CENTRIK = '/Andr-s-Santacruz-Pruebas/centrik/'
+            var p = location.pathname
+            if (p.indexOf(CENTRIK) === 0 && p !== CENTRIK) {
+              try { sessionStorage.setItem('ck-ruta', p + location.search + location.hash) } catch (e) {}
+              location.replace(CENTRIK)
+            }
+          })()
+          </script>
+          HTML
+          cat /tmp/desvio.html oscura/dist/index.html > sitio/404.html
+
+          cat > /tmp/restaurar.html <<'HTML'
+          <script>
+          (function () {
+            try {
+              var r = sessionStorage.getItem('ck-ruta')
+              if (r) { sessionStorage.removeItem('ck-ruta'); history.replaceState(null, '', r) }
+            } catch (e) {}
+          })()
+          </script>
+          HTML
+          # El guion va ANTES del bundle: el router tiene que leer ya la URL buena.
+          python3 - <<'PY'
+          import pathlib
+          idx = pathlib.Path('sitio/centrik/index.html')
+          html = idx.read_text(encoding='utf-8')
+          restaurar = pathlib.Path('/tmp/restaurar.html').read_text(encoding='utf-8')
+          html = html.replace('</head>', restaurar + '</head>', 1)
+          idx.write_text(html, encoding='utf-8')
+          pathlib.Path('sitio/centrik/404.html').write_text(html, encoding='utf-8')
+          PY
+
+          touch sitio/.nojekyll
+          echo "── contenido publicado ──"
+          ls sitio | head
+          ls sitio/centrik | head
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: sitio
 
   deploy:
     needs: build
@@ -62,9 +152,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-
-# redeploy 754a923
-
-# redeploy default-branch 15b3b41
-
-# redeploy env-open 62d37ac

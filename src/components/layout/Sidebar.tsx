@@ -83,7 +83,7 @@ export function Sidebar() {
           texto el rail y el panel se leen igual, sin un salto de composicion. */}
       <div className="relative flex items-center justify-center p-4 border-b border-gray-200 shrink-0">
         <img
-          src="/logo.png"
+          src={`${import.meta.env.BASE_URL}logo.png`}
           alt="Lean Process"
           width={36}
           height={36}

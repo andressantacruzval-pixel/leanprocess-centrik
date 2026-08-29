@@ -63,7 +63,7 @@ export function SlideRenderer({ slide, macroprocesses, processes, risks, indicat
         <div className="flex flex-col items-center justify-center h-full gap-6">
           {/* La portada la proyecta el cliente delante de su equipo: aqui el isotipo
               de marca vale mas que un icono generico de presentacion. */}
-          <img src="/logo.png" alt="" width={96} height={96} className="w-24 h-24" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" width={96} height={96} className="w-24 h-24" />
           <h1 className="text-6xl font-bold tracking-tight text-gray-900">Lean Process</h1>
           <p className="text-2xl text-gray-400">Gestion de Procesos</p>
           <div className="mt-8 text-lg text-gray-500">
